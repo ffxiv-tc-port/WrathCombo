@@ -26,21 +26,17 @@ internal sealed class BossModIPC(
             return false;
         }
 
-        try
+        if (!_hasEntries.TryInvoke(out var hasEntries))
         {
-            var hasEntries = _hasEntries();
-            PluginLog.Verbose(
-                $"[ConflictingPlugins] [{PluginName}] `ActionQueue.HasEntries`: " +
-                hasEntries);
-            return hasEntries;
-        }
-        catch (Exception e)
-        {
-            PluginLog.Warning($"[ConflictingPlugins] [{PluginName}] " +
-                              $"`ActionQueue.HasEntries` failed:" +
-                              e.ToStringFull());
+            PluginLog.Debug($"[ConflictingPlugins] [{PluginName}] " +
+                            $"`ActionQueue.HasEntries` IPC not ready yet.");
             return false;
         }
+
+        PluginLog.Verbose(
+            $"[ConflictingPlugins] [{PluginName}] `ActionQueue.HasEntries`: " +
+            hasEntries);
+        return hasEntries;
     }
 
     public bool IsAutoTargetingEnabled()

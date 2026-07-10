@@ -188,8 +188,8 @@ public sealed partial class WrathCombo : IDalamudPlugin
             ToggleAutoRotation(!Service.Configuration.RotationConfig.Enabled);
         };
         DtrBarEntry.Tooltip = new SeString(
-        new TextPayload("点击切换Wrath Combo的自动循环开关状态。\n"),
-        new TextPayload("可在/xlsettings -> 服务器信息栏中禁用此图标"));
+        new TextPayload("點擊切換 Wrath Combo的自動循環開關狀態。\n"),
+        new TextPayload("可在/xlsettings -> 伺服器資訊欄中禁用此圖示"));
 
         Svc.ClientState.Login += PrintLoginMessage;
         if (Svc.ClientState.IsLoggedIn) ResetFeatures();
@@ -308,12 +308,12 @@ public sealed partial class WrathCombo : IDalamudPlugin
             ? BitmapFontIcon.SwordUnsheathed
             : BitmapFontIcon.SwordSheathed);
 
-        var text = autoOn ? "：开" : "：关";
+        var text = autoOn ? "：開" : "：關";
         if (!Service.Configuration.ShortDTRText && autoOn)
             text += $"（{P.IPCSearch.ActiveJobPresets} 有效）";
         var ipcControlledText =
             P.UIHelper.AutoRotationStateControlled() is not null
-                ? "（已锁定）"
+                ? "（已鎖定）"
                 : "";
 
         var payloadText = new TextPayload(text + ipcControlledText);
