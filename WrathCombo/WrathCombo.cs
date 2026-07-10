@@ -308,7 +308,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
             ? BitmapFontIcon.SwordUnsheathed
             : BitmapFontIcon.SwordSheathed);
 
-        var text = autoOn ? "：開" : "：關";
+        var text = autoOn ? ": on" : ": off";
         if (!Service.Configuration.ShortDTRText && autoOn)
             text += $"（{P.IPCSearch.ActiveJobPresets} 有效）";
         var ipcControlledText =
