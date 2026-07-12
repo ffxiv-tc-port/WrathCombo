@@ -5,6 +5,9 @@ on:
     tags:
       - 'testing_*-cn'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
