@@ -21,14 +21,14 @@ internal sealed class BossModIPC(
     {
         if (!IsEnabled)
         {
-            PluginLog.Debug($"[ConflictingPlugins] [{PluginName}] " +
+            PluginLog.Verbose($"[ConflictingPlugins] [{PluginName}] " +
                             $"IPC is not enabled.");
             return false;
         }
 
         if (!_hasEntries.TryInvoke(out var hasEntries))
         {
-            PluginLog.Debug($"[ConflictingPlugins] [{PluginName}] " +
+            PluginLog.Verbose($"[ConflictingPlugins] [{PluginName}] " +
                             $"`ActionQueue.HasEntries` IPC not ready yet.");
             return false;
         }
@@ -43,7 +43,7 @@ internal sealed class BossModIPC(
     {
         if (!PluginIsLoaded)
         {
-            PluginLog.Debug($"[ConflictingPlugins] [{PluginName}] " +
+            PluginLog.Verbose($"[ConflictingPlugins] [{PluginName}] " +
                             $"Plugin is not loaded.");
             return false;
         }
@@ -51,7 +51,7 @@ internal sealed class BossModIPC(
         var ai = Plugin.GetFoP("_ai");
         if (ai == null)
         {
-            PluginLog.Debug(
+            PluginLog.Verbose(
                 $"[ConflictingPlugins] [{PluginName}] Could not access _ai field");
             return false;
         }
@@ -59,7 +59,7 @@ internal sealed class BossModIPC(
         var aiConfig = ai.GetFoP("Config");
         if (aiConfig == null)
         {
-            PluginLog.Debug(
+            PluginLog.Verbose(
                 $"[ConflictingPlugins] [{PluginName}] Could not access AI.Config field");
             return false;
         }
