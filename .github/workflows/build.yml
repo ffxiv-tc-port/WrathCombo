@@ -19,10 +19,10 @@ jobs:
           dotnet-version: '9.x.x'
       - name: Restore dependencies
         run: dotnet restore
-      - name: Download Dalamud
+      - name: Download Dalamud (pinned TC-compatible build)
         run: |
-          Invoke-WebRequest -Uri https://raw.githubusercontent.com/ottercorp/dalamud-distrib/main/stg/latest.zip -OutFile latest.zip
-          Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"
+          Invoke-WebRequest -Uri https://github.com/Lother/dalamud-tc-pin/releases/download/v12.0.2/dalamud-api12-net9.zip -OutFile dalamud-pinned.zip
+          Expand-Archive -Force dalamud-pinned.zip "$env:AppData\XIVLauncher\addon\Hooks\dev\"
       - name: Build
         run: |
           dotnet build --no-restore --configuration Release --nologo
