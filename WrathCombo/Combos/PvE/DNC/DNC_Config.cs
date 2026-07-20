@@ -50,31 +50,31 @@ internal partial class DNC
             #endregion
 
             var t = ImGui.GetCursorPos();
-            const string texTrip = "Forced Triple Weave";
+            const string texTrip = "强制三重穿插";
             UserConfig.DrawRadioButton(
                 DNC_ST_ADV_AntiDrift, texTrip,
-                "Forces a triple weave of Flourish and Fan Dance 3 + 4 during non-opener burst windows." +
-                "\nFixes SS/FM drift where you use a gcd when SS/FM is on a 0.5sec CD." +
-                "\nRecommended anti-drift option.",
+                "在非开幕爆发窗口期间强制三重穿插使用华丽/扇舞·急+扇舞·骤。" +
+                "\n修复在SS/FM剩0.5秒冷却时使用GCD导致的偏移问题。" +
+                "\n推荐的防偏移选项。",
                 outputValue: (int) AntiDrift.TripleWeave, descriptionAsTooltip: true);
             var h = ImGui.GetCursorPos();
-            const string texHold = "Hold before Standard Step";
+            const string texHold = "标准步前预留等待";
             UserConfig.DrawRadioButton(
                 DNC_ST_ADV_AntiDrift, texHold,
-                "Will hold GCDs for Standard Step if it is going to come off cooldown before your next GCD." +
-                "\nThis WILL give you down-time." +
-                "\nONLY recommended if you have extra skill speed, but can be used as an anti-drift option.",
+                "如果标准步将在你下一个GCD前冷却完成，会预留GCD等待。" +
+                "\n这会造成一定的空转时间。" +
+                "\n仅在拥有额外技速时推荐，但可作为防偏移选项使用。",
                 outputValue: (int) AntiDrift.Hold, descriptionAsTooltip: true);
             UserConfig.DrawRadioButton(
-                DNC_ST_ADV_AntiDrift, "Both",
-                "Will use both options from above." +
-                "\nThis WILL give you down-time." +
-                "\nNOT recommended, but can be the answer if neither of the above options work for you.",
+                DNC_ST_ADV_AntiDrift, "两者皆用",
+                "将同时使用以上两个选项。" +
+                "\n这会造成一定的空转时间。" +
+                "\n不推荐，但若以上选项都不适合你可以作为解决方案。",
                 outputValue: (int) AntiDrift.Both, descriptionAsTooltip: true);
             UserConfig.DrawRadioButton(
-                DNC_ST_ADV_AntiDrift, "None",
-                "Will not use any anti-drift options." +
-                "\nThis WILL cause drift. NOT recommended.",
+                DNC_ST_ADV_AntiDrift, "皆不使用",
+                "不使用任何防偏移选项。" +
+                "\n这会导致偏移。不推荐。",
                 outputValue: (int) AntiDrift.None, descriptionAsTooltip: true);
 
             #region Show recommended setting, based on GCD
@@ -107,7 +107,7 @@ internal partial class DNC
         private static void DrawPartnerInfo()
         {
             ImGuiEx.TextWrapped(ImGuiColors.DalamudGrey,
-                "This will check through your party members, and select the most desirable Partner, based on The Balance's priority list as well as stuff like Rez Sickness and Damage Downs.");
+                "这将检查你的队伍成员，并根据The Balance的优先级列表以及复生虚弱、损伤降低等状态，选择最理想的舞伴。");
         }
 
         internal static void Draw(Preset preset)
@@ -185,24 +185,24 @@ internal partial class DNC
 
                     ImGui.NewLine();
                     UserConfig.DrawRadioButton(DNC_ST_OpenerSelection,
-                        "Standard: 15s Countdown",
-                        "Requires at least a 15s cooldown\nand that you start Standard Step at 15s.",
+                        "标准：15秒倒数",
+                        "需要至少15秒冷却\n且在15秒时开始标准步。",
                         (int)Openers.FifteenSecond, descriptionAsTooltip: true);
                     UserConfig.DrawRadioButton(DNC_ST_OpenerSelection,
-                        "Standard: 7s Countdown",
-                        "Requires at least a 7s cooldown\nand that you start Standard Step at 7s.\nPerforms worse than 15s.",
+                        "标准：7秒倒数",
+                        "需要至少7秒冷却\n且在7秒时开始标准步。\n表现比15秒差。",
                         (int)Openers.SevenSecond, descriptionAsTooltip: true);
                     UserConfig.DrawRadioButton(DNC_ST_OpenerSelection,
-                        "Technical: 30s Countdown",
-                        "Requires a 30s cooldown\nand that you start Standard Step at 30s.\nNot generally recommended.\nWill align buffs worse than Standard 15s.",
+                        "技巧：30秒倒数",
+                        "需要30秒冷却\n且在30秒时开始标准步。\n通常不推荐。\nBuff对齐效果比标准15秒差。",
                         (int)Openers.ThirtySecondTech, descriptionAsTooltip: true);
                     UserConfig.DrawRadioButton(DNC_ST_OpenerSelection,
-                        "Technical: 7+s Countdown",
-                        "Requires at least a 7s cooldown\nand that you complete Standard Step beforehand.\nDoes not include Peloton.\nWill NOT Standard Step for you.\nNot generally recommended.\nWill align buffs worse than Standard 7s.",
+                        "技巧：7+秒倒数",
+                        "需要至少7秒冷却\n且需事先完成标准步。\n不包含飞燕回风。\n不会为你自动使用标准步。\n通常不推荐。\nBuff对齐效果比标准7秒差。",
                         (int)Openers.SevenPlusSecondTech, descriptionAsTooltip: true);
                     UserConfig.DrawRadioButton(DNC_ST_OpenerSelection,
-                        "Technical: 7s Countdown",
-                        "Requires at least a 7s cooldown\nand that you start Technical Step at 7s.\nNOT recommended.",
+                        "技巧：7秒倒数",
+                        "需要至少7秒冷却\n且在7秒时开始技巧步。\n不推荐。",
                         (int)Openers.SevenSecondTech, descriptionAsTooltip: true);
 
                     ImGui.Indent();
@@ -221,8 +221,8 @@ internal partial class DNC
 
                 case Preset.DNC_ST_Adv_PartnerAuto:
                     UserConfig.DrawAdditionalBoolChoice(DNC_Partner_FocusOverride,
-                        "Prioritize your Focus Target##DPFocusOver0",
-                        "If you have a focus target that is within range, it will be prioritized over The Balance's suggested Dance Partner.",
+                        "优先聚焦目标##DPFocusOver0",
+                        "如果你有一个在范围内的聚焦目标，将优先于The Balance建议的舞伴。",
                         indentDescription: true);
 
                     break;
@@ -233,37 +233,37 @@ internal partial class DNC
                     ImGui.Unindent(29f.Scale());
 
                     UserConfig.DrawAdditionalBoolChoice(DNC_Partner_FocusOverride,
-                        "Prioritize your Focus Target##DPFocusOver1",
-                        "If you have a focus target that is within range, alive, and has no rez sickness or damage down, it will be prioritized over The Balance's suggested Dance Partner.",
+                        "优先聚焦目标##DPFocusOver1",
+                        "如果你有一个在范围内、存活、且没有复生虚弱或损伤降低的聚焦目标，将优先于The Balance建议的舞伴。",
                         indentDescription: true);
 
                     break;
 
                 case Preset.DNC_ST_EspritOvercap:
                     UserConfig.DrawSliderInt(50, 100, DNCEspritThreshold_ST,
-                        "Esprit",
+                        "气魄",
                         itemWidth: 150f, sliderIncrement: SliderIncrements.Fives);
 
                     break;
 
                 case Preset.DNC_ST_Adv_SS:
                     UserConfig.DrawSliderInt(0, 15, DNC_ST_Adv_SSBurstPercent,
-                        "Target HP% to stop using Standard Step below",
+                        "目标HP%低于此值时停止使用标准步",
                         itemWidth: 75f, sliderIncrement: SliderIncrements.Fives);
 
                     ImGuiEx.Spacing(new Vector2(30, 0));
                     UserConfig.DrawHorizontalRadioButton(
                         DNC_ST_ADV_SS_IncludeSS,
-                        "Include Standard Step",
-                        "Will include Standard Step itself," +
-                        "\ndance steps, and Finish into the rotation.",
+                        "包含标准步",
+                        "将把标准步本身、" +
+                        "\n舞步、以及终曲都包含进循环中。",
                         outputValue: (int) IncludeStep.Yes,
                         itemWidth: 125f);
                     UserConfig.DrawHorizontalRadioButton(
                         DNC_ST_ADV_SS_IncludeSS,
-                        "Exclude Standard Step",
-                        "Will ONLY include the dance steps, and Finish;" +
-                        "\nYOU will need to manually press Standard Step.",
+                        "排除标准步",
+                        "仅包含舞步和终曲；" +
+                        "\n你需要手动按下标准步。",
                         outputValue: (int) IncludeStep.No,
                         itemWidth: 125f);
 
@@ -273,22 +273,22 @@ internal partial class DNC
 
                 case Preset.DNC_ST_Adv_TS:
                     UserConfig.DrawSliderInt(0, 15, DNC_ST_Adv_TSBurstPercent,
-                        "Target HP% to stop using Technical Step below",
+                        "目标HP%低于此值时停止使用技巧步",
                         itemWidth: 75f, sliderIncrement: SliderIncrements.Fives);
 
                     ImGuiEx.Spacing(new Vector2(30, 0));
                     UserConfig.DrawHorizontalRadioButton(
                         DNC_ST_ADV_TS_IncludeTS,
-                        "Include Technical Step",
-                        "Will include Technical Step itself," +
-                        "\ndance steps, and Finish into the rotation.",
+                        "包含技巧步",
+                        "将把技巧步本身、" +
+                        "\n舞步、以及终曲都包含进循环中。",
                         outputValue: (int) IncludeStep.Yes,
                         itemWidth: 125f);
                     UserConfig.DrawHorizontalRadioButton(
                         DNC_ST_ADV_TS_IncludeTS,
-                        "Exclude Technical Step",
-                        "Will ONLY include the dance Steps, and Finish;" +
-                        "\nYOU will need to manually press Technical Step.",
+                        "排除技巧步",
+                        "仅包含舞步和终曲；" +
+                        "\n你需要手动按下技巧步。",
                         outputValue: (int) IncludeStep.No,
                         itemWidth: 125f);
 
@@ -298,7 +298,7 @@ internal partial class DNC
 
                 case Preset.DNC_ST_Adv_Feathers:
                     UserConfig.DrawSliderInt(0, 5, DNC_ST_Adv_FeatherBurstPercent,
-                        "Target HP% to dump all pooled feathers below",
+                        "目标HP%低于此值时倾泻所有储蓄的羽毛",
                         itemWidth: 75f);
 
                     break;
@@ -307,18 +307,18 @@ internal partial class DNC
                     ImGui.Indent();
                     UserConfig.DrawHorizontalRadioButton(
                         DNC_ST_ADV_TillanaUse,
-                        "Use Tillana Normally",
-                        "Will use Tillana as recommended by The Balance" +
-                        "\nCan allow Tillana to drift out of burst windows.",
+                        "正常使用蒂拉纳",
+                        "将按照The Balance建议使用蒂拉纳" +
+                        "\n可能导致蒂拉纳偏移出爆发窗口。",
                         outputValue: (int) TillanaDriftProtection.None,
                         itemWidth: 125f);
                     UserConfig.DrawHorizontalRadioButton(
                         DNC_ST_ADV_TillanaUse,
-                        "Favor Tillana over Esprit",
-                        "Will perform Tillana over Saber or Dance of the Dawn, even if above 50 Esprit." +
-                        "\nCan prevent Tillana from drifting out of burst windows." +
-                        "\nShould be used with Saber Dance's Esprit slider being >50." +
-                        "\nNOT recommended.",
+                        "优先蒂拉纳而非气魄",
+                        "即使气魄高于50，也会优先使用蒂拉纳而非军刀或黎明之舞。" +
+                        "\n可防止蒂拉纳偏移出爆发窗口。" +
+                        "\n应与军刀舞的气魄滑块设为>50搭配使用。" +
+                        "\n不推荐。",
                         outputValue: (int) TillanaDriftProtection.Favor,
                         itemWidth: 125f);
                     ImGui.Unindent();
@@ -328,7 +328,7 @@ internal partial class DNC
                 case Preset.DNC_ST_Adv_SaberDance:
                     UserConfig.DrawSliderInt(50, 100,
                         DNC_ST_Adv_SaberThreshold,
-                        "Esprit",
+                        "气魄",
                         itemWidth: 150f, sliderIncrement: SliderIncrements.Fives);
 
                     break;
@@ -336,11 +336,11 @@ internal partial class DNC
                 case Preset.DNC_ST_Adv_PanicHeals:
                     UserConfig.DrawSliderInt(0, 80,
                         DNC_ST_Adv_PanicHealWaltzPercent,
-                        "Curing Waltz HP%",
+                        "愈疗之华HP%",
                         itemWidth: 200f, sliderIncrement: SliderIncrements.Fives);
 
                     UserConfig.DrawSliderInt(0, 80, DNC_ST_Adv_PanicHealWindPercent,
-                        "Second Wind HP%",
+                        "续气HP%",
                         itemWidth: 200f, sliderIncrement: SliderIncrements.Fives);
 
                     break;
@@ -351,29 +351,29 @@ internal partial class DNC
 
                 case Preset.DNC_AoE_EspritOvercap:
                     UserConfig.DrawSliderInt(50, 100, DNCEspritThreshold_AoE,
-                        "Esprit",
+                        "气魄",
                         itemWidth: 150f, sliderIncrement: SliderIncrements.Fives);
 
                     break;
 
                 case Preset.DNC_AoE_Adv_SS:
                     UserConfig.DrawSliderInt(0, 60, DNC_AoE_Adv_SSBurstPercent,
-                        "Target HP% to stop using Standard Step below",
+                        "目标HP%低于此值时停止使用标准步",
                         itemWidth: 75f, sliderIncrement: SliderIncrements.Fives);
 
                     ImGuiEx.Spacing(new Vector2(30, 0));
                     UserConfig.DrawHorizontalRadioButton(
                         DNC_AoE_Adv_SS_IncludeSS,
-                        "Include Standard Step",
-                        "Will include Standard Step itself," +
-                        "\ndance steps, and Finish into the rotation.",
+                        "包含标准步",
+                        "将把标准步本身、" +
+                        "\n舞步、以及终曲都包含进循环中。",
                         outputValue: (int) IncludeStep.Yes,
                         itemWidth: 125f);
                     UserConfig.DrawHorizontalRadioButton(
                         DNC_AoE_Adv_SS_IncludeSS,
-                        "Exclude Standard Step",
-                        "Will ONLY include the dance steps, and Finish;" +
-                        "\nYOU will need to manually press Standard Step.",
+                        "排除标准步",
+                        "仅包含舞步和终曲；" +
+                        "\n你需要手动按下标准步。",
                         outputValue: (int) IncludeStep.No,
                         itemWidth: 125f);
 
@@ -381,22 +381,22 @@ internal partial class DNC
 
                 case Preset.DNC_AoE_Adv_TS:
                     UserConfig.DrawSliderInt(0, 60, DNC_AoE_Adv_TSBurstPercent,
-                        "Target HP% to stop using Technical Step below",
+                        "目标HP%低于此值时停止使用技巧步",
                         itemWidth: 75f, sliderIncrement: SliderIncrements.Fives);
 
                     ImGuiEx.Spacing(new Vector2(30, 0));
                     UserConfig.DrawHorizontalRadioButton(
                         DNC_AoE_Adv_TS_IncludeTS,
-                        "Include Technical Step",
-                        "Will include Technical Step itself," +
-                        "\ndance steps, and Finish into the rotation.",
+                        "包含技巧步",
+                        "将把技巧步本身、" +
+                        "\n舞步、以及终曲都包含进循环中。",
                         outputValue: (int) IncludeStep.Yes,
                         itemWidth: 125f);
                     UserConfig.DrawHorizontalRadioButton(
                         DNC_AoE_Adv_TS_IncludeTS,
-                        "Exclude Technical Step",
-                        "Will ONLY include the dance steps, and Finish;" +
-                        "\nYOU will need to manually press Technical Step.",
+                        "排除技巧步",
+                        "仅包含舞步和终曲；" +
+                        "\n你需要手动按下技巧步。",
                         outputValue: (int) IncludeStep.No,
                         itemWidth: 125f);
 
@@ -404,7 +404,7 @@ internal partial class DNC
 
                 case Preset.DNC_AoE_Adv_SaberDance:
                     UserConfig.DrawSliderInt(50, 100, DNC_AoE_Adv_SaberThreshold,
-                        "Esprit",
+                        "气魄",
                         itemWidth: 150f, sliderIncrement: SliderIncrements.Fives);
 
                     break;
@@ -412,12 +412,12 @@ internal partial class DNC
                 case Preset.DNC_AoE_Adv_PanicHeals:
                     UserConfig.DrawSliderInt(0, 80,
                         DNC_AoE_Adv_PanicHealWaltzPercent,
-                        "Curing Waltz HP%",
+                        "愈疗之华HP%",
                         itemWidth: 200f, sliderIncrement: SliderIncrements.Fives);
 
                     UserConfig.DrawSliderInt(0, 80,
                         DNC_AoE_Adv_PanicHealWindPercent,
-                        "Second Wind HP%",
+                        "续气HP%",
                         itemWidth: 200f, sliderIncrement: SliderIncrements.Fives);
 
                     break;
@@ -431,33 +431,33 @@ internal partial class DNC
                     ImGuiEx.Spacing(new Vector2(0, 12));
 
                     UserConfig.DrawAdditionalBoolChoice(DNC_Partner_FocusOverride,
-                        "Prioritize your Focus Target##DPFocusOver2",
-                        "If you have a focus target that is within range, alive, and has no rez sickness or damage down, it will be prioritized over The Balance's suggested Dance Partner.",
+                        "优先聚焦目标##DPFocusOver2",
+                        "如果你有一个在范围内、存活、且没有复生虚弱或损伤降低的聚焦目标，将优先于The Balance建议的舞伴。",
                         indentDescription: true);
 
                     ImGuiEx.Spacing(new Vector2(29, 12));
-                    ImGui.Text("Action to Show when Partner is Optimal Options:     (hover each for more info)");
+                    ImGui.Text("舞伴最佳时显示的动作：     (悬停查看详情)");
                     ImGui.NewLine();
                     UserConfig.DrawRadioButton(
-                        DNC_Partner_ActionToShow, "Let Game Decide",
-                        "Will not change the action shown in the hotbar from what FFXIV puts there.\n" +
-                        "When you have a Dance Partner, it will show Ending, as usual.\n\n" +
-                        "This is the default behavior.",
+                        DNC_Partner_ActionToShow, "由游戏决定",
+                        "不会更改FFXIV在快捷栏中放置的动作。\n" +
+                        "当你有舞伴时，会照常显示终舞。\n\n" +
+                        "这是默认行为。",
                         outputValue: (int)PartnerShowAction.Default,
                         descriptionAsTooltip: true);
                     UserConfig.DrawRadioButton(
-                        DNC_Partner_ActionToShow, "Closed Position",
-                        "When your current partner is optimal Closed Position will be shown.\n" +
-                        "This will block you from using Closed Position or Ending\n(unless you hard target a friendly other than your partner).\n\n" +
-                        "This is less distracting than the Savage Blade option.",
+                        DNC_Partner_ActionToShow, "华丽舞姿",
+                        "当前舞伴最佳时会显示华丽舞姿。\n" +
+                        "这会阻止你使用华丽舞姿或终舞\n(除非你硬指向舞伴以外的友方)。\n\n" +
+                        "比蛮神之剑选项干扰更小。",
                         outputValue: (int)PartnerShowAction.ClosedPosition,
                         descriptionAsTooltip: true);
                     UserConfig.DrawRadioButton(
-                        DNC_Partner_ActionToShow, "Savage Blade",
-                        "When your current partner is optimal Savage Blade will be shown.\n" +
-                        "Savage Blade is a removed action that we use to block input.\n" +
-                        "This will block you from using Closed Position or Ending.\n\n" +
-                        "This is the recommended option, to keep you from mistakenly switching partners.",
+                        DNC_Partner_ActionToShow, "蛮神之剑",
+                        "当前舞伴最佳时会显示蛮神之剑。\n" +
+                        "蛮神之剑是一个已移除的动作，我们用它来阻挡输入。\n" +
+                        "这会阻止你使用华丽舞姿或终舞。\n\n" +
+                        "这是推荐选项，可避免你误切换舞伴。",
                         outputValue: (int)PartnerShowAction.SavageBlade,
                         descriptionAsTooltip: true);
 
@@ -465,7 +465,7 @@ internal partial class DNC
 
                 case Preset.DNC_Variant_Cure:
                     UserConfig.DrawSliderInt(1, 80, DNCVariantCurePercent,
-                        "HP% to be at or under",
+                        "HP%等于或低于此值",
                         itemWidth: 200f, sliderIncrement: SliderIncrements.Fives);
 
                     break;
