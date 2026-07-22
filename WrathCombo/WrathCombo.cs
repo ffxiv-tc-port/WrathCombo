@@ -153,6 +153,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
         pluginInterface.Create<Service>();
         ECommonsMain.Init(pluginInterface, this, Module.All);
         PunishLibMain.Init(pluginInterface, "Wrath Combo");
+        ECommons.LanguageHelpers.Localization.Init("ChineseTraditional");
 
         TM = new();
         RemoveNullAutos(); 
