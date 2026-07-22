@@ -58,7 +58,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Silent Nocturne", BRDPvP.SilentNocturne.ActionName()),
                 KeyValuePair.Create("Harmonic Arrow", BRDPvP.HarmonicArrow.ActionName()),
                 // Manually added
-                KeyValuePair.Create("Encore of Light", "英雄的返场余音"),
+                KeyValuePair.Create("Encore of Light", "英雄的返場餘音"),
                 #endregion
             ];
         }

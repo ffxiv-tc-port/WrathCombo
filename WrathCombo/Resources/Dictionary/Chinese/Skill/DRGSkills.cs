@@ -46,7 +46,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Wyrmwind Thrust", DRG.WyrmwindThrust.ActionName()),
                 KeyValuePair.Create("Draconian Fury", DRG.DraconianFury.ActionName()),
                 KeyValuePair.Create("Chaotic Spring", DRG.ChaoticSpring.ActionName()),
-                KeyValuePair.Create("Chaotic Combo", $"{DRG.ChaoticSpring.ActionName()}连击"),
+                KeyValuePair.Create("Chaotic Combo", $"{DRG.ChaoticSpring.ActionName()}連擊"),
 
                 // Dragon Abilities
                 KeyValuePair.Create("Dragonfire Dive", DRG.DragonfireDive.ActionName()),

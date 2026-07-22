@@ -68,8 +68,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 #endregion
 
                 // Name
-                KeyValuePair.Create("Rapture into Misery", "安慰苦难"),
-                KeyValuePair.Create("Solace into Misery", "狂喜苦难"),
+                KeyValuePair.Create("Rapture into Misery", "狂喜苦難"),
+                KeyValuePair.Create("Solace into Misery", "安慰苦難"),
                 KeyValuePair.Create("Misery", WHM.AfflatusMisery.ActionName()),
                 KeyValuePair.Create("Asylum", WHM.Asylum.ActionName()),
                 KeyValuePair.Create("Liturgy of the Bell", WHM.LiturgyOfTheBell.ActionName()),

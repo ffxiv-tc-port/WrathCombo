@@ -17,7 +17,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region DOH
-                KeyValuePair.Create("Placeholder.", "占位符。"),
+                KeyValuePair.Create("Placeholder.", "佔位符。"),
                 #endregion
             ];
         }

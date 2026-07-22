@@ -52,20 +52,20 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
 
         #region MouseOver Options moved
 
-        ImGuiEx.TextUnderlined("治疗职业的鼠标悬停选项已迁移！");
+        ImGuiEx.TextUnderlined("治療職業的滑鼠懸停選項已遷移！");
         if (WasUsingOldMouseOverConfigs)
             ImGuiEx.Text(ImGuiColors.DalamudYellow,
-                "你正在使用其中一个选项！请仔细阅读！");
+                "你正在使用其中一個選項！請仔細閱讀！");
         ImGuiEx.Text(
-            "各治疗职业治疗连击检查鼠标悬停的选项已被移除，\n" +
-            "现已替换为一个全局鼠标悬停选项（以及一些新选项）。\n\n" +
-            "你可以在以下位置找到这个新设置：\n" +
-            "设置 > 'Target Options' > 'Heal Stack Customization Options'"
+            "各治療職業治療連擊檢查滑鼠懸停的選項已被移除，\n" +
+            "現已替換為一個全域滑鼠懸停選項（以及一些新選項）。\n\n" +
+            "你可以在以下位置找到這個新設定：\n" +
+            "設定 > 'Target Options' > 'Heal Stack Customization Options'"
         );
         ImGui.NewLine();
-        if (ImGui.Button("> 打开设置页面##majorSettings1"))
+        if (ImGui.Button("> 開啟設定頁面##majorSettings1"))
             P.OnOpenConfigUi();
-        if (ImGui.Button("> 帮我启用新的UI鼠标悬停选项"))
+        if (ImGui.Button("> 幫我啟用新的UI滑鼠懸停選項"))
         {
             Service.Configuration.UseUIMouseoverOverridesInDefaultHealStack = true;
             Service.Configuration.Save();
@@ -75,7 +75,7 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
             ImGui.SameLine();
             FontAwesome.Print(ImGuiColors.HealerGreen, FontAwesomeIcon.Check);
             ImGui.SameLine();
-            ImGuiEx.Text($"已启用");
+            ImGuiEx.Text($"已啟用");
         }
 
         #endregion
@@ -86,31 +86,31 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
 
         #region Retargeting
 
-        ImGuiEx.TextUnderlined("新功能：动作重定向！");
+        ImGuiEx.TextUnderlined("新功能：動作重定向！");
         ImGuiEx.Text(
-            "动作重定向让我们能够根据The Balance的建议和你的选项，\n" +
-            "为你选择动作的目标，而无需你自行\n" +
-            "设置转移或反应技能。");
+            "動作重定向讓我們能夠根據The Balance的建議和你的選項，\n" +
+            "為你選擇動作的目標，而無需你自行\n" +
+            "設定轉移或反應技能。");
         ImGuiComponents.HelpMarker(
-            "此前有一些功能（如占星术士的大地星）\n" +
-            "需要转移或反应技能才能工作，单体治疗连击\n" +
-            "会（可选地）依次检查鼠标悬停 > 软目标 > 硬目标的HP，\n" +
-            "这可能与你的实际指向不一致，从而使用了'错误'的治疗技能。\n\n" +
-            "动作重定向解决了这个问题！"
+            "此前有一些功能（如占星術士的大地星）\n" +
+            "需要轉移或反應技能才能工作，單體治療連擊\n" +
+            "會（可選地）依次檢查滑鼠懸停 > 軟目標 > 硬目標的HP，\n" +
+            "這可能與你的實際指向不一致，從而使用了'錯誤'的治療技能。\n\n" +
+            "動作重定向解決了這個問題！"
         );
         ImGuiEx.Text(
-            "此外，我们还新增了控制治疗连击用于检查HP并选择\n" +
-            "不同治疗技能的目标'堆叠'的能力，\n" +
-            "以及一个将所有单体治疗动作也重定向到同一堆叠的选项。\n" +
-            "（强烈推荐启用此'重定向治疗动作'选项！）");
+            "此外，我們還新增了控制治療連擊用於檢查HP並選擇\n" +
+            "不同治療技能的目標'堆疊'的能力，\n" +
+            "以及一個將所有單體治療動作也重定向到同一堆疊的選項。\n" +
+            "（強烈推薦啟用此'重定向治療動作'選項！）");
         ImGuiEx.Text(
-            "你可以在以下位置找到这些新设置：\n" +
-            "Settings > 'Target Options'（以及折叠的 'Heal Stack Customization Options'）"
+            "你可以在以下位置找到這些新設定：\n" +
+            "Settings > 'Target Options'（以及摺疊的 'Heal Stack Customization Options'）"
         );
         ImGui.NewLine();
-        if (ImGui.Button("> 打开设置页面##majorSettings2"))
+        if (ImGui.Button("> 開啟設定頁面##majorSettings2"))
             P.OnOpenConfigUi();
-        if (ImGui.Button("> 帮我启用重定向治疗动作选项"))
+        if (ImGui.Button("> 幫我啟用重定向治療動作選項"))
         {
             Service.Configuration.RetargetHealingActionsToStack = true;
             Service.Configuration.Save();
@@ -120,13 +120,13 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
             ImGui.SameLine();
             FontAwesome.Print(ImGuiColors.HealerGreen, FontAwesomeIcon.Check);
             ImGui.SameLine();
-            ImGuiEx.Text($"已启用");
+            ImGuiEx.Text($"已啟用");
         }
         ImGui.NewLine();
         ImGuiEx.Text(
-            "你会看到新的符号，用于指示某功能的动作是否被重定向："
+            "你會看到新的符號，用於指示某功能的動作是否被重定向："
         );
-        ImGuiEx.Text("视设置而定，可能会被重定向：");
+        ImGuiEx.Text("視設定而定，可能會被重定向：");
         ImGui.SameLine();
         using (ImRaii.PushFont(UiBuilder.IconFont))
         {
@@ -134,7 +134,7 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
                 ImGui.Text(FontAwesomeIcon.Random.ToIconString());
         }
         ImGui.SameLine();
-        ImGuiEx.Text("总是会被重定向：");
+        ImGuiEx.Text("總是會被重定向：");
         ImGui.SameLine();
         using (ImRaii.PushFont(UiBuilder.IconFont))
         {
@@ -143,17 +143,17 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
         }
         ImGui.NewLine();
         ImGuiEx.Text(ImGuiColors.DalamudYellow,
-            "如果你之前为现已被重定向的动作配置了转移/反应技能，\n" +
-            "或者启用了反应技能/Bossmod的瞬发地面目标选项，\n" +
-            "你可能会想要禁用这些选项。");
+            "如果你之前為現已被重定向的動作配置了轉移/反應技能，\n" +
+            "或者啟用了反應技能/Bossmod的瞬發地面目標選項，\n" +
+            "你可能會想要禁用這些選項。");
         ImGuiEx.Text(
-            "这包括占星术士卡牌、舞者舞伴，以及（如果启用：）\n" +
-            "单体治疗动作");
+            "這包括占星術士卡牌、舞者舞伴，以及（如果啟用：）\n" +
+            "單體治療動作");
         ImGuiComponents.HelpMarker(
-            "治疗动作是否启用取决于你的个人偏好\n" +
-            "（强烈推荐启用），但舞伴和卡牌现在比简单的动作重定向\n" +
-            "更加智能（会遵循The Balance的优先级，\n" +
-            "检查损伤降低等状态）。");
+            "治療動作是否啟用取決於你的個人偏好\n" +
+            "（強烈推薦啟用），但舞伴和卡牌現在比簡單的動作重定向\n" +
+            "更加智慧（會遵循The Balance的優先順序，\n" +
+            "檢查損傷降低等狀態）。");
 
         #endregion
 
@@ -162,10 +162,10 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
         ImGuiEx.Spacing(new System.Numerics.Vector2(0, 20));
         ImGui.Separator();
         ImGuiHelpers.CenterCursorFor(
-            ImGuiHelpers.GetButtonSize("关闭并不再显示").X
+            ImGuiHelpers.GetButtonSize("關閉並不再顯示").X
             //+ ImGui.GetStyle().ItemSpacing.X * 2
         );
-        if (ImGui.Button("关闭并不再显示"))
+        if (ImGui.Button("關閉並不再顯示"))
         {
             Service.Configuration.HideMajorChangesForVersion = Version;
             Service.Configuration.Save();

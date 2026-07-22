@@ -28,10 +28,10 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Skill
                 KeyValuePair.Create("Reprisal", RoleActions.Tank.Reprisal.ActionName()),
                 KeyValuePair.Create("Shirk", RoleActions.Tank.Shirk.ActionName()),
                 // Tank Descriptions
-                KeyValuePair.Create("one-button mitigation.", "一键减伤。"),
-                KeyValuePair.Create("when your target's cast is interruptible.", "(目标的施法可被打断时)。"),
-                KeyValuePair.Create("when your target's casting, interruptible or not.", "(目标正在施法时，无论是否可被打断。)。"),
-                KeyValuePair.Create("when your target is casting, interruptible or not.", "(目标正在施法时，无论是否可被打断。)。"),
+                KeyValuePair.Create("one-button mitigation.", "一鍵減傷。"),
+                KeyValuePair.Create("when your target's cast is interruptible.", "(目標的施法可被打斷時)。"),
+                KeyValuePair.Create("when your target's casting, interruptible or not.", "(目標正在施法時，無論是否可被打斷。)。"),
+                KeyValuePair.Create("when your target is casting, interruptible or not.", "(目標正在施法時，無論是否可被打斷。)。"),
 
                 // Healer
                 KeyValuePair.Create("Healing Wind", RoleActions.Healer.HealingWind.ActionName()),
@@ -63,16 +63,16 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Skill
                 KeyValuePair.Create("Sleep", RoleActions.Caster.Sleep.ActionName()),
 
                 // Multi-role actions
-                KeyValuePair.Create("Second Wind", "内丹"),
-                KeyValuePair.Create("Lucid Dreaming", "醒梦"),
-                KeyValuePair.Create("Swiftcast", "即刻咏唱"),
+                KeyValuePair.Create("Second Wind", "內丹"),
+                KeyValuePair.Create("Lucid Dreaming", "醒夢"),
+                KeyValuePair.Create("Swiftcast", "即刻詠唱"),
                 KeyValuePair.Create("Arm's Length", RoleActions.Physical.ArmsLength.ActionName()),
                 KeyValuePair.Create("Arms Length", RoleActions.Physical.ArmsLength.ActionName()),
                 KeyValuePair.Create("Surecast", RoleActions.Magic.Surecast.ActionName()),
 
                 // Misc
-                KeyValuePair.Create("Resurrection", "复生"),
-                KeyValuePair.Create("Raise", "复活"),
+                KeyValuePair.Create("Resurrection", "復生"),
+                KeyValuePair.Create("Raise", "復活"),
                 KeyValuePair.Create("Solid Reason", DOL.SolidReason.ActionName()),
                 KeyValuePair.Create("Ageless Words", DOL.AgelessWords.ActionName()),
                 #endregion

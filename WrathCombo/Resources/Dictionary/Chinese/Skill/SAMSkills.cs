@@ -64,8 +64,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Tendo Setsugekka", SAM.TendoSetsugekka.ActionName()),
                 KeyValuePair.Create("Tengentsu", SAM.Tengentsu.ActionName()),
                 KeyValuePair.Create("Gyofu", SAM.Gyofu.ActionName()),
-                KeyValuePair.Create("Kaeshi: Goken", "回返五剑"),
-                KeyValuePair.Create("Namikiri", "斩浪"),
+                KeyValuePair.Create("Kaeshi: Goken", "回返五劍"),
+                KeyValuePair.Create("Namikiri", "斬浪"),
                 #endregion
 
                 #region SAMPvP
