@@ -55,7 +55,7 @@ namespace WrathCombo.Combos.PvP
 
                     case CustomComboPreset.SCHPvP_Selfcare:
                         UserConfig.DrawSliderInt(1, 100, SCHPvP_AdloThreshold,
-                            "为自身使用鼓励激励之策的生命值百分比阈值");
+                            "為自身使用鼓勵激勵之策的生命值百分比閾值");
 
                         break;
                 }

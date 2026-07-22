@@ -28,9 +28,9 @@ internal partial class BRD
             switch (preset)
             {
                 case CustomComboPreset.BRD_ST_Adv_Balance_Standard:
-                    DrawRadioButton(BRD_Adv_Opener_Selection, "标准起手", "", 0);
-                    DrawRadioButton(BRD_Adv_Opener_Selection, "2.48调整标准起手", "", 1);
-                    DrawRadioButton(BRD_Adv_Opener_Selection, "2.49舒适标准起手", "", 2);
+                    DrawRadioButton(BRD_Adv_Opener_Selection, "Standard Opener", "", 0);
+                    DrawRadioButton(BRD_Adv_Opener_Selection, "2.48 Adjusted Standard Opener", "", 1);
+                    DrawRadioButton(BRD_Adv_Opener_Selection, "2.49 Standard Comfy", "", 2);
 
                     ImGui.Indent();
                     DrawBossOnlyChoice(BRD_Balance_Content);
@@ -39,24 +39,24 @@ internal partial class BRD
 
                 case CustomComboPreset.BRD_Adv_RagingJaws:
                     DrawSliderInt(3, 10, BRD_RagingJawsRenewTime,
-                        "剩余时间（秒）。推荐5秒，如在光明神窗口外刷新可适当增加");
+                        "Remaining time (In seconds). Recommended 5, increase little by little if refresh is outside of radiant window");
 
                     break;
 
                 case CustomComboPreset.BRD_Adv_DoT:
 
                     DrawSliderInt(0, 100, BRD_Adv_DoT_Threshold,
-                        $"目标HP低于该百分比时停止使用持续伤害技能（0% = 总是使用，100% = 从不使用）。");
+                        $"目標HP低於該百分比時停止使用持續傷害技能（0% = 總是使用，100% = 從不使用）。");
 
                     ImGui.Indent();
 
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
 
                     DrawHorizontalRadioButton(BRD_Adv_DoT_SubOption,
-                        "仅非Boss敌人", $"仅对非Boss敌人应用HP检查", 0);
+                        "僅非Boss敵人", $"僅對非Boss敵人應用HP檢查", 0);
 
                     DrawHorizontalRadioButton(BRD_Adv_DoT_SubOption,
-                        "全部内容", $"对所有内容应用HP检查", 1);
+                        "All Content", $"對所有內容應用HP檢查", 1);
 
                     ImGui.Unindent();
 
@@ -65,17 +65,17 @@ internal partial class BRD
                 case CustomComboPreset.BRD_Adv_Buffs:
 
                     DrawSliderInt(0, 100, BRD_Adv_Buffs_Threshold,
-                       $"目标HP低于该百分比时停止使用增益（0% = 总是使用，100% = 从不使用）。");
+                       $"目標HP低於該百分比時停止使用增益（0% = 總是使用，100% = 從不使用）。");
 
                     ImGui.Indent();
 
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
 
                     DrawHorizontalRadioButton(BRD_Adv_Buffs_SubOption,
-                        "仅非Boss敌人", $"仅对非Boss敌人应用HP检查", 0);
+                        "僅非Boss敵人", $"僅對非Boss敵人應用HP檢查", 0);
 
                     DrawHorizontalRadioButton(BRD_Adv_Buffs_SubOption,
-                        "全部内容", $"对所有内容应用HP检查", 1);
+                        "All Content", $"對所有內容應用HP檢查", 1);
 
                     ImGui.Unindent();
 
@@ -84,17 +84,17 @@ internal partial class BRD
                 case CustomComboPreset.BRD_AoE_Adv_Buffs:
 
                     DrawSliderInt(0, 100, BRD_AoE_Adv_Buffs_Threshold,
-                        $"目标HP低于该百分比时停止使用增益（0% = 总是使用，100% = 从不使用）。");
+                        $"目標HP低於該百分比時停止使用增益（0% = 總是使用，100% = 從不使用）。");
 
                     ImGui.Indent();
 
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
 
                     DrawHorizontalRadioButton(BRD_AoE_Adv_Buffs_SubOption,
-                        "仅非Boss敌人", $"仅对非Boss敌人应用HP检查", 0);
+                        "僅非Boss敵人", $"僅對非Boss敵人應用HP檢查", 0);
 
                     DrawHorizontalRadioButton(BRD_AoE_Adv_Buffs_SubOption,
-                        "全部内容", $"对所有内容应用HP检查", 1);
+                        "All Content", $"對所有內容應用HP檢查", 1);
 
                     ImGui.Unindent();
 
@@ -102,18 +102,18 @@ internal partial class BRD
 
                 case CustomComboPreset.BRD_ST_SecondWind:
                     DrawSliderInt(0, 100, BRD_STSecondWindThreshold,
-                        "低于该HP百分比时使用内丹。");
+                        "HP percent threshold to use Second Wind below.");
 
                     break;
 
                 case CustomComboPreset.BRD_AoE_SecondWind:
                     DrawSliderInt(0, 100, BRD_AoESecondWindThreshold,
-                        "低于该HP百分比时使用内丹。");
+                        "HP percent threshold to use Second Wind below.");
 
                     break;
 
                 case CustomComboPreset.BRD_Variant_Cure:
-                    DrawSliderInt(1, 100, BRD_VariantCure, "HP%小于等于该值时使用", 200);
+                    DrawSliderInt(1, 100, BRD_VariantCure, "HP% to be at or under", 200);
 
                     break;
             }

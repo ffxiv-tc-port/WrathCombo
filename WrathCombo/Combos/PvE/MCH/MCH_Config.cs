@@ -47,10 +47,10 @@ internal partial class MCH
 
                 case CustomComboPreset.MCH_ST_Adv_TurretQueen:
                     DrawHorizontalRadioButton(MCH_ST_Adv_Turret_SubOption,
-                        "在所有内容中使用 The Balance 逻辑", $"无论内容如何都使用{AutomatonQueen.ActionName()}逻辑。", 0);
+                        "在所有內容中使用 The Balance 邏輯", $"無論內容如何都使用{AutomatonQueen.ActionName()}邏輯。", 0);
 
                     DrawHorizontalRadioButton(MCH_ST_Adv_Turret_SubOption,
-                        "仅在Boss战中使用 The Balance 逻辑", $"仅在Boss战中使用{AutomatonQueen.ActionName()}逻辑。", 1);
+                        "僅在Boss戰中使用 The Balance 邏輯", $"僅在Boss戰中使用{AutomatonQueen.ActionName()}邏輯。", 1);
 
                     if (MCH_ST_Adv_Turret_SubOption == 1)
                     {
@@ -69,12 +69,12 @@ internal partial class MCH
 
                 case CustomComboPreset.MCH_ST_Adv_GaussRicochet:
                     DrawSliderInt(0, 2, MCH_ST_GaussRicoPool,
-                        "保留多少充能次数供手动使用");
+                        "保留多少充能次數供手動使用");
                     break;
 
                 case CustomComboPreset.MCH_ST_Adv_Reassemble:
                     DrawSliderInt(0, 1, MCH_ST_ReassemblePool,
-                        "保留多少充能次数供手动使用");
+                        "Number of Charges to Save for Manual Use");
 
                     DrawHorizontalMultiChoice(MCH_ST_Reassembled, $"Use on {Excavator.ActionName()}", "", 5, 0);
                     DrawHorizontalMultiChoice(MCH_ST_Reassembled, $"Use on {Chainsaw.ActionName()}", "", 5, 1);

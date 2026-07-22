@@ -43,7 +43,7 @@ internal partial class SCH
 
                     ImGui.Indent();
 
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
 
                     DrawHorizontalRadioButton(SCH_DPS_BioSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.\nAllows you to only stop DoTing early when it's not a boss.", 0);
@@ -51,7 +51,7 @@ internal partial class SCH
                     DrawHorizontalRadioButton(SCH_DPS_BioSubOption,
                         "All Enemies", "Applies the HP check above to all enemies.", 1);
 
-                    DrawRoundedSliderFloat(0, 4, SCH_DPS_BioUptime_Threshold, "重新应用DoT前剩余秒数。设置为零以禁用此检查。", digits: 1);
+                    DrawRoundedSliderFloat(0, 4, SCH_DPS_BioUptime_Threshold, "重新應用DoT前剩餘秒數。設定為零以禁用此檢查。", digits: 1);
 
                     ImGui.Unindent();
 
@@ -63,7 +63,7 @@ internal partial class SCH
                     
                     ImGui.Indent();
                     
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
                     
                     DrawHorizontalRadioButton(SCH_ST_DPS_ChainStratagemSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.\nAllows you to only stop DoTing early when it's not a boss.", 0);
@@ -76,25 +76,25 @@ internal partial class SCH
                     break;
 
                 case CustomComboPreset.SCH_ST_ADV_DPS_EnergyDrain:
-                    DrawSliderInt(0, 60, SCH_ST_DPS_EnergyDrain, "以太超流剩余冷却时间");
+                    DrawSliderInt(0, 60, SCH_ST_DPS_EnergyDrain, "乙太超流剩餘冷卻時間");
                     
                     DrawAdditionalBoolChoice(SCH_ST_DPS_EnergyDrain_Burst, 
-                        "能量吸收爆发", "当连环计可用或冷却时间少于10秒时，保留能量吸收。");
+                        "Energy Drain Burst", "Holds Energy Drain when Chain Stratagem is ready or has less than 10 seconds cooldown remaining.");
                     break;
                 
                 case CustomComboPreset.SCH_AoE_ADV_DPS_Lucid:
-                    DrawSliderInt(4000, 9500, SCH_AoE_DPS_LucidOption, "MP阈值", 150, Hundreds);
+                    DrawSliderInt(4000, 9500, SCH_AoE_DPS_LucidOption, "MP Threshold", 150, Hundreds);
                     break;
                 
                 case CustomComboPreset.SCH_AoE_ADV_DPS_ChainStrat:
                     DrawAdditionalBoolChoice(SCH_AoE_DPS_ChainStratagemBanefulOption, 
-                        "仅限埋伏之毒", "只有在等级足够使用埋伏之毒时才会使用连环计");
+                        "僅限埋伏之毒", "只有在等級足夠使用埋伏之毒時才會使用連環計");
                     
-                    DrawSliderInt(0, 100, SCH_AoE_DPS_ChainStratagemOption, "敌人HP低于此百分比时停止使用。设为0以禁用此检查。");
+                    DrawSliderInt(0, 100, SCH_AoE_DPS_ChainStratagemOption, "Stop using at Enemy HP%. Set to Zero to disable this check.");
                     
                     ImGui.Indent();
                     
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
                     
                     DrawHorizontalRadioButton(SCH_AoE_DPS_ChainStratagemSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.\nAllows you to only stop DoTing early when it's not a boss.", 0);
@@ -200,12 +200,12 @@ internal partial class SCH
                     break;
 
                 case CustomComboPreset.SCH_AoE_Heal:
-                    ImGui.TextUnformatted("注意：士气高扬之策总是可用。");
-                    ImGui.TextUnformatted("这些选项用于为士气高扬之策提供可选优先级，或设置应急战术选项。");
-                    DrawSliderInt(0, 100, SCH_AoE_Heal_SuccorShieldOption, "护盾检查：当队伍中护盾覆盖率低于设定百分比时使用。", sliderIncrement: 25);
-                    DrawPriorityInput(SCH_AoE_Heals_Priority, 8, 7, $"{Succor.ActionName()} 优先级：");
-                    DrawHorizontalMultiChoice(SCH_AoE_Heal_Succor_Options,"应急战术","当队伍护盾覆盖率超过设定百分比时，将在士气高扬之策前使用应急战术", 2, 0);
-                    DrawHorizontalMultiChoice(SCH_AoE_Heal_Succor_Options,"秘策","将使用秘策强化士气高扬之策", 2, 1);
+                    ImGui.TextUnformatted("注意：士氣高揚之策總是可用。");
+                    ImGui.TextUnformatted("這些選項用於為士氣高揚之策提供可選優先順序，或設定應急戰術選項。");
+                    DrawSliderInt(0, 100, SCH_AoE_Heal_SuccorShieldOption, "護盾檢查：當隊伍中護盾覆蓋率低於設定百分比時使用。", sliderIncrement: 25);
+                    DrawPriorityInput(SCH_AoE_Heals_Priority, 8, 7, $"{Succor.ActionName()} Priority: ");
+                    DrawHorizontalMultiChoice(SCH_AoE_Heal_Succor_Options,"Emergency Tactics","當隊伍護盾覆蓋率超過設定百分比時，將在士氣高揚之策前使用應急戰術", 2, 0);
+                    DrawHorizontalMultiChoice(SCH_AoE_Heal_Succor_Options,"Recitation","將使用秘策強化士氣高揚之策", 2, 1);
                     break;
 
                 case CustomComboPreset.SCH_AoE_Heal_WhisperingDawn:
@@ -246,12 +246,12 @@ internal partial class SCH
                 
                 case CustomComboPreset.SCH_AoE_Heal_Aetherflow:
                     DrawAdditionalBoolChoice(SCH_AoE_Heal_Aetherflow_Indomitability,
-                        "不屈不挠之策可用时", "仅在不屈不挠之策可用时才使用以太超流。");
+                        "Indomitability Ready Only Option", "僅在不屈不撓之策可用時才使用乙太超流。");
                     break;
                 
                 case CustomComboPreset.SCH_AoE_Heal_Dissipation:
                     DrawAdditionalBoolChoice(SCH_AoE_Heal_Dissipation_Indomitability,
-                        "不屈不挠之策可用时", "仅在不屈不挠之策可用时才使用转化。");
+                        "Indomitability Ready Only Option", "僅在不屈不撓之策可用時才使用轉化。");
                     break;
                 
                 #endregion
@@ -292,7 +292,7 @@ internal partial class SCH
                     break; 
                 
                 case CustomComboPreset.SCH_Raidwide_Succor:
-                    DrawAdditionalBoolChoice(SCH_Raidwide_Succor_Recitation, "秘策", "在团队士气高扬之策前使用秘策进行强化。");
+                    DrawAdditionalBoolChoice(SCH_Raidwide_Succor_Recitation, "Recitation Option", "在團隊士氣高揚之策前使用秘策進行強化。");
                     break;
                 
                 #endregion
