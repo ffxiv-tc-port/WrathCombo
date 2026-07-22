@@ -5,6 +5,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
+using ECommons.LanguageHelpers;
 using ECommons.Logging;
 using ECommons.Throttlers;
 using ImGuiNET;
@@ -174,26 +175,26 @@ namespace WrathCombo.Window
             ImGui.Separator();
 
             ImGui.Spacing();
-            if (ImGui.Selectable("PvE功能", OpenWindow == OpenWindow.PvE))
+            if (ImGui.Selectable("PvE Features".Loc(), OpenWindow == OpenWindow.PvE))
                 OpenWindow = OpenWindow.PvE;
 
             ImGui.Spacing();
-            if (ImGui.Selectable("PvP功能", OpenWindow == OpenWindow.PvP))
+            if (ImGui.Selectable("PvP Features".Loc(), OpenWindow == OpenWindow.PvP))
                 OpenWindow = OpenWindow.PvP;
 
             ImGui.Spacing();
-            if (ImGui.Selectable("自动循环", OpenWindow == OpenWindow.AutoRotation))
+            if (ImGui.Selectable("Auto-Rotation".Loc(), OpenWindow == OpenWindow.AutoRotation))
                 OpenWindow = OpenWindow.AutoRotation;
 
             ImGui.Spacing();
             ImGui.Spacing();
 
             ImGui.Spacing();
-            if (ImGui.Selectable("插件设置", OpenWindow == OpenWindow.Settings))
+            if (ImGui.Selectable("Settings".Loc(), OpenWindow == OpenWindow.Settings))
                 OpenWindow = OpenWindow.Settings;
 
             ImGui.Spacing();
-            if (ImGui.Selectable("关于", OpenWindow == OpenWindow.About))
+            if (ImGui.Selectable("About".Loc(), OpenWindow == OpenWindow.About))
                 OpenWindow = OpenWindow.About;
 
 #if DEBUG
@@ -201,7 +202,7 @@ namespace WrathCombo.Window
             ImGui.Spacing();
 
             ImGui.Spacing();
-            if (ImGui.Selectable("调试", OpenWindow == OpenWindow.Debug))
+            if (ImGui.Selectable("DEBUG", OpenWindow == OpenWindow.Debug))
                 OpenWindow = OpenWindow.Debug;
 
             ImGui.Spacing();
@@ -273,12 +274,12 @@ namespace WrathCombo.Window
 
             // Set up how the button should display
             var icon = FontAwesomeIcon.CaretLeft;
-            var hoverText = "收起侧边栏";
+            var hoverText = "Collapse Sidebar".Loc();
             ImGui.SetWindowFontScale(1.5f.Scale());
             if (collapsed)
             {
                 icon = FontAwesomeIcon.CaretRight;
-                hoverText = "展开侧边栏";
+                hoverText = "Expand Sidebar".Loc();
             }
 
             // Draw the button

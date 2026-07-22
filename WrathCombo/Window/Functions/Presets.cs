@@ -24,6 +24,7 @@ using WrathCombo.Data;
 using WrathCombo.Extensions;
 using WrathCombo.Resources.Dictionary.Chinese;
 using WrathCombo.Services;
+using ECommons.LanguageHelpers;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
 using static WrathCombo.Attributes.PossiblyRetargetedAttribute;
 using ECommons.Throttlers;
@@ -156,7 +157,7 @@ namespace WrathCombo.Window.Functions
                 if (!Service.Configuration.AutoActions.ContainsKey(preset))
                     Service.Configuration.AutoActions[preset] = false;
 
-                var label = "加入自动循环";
+                var label = "Auto-Mode".Loc();
                 var labelSize = ImGui.CalcTextSize(label);
                 ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - labelSize.X.Scale() - 64f.Scale());
                 bool autoOn = Service.Configuration.AutoActions[preset];
@@ -170,8 +171,8 @@ namespace WrathCombo.Window.Functions
                 }
                 ImGui.SameLine();
                 ImGui.Text(label);
-                ImGuiComponents.HelpMarker($"将此功能添加到自动循环中。\n" +
-                    $"自动循环将自动使用勾选的功能，使你可以专注于移动。在“自动循环”选项卡中进行设置。");
+                ImGuiComponents.HelpMarker(("Add this feature to Auto-Rotation.\n" +
+                    "Auto-Rotation will automatically use the actions selected within the feature, allowing you to focus on movement. Configure the settings in the 'Auto-Rotation' section.").Loc());
                 ImGui.Separator();
             }
 
@@ -232,7 +233,7 @@ namespace WrathCombo.Window.Functions
 
             if (conflicts.Length > 0)
             {
-                ImGui.TextColored(ImGuiColors.DalamudRed, "冲突：");
+                ImGui.TextColored(ImGuiColors.DalamudRed, "Conflicts with:".Loc());
                 StringBuilder conflictBuilder = new();
                 ImGui.Indent();
                 foreach (var conflict in conflicts)
@@ -272,14 +273,14 @@ namespace WrathCombo.Window.Functions
                 if (blueAttr.Actions.Count > 0)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, blueAttr.NoneSet ? ImGuiColors.DPSRed : ImGuiColors.DalamudOrange);
-                    ImGui.Text($"{(blueAttr.NoneSet ? "需要的法术未激活：" : "缺少激活的法术：")} {string.Join(", ", blueAttr.Actions.Select(x => ActionWatching.GetBLUIndex(x) + GetActionName(x)))}");
+                    ImGui.Text($"{(blueAttr.NoneSet ? "No Required Spells Active:".Loc() : "Missing active spells:".Loc())} {string.Join(", ", blueAttr.Actions.Select(x => ActionWatching.GetBLUIndex(x) + GetActionName(x)))}");
                     ImGui.PopStyleColor();
                 }
 
                 else
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
-                    ImGui.Text("所有需要的法术已激活！");
+                    ImGui.Text("All required spells active!".Loc());
                     ImGui.PopStyleColor();
                 }
             }
@@ -287,7 +288,7 @@ namespace WrathCombo.Window.Functions
             if (variantParents is not null)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
-                ImGui.TextWrapped($"属于正常连击的一部分{(variantParents.ParentPresets.Length > 1 ? "（复数）" : "")}:");
+                ImGui.TextWrapped(("Part of normal combo" + (variantParents.ParentPresets.Length > 1 ? "s" : "") + ":").Loc());
                 StringBuilder builder = new();
                 foreach (var par in variantParents.ParentPresets)
                 {
@@ -313,7 +314,7 @@ namespace WrathCombo.Window.Functions
             if (bozjaParents is not null)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
-                ImGui.TextWrapped($"属于正常连击的一部分{(bozjaParents.ParentPresets.Length > 1 ? "（复数）" : "")}:");
+                ImGui.TextWrapped(("Part of normal combo" + (bozjaParents.ParentPresets.Length > 1 ? "s" : "") + ":").Loc());
                 StringBuilder builder = new();
                 foreach (var par in bozjaParents.ParentPresets)
                 {
@@ -338,7 +339,7 @@ namespace WrathCombo.Window.Functions
             if (eurekaParents is not null)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
-                ImGui.TextWrapped($"属于正常连击的一部分{(variantParents.ParentPresets.Length > 1 ? "（复数）" : "")}:");
+                ImGui.TextWrapped(("Part of normal combo" + (variantParents.ParentPresets.Length > 1 ? "s" : "") + ":").Loc());
                 StringBuilder builder = new();
                 foreach (var par in eurekaParents.ParentPresets)
                 {
@@ -509,7 +510,7 @@ namespace WrathCombo.Window.Functions
             {
                 string skills = string.Join(", ", att.ActionNames);
 
-                ImGuiComponents.HelpMarker($"替换：{skills}");
+                ImGuiComponents.HelpMarker("Replaces: ??".Loc(skills));
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.BeginTooltip();
@@ -526,11 +527,11 @@ namespace WrathCombo.Window.Functions
 
         public static void DrawRetargetedSymbolForSettingsPage() =>
             DrawRetargetedAttribute(
-                firstLine: "启用后，该功能将涉及重定向技能目标。",
-                secondLine: "此功能影响的技能会自动按照你配置的优先级\n" +
-                            "依次选定目标进行施放。",
-                thirdLine: "如同时使用Redirect或Reaction等插件，\n" +
-                           "并对相同技能有重定向设置，可能会产生冲突或异常。");
+                firstLine: "This Feature will involve retargeting actions if enabled.".Loc(),
+                secondLine: ("The actions this Feature affects will automatically be\n" +
+                            "targeted onto the targets in the priority you have configured.").Loc(),
+                thirdLine: ("Using plugins like Redirect or Reaction with configurations\n" +
+                           "affecting the same actions will Conflict and may cause issues.").Loc());
 
         private static void DrawRetargetedAttribute
             (CustomComboPreset? preset = null,
@@ -585,21 +586,22 @@ namespace WrathCombo.Window.Functions
                     {
                         if (possiblyRetargeted)
                             ImGui.TextUnformatted(
-                                "此功能的技能可能会被重新选择目标。");
+                                "This Feature's actions may be retargeted.".Loc());
                         if (retargeted)
                             ImGui.TextUnformatted(
                                 firstLine ??
-                                "此功能的技能已被重新选择目标。");
+                                "This Feature's actions are retargeted.".Loc());
 
                         ImGui.TextUnformatted(
                             secondLine ??
-                            "此功能的技能将自动选择开发者认为的最佳目标\n" +
-                            "（在适用的情况下遵循The Balance指南）。");
+                            ("The actions from this Feature will automatically be\n" +
+                            "targeted onto what the developers feel is the best target\n" +
+                            "(following The Balance where applicable).").Loc());
 
                         ImGui.TextUnformatted(
                             thirdLine ??
-                            "使用Redirect或Reaction等插件并配置影响此技能时\n" +
-                            "会产生冲突并可能导致问题。");
+                            ("Using plugins like Redirect or Reaction with configurations\n" +
+                            "affecting this action will Conflict and may cause issues.").Loc());
 
                         var settingInfo = "";
                         if (preset.HasValue)
@@ -612,7 +614,7 @@ namespace WrathCombo.Window.Functions
                         {
                             ImGui.NewLine();
                             ImGui.TextUnformatted(
-                                "控制此技能是否重新选择目标的设置是：\n" +
+                                "The setting that controls if this action is retargeted is:\n".Loc() +
                                 settingInfo);
                         }
                     }

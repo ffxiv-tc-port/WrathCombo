@@ -4,6 +4,7 @@ using Dalamud.Interface.Utility.Raii;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
+using ECommons.LanguageHelpers;
 using ImGuiNET;
 using System.Linq;
 using System.Numerics;
@@ -26,7 +27,7 @@ namespace WrathCombo.Window.Tabs
             //#if !DEBUG
             if (ActionReplacer.ClassLocked())
             {
-                ImGui.TextWrapped("Equip your job stone to re-unlock features.");
+                ImGui.TextWrapped("Equip your job stone to re-unlock features.".Loc());
                 return;
             }
             //#endif
@@ -43,7 +44,7 @@ namespace WrathCombo.Window.Tabs
                     ImGui.SameLine(indentwidth);
                     ImGuiEx.LineCentered(() =>
                     {
-                        ImGuiEx.TextUnderlined("从下面选择一个职业，以启用并配置其功能。");
+                        ImGuiEx.TextUnderlined("Select a job from below to enable and configure features for it.".Loc());
                     });
 
                     ColCount = Math.Max(1, (int)(ImGui.GetContentRegionAvail().X / 200f.Scale()));
@@ -85,7 +86,7 @@ namespace WrathCombo.Window.Tabs
                                 ImGui.SameLine(indentwidth2);
 
                                 ImGuiEx.Spacing(new Vector2(0, verticalCenteringPadding));
-                                ImGui.Text($"{header} {(disabled ? "(Disabled due to update)" : "")}");
+                                ImGui.Text($"{header} {(disabled ? "(Disabled due to update)".Loc() : "")}");
 
                                 if (!string.IsNullOrEmpty(abbreviation) &&
                                     P.UIHelper.JobControlled(id) is not null)
@@ -107,7 +108,7 @@ namespace WrathCombo.Window.Tabs
 
                     using (ImRaii.Child("HeadingTab", new Vector2(ImGui.GetContentRegionAvail().X, iconMaxSize)))
                     {
-                        if (ImGui.Button("返回", new Vector2(0, 24f.Scale())))
+                        if (ImGui.Button("Back".Loc(), new Vector2(0, 24f.Scale())))
                         {
                             OpenJob = "";
                             return;
@@ -149,7 +150,7 @@ namespace WrathCombo.Window.Tabs
                         {
                             if (ImGui.BeginTabBar($"subTab{OpenJob}", ImGuiTabBarFlags.Reorderable | ImGuiTabBarFlags.AutoSelectNewTabs))
                             {
-                                if (ImGui.BeginTabItem("普通场景"))
+                                if (ImGui.BeginTabItem("Normal".Loc()))
                                 {
                                     DrawHeadingContents(OpenJob);
                                     ImGui.EndTabItem();
@@ -157,7 +158,7 @@ namespace WrathCombo.Window.Tabs
 
                                 if (groupedPresets[OpenJob].Any(x => PresetStorage.IsVariant(x.Preset)))
                                 {
-                                    if (ImGui.BeginTabItem("多变迷宫"))
+                                    if (ImGui.BeginTabItem("Variant Dungeons".Loc()))
                                     {
                                         DrawVariantContents(OpenJob);
                                         ImGui.EndTabItem();
@@ -166,7 +167,7 @@ namespace WrathCombo.Window.Tabs
 
                                 if (groupedPresets[OpenJob].Any(x => PresetStorage.IsBozja(x.Preset)))
                                 {
-                                    if (ImGui.BeginTabItem("特殊场景"))
+                                    if (ImGui.BeginTabItem("Bozja".Loc()))
                                     {
                                         DrawBozjaContents(OpenJob);
                                         ImGui.EndTabItem();
@@ -175,7 +176,7 @@ namespace WrathCombo.Window.Tabs
 
                                 if (groupedPresets[OpenJob].Any(x => PresetStorage.IsEureka(x.Preset)))
                                 {
-                                    if (ImGui.BeginTabItem("优雷卡"))
+                                    if (ImGui.BeginTabItem("Eureka".Loc()))
                                     {
                                         ImGui.EndTabItem();
                                     }
