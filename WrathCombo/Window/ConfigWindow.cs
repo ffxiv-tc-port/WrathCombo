@@ -159,7 +159,7 @@ namespace WrathCombo.Window
             catch (Exception)
             {
                 // Fallback to the remote icon if there are any issues
-                imagePath = PunishLibMain.PluginManifest.IconUrl ?? "";
+                imagePath = Svc.PluginInterface.Manifest.IconUrl ?? "";
                 if (EzThrottler.Throttle("logTypeOfWrathIconUsed", 45000))
                     PluginLog.Verbose(
                         "Using Remote WrathCombo Icon\n             " +
@@ -169,7 +169,7 @@ namespace WrathCombo.Window
 
             if (ThreadLoadImageHandler.TryGetTextureWrap(imagePath, out var logo))
                 ImGuiEx.LineCentered("###WrathLogo", () =>
-                    ImGui.Image(logo.ImGuiHandle, imageSize));
+                    ImGui.Image(logo.Handle, imageSize));
 
             ImGui.Spacing();
             ImGui.Separator();

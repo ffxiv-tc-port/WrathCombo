@@ -461,9 +461,9 @@ public class UIHelper(Leasing leasing)
         ImGui.SameLine();
 
         if (forPreset is null)
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudGrey, label);
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey, label);
         else
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudGrey,
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey,
                 label.Contains("Auto") ? "" : label.Split('#')[0]);
 
         ImGui.PopStyleColor(2);
@@ -520,7 +520,7 @@ public class UIHelper(Leasing leasing)
         ImGui.EndDisabled();
 
         ImGui.SameLine();
-        ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudGrey, label);
+        ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey, label);
 
         ImGui.PopStyleColor(3);
         ImGui.EndGroup();
