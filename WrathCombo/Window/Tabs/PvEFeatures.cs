@@ -5,7 +5,7 @@ using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using ECommons.LanguageHelpers;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Linq;
 using System.Numerics;
 using ECommons.Logging;

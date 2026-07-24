@@ -8,7 +8,7 @@ using ECommons.ImGuiMethods;
 using ECommons.LanguageHelpers;
 using ECommons.Logging;
 using ECommons.Throttlers;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using PunishLib;
 using PunishLib.ImGuiMethods;
 using System;
