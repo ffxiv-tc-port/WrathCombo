@@ -6,6 +6,7 @@ using ECommons.Throttlers;
 using Lumina.Data.Files;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvE.Content;
 
@@ -14,6 +15,7 @@ namespace WrathCombo.Window
     internal static class Icons
     {
         public static Dictionary<uint, IDalamudTextureWrap> CachedModdedIcons = new();
+        private static readonly HashSet<uint> LoadingModdedIcons = new();
         public static Dictionary<int, IDalamudTextureWrap?> OccultIcons = [];
         private static int OccultIdx = -1; // Instead of 0 to show Freelancer
         public static IDalamudTextureWrap? GetJobIcon(uint jobId)
@@ -66,19 +68,35 @@ namespace WrathCombo.Window
             if (wrap.TryGetWrap(out var icon, out _))
                 return icon;
 
-            try
-            {
-                if (CachedModdedIcons.TryGetValue(iconId, out IDalamudTextureWrap? cachedIcon)) return cachedIcon;
-                var tex = Svc.Data.GameData.GetFileFromDisk<TexFile>(resolvePath);
-                var output = Svc.Texture.CreateFromRaw(RawImageSpecification.Rgba32(tex.Header.Width, tex.Header.Width), tex.GetRgbaImageData());
-                if (output != null)
-                {
-                    CachedModdedIcons[iconId] = output;
-                    return output;
-                }
-            }
-            catch { }
+            if (CachedModdedIcons.TryGetValue(iconId, out IDalamudTextureWrap? cachedIcon))
+                return cachedIcon;
 
+            // Fallback for modded icons not resolvable via GetFromFile: load off the
+            // main thread so a burst of uncached icons (e.g. the job list on first
+            // window open) doesn't block Draw() with synchronous disk reads.
+            if (LoadingModdedIcons.Add(iconId))
+            {
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        var tex = Svc.Data.GameData.GetFileFromDisk<TexFile>(resolvePath);
+                        var spec = RawImageSpecification.Rgba32(tex.Header.Width, tex.Header.Width);
+                        var data = tex.GetRgbaImageData();
+                        Svc.Framework.RunOnFrameworkThread(() =>
+                        {
+                            var output = Svc.Texture.CreateFromRaw(spec, data);
+                            if (output != null)
+                                CachedModdedIcons[iconId] = output;
+                        });
+                    }
+                    catch { }
+                    finally
+                    {
+                        LoadingModdedIcons.Remove(iconId);
+                    }
+                });
+            }
 
             return Svc.Texture.GetFromGame(path).GetWrapOrDefault();
         }
