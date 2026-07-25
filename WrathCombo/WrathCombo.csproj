@@ -3,7 +3,7 @@
 
     <!-- Metadata -->
     <PropertyGroup>
-        <Authors>Team Wrath, Lother</Authors>
+        <Authors>Team Wrath</Authors>
         <Company>-</Company>
         <!-- This is the version that will be used when pushing to the repo.-->
         <Description>XIVCombo for very lazy players</Description>
