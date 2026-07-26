@@ -234,3 +234,4 @@ Wrath Combo 可以作为 Questionable 的战斗模块，使得 Wrath Combo 的�
   <a href="https://discord.gg/Zzrcc8kmvy" alt="Discord">
     <img src="https://discordapp.com/api/guilds/1001823907193552978/embed.png?style=banner2" /></a>
 </div>
+# dispatch-verify Sun Jul 26 09:36:25 UTC 2026
