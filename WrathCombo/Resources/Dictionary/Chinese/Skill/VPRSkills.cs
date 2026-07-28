@@ -25,7 +25,11 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
 
                 // Coil and Snap
                 KeyValuePair.Create("Vicewinder", VPR.Vicewinder.ActionName()),
+                // 複數形（"Replaces Vicewinder with Hunter's/Swiftskin's Coils."）
+                // 加上詞界比對後需要自己的條目。
+                KeyValuePair.Create("Hunter's Coils", VPR.HuntersCoil.ActionName()),
                 KeyValuePair.Create("Hunter's Coil", VPR.HuntersCoil.ActionName()),
+                KeyValuePair.Create("Hunter's Dens", VPR.HuntersDen.ActionName()),
                 KeyValuePair.Create("Hunter's Den", VPR.HuntersDen.ActionName()),
                 KeyValuePair.Create("Hunters Snap", VPR.HuntersSnap.ActionName()),
                 KeyValuePair.Create("Vicepit", VPR.Vicepit.ActionName()),
@@ -52,7 +56,9 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Twinblood", VPR.Twinblood.ActionName()),
 
                 // Sting and Bite
+                KeyValuePair.Create("Swiftskin's Coils", VPR.SwiftskinsCoil.ActionName()),
                 KeyValuePair.Create("Swiftskin's Coil", VPR.SwiftskinsCoil.ActionName()),
+                KeyValuePair.Create("Swiftskin's Dens", VPR.SwiftskinsDen.ActionName()),
                 KeyValuePair.Create("Swiftskin's Den", VPR.SwiftskinsDen.ActionName()),
                 KeyValuePair.Create("Swiftskin's Sting", VPR.SwiftskinsSting.ActionName()),
                 KeyValuePair.Create("Swiftskin's Bite", VPR.SwiftskinsBite.ActionName()),

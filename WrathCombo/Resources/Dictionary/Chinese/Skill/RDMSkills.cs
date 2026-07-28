@@ -35,6 +35,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Vercure", RDM.Vercure.ActionName()),
                 KeyValuePair.Create("Jolt III", RDM.Jolt3.ActionName()),
                 KeyValuePair.Create("Jolt II", RDM.Jolt2.ActionName()),
+                // 複數形（"Replaces Jolts."）加上詞界比對後需要自己的條目。
+                KeyValuePair.Create("Jolts", RDM.Jolt.ActionName()),
                 KeyValuePair.Create("Jolt", RDM.Jolt.ActionName()),
                 KeyValuePair.Create("Verholy", RDM.Verholy.ActionName()),
                 KeyValuePair.Create("Verflare", RDM.Verflare.ActionName()),

@@ -121,8 +121,12 @@ namespace WrathCombo.Window.Functions
 
                         DebugFile.AddLog($"Set Config {config} to {output}");
                         PluginConfiguration.SetCustomIntValue(config, output);
-                        Service.Configuration.Save();
                     }
+
+                    // 拖曳期間 SliderInt 每一幀都回傳 true，原本在這裡存檔等於每幀
+                    // 完整序列化設定並寫檔一次；改成放開滑桿（編輯結束）時才寫。
+                    if (ImGui.IsItemDeactivatedAfterEdit())
+                        Service.Configuration.Save();
 
                     return inputChanged;
                 }
@@ -236,8 +240,11 @@ namespace WrathCombo.Window.Functions
                     {
                         DebugFile.AddLog($"Set Config {config} to {output}");
                         PluginConfiguration.SetCustomFloatValue(config, output);
-                        Service.Configuration.Save();
                     }
+
+                    // 同 DrawSliderInt：拖曳中每幀都會回傳 true，存檔改到編輯結束時做。
+                    if (ImGui.IsItemDeactivatedAfterEdit())
+                        Service.Configuration.Save();
                 }
             };
 
@@ -334,8 +341,11 @@ namespace WrathCombo.Window.Functions
                     {
                         DebugFile.AddLog($"Set Config {config} to {output}");
                         PluginConfiguration.SetCustomFloatValue(config, output);
-                        Service.Configuration.Save();
                     }
+
+                    // 同 DrawSliderInt：拖曳中每幀都會回傳 true，存檔改到編輯結束時做。
+                    if (ImGui.IsItemDeactivatedAfterEdit())
+                        Service.Configuration.Save();
                 }
             };
 

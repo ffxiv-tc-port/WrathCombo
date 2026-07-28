@@ -39,7 +39,11 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 //KeyValuePair.Create("Glare1", WHM.Glare1.ActionName()),
                 //KeyValuePair.Create("Glare3", WHM.Glare3.ActionName()),
                 KeyValuePair.Create("Glare IV", WHM.Glare4.ActionName()),
+                // 複數形（"Glares/Stones/Aeros/Dia"、"Apply options to all Stones and Glares."）
+                // 需要自己的條目，否則加上詞界後就不再被翻譯。
+                KeyValuePair.Create("Glares", WHM.Glare1.ActionName()),
                 KeyValuePair.Create("Glare", WHM.Glare1.ActionName()),
+                KeyValuePair.Create("Stones", WHM.Stone1.ActionName()),
                 KeyValuePair.Create("Stone", WHM.Stone1.ActionName()),
                 KeyValuePair.Create("Stone1", WHM.Stone1.ActionName()),
                 KeyValuePair.Create("Stone2", WHM.Stone2.ActionName()),
@@ -50,6 +54,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Holy", WHM.Holy.ActionName()),
 
                 // DoT
+                KeyValuePair.Create("Aeros", WHM.Aero.ActionName()),
                 KeyValuePair.Create("Aero", WHM.Aero.ActionName()),
                 KeyValuePair.Create("Aero2", WHM.Aero2.ActionName()),
                 KeyValuePair.Create("Dia", WHM.Dia.ActionName()),

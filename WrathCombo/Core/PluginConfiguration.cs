@@ -4,8 +4,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ECommons.Logging;
 using WrathCombo.AutoRotation;
@@ -344,7 +346,13 @@ namespace WrathCombo.Core
         /// <summary>
         ///     The queue of items to be saved.
         /// </summary>
-        internal static readonly Queue<(PluginConfiguration, StackTrace)> SaveQueue = [];
+        /// <remarks>
+        ///     第二個欄位是「誰要求存檔」，只在存檔失敗的錯誤訊息裡用到。
+        ///     以前這裡放的是 <see cref="StackTrace"/>，等於每次 <see cref="Save"/>
+        ///     都在主執行緒走訪一次完整呼叫堆疊；改用編譯期就決定好的呼叫者資訊，
+        ///     診斷價值一樣但執行期成本是零。
+        /// </remarks>
+        internal static readonly Queue<(PluginConfiguration, string)> SaveQueue = [];
 
         /// <summary>
         ///     Whether an item is currently being saved.
@@ -360,7 +368,10 @@ namespace WrathCombo.Core
             if (_isSaving || SaveQueue.Count == 0) return;
 
             _isSaving = true;
-            var (config, trace) = SaveQueue.Dequeue();
+            (PluginConfiguration config, string trace) dequeued;
+            lock (SaveQueue)
+                dequeued = SaveQueue.Dequeue();
+            var (config, trace) = dequeued;
 
             try
             {
@@ -374,7 +385,7 @@ namespace WrathCombo.Core
         }
 
         internal static void RetrySave
-            (PluginConfiguration config, StackTrace trace)
+            (PluginConfiguration config, string trace)
         {
             var success = false;
             var retryCount = 0;
@@ -408,16 +419,35 @@ namespace WrathCombo.Core
 
         /// <summary> Set the configuration to be saved to disk. </summary>
         /// <remarks>
+        ///     <para>
         ///     Configurations set to be saved will be processed in the order they
         ///     were added, each frame.
+        ///     </para>
+        ///     <para>
+        ///     同一份設定在佇列裡最多只會排一筆：真正的序列化是在出列時才做，
+        ///     所以已經排隊的那一筆本來就會寫入「當下最新」的內容，重複排隊只會
+        ///     讓同一份檔案被重寫好幾次。每個 tick 只處理一筆，重複排隊還會讓
+        ///     佇列越積越長，放開滑桿之後仍持續寫檔。
+        ///     </para>
         /// </remarks>
         /// <seealso cref="SaveQueue"/>
-        public void Save()
+        public void Save
+            ([CallerMemberName] string caller = "",
+             [CallerFilePath] string callerFile = "",
+             [CallerLineNumber] int callerLine = 0)
         {
             if (Debug.DebugConfig)
                 return;
 
-            SaveQueue.Enqueue((this, new StackTrace()));
+            lock (SaveQueue)
+            {
+                foreach (var (queued, _) in SaveQueue)
+                    if (ReferenceEquals(queued, this))
+                        return;
+
+                SaveQueue.Enqueue(
+                    (this, $"{caller} ({Path.GetFileName(callerFile)}:{callerLine})"));
+            }
         }
 
         #endregion

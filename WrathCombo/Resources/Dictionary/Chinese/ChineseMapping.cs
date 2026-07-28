@@ -35,7 +35,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese
                     if (replacedLine.Contains(pair.Key))
                     {
                         string beforeReplace = replacedLine;
-                        replacedLine = replacedLine.Replace(pair.Key, pair.Value);
+                        replacedLine = ReplaceWholeWords(replacedLine, pair.Key, pair.Value);
 
                         if (beforeReplace != replacedLine)
                         {
@@ -59,6 +59,52 @@ namespace WrathCombo.Resources.Dictionary.Chinese
             }
 
             return string.Join("\n", lines);
+        }
+
+        /// <summary>
+        ///     取代 <paramref name="key"/> 為 <paramref name="value"/>，但只在「沒有和其他英文字母黏在一起」的位置動手。
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///     原本這裡是 <c>string.Replace</c>，完全沒有詞界概念，所以短鍵會咬進更長的英文單字裡：
+        ///     'Heal' 咬進 "Health"、'Mana' 咬進 "Manafont"、'and' 咬進 "Standard"、
+        ///     'Ruin II' 咬進 "Ruin III"（顯示成錯誤的技能）。
+        ///     </para>
+        ///     <para>
+        ///     這裡刻意只把「ASCII 英文字母」當作詞界字元，不用 <c>\b</c>：
+        ///     取代後的內容是中文，而中文字對 <c>\b</c> 而言也是文字字元，
+        ///     用真正的詞界會導致「緊鄰已翻譯中文」的英文字反而不給翻。
+        ///     </para>
+        /// </remarks>
+        private static string ReplaceWholeWords(string source, string key, string value)
+        {
+            int index = source.IndexOf(key, StringComparison.Ordinal);
+            if (index < 0)
+                return source;
+
+            // 鍵本身若不是以字母開頭/結尾（例如 " to "、"On "），該側就不需要詞界檢查。
+            bool guardStart = char.IsAsciiLetter(key[0]);
+            bool guardEnd = char.IsAsciiLetter(key[^1]);
+
+            StringBuilder builder = new(source.Length);
+            int copiedUpTo = 0;
+
+            while (index >= 0)
+            {
+                int end = index + key.Length;
+                bool gluedToAWord =
+                    (guardStart && index > 0 && char.IsAsciiLetter(source[index - 1])) ||
+                    (guardEnd && end < source.Length && char.IsAsciiLetter(source[end]));
+
+                builder.Append(source, copiedUpTo, index - copiedUpTo);
+                builder.Append(gluedToAWord ? key : value);
+
+                copiedUpTo = end;
+                index = source.IndexOf(key, end, StringComparison.Ordinal);
+            }
+
+            builder.Append(source, copiedUpTo, source.Length - copiedUpTo);
+            return builder.ToString();
         }
     }
 

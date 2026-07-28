@@ -93,10 +93,11 @@ namespace WrathCombo.Window.Tabs
 
                 Vector4 colour = Service.Configuration.TargetHighlightColor;
                 if (ImGui.ColorEdit4("Target Highlight Colour".Loc(), ref colour, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar))
-                {
-                    Service.Configuration.TargetHighlightColor = colour;
+                    Service.Configuration.TargetHighlightColor = colour;   // 即時預覽，保持每幀更新
+
+                // 在色盤上拖曳時 ColorEdit4 每幀都回傳 true，存檔改到編輯結束時做。
+                if (ImGui.IsItemDeactivatedAfterEdit())
                     Service.Configuration.Save();
-                }
 
                 ImGuiComponents.HelpMarker("Draws a box around party members in the vanilla Party List, as targeted by certain features.\nSet Alpha to 0 to hide the box.".Loc());
 
@@ -315,8 +316,11 @@ namespace WrathCombo.Window.Tabs
                     delay = delay.RoundOff(SliderIncrements.Fives);
 
                     Service.Configuration.InterruptDelay = ((double)delay) / 100d;
-                    Service.Configuration.Save();
                 }
+
+                // 拖曳中每幀都回傳 true，存檔改到編輯結束時做。
+                if (ImGui.IsItemDeactivatedAfterEdit())
+                    Service.Configuration.Save();
                 ImGui.SameLine();
                 ImGui.Text("%% of cast".Loc());
                 ImGui.SameLine( pos);
@@ -329,7 +333,9 @@ namespace WrathCombo.Window.Tabs
                 #region Maximum Weaves
 
                 ImGui.PushItemWidth(75);
-                if (ImGui.SliderInt("###MaximumWeaves", ref Service.Configuration.MaximumWeavesPerWindow, 1, 3))
+                ImGui.SliderInt("###MaximumWeaves", ref Service.Configuration.MaximumWeavesPerWindow, 1, 3);
+                // 拖曳中每幀都回傳 true，存檔改到編輯結束時做。
+                if (ImGui.IsItemDeactivatedAfterEdit())
                     Service.Configuration.Save();
 
                 ImGui.SameLine();
