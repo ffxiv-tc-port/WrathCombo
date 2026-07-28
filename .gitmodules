@@ -10,4 +10,4 @@
 	url = https://github.com/ffxiv-tc-port/ECommons.git
 [submodule "PunishLib"]
 	path = PunishLib
-	url = https://github.com/MeowZWR/PunishLib.git
+	url = https://github.com/ffxiv-tc-port/PunishLib.git
