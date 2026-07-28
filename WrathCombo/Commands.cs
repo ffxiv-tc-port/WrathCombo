@@ -6,6 +6,7 @@ using System.Linq;
 using ECommons;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
+using ECommons.LanguageHelpers;
 using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using WrathCombo.Combos;
@@ -33,11 +34,15 @@ public partial class WrathCombo
     /// </summary>
     private void RegisterCommands()
     {
+        // 說明文字原本是直接寫死的簡體中文(來自 CN fork),既不是本專案的正體中文,
+        // 也繞過了 ini,英文使用者反而看不到原文。改回上游英文原文當 key,
+        // 譯文放進 LanguageChineseTraditional.ini;指令名用 ?? 佔位符帶入,
+        // 這樣 Command/OldCommand 之後改名也不會讓 key 對不上。
         EzCmd.Add(Command, OnCommand,
-            "打开自定义连击设置窗口。\n" +
-            $"{Command} auto → 切换自动循环开/关。\n" +
-            $"{Command} debug → 将调试日志导出到桌面，供开发者使用。\n" +
-            $"{OldCommand} → 来自 XIVSlothCombo 的旧别名，仍然有效！");
+            ("Open a window to edit custom combo settings.\n" +
+             "?? auto → Toggle Auto-rotation on/off.\n" +
+             "?? debug → Dumps a debug log onto your desktop for developers.\n" +
+             "?? → Old alias from XIVSlothCombo, still works!").Loc(Command, Command, OldCommand));
         EzCmd.Add(OldCommand, OnCommand);
     }
 
