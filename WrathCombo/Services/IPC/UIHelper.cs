@@ -10,7 +10,7 @@ using Dalamud.Interface.Utility;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.ImGuiMethods;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using WrathCombo.AutoRotation;
 using WrathCombo.Combos;
 using WrathCombo.CustomComboNS.Functions;
@@ -461,9 +461,9 @@ public class UIHelper(Leasing leasing)
         ImGui.SameLine();
 
         if (forPreset is null)
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudGrey, label);
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey, label);
         else
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudGrey,
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey,
                 label.Contains("Auto") ? "" : label.Split('#')[0]);
 
         ImGui.PopStyleColor(2);
@@ -520,7 +520,7 @@ public class UIHelper(Leasing leasing)
         ImGui.EndDisabled();
 
         ImGui.SameLine();
-        ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudGrey, label);
+        ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey, label);
 
         ImGui.PopStyleColor(3);
         ImGui.EndGroup();
