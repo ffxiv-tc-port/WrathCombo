@@ -154,7 +154,11 @@ namespace WrathCombo.Window.Tabs
                 ImGuiComponents.HelpMarker("Disabling this will turn off AoE DPS features. Otherwise will require the amount of targets required to be in range of an AoE feature's attack to use. This applies to all 3 roles, and for any features that deal AoE damage.".Loc());
 
                 ImGuiEx.SetNextItemWidthScaled(100);
-                changed |= ImGui.SliderFloat("Max Target Distance".Loc(), ref cfg.DPSSettings.MaxDistance, 1, 30);
+                // SliderFloat 在拖曳過程中每一畫格都回傳 true，直接餵給 changed 會讓底下的
+                // if (changed) Configuration.Save() 以幀率同步寫磁碟。改用
+                // IsItemDeactivatedAfterEdit()：數值仍即時套用，但只在放開滑鼠時存檔一次。
+                ImGui.SliderFloat("Max Target Distance".Loc(), ref cfg.DPSSettings.MaxDistance, 1, 30);
+                changed |= ImGui.IsItemDeactivatedAfterEdit();
                 cfg.DPSSettings.MaxDistance =
                     Math.Clamp(cfg.DPSSettings.MaxDistance, 1, 30);
 
