@@ -277,7 +277,9 @@ internal class Debug : ConfigWindow, IDisposable
             CustomStyleText("Health:", $"{player.CurrentHp:N0} / {player.MaxHp:N0} ({MathF.Round(PlayerHealthPercentageHp(), 2)}%)");
             CustomStyleText("MP:", $"{player.CurrentMp:N0} / {player.MaxMp:N0}");
             CustomStyleText("Job:", $"{player.ClassJob.Value.NameEnglish} (ID: {player.ClassJob.RowId})");
-            CustomStyleText("Zone:", $"{Svc.Data.GetExcelSheet<TerritoryType>().FirstOrDefault(x => x.RowId == Svc.ClientState.TerritoryType).PlaceName.Value.Name} (ID: {Svc.ClientState.TerritoryType})");
+            // 原為 FirstOrDefault(x => x.RowId == …):對整張 TerritoryType 表做 O(n) 線性走訪
+            // 找主鍵,而這裡在除錯分頁的 Draw 路徑上、每幀執行。GetRowOrDefault 是 O(1)。
+            CustomStyleText("Zone:", $"{Svc.Data.GetExcelSheet<TerritoryType>().GetRowOrDefault(Svc.ClientState.TerritoryType)?.PlaceName.Value.Name.ToString() ?? ""} (ID: {Svc.ClientState.TerritoryType})");
             CustomStyleText("In PvP:", InPvP());
             CustomStyleText("In FATE:", InFATE());
             CustomStyleText("In Combat:", InCombat());

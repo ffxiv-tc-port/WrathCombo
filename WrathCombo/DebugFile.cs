@@ -188,9 +188,10 @@ public static class DebugFile
         var currentZone = "Unknown";
         try
         {
+            // 原為 FirstOrDefault(x => x.RowId == …):O(n) 全表線性走訪找主鍵。GetRowOrDefault 是 O(1)。
             currentZone = Svc.Data.GetExcelSheet<TerritoryType>()
-                .FirstOrDefault(x => x.RowId == Svc.ClientState.TerritoryType)
-                .PlaceName.Value.Name.ToString();
+                .GetRowOrDefault(Svc.ClientState.TerritoryType)
+                ?.PlaceName.Value.Name.ToString() ?? "";
         }
         catch
         {
