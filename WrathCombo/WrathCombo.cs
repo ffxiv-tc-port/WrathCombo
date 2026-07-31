@@ -184,13 +184,18 @@ public sealed partial class WrathCombo : IDalamudPlugin
         RegisterCommands();
 
         DtrBarEntry ??= Svc.DtrBar.Get("Wrath Combo");
-        DtrBarEntry.OnClick = _ =>
+        DtrBarEntry.OnClick = ev =>
         {
-            ToggleAutoRotation(!Service.Configuration.RotationConfig.Enabled);
+            // 右鍵開關設定視窗（再按一次關閉）；左鍵維持原本的自動循環切換。
+            if (ev.ClickType == MouseClickType.Right)
+                ConfigWindow.IsOpen ^= true;
+            else
+                ToggleAutoRotation(!Service.Configuration.RotationConfig.Enabled);
         };
         DtrBarEntry.Tooltip = new SeString(
-        new TextPayload("點擊切換 Wrath Combo的自動循環開關狀態。\n"),
-        new TextPayload("可在/xlsettings -> 伺服器資訊欄中禁用此圖示"));
+        new TextPayload("左鍵：切換 Wrath Combo 的自動循環開關\n"),
+        new TextPayload("右鍵：開啟／關閉設定視窗\n"),
+        new TextPayload("可在 /xlsettings → 伺服器資訊欄中隱藏此圖示"));
 
         Svc.ClientState.Login += PrintLoginMessage;
         if (Svc.ClientState.IsLoggedIn) ResetFeatures();
