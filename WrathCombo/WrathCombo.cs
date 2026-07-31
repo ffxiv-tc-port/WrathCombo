@@ -309,16 +309,14 @@ public sealed partial class WrathCombo : IDalamudPlugin
             ? BitmapFontIcon.SwordUnsheathed
             : BitmapFontIcon.SwordSheathed);
 
-        var text = autoOn ? ": on" : ": off";
-        if (!Service.Configuration.ShortDTRText && autoOn)
-            text += $"（{P.IPCSearch.ActiveJobPresets} 有效）";
-        var ipcControlledText =
-            P.UIHelper.AutoRotationStateControlled() is not null
-                ? "（已鎖定）"
-                : "";
-
-        var payloadText = new TextPayload(text + ipcControlledText);
-        DtrBarEntry.Text = new SeString(icon, payloadText);
+        // DTR 空間很擠，而且圖示本身已經帶了開關資訊（出鞘＝開、入鞘＝關），
+        // 再寫一次「: on / : off」是重複的。詳細狀態改放滑鼠提示。
+        var locked = P.UIHelper.AutoRotationStateControlled() is not null;
+        DtrBarEntry.Text = new SeString(icon);
+        DtrBarEntry.Tooltip = new SeString(new TextPayload(
+            $"Wrath Combo — 自動輪換\n目前：{(autoOn ? "開啟（劍出鞘圖示）" : "關閉（劍入鞘圖示）")}"
+            + (autoOn ? $"\n生效中的職業組合：{P.IPCSearch.ActiveJobPresets}" : "")
+            + (locked ? "\n⚠ 已被其他外掛鎖定" : "")));
     }
 
     private static void KillRedundantIDs()
