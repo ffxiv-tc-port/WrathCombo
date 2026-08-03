@@ -152,6 +152,9 @@ public sealed partial class WrathCombo : IDalamudPlugin
         P = this;
         pluginInterface.Create<Service>();
         ECommonsMain.Init(pluginInterface, this, Module.All);
+        // 讓「呼叫了對方沒有的 IPC 方法」不再完全靜默。
+        // 訂閱越早越好：事件只在 IPC **呼叫**當下才被查閱，在這裡訂閱就涵蓋往後所有呼叫。
+        EzIpcFailureLog.Enable();
         PunishLibMain.Init(pluginInterface, "Wrath Combo");
         ECommons.LanguageHelpers.Localization.Init("ChineseTraditional");
 
@@ -430,6 +433,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
         ConflictingPluginsChecks.Dispose();
         AllStaticIPCSubscriptions.Dispose();
         Svc.ClientState.Login -= PrintLoginMessage;
+        EzIpcFailureLog.Disable();
         ECommonsMain.Dispose();
         P = null;
     }
