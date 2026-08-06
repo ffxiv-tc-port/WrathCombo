@@ -45,7 +45,11 @@ namespace WrathCombo.CustomComboNS.Functions
             return isMoving && TimeMoving.TotalSeconds >= Service.Configuration.MovementLeeway;
         }
 
-        public unsafe static bool IsDashing() => MovementHook.Instance != null && MovementHook.Instance->Dashing == 1;
+        /// <summary>
+        /// Last dash state sampled inside the RMIWalk detour (see <see cref="MovementHook"/>).
+        /// False whenever the hook is not running - never a stale native pointer read.
+        /// </summary>
+        public static bool IsDashing() => MovementHook.Dashing;
 
         public static TimeSpan TimeMoving => movementStarted is null ? TimeSpan.Zero : (DateTime.Now - movementStarted.Value);
 
@@ -54,28 +58,78 @@ namespace WrathCombo.CustomComboNS.Functions
 
     internal unsafe class MovementHook : IDisposable
     {
-        public static MoveControllerSubMemberForMine* Instance = null!;
+        // This used to be `public static MoveControllerSubMemberForMine* Instance = null!;`, assigned
+        // from inside the detour (`Instance = self;`) and never cleared - not even in Dispose(). Every
+        // reader (IsDashing) then dereferenced that native pointer on some *later* frame. That is the
+        // one thing we never do: a native pointer held across frames goes stale on zone change or
+        // plugin reload, and the resulting AccessViolationException is a corrupted-state exception
+        // that try/catch cannot intercept.
+        //
+        // The usual fix is "don't store it, re-fetch it on every use", but there is no getter to
+        // re-fetch from here: RMIWalk's `self` has no ClientStructs counterpart and no Instance()
+        // accessor - the pointer only exists as the detour's argument. So this takes the other half of
+        // the rule (store the value, not the pointer): the pointer is dereferenced only inside the
+        // detour, where it is guaranteed live, and what survives across frames is a plain bool.
+        private static bool dashing;
+
+        /// <summary>Dash state as of the last RMIWalk call. False while the hook is not running.</summary>
+        public static bool Dashing => dashing;
 
         private delegate void RMIWalkDelegate(MoveControllerSubMemberForMine* self, float* sumLeft, float* sumForward, float* sumTurnLeft, byte* haveBackwardOrStrafe, byte* a6, byte bAdditiveUnk);
-        [Signature("E8 ?? ?? ?? ?? 80 7B 3E 00 48 8D 3D", DetourName = nameof(RMIWalkDetour))]
-        private readonly Hook<RMIWalkDelegate> _rmiWalkHook = null!;
+        // Fallible on purpose: MovementHook is constructed from the plugin ctor, so an unresolved
+        // signature used to throw SignatureException and take the *entire* rotation plugin down -
+        // over a flag that only feeds IsDashing(). Now it degrades to "IsDashing() always false".
+        [Signature("E8 ?? ?? ?? ?? 80 7B 3E 00 48 8D 3D", DetourName = nameof(RMIWalkDetour), Fallibility = Fallibility.Fallible)]
+        private readonly Hook<RMIWalkDelegate>? _rmiWalkHook;
+
+        // fail-closed: a detour is a managed function the *native* code calls directly, so a managed
+        // exception escaping it unwinds through native frames that have no handler for it. Everything
+        // we add on top of Original() runs inside a try; on failure we simply do not update our own
+        // state and let the game's own movement handling pass through untouched.
+        // NOTE: this does NOT protect against AccessViolationException - see the note above; the
+        // protection against *that* is not holding the pointer in the first place.
+        private static long detourErrors;
+        private static DateTime lastDetourErrorLog = DateTime.MinValue;
+
+        private static void OnDetourError(Exception ex)
+        {
+            ++detourErrors;
+            // this runs per frame - never log unthrottled. Information (not Debug) because reporting
+            // users run at LogLevel 2.
+            var now = DateTime.UtcNow;
+            if (now - lastDetourErrorLog < TimeSpan.FromSeconds(30))
+                return;
+            lastDetourErrorLog = now;
+            Svc.Log.Information($"MovementHook: RMIWalk detour threw, dash state not updated this frame (total {detourErrors}): {ex}");
+        }
 
         private void RMIWalkDetour(MoveControllerSubMemberForMine* self, float* sumLeft, float* sumForward, float* sumTurnLeft, byte* haveBackwardOrStrafe, byte* a6, byte bAdditiveUnk)
         {
-            _rmiWalkHook.Original(self, sumLeft, sumForward, sumTurnLeft, haveBackwardOrStrafe, a6, bAdditiveUnk);
+            _rmiWalkHook!.Original(self, sumLeft, sumForward, sumTurnLeft, haveBackwardOrStrafe, a6, bAdditiveUnk);
 
-            Instance = self;
+            try
+            {
+                dashing = self != null && self->Dashing == 1;
+            }
+            catch (Exception ex)
+            {
+                OnDetourError(ex);
+            }
         }
 
         public void Dispose()
         {
             _rmiWalkHook?.Dispose();
+            dashing = false;
         }
 
         internal MovementHook()
         {
             Svc.Hook.InitializeFromAttributes(this);
-            _rmiWalkHook.Enable();
+            if (_rmiWalkHook != null)
+                _rmiWalkHook.Enable();
+            else
+                Svc.Log.Warning("RMIWalk signature not found - IsDashing() will always report false");
         }
     }
 
