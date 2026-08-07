@@ -35,6 +35,12 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Balance Opener (Level 100)", "平衡起手式（等級100）"),
                 KeyValuePair.Create("Adds the Balance opener from level 92 onwards.", "從92級開始新增由The Balance社群建議的開場輸出循環。"),
                 KeyValuePair.Create("Adds the Balance opener at level 100.", "在100級時新增由The Balance社群建議的開場輸出循環。"),
+                // Deliberately placed AFTER "Balance Opener (Level 100)" above (same
+                // file, same array -- earlier entries always win the substring match).
+                // Only catches the genuinely-standalone case (RDM_Balance_Opener,
+                // CustomComboPreset.cs) once the more specific "Balance ..." entries
+                // have already had first chance to match.
+                KeyValuePair.Create("Opener (Level 100)", "起手式(100級)"),
                 KeyValuePair.Create("with Stun", "(使用眩暈技能)"),
                 KeyValuePair.Create("Target HP% to use at or below", "目標生命值百分比低於此值時使用"),
                 KeyValuePair.Create("HP% to use at or below", "生命值百分比低於此值時使用"),

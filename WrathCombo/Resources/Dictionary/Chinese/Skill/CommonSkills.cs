@@ -111,7 +111,15 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Skill
                 KeyValuePair.Create("Buffs AoE Option", "AoE增益選項"),
                 KeyValuePair.Create("Normal Opener", "一般起手式"),
                 KeyValuePair.Create("Early Opener", "提前起手式"),
-                KeyValuePair.Create("Opener (Level 100)", "起手式(100級)"),
+                // "Opener (Level 100)" is NOT here on purpose: it's a substring of the
+                // pre-existing, more specific "Balance Opener (Level 100)" entry in
+                // ApocalypseDescriptions.cs (which is merged LAST). Adding a bare
+                // "Opener (Level 100)" entry in THIS file (merged much earlier, right
+                // after Bozja) would fire first and pre-empt/shadow that better
+                // translation, replacing "平衡起手式（等級100）" with a half-English
+                // "Balance起手式(100級)" -- see ApocalypseDescriptions.cs for the actual
+                // placement (positioned after the "Balance Opener (Level 100)" family so
+                // it only catches the genuinely-standalone RDM_Balance_Opener case).
                 #endregion
 
                 #region PVP
