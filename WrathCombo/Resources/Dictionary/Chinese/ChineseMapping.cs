@@ -121,16 +121,16 @@ namespace WrathCombo.Resources.Dictionary.Chinese
                 InitializeDictionary();
                 stopwatch.Stop();
 
-                PluginLog.Information($"中文替换字典初始化完成，共加载 {_replacements.Count} 个键值对，耗时 {stopwatch.ElapsedMilliseconds} 毫秒");
+                PluginLog.Information($"中文替換字典初始化完成，共加載 {_replacements.Count} 個鍵值對，耗時 {stopwatch.ElapsedMilliseconds} 毫秒");
 
                 if (_duplicateKeysLog.Length > 0)
                 {
-                    PluginLog.Warning($"初始化过程中检测到重复键值对，{_duplicateKeysLog}");
+                    PluginLog.Warning($"初始化過程中檢測到重複鍵值對，{_duplicateKeysLog}");
                 }
             }
             catch (System.Exception ex)
             {
-                PluginLog.Error($"初始化中文替换字典时发生错误: {ex.Message}\n{ex.StackTrace}");
+                PluginLog.Error($"初始化中文替換字典時發生錯誤: {ex.Message}\n{ex.StackTrace}");
                 _replacements.Clear();
             }
 
@@ -205,11 +205,11 @@ namespace WrathCombo.Resources.Dictionary.Chinese
 
             if (duplicates.Count != 0)
             {
-                _duplicateKeysLog.AppendLine($"共检测到 {duplicates.Count} 个重复键:");
+                _duplicateKeysLog.AppendLine($"共檢測到 {duplicates.Count} 個重複鍵:");
 
                 foreach (var group in duplicates)
                 {
-                    _duplicateKeysLog.AppendLine($"键: \"{group.Key}\"，出现 {group.Count()} 次，值:");
+                    _duplicateKeysLog.AppendLine($"鍵: \"{group.Key}\"，出現 {group.Count()} 次，值:");
                     foreach (var kvp in group)
                     {
                         _duplicateKeysLog.AppendLine($"  - \"{kvp.Value}\"");

@@ -302,7 +302,7 @@ namespace WrathCombo.Core
 
                         if (!needToResetMessagePrinted)
                         {
-                            DuoLog.Error($"由于内部配置更新，某些功能已被禁用:");
+                            DuoLog.Error($"由於內部配置更新，某些功能已被停用:");
                             needToResetMessagePrinted = !needToResetMessagePrinted;
                         }
 
@@ -313,7 +313,7 @@ namespace WrathCombo.Core
                 }
 
                 if (needToResetMessagePrinted)
-                    DuoLog.Error($"请重新启用这些功能以继续使用。我们为造成的不便深表歉意");
+                    DuoLog.Error($"請重新啟用這些功能以繼續使用。我們為造成的不便深表歉意");
             }
             SetResetValues(config, true);
             Save();

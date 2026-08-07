@@ -669,20 +669,20 @@ namespace WrathCombo.Window.Tabs
                 #endregion
 
                 #if DEBUG
-                // 在生成调试文件按钮下方添加
-                if (ImGui.Button("生成键值对调试文件"))
+                // 在生成調試檔案按鈕下方添加
+                if (ImGui.Button("生成鍵值對調試檔案"))
                 {
                     DictionaryDebugger.ExportDebugFile();
                 }
-                ImGuiComponents.HelpMarker("将在桌面生成中文翻译键值对调试文件。\n包含未被替换的英文文本和未被使用的键值对词典。");
+                ImGuiComponents.HelpMarker("將在桌面生成中文翻譯鍵值對調試檔案。\n包含未被替換的英文文字和未被使用的鍵值對詞典。");
                 #endif
 
                 #if DEBUG
-                if (ImGui.Button("生成技能对照表"))
+                if (ImGui.Button("生成技能對照表"))
                 {
                     SkillTranslationTableGenerator.GenerateSkillTranslationTable();
                 }
-                ImGuiComponents.HelpMarker("将在桌面生成MD格式的技能名称中英文对照表。");
+                ImGuiComponents.HelpMarker("將在桌面生成MD格式的技能名稱中英文對照表。");
                 #endif
 
                 #endregion

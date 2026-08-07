@@ -49,7 +49,9 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Dyskrasia", SGE.Dyskrasia.ActionName()),
                 KeyValuePair.Create("Toxikon II", SGE.Toxikon2.ActionName()),
                 KeyValuePair.Create("Toxikon", SGE.Toxikon.ActionName()),
+                KeyValuePair.Create("Uses Toxikon opener", $"使用{SGE.Toxikon.ActionName()}起手式"),
                 KeyValuePair.Create("Pneuma", SGE.Pneuma.ActionName()),
+                KeyValuePair.Create("Uses Pneuma opener", $"使用{SGE.Pneuma.ActionName()}起手式"),
                 KeyValuePair.Create("Psyche", SGE.Psyche.ActionName()),
 
                 // Buffs

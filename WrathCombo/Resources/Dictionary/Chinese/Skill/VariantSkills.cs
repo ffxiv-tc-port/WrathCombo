@@ -19,6 +19,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("when HP is below set threshold.", "（生命值低於設定的閾值）"),
                 KeyValuePair.Create("on cooldown.", "（冷卻即用）"),
                 KeyValuePair.Create("Spirit Dart", "精神鏢"),
+                KeyValuePair.Create("Spirit Dart Option", "精神鏢選項"),
                 KeyValuePair.Create("Ultimatum", "最後通牒"),
                 KeyValuePair.Create("Variant", "多變"),
                 #endregion

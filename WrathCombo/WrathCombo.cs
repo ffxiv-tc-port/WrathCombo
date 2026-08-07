@@ -60,7 +60,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
     internal ActionRetargeting ActionRetargeting = new();
     internal MovementHook MoveHook;
 
-    private readonly TextPayload starterMotd = new("[Wrath 日报] ");
+    private readonly TextPayload starterMotd = new("[Wrath 日報] ");
     private static uint? jobID;
     private static bool inInstancedContent;
 

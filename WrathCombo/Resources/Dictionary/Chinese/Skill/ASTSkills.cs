@@ -44,6 +44,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Lord of Crowns", AST.LordOfCrowns.ActionName()),
                 KeyValuePair.Create("Lady of Crowns", AST.LadyOfCrown.ActionName()),
                 KeyValuePair.Create("Lazy Lady", AST.LadyOfCrown.ActionName()),
+                KeyValuePair.Create("Lady Option", $"{AST.LadyOfCrown.ActionName()}選項"),
+                KeyValuePair.Create("Turns Fall Malefic into an all-in-one damage button.", $"將{AST.FallMalefic.ActionName()}變成單一全能傷害技能。"),
                 
                 // Utility
                 KeyValuePair.Create("Divination", AST.Divination.ActionName()),

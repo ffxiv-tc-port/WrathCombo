@@ -19,6 +19,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Generation Time: 2025-03-13 18:45:21  
                 #region WHM                
                 // Heals
+                KeyValuePair.Create("Adds Cure 3 to Burst combo when the Cure 3 Ready buff is under 6 seconds", $"當{WHM.Cure3.ActionName()}預備buff剩餘時間低於6秒時，將{WHM.Cure3.ActionName()}加入爆發連段"),
                 KeyValuePair.Create("Cure III", WHM.Cure3.ActionName()),
                 KeyValuePair.Create("Cure II", WHM.Cure2.ActionName()),
                 KeyValuePair.Create("Cure", WHM.Cure.ActionName()),

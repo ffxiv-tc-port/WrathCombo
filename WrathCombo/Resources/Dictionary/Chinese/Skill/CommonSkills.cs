@@ -75,6 +75,43 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Skill
                 KeyValuePair.Create("Raise", "復活"),
                 KeyValuePair.Create("Solid Reason", DOL.SolidReason.ActionName()),
                 KeyValuePair.Create("Ageless Words", DOL.AgelessWords.ActionName()),
+
+                // Common config option labels/descriptions (2026-08-07 sweep: these are
+                // generic combo-option strings shared across many jobs' *_Config.cs and
+                // CustomComboInfo attributes, routed through ReplaceWithChinese() same as
+                // everything else above).
+                KeyValuePair.Create("Rampart Option", $"{RoleActions.Tank.Rampart.ActionName()}選項"),
+                KeyValuePair.Create("Reprisal Option", $"{RoleActions.Tank.Reprisal.ActionName()}選項"),
+                KeyValuePair.Create("Interrupt Option", "打斷選項"),
+                KeyValuePair.Create("Interrupt with Stun Option", "暈眩打斷選項"),
+                KeyValuePair.Create("Arm's Length Option", $"{RoleActions.Physical.ArmsLength.ActionName()}選項"),
+                KeyValuePair.Create("Second Wind Option", "內丹選項"),
+                KeyValuePair.Create("Lucid Dreaming Option", "醒夢選項"),
+                KeyValuePair.Create("Lucid Dreaming Weave Option", "醒夢插入選項"),
+                KeyValuePair.Create("Swiftcast Option", "即刻詠唱選項"),
+                KeyValuePair.Create("Esuna Option", $"{RoleActions.Healer.Esuna.ActionName()}選項"),
+                KeyValuePair.Create("Mitigation Options", "減傷選項"),
+                KeyValuePair.Create("Combo Heals Option", "連段自療選項"),
+                KeyValuePair.Create("Not on Bosses", "不對首領使用"),
+                KeyValuePair.Create("Only Weave", "僅插入使用"),
+                KeyValuePair.Create("Hidden Options", "隱藏選項"),
+                KeyValuePair.Create("Will only weave this action.", "此動作僅會插入使用。"),
+                KeyValuePair.Create("Will not use on ST in Boss encounters.", "首領戰中不會對單體目標使用。"),
+                KeyValuePair.Create("Collection of Mitigations to add to the rotation.", "加入循環的減傷技能集合。"),
+                KeyValuePair.Create("Collection of Mitigation features.", "減傷功能集合。"),
+                KeyValuePair.Create("Uses interrupt during the rotation if applicable.", "適用時會在循環中使用打斷技能。"),
+                KeyValuePair.Create("Uses Second Wind when below set HP percentage.", "血量低於設定百分比時使用內丹。"),
+                KeyValuePair.Create("Output Combat Log", "輸出戰鬥紀錄"),
+                KeyValuePair.Create("Include Mitigations", "包含減傷"),
+                KeyValuePair.Create("Exclude Mitigations", "排除減傷"),
+                KeyValuePair.Create("Enables the use of mitigations in Simple Mode.", "在簡易模式中啟用減傷技能。"),
+                KeyValuePair.Create("Disables the use of mitigations in Simple Mode.", "在簡易模式中停用減傷技能。"),
+                KeyValuePair.Create("Non-boss Encounters Only", "僅非Boss遭遇戰"),
+                KeyValuePair.Create("Buffs Option", "增益選項"),
+                KeyValuePair.Create("Buffs AoE Option", "AoE增益選項"),
+                KeyValuePair.Create("Normal Opener", "一般起手式"),
+                KeyValuePair.Create("Early Opener", "提前起手式"),
+                KeyValuePair.Create("Opener (Level 100)", "起手式(100級)"),
                 #endregion
 
                 #region PVP
