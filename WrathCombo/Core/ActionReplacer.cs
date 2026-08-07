@@ -86,6 +86,13 @@ internal sealed class ActionReplacer : IDisposable
     ///     delegate, but is not used in the method.<br />
     ///     Do not remove or modify the <see langword="IntPtr" /> parameter.
     /// </remarks>
+    // fail-closed 稽核註記（2026-08-07）：這支**刻意維持原樣**，不要「修好」它。
+    // ① 例外逸不出去：整個本體在 try 內，catch 一定 return 一個值，所以受管理例外不會穿進原生框架。
+    // ② 自動稽核會把它標成 NO_ORIGINAL，那是工具的假陽性 —— Original 是透過下面的
+    //    OriginalHook() 呼叫的（getActionHook.Original），字面上沒有 ".Original(" 而已。
+    // ③ catch 回 actionID 而不是 OriginalHook(actionID) 是刻意的保守做法：會進到 catch 最可能
+    //    的原因就是 hook 本身不可用，此時再呼叫一次 Original 只會在 catch 裡二次擲例外，
+    //    而 catch 裡擲出的例外正是會逸出到原生框架的那一種。
     private uint GetAdjustedActionDetour(IntPtr _, uint actionID)
     {
         try
