@@ -68,7 +68,7 @@ public static class ActionWatching
     /// <summary> Handles logic when an action causes an effect. </summary>
     private unsafe static void ReceiveActionEffectDetour(uint casterEntityId, Character* casterPtr, Vector3* targetPos, Header* header, TargetEffects* effects, GameObjectId* targetEntityIds)
     {
-        ReceiveActionEffectHook!.Original(casterEntityId, casterPtr, targetPos, header, effects, targetEntityIds);
+        ReceiveActionEffectHook!.OriginalDisposeSafe(casterEntityId, casterPtr, targetPos, header, effects, targetEntityIds);
 
         try
         {
@@ -278,7 +278,7 @@ public static class ActionWatching
         // It used to sit at the end of the try *and* be repeated in the catch, which meant an
         // exception thrown by Original itself (or by the catch's own logging) would have sent the
         // action a second time. Our bookkeeping failing must never change what the game does.
-        SendActionHook!.Original(targetObjectId, actionType, actionId, sequence, a5, a6, a7, a8, a9);
+        SendActionHook!.OriginalDisposeSafe(targetObjectId, actionType, actionId, sequence, a5, a6, a7, a8, a9);
     }
 
     /// <summary> Checks if at least two abilities were used between GCDs. </summary>
@@ -388,7 +388,7 @@ public static class ActionWatching
         }
 
         //Important to pass actionId here and not replaced. Performance mode = result from earlier, which could be modified. Non-performance mode = original action, which gets modified by the hook. Same result.
-        var hookResult = UseActionHook.Original(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
+        var hookResult = UseActionHook.OriginalDisposeSafe(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
 
         // If the target was changed, support changing the target for ground actions, too
         if (changed)
