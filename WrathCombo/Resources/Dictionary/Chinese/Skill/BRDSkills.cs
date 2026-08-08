@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -51,7 +51,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Heartbreakshot", BRD.HeartbreakShot.ActionName()),
                 KeyValuePair.Create("Resonant Arrow", BRD.ResonantArrow.ActionName()),
                 KeyValuePair.Create("Apex Arrow", BRD.ApexArrow.ActionName()),
-                KeyValuePair.Create("Apex Arrow Option", $"{BRD.ApexArrow.ActionName()}選項"),
                 KeyValuePair.Create("Radiant Encore", BRD.RadiantEncore.ActionName()),
                 #endregion
                                 

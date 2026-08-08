@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
 using WrathCombo.Extensions;
@@ -20,8 +20,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Malefic IV", AST.Malefic4.ActionName()),
                 KeyValuePair.Create("Malefic III", AST.Malefic3.ActionName()),
                 KeyValuePair.Create("Malefic II", AST.Malefic2.ActionName()),
-                KeyValuePair.Create("Malefic", AST.Malefic.ActionName()),
                 KeyValuePair.Create("Fall Malefic", AST.FallMalefic.ActionName()),
+                KeyValuePair.Create("Malefic", AST.Malefic.ActionName()),
                 KeyValuePair.Create("Gravity II", AST.Gravity2.ActionName()),
                 KeyValuePair.Create("Gravity", AST.Gravity.ActionName()),
                 KeyValuePair.Create("Oracle", AST.Oracle.ActionName()),

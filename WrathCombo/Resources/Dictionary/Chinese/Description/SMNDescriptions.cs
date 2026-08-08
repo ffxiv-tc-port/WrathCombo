@@ -1,4 +1,4 @@
-﻿using ECommons.ExcelServices;
+using ECommons.ExcelServices;
 using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
@@ -107,7 +107,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Adds Mountain Buster to Burst Mode.", "將Mountain Buster加入Burst Mode。"),
                 KeyValuePair.Create("Adds Slipstream to Burst Mode.", "將Slipstream加入Burst Mode。"),
                 KeyValuePair.Create("Adds Necrotize to Burst Mode.", "將Necrotize加入Burst Mode。"),
-                KeyValuePair.Create("Adds DeathFlare to Burst Mode.", "將DeathFlare加入Burst Mode。"),
                 KeyValuePair.Create("Adds Brand of Purgatory to Burst Mode.", "將Brand of Purgatory加入Burst Mode。"),
                 #endregion
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -17,6 +17,21 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region ADV
+                // Cross-file dictionary-concatenation-order dead code fixes
+                // (2026-08-08 full-repo sweep, see commit message for the full
+                // triage). Relocated here (the earliest file this layer loads)
+                // so each entry fires before whatever was shadowing it. Sorted by
+                // descending key length so this block does not shadow itself.
+                KeyValuePair.Create("Target's HP% to be at or under", "目標血量百分比需低於或等於"),
+                KeyValuePair.Create("- Will not use outside combat.", "- 不會在戰鬥外使用。"),
+                KeyValuePair.Create("No Movement Option", "未移動時使用"),
+                KeyValuePair.Create("Summon Garuda II", SMN.SummonGaruda2.ActionName()),
+                KeyValuePair.Create("Summon Ifrit II", SMN.SummonIfrit2.ActionName()),
+                KeyValuePair.Create("Summon Titan II", SMN.SummonTitan2.ActionName()),
+                KeyValuePair.Create("Summon Garuda", SMN.SummonGaruda.ActionName()),
+                KeyValuePair.Create("Summon Ifrit", SMN.SummonIfrit.ActionName()),
+                KeyValuePair.Create("Summon Titan", SMN.SummonTitan.ActionName()),
+
                 KeyValuePair.Create("Island Sanctuary Sprint Feature", "無名島衝刺特性"),
                 KeyValuePair.Create("Replaces Sprint with Isle Sprint.", "用海島衝刺替換衝刺。"),
                 KeyValuePair.Create("Only works at the Island Sanctuary. Icon does not change.", "僅在無名島有效。圖示不會改變。"),
@@ -46,6 +61,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 
                 // Manually added
                 // PLD
+                KeyValuePair.Create("Adds Sentinel / Guardian to the one-button mitigation.", $"將{PLD.Sentinel.ActionName()} / {PLD.Guardian.ActionName()}新增到一鍵式減傷按鈕。"),
                 KeyValuePair.Create("Guardian", PLD.Guardian.ActionName()),
                 // WAR
                 KeyValuePair.Create("Primal Ruination", WAR.PrimalRuination.ActionName()),

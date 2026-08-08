@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -89,7 +89,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Auto-Mode is enabled for this option.", "此選項已啟用自動模式。"),
                 KeyValuePair.Create($"{RDM.Zwerchhau.ActionName()} & {RDM.Redoublement.ActionName()} will be placed on {RDM.Jolt.ActionName()}", $"{RDM.Zwerchhau.ActionName()}和{RDM.Redoublement.ActionName()}將被放置在 {RDM.Jolt.ActionName()}上。"),
                 KeyValuePair.Create("Uses Prefulgence when available.", "當光芒四射可用時自動使用"),
-                KeyValuePair.Create("No Movement Option", "未移動時使用"),
                 KeyValuePair.Create("Uses Displacement only when not moving.", "僅在未移動時使用移轉。"),
                 KeyValuePair.Create("Uses Vice of Thorns when available.", "可用時使用荊棘環繞。"),
             ];

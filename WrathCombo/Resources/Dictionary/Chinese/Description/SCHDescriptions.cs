@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -19,7 +19,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 #region SCH
                 KeyValuePair.Create("Replaces Ruin I / Broils with options below", "用下方選項替換Ruin / Broil"),
                 KeyValuePair.Create("Adds Summon Eos whenever you've not summoned your fairy.", "當你未召喚小仙女時新增Summon Eos。"),
-                KeyValuePair.Create("Adds Lucid Dreaming when MP drops below slider value:", "當MP低於滑塊值時新增Lucid Dreaming："),
                 KeyValuePair.Create("Adds Chain Stratagem & Baneful Impact on cooldown with overlap protection", "新增Chain Stratagem & Baneful Impact，並在冷卻時使用，帶有重疊保護。"),
                 KeyValuePair.Create("Use Aetherflow when out of Aetherflow stacks.", "當Aetherflow層數耗盡時使用Aetherflow。"),
                 KeyValuePair.Create("Use Energy Drain to consume remaining Aetherflow stacks when Aetherflow is about to come off cooldown.", "當Aetherflow即將冷卻完畢時，使用Energy Drain消耗剩餘的Aetherflow層數。"),

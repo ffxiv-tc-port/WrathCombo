@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -45,8 +45,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Unmend", DRK.Unmend.ActionName()),
                 
                 // Defensive
-                KeyValuePair.Create("Grit", DRK.Grit.ActionName()),
                 KeyValuePair.Create("Release Grit", DRK.ReleaseGrit.ActionName()),
+                KeyValuePair.Create("Grit", DRK.Grit.ActionName()),
                 KeyValuePair.Create("Shadow Wall", DRK.ShadowWall.ActionName()),
                 KeyValuePair.Create("Dark Mind", DRK.DarkMind.ActionName()),
                 KeyValuePair.Create("Living Dead", DRK.LivingDead.ActionName()),

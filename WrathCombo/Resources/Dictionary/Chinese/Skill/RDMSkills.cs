@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -51,10 +51,10 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Verraise", RDM.Verraise.ActionName()),
                 KeyValuePair.Create("Scorch", RDM.Scorch.ActionName()),
                 KeyValuePair.Create("Resolution", RDM.Resolution.ActionName()),
-                KeyValuePair.Create("Moulinet", RDM.Moulinet.ActionName()),
-                KeyValuePair.Create("Enchanted Moulinet", RDM.EnchantedMoulinet.ActionName()),
-                KeyValuePair.Create("Enchanted Moulinet Deux", RDM.EnchantedMoulinetDeux.ActionName()),
                 KeyValuePair.Create("Enchanted Moulinet Trois", RDM.EnchantedMoulinetTrois.ActionName()),
+                KeyValuePair.Create("Enchanted Moulinet Deux", RDM.EnchantedMoulinetDeux.ActionName()),
+                KeyValuePair.Create("Enchanted Moulinet", RDM.EnchantedMoulinet.ActionName()),
+                KeyValuePair.Create("Moulinet", RDM.Moulinet.ActionName()),
                 KeyValuePair.Create("Corps-a-corps", RDM.Corpsacorps.ActionName()),
                 KeyValuePair.Create("Corps a Corps", RDM.Corpsacorps.ActionName()),
                 KeyValuePair.Create("Displacement", RDM.Displacement.ActionName()),

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using WrathCombo.Combos.PvE;
@@ -45,19 +45,18 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Glares", WHM.Glare1.ActionName()),
                 KeyValuePair.Create("Glare", WHM.Glare1.ActionName()),
                 KeyValuePair.Create("Stones", WHM.Stone1.ActionName()),
-                KeyValuePair.Create("Stone", WHM.Stone1.ActionName()),
-                KeyValuePair.Create("Stone1", WHM.Stone1.ActionName()),
                 KeyValuePair.Create("Stone2", WHM.Stone2.ActionName()),
                 KeyValuePair.Create("Stone3", WHM.Stone3.ActionName()),
                 KeyValuePair.Create("Stone4", WHM.Stone4.ActionName()),
+                KeyValuePair.Create("Stone", WHM.Stone1.ActionName()),
                 KeyValuePair.Create("Assize", WHM.Assize.ActionName()),
                 KeyValuePair.Create("Holy III", WHM.Holy3.ActionName()),
                 KeyValuePair.Create("Holy", WHM.Holy.ActionName()),
 
                 // DoT
                 KeyValuePair.Create("Aeros", WHM.Aero.ActionName()),
-                KeyValuePair.Create("Aero", WHM.Aero.ActionName()),
                 KeyValuePair.Create("Aero2", WHM.Aero2.ActionName()),
+                KeyValuePair.Create("Aero", WHM.Aero.ActionName()),
                 KeyValuePair.Create("Dia", WHM.Dia.ActionName()),
 
                 // Buffs

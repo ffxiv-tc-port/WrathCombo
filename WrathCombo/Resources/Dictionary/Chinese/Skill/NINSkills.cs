@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -43,9 +43,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Bhavacakra", NIN.Bhavacakra.ActionName()),
                 KeyValuePair.Create("Hakke Mujinsatsu", NIN.HakkeMujinsatsu.ActionName()),
                 KeyValuePair.Create("Meisui", NIN.Meisui.ActionName()),
-                KeyValuePair.Create("Meisui Option", $"{NIN.Meisui.ActionName()}選項"),
                 KeyValuePair.Create("Bunshin", NIN.Bunshin.ActionName()),
-                KeyValuePair.Create("Bunshin Option", $"{NIN.Bunshin.ActionName()}選項"),
                 KeyValuePair.Create("Phantom Kamaitachi", NIN.PhantomKamaitachi.ActionName()),
                 KeyValuePair.Create("Forked Raiju", NIN.ForkedRaiju.ActionName()),
                 KeyValuePair.Create("Fleeting Raiju", NIN.FleetingRaiju.ActionName()),
@@ -69,26 +67,26 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Jin Combo", NIN.JinCombo.ActionName()),
 
                 // Ninjutsu Abilities
+                KeyValuePair.Create("TCJ Fuma Shuriken Ten", NIN.TCJFumaShurikenTen.ActionName()),
+                KeyValuePair.Create("TCJ Fuma Shuriken Chi", NIN.TCJFumaShurikenChi.ActionName()),
+                KeyValuePair.Create("TCJ Fuma Shuriken Jin", NIN.TCJFumaShurikenJin.ActionName()),
                 KeyValuePair.Create("Fuma Shuriken", NIN.FumaShuriken.ActionName()),
+                KeyValuePair.Create("TCJ Hyoton", NIN.TCJHyoton.ActionName()),
                 KeyValuePair.Create("Hyoton", NIN.Hyoton.ActionName()),
+                KeyValuePair.Create("TCJ Doton", NIN.TCJDoton.ActionName()),
                 KeyValuePair.Create("Doton", NIN.Doton.ActionName()),
+                KeyValuePair.Create("TCJ Katon", NIN.TCJKaton.ActionName()),
                 KeyValuePair.Create("Katon", NIN.Katon.ActionName()),
+                KeyValuePair.Create("TCJ Suiton", NIN.TCJSuiton.ActionName()),
                 KeyValuePair.Create("Suiton", NIN.Suiton.ActionName()),
+                KeyValuePair.Create("TCJ Raiton", NIN.TCJRaiton.ActionName()),
                 KeyValuePair.Create("Raiton", NIN.Raiton.ActionName()),
+                KeyValuePair.Create("TCJ Huton", NIN.TCJHuton.ActionName()),
                 KeyValuePair.Create("Huton", NIN.Huton.ActionName()),
                 KeyValuePair.Create("Goka Mekkyaku", NIN.GokaMekkyaku.ActionName()),
                 KeyValuePair.Create("Hyosho Ranryu", NIN.HyoshoRanryu.ActionName()),
 
                 // TCJ Jutsus
-                KeyValuePair.Create("TCJ Fuma Shuriken Ten", NIN.TCJFumaShurikenTen.ActionName()),
-                KeyValuePair.Create("TCJ Fuma Shuriken Chi", NIN.TCJFumaShurikenChi.ActionName()),
-                KeyValuePair.Create("TCJ Fuma Shuriken Jin", NIN.TCJFumaShurikenJin.ActionName()),
-                KeyValuePair.Create("TCJ Katon", NIN.TCJKaton.ActionName()),
-                KeyValuePair.Create("TCJ Raiton", NIN.TCJRaiton.ActionName()),
-                KeyValuePair.Create("TCJ Hyoton", NIN.TCJHyoton.ActionName()),
-                KeyValuePair.Create("TCJ Huton", NIN.TCJHuton.ActionName()),
-                KeyValuePair.Create("TCJ Doton", NIN.TCJDoton.ActionName()),
-                KeyValuePair.Create("TCJ Suiton", NIN.TCJSuiton.ActionName()),
                                 
                 // Initial State Mudras
                 KeyValuePair.Create("Ten ", NIN.Ten.ActionName()),

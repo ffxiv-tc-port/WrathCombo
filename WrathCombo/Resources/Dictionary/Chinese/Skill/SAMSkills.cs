@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -28,6 +28,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Mangetsu", SAM.Mangetsu.ActionName()),
                 KeyValuePair.Create("Fuga", SAM.Fuga.ActionName()),
                 KeyValuePair.Create("Oka", SAM.Oka.ActionName()),
+                KeyValuePair.Create("Kaeshi Higanbana", SAM.KaeshiHiganbana.ActionName()),
                 KeyValuePair.Create("Higanbana", SAM.Higanbana.ActionName()),
                 KeyValuePair.Create("Tenka Goken", SAM.TenkaGoken.ActionName()),
                 KeyValuePair.Create("Midare: Setsugekka", SAM.MidareSetsugekka.ActionName()),
@@ -45,7 +46,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Iajutsu", SAM.Iaijutsu.ActionName()),
                 KeyValuePair.Create("Tsubame-gaeshi", SAM.TsubameGaeshi.ActionName()),
                 KeyValuePair.Create("Tsubame-Gaeshi", SAM.TsubameGaeshi.ActionName()),
-                KeyValuePair.Create("Kaeshi Higanbana", SAM.KaeshiHiganbana.ActionName()),
                 KeyValuePair.Create("Shoha", SAM.Shoha.ActionName()),
                 KeyValuePair.Create("Ikishoten", SAM.Ikishoten.ActionName()),
                 KeyValuePair.Create("Fuko", SAM.Fuko.ActionName()),

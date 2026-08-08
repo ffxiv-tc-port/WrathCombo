@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -99,7 +99,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("First positional: ", "第一個身位技能："),
                 KeyValuePair.Create("Priority:", "優先順序："),
                 KeyValuePair.Create("Select what difficulties ", "選擇"),
-                KeyValuePair.Create("Select what difficulties Emergency Living Dead should be used in:", "選擇緊急"),
                 KeyValuePair.Create("should be used in:", "應在哪些難度下使用："),
                 KeyValuePair.Create("Set to Zero to disable this check.", "設定為零禁用此檢測。"),
                 KeyValuePair.Create("Set to Zero to disable this check", "設定為零禁用此檢測"),
@@ -108,7 +107,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Allows you to only stop DoTing early when it's not a boss.", "允許你在敵人不是Boss時提前停用持續傷害技能。"),
                 KeyValuePair.Create("Only applies the HP check above to non-bosses.", "僅對非Boss敵人應用上述HP檢查。"),
                 KeyValuePair.Create("Number of charges to hold onto", "保留的充能層數"),
-                KeyValuePair.Create("Start using when below HP %. Set to 100 to disable this check.", "當血量低於此百分比時使用。設定為100以禁用此檢查。"),
                 KeyValuePair.Create("Start using when below party average HP %. Set to 100 to disable this check", "當隊伍平均血量低於此百分比時使用。設定為100以禁用此檢查"),
                 KeyValuePair.Create("Party UI Mouseover Checking", "小隊UI滑鼠懸停檢查"),
                 KeyValuePair.Create("Check party member's HP & Debuffs by using mouseover on the party list.", "透過滑鼠懸停在隊伍列表上檢查隊員的血量和減益效果。"),

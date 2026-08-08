@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -51,8 +51,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Off-guard", BLU.Offguard.ActionName()),
                 KeyValuePair.Create("Bad Breath", BLU.BadBreath.ActionName()),
                 KeyValuePair.Create("Magic Hammer", BLU.MagicHammer.ActionName()),
-                KeyValuePair.Create("Addle & Magic Hammer Debuff", $"{RoleActions.Caster.Addle.ActionName()}與{BLU.MagicHammer.ActionName()}"),
-                KeyValuePair.Create("Turns Magic Hammer into Addle when off cooldown.", $"{BLU.MagicHammer.ActionName()}不在冷卻中時，切換為{RoleActions.Caster.Addle.ActionName()}。"),
                 KeyValuePair.Create("White Knight's Tour", BLU.WhiteKnightsTour.ActionName()),
                 KeyValuePair.Create("Black Knight's Tour", BLU.BlackKnightsTour.ActionName()),
                 KeyValuePair.Create("Knight's Tour", "騎士之旅"),

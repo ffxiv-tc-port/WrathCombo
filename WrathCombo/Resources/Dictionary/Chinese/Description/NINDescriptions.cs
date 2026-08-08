@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -135,7 +135,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Adds Dokumori to Burst Mode.", "將Dokumori加入Burst Mode。"),
                 KeyValuePair.Create("Adds Bunshin to Burst Mode.", "將Bunshin加入Burst Mode。"),
                 KeyValuePair.Create("Adds SeitonTenchu to Burst Mode when the target is below threshold HP%.", "當目標HP低於設定百分比時，將SeitonTenchu加入Burst Mode。"),
-                KeyValuePair.Create("Target's HP% to be at or under", "目標血量百分比需低於或等於")
                 #endregion
             ];
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -22,9 +22,9 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Elusive Jump", DRG.ElusiveJump.ActionName()),
                 KeyValuePair.Create("Lance Charge", DRG.LanceCharge.ActionName()),
                 KeyValuePair.Create("Battle Litany", DRG.BattleLitany.ActionName()),
+                KeyValuePair.Create("High Jump", DRG.HighJump.ActionName()),
                 KeyValuePair.Create("Jump", DRG.Jump.ActionName()),
                 KeyValuePair.Create("Life Surge", DRG.LifeSurge.ActionName()),
-                KeyValuePair.Create("High Jump", DRG.HighJump.ActionName()),
                 KeyValuePair.Create("Mirage Dive", DRG.MirageDive.ActionName()),
                 KeyValuePair.Create("Blood of the Dragon", DRG.BloodOfTheDragon.ActionName()),
 
@@ -58,7 +58,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Final Attacks
                 KeyValuePair.Create("Drakesbane", DRG.Drakesbane.ActionName()),
                 KeyValuePair.Create("Rise of the Dragon", DRG.RiseOfTheDragon.ActionName()),
-                KeyValuePair.Create("Lance Barrage", DRG.LanceBarrage.ActionName()),
                 KeyValuePair.Create("Spiral Blow", DRG.SpiralBlow.ActionName()),
                 KeyValuePair.Create("Starcross", DRG.Starcross.ActionName()),
 
