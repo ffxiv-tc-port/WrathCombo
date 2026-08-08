@@ -22,6 +22,18 @@ namespace WrathCombo.Window.Tabs
     {
         private static uint _selectedNpc = 0;
 
+        /// <summary>
+        ///     IgnoredNPCs 是設定檔回讀的字典，裡面的 BNpcName id 可能跨版本殘留，
+        ///     不保證存在於本地資料表。裸 GetRow 查無此列時 Lumina 會擲例外，而這個
+        ///     分頁在 Draw 路徑上，一擲整個設定視窗就不見。查不到時顯示「未知 NPC」，
+        ///     不要靜默把它從使用者的忽略清單裡移掉。
+        /// </summary>
+        private static string GetIgnoredNpcName(uint bNpcNameId)
+        {
+            var row = Svc.Data.Excel.GetSheet<BNpcName>().GetRowOrDefault(bNpcNameId);
+            return row == null ? "Unknown NPC".Loc() : row.Value.Singular.ToString();
+        }
+
         private static readonly Dictionary<DPSRotationMode, string> DPSRotationModeTranslations = new()
         {
             { DPSRotationMode.Manual, "Manual" },
@@ -188,7 +200,7 @@ namespace WrathCombo.Window.Tabs
 
                 var npcs = Service.Configuration.IgnoredNPCs.ToList();
                 var selected = npcs.FirstOrNull(x => x.Key == _selectedNpc);
-                var prev = selected is null ? "" : $"{Svc.Data.Excel.GetSheet<BNpcName>().GetRow(selected.Value.Value).Singular} (ID: {selected.Value.Key})";
+                var prev = selected is null ? "" : $"{GetIgnoredNpcName(selected.Value.Value)} (ID: {selected.Value.Key})";
                 ImGuiEx.TextUnderlined("Ignored NPCs".Loc());
                 using (var combo = ImRaii.Combo("###Ignore", prev))
                 {
@@ -201,9 +213,7 @@ namespace WrathCombo.Window.Tabs
 
                         foreach (var npc in npcs)
                         {
-                            var npcData = Svc.Data.Excel
-                                .GetSheet<BNpcName>().GetRow(npc.Value);
-                            if (ImGui.Selectable($"{npcData.Singular} (ID: {npc.Key})"))
+                            if (ImGui.Selectable($"{GetIgnoredNpcName(npc.Value)} (ID: {npc.Key})"))
                             {
                                 _selectedNpc = npc.Key;
                             }
