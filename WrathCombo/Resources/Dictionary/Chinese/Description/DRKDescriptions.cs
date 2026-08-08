@@ -36,6 +36,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Adds Bloodspiller to the rotation when Delirium is active or well outside of burst.", "當Delirium啟用或遠離爆發期時，將Bloodspiller加入循環。"),
                 KeyValuePair.Create("Adds Bloodspiller to the rotation after Syphon Strike when the blood gauge is above the chosen threshold.", "當血槽超過設定閾值時，在Syphon Strike後將Bloodspiller加入循環。"),
                 KeyValuePair.Create("Uses Edge of Darkness in burst windows, and outside of that will spend to chosen MP limit.", "在爆發視窗使用Edge of Darkness，其他時候會消耗到設定的MP上限。"),
+                KeyValuePair.Create("Uses Edge of Darkness in burst windows.", "在爆發視窗使用Edge of Darkness。"),
                 KeyValuePair.Create("Will spend Dark Arts if your own The Blackest Night shield is active on you.", "如果你自身的The Blackest Night護盾啟用，會消耗Dark Arts。"),
                 KeyValuePair.Create("Uses Edge of Darkness if Darkside is about to expire (<10s).", "如果Darkside即將結束（<10秒），使用Edge of Darkness。"),
                 KeyValuePair.Create("Uses Edge of Darkness if you are above 8,500 mana.", "如果你的魔力超過8,500，使用Edge of Darkness。"),

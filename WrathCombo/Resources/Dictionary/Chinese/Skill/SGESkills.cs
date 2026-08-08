@@ -48,10 +48,13 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Dyskrasia II", SGE.Dyskrasia2.ActionName()),
                 KeyValuePair.Create("Dyskrasia", SGE.Dyskrasia.ActionName()),
                 KeyValuePair.Create("Toxikon II", SGE.Toxikon2.ActionName()),
-                KeyValuePair.Create("Toxikon", SGE.Toxikon.ActionName()),
+                // Full-sentence entries placed BEFORE the bare "Toxikon"/"Pneuma" fragments
+                // below -- otherwise those fire first (same array) and the exact-string
+                // matches here become unreachable dead code.
                 KeyValuePair.Create("Uses Toxikon opener", $"使用{SGE.Toxikon.ActionName()}起手式"),
-                KeyValuePair.Create("Pneuma", SGE.Pneuma.ActionName()),
+                KeyValuePair.Create("Toxikon", SGE.Toxikon.ActionName()),
                 KeyValuePair.Create("Uses Pneuma opener", $"使用{SGE.Pneuma.ActionName()}起手式"),
+                KeyValuePair.Create("Pneuma", SGE.Pneuma.ActionName()),
                 KeyValuePair.Create("Psyche", SGE.Psyche.ActionName()),
 
                 // Buffs

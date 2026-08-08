@@ -43,7 +43,12 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Changes Swiftcast to Ascend", "將Swiftcast更改為Ascend"),
                 KeyValuePair.Create("When you play the Balance or Spear, this will automatically apply the buff to a party member. It will look at DPS that suit the card first, if none found or they have buffs already, will look at the other DPS instead.", "當你使用太陽神之衡或放浪神之箭時，自動將卡發給一名隊員。它將首先考慮發給適合該卡的進攻職業，如果沒有找到或他們已經擁有進攻卡，則會發給其他進攻職業。"),
                 KeyValuePair.Create("Targets a tank or healer if no DPS remain for quick target selection", "如果沒有剩餘的DPS用於快速目標選擇，則選擇坦克或治療者"),
-                KeyValuePair.Create("Turns Fall Malefic into an all-in-one damage button.", "將Fall Malefic變成一個全能傷害按鈕。"),
+                // This full-sentence match fires before ASTSkills.cs's bare "Malefic"
+                // fragment (Skill layer, processed after all Description files), so it must
+                // supply the resolved action name itself rather than leave "Fall Malefic" as
+                // a literal for a later fragment to catch -- "Malefic" alone would otherwise
+                // match first and strand the "Fall " prefix untranslated.
+                KeyValuePair.Create("Turns Fall Malefic into an all-in-one damage button.", $"將{AST.FallMalefic.ActionName()}變成一個全能傷害按鈕。"),
                 KeyValuePair.Create("Adds Drawing Cards to Burst Mode.", "將抽卡新增到爆發模式。"),
                 KeyValuePair.Create("Adds Playing Cards to Burst Mode.", "將使用卡新增到爆發模式。"),
                 KeyValuePair.Create("Adds Double Cast to Aspected Benefic.", "為Aspected Benefic新增雙重施法。"),

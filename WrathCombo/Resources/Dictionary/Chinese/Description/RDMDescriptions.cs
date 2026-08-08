@@ -17,6 +17,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region RDMPvE
+                KeyValuePair.Create("Use Swiftcast for movement only.", "僅為了移動而使用即刻詠唱。"),
                 KeyValuePair.Create("Replaces Jolt with a full one-button single target rotation.", "用一鍵單體循環替換Jolt。"),
                 KeyValuePair.Create("To start the melee combo, you must be within melee range.", "要開始近戰連擊，你必須處於近戰範圍內。"),
                 KeyValuePair.Create("Replaces Scatter with a full one-button AoE rotation.", "用一鍵AOE循環替換Scatter。"),

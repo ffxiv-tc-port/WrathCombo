@@ -45,8 +45,11 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Lady of Crowns", AST.LadyOfCrown.ActionName()),
                 KeyValuePair.Create("Lazy Lady", AST.LadyOfCrown.ActionName()),
                 KeyValuePair.Create("Lady Option", $"{AST.LadyOfCrown.ActionName()}選項"),
-                KeyValuePair.Create("Turns Fall Malefic into an all-in-one damage button.", $"將{AST.FallMalefic.ActionName()}變成單一全能傷害技能。"),
-                
+                // "Turns Fall Malefic into an all-in-one damage button." lives in
+                // ASTDescriptions.cs (Description layer, processed before this Skill-layer
+                // file) -- a duplicate key here would always lose the key de-dup and never
+                // fire, so it was removed rather than kept as dead weight.
+
                 // Utility
                 KeyValuePair.Create("Divination", AST.Divination.ActionName()),
                 KeyValuePair.Create("Lightspeed", AST.Lightspeed.ActionName()),

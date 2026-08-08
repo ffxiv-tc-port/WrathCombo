@@ -17,6 +17,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region GNB
+                KeyValuePair.Create("One-Button Party Mitigation Feature", "一鍵隊伍減傷特性"),
+                KeyValuePair.Create("Replaces Heart of Light with Reprisal when ready.", "當Reprisal就緒時，用其替換Heart of Light。"),
                 KeyValuePair.Create("Replaces Keen Edge with a full one-button single target rotation.", "用一鍵完整單體循環替換Keen Edge。"),
                 KeyValuePair.Create("Replaces Demon Slice with a full one-button AoE rotation.", "用一鍵完整AOE循環替換Demon Slice。"),
                 KeyValuePair.Create("Add openers into the rotation based on Skill Speed and current Level, starting at Lv90.", "從90級開始，根據技能速度和當前等級將起手技能加入循環。"),

@@ -18,6 +18,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region WARPvE
+                KeyValuePair.Create("Use only under Lost Font of Power.", "僅在Lost Font of Power下使用。"),
                 KeyValuePair.Create("Replaces Heavy Swing with a full one-button single target rotation.", "用一鍵完整單體循環替換Heavy Swing。"),
                 KeyValuePair.Create("This is the ideal option for newcomers to the job.", "這是新手玩家的理想選擇。"),
                 KeyValuePair.Create("Replaces Overpower with a full one-button AoE rotation.", "用一鍵完整AOE循環替換Overpower。"),

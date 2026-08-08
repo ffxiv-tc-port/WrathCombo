@@ -27,8 +27,11 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Throwing Dagger", NIN.ThrowingDaggers.ActionName()),
                 KeyValuePair.Create("Mug", NIN.Mug.ActionName()),
                 KeyValuePair.Create("Death Blossom", NIN.DeathBlossom.ActionName()),
-                KeyValuePair.Create("Aeolian Edge", NIN.AeolianEdge.ActionName()),
+                // Full-sentence entry placed BEFORE the bare "Aeolian Edge" fragment below --
+                // otherwise "Aeolian Edge" fires first (same array) and the exact-string
+                // match here becomes unreachable dead code.
                 KeyValuePair.Create("Replace Aeolian Edge with its combo chain.", $"用連段替換{NIN.AeolianEdge.ActionName()}。"),
+                KeyValuePair.Create("Aeolian Edge", NIN.AeolianEdge.ActionName()),
                 KeyValuePair.Create("Trick Attack", NIN.TrickAttack.ActionName()),
                 KeyValuePair.Create("Kassatsu", NIN.Kassatsu.ActionName()),
                 KeyValuePair.Create("Armor Crush", NIN.ArmorCrush.ActionName()),

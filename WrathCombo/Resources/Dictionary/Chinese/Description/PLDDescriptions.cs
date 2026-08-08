@@ -17,6 +17,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region PLD
+                KeyValuePair.Create("- Requires Requiescat to be ready.", "- 需要安魂祈禱準備就緒。"),
                 KeyValuePair.Create("Replaces Fast Blade with a full one-button single target rotation.", "用一鍵式單體循環替換Fast Blade。"),
                 KeyValuePair.Create("Replaces Total Eclipse with a full one-button AoE rotation.", "用一鍵式AOE循環替換Total Eclipse。"),
                 KeyValuePair.Create("Adds Fight or Flight to Advanced Mode.", "將Fight or Flight新增到高階模式。"),

@@ -17,6 +17,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region DNC
+                KeyValuePair.Create("Change Technical Step into each dance step, while dancing.", $"跳舞時，將{DNC.TechnicalStep.ActionName()}轉換為逐一的舞步技能。"),
                 KeyValuePair.Create("Replaces Windmill with a full one-button AoE rotation.", "用一鍵AOE循環替換Windmill。"),
                 KeyValuePair.Create("Includes Closed Position when out of combat and no dance partner is found.", "在戰鬥外且未找到舞伴時，包含Closed Position。"),
                 KeyValuePair.Create("Includes an interrupt in the rotation (if applicable to your current target).", "在循環中包含打斷技能（如果適用於當前目標）。"),

@@ -76,11 +76,17 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("When under the effect of Astral Fire, must be moving this long before using Blizzard spells.", "處於星極火狀態時，必須移動指定時長才能使用冰系法術"),
                 KeyValuePair.Create("Defensive Burst", "防禦性爆發"),
                 KeyValuePair.Create("Also uses Burst when under 50% HP.", "50%血量以下時也會使用爆發"),
+                // "%%" variants: same PvP sub-options, but this particular call site passes
+                // the description through with an escaped "%%" (see SCHDescriptions.cs for
+                // the same "%%" convention elsewhere in this dictionary).
+                KeyValuePair.Create("Also uses Burst when under 50%% HP.", "50%%血量以下時也會使用爆發"),
                 KeyValuePair.Create("Will not use outside combat.", "非戰鬥狀態下不使用"),
                 KeyValuePair.Create("Defensive Xenoglossy", "防禦性異言"),
                 KeyValuePair.Create("Also uses Xenoglossy when under 50% HP.", "50%血量以下時也會使用異言"),
+                KeyValuePair.Create("Also uses Xenoglossy when under 50%% HP.", "50%%血量以下時也會使用異言"),
                 KeyValuePair.Create("Defensive Lethargy", "防禦性昏亂"),
                 KeyValuePair.Create("Also uses Lethargy when under 50% HP.", "50%血量以下時也會使用昏亂"),
+                KeyValuePair.Create("Also uses Lethargy when under 50%% HP.", "50%%血量以下時也會使用昏亂"),
                 KeyValuePair.Create("Uses only when targeted by enemy.", "僅在被敵人鎖定目標時使用"),
                 KeyValuePair.Create("Defensive Elemental Weave", "防禦性元素天賦穿插"),
                 KeyValuePair.Create("When under, uses Wreath of Ice instead.", "血量低下時改用寒冰環"),

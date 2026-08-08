@@ -28,6 +28,11 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Sonic Boom", BLU.SonicBoom.ActionName()),
                 KeyValuePair.Create("Surpanakha", BLU.Surpanakha.ActionName()),
                 KeyValuePair.Create("Nightbloom", BLU.Nightbloom.ActionName()),
+                // Full-label entries placed BEFORE the bare "Moon Flute" fragment below so
+                // they aren't shadowed by it (same array, "Moon Flute" would otherwise fire
+                // first and break the exact-string match for these).
+                KeyValuePair.Create("BLU Moon Flute Opener (Level 80)", $"青魔{BLU.MoonFlute.ActionName()}起手式(80級)"),
+                KeyValuePair.Create("BLU Moon Flute Opener (Level 70)", $"青魔{BLU.MoonFlute.ActionName()}起手式(70級)"),
                 KeyValuePair.Create("Moon Flute", BLU.MoonFlute.ActionName()),
                 KeyValuePair.Create("Whistle", BLU.Whistle.ActionName()),
                 KeyValuePair.Create("Tingle", BLU.Tingle.ActionName()),

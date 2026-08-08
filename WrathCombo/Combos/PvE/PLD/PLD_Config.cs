@@ -241,7 +241,7 @@ internal partial class PLD
                         "", 1);
 
                     UserConfig.DrawHorizontalRadioButton(PLD_Requiescat_SubOption, "Add Fight or Flight",
-                        "Adds Fight or Flight to the normal logic.\n- Requires Resquiescat to be ready.", 2);
+                        "Adds Fight or Flight to the normal logic.\n- Requires Requiescat to be ready.", 2);
 
                     break;
 

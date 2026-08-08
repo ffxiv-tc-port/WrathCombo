@@ -17,8 +17,10 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:45:21  
                 #region RDM
-                KeyValuePair.Create("Balance Standard Opener", "The Balance標準起手"),
-                KeyValuePair.Create("GapClosing Adjusted Standard Opener", "位移調整標準起手"),
+                // "Balance Standard Opener" / "GapClosing Adjusted Standard Opener" moved to
+                // GenesisDescriptions.cs: BRDDescriptions.cs's bare "Standard Opener" fragment
+                // (processed earlier, Description layer) was shadowing these full-sentence
+                // keys here in the Skill layer, making them dead code.
                 KeyValuePair.Create("Shifts the melee a little bit to put a gapcloser in", "些微調整近戰段落以插入位移技能"),
                 KeyValuePair.Create("Veraero III", RDM.Veraero3.ActionName()),
                 KeyValuePair.Create("Veraero II", RDM.Veraero2.ActionName()),

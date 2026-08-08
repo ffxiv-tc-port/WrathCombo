@@ -17,6 +17,10 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region SGE
+                KeyValuePair.Create("Will try to cast Shields when a raidwide casting is detected if shieldcheck from Eukrasian Prognosis setting passes. ", "當偵測到團隊範圍技能正在施放，且來自Eukrasian Prognosis設定的護盾檢查通過時，會嘗試施放護盾技能。 "),
+                KeyValuePair.Create("Will try to cast Kerachole when a raidwide casting is detected. ", "當偵測到團隊範圍技能正在施放時，會嘗試施放Kerachole。 "),
+                KeyValuePair.Create("Will try to cast Holos when a raidwide casting is detected. ", "當偵測到團隊範圍技能正在施放時，會嘗試施放Holos。 "),
+                KeyValuePair.Create("Will be used in all 4 main combos.", "適用於全部4種主要連擊。"),
                 KeyValuePair.Create("Adds various options to Dosis I/II/III.", "為Dosis I/II/III新增各種選項。"),
                 KeyValuePair.Create("Use the Balance opener from level 92 onwards.", "從92級開始使用由The Balance社群建議的開場輸出循環。"),
                 KeyValuePair.Create("Weaves Lucid Dreaming when your MP drops below the specified value.", "當你的MP低於指定值時插入Lucid Dreaming。"),
