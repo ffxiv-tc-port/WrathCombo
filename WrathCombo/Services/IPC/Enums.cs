@@ -228,9 +228,57 @@ public enum AutoRotationConfigOption
     /// <seealso cref="DPSSettings.OnlyAttackInCombat" />
     [ConfigValueType(typeof(bool))] OnlyAttackInCombat = 13,
 
+    /// <seealso cref="AutoRotationConfig.OrbwalkerIntegration" />
     [ConfigValueType(typeof(bool))] OrbwalkerIntegration = 14,
 
+    /// <seealso cref="HealerSettings.AutoRezOutOfParty" />
     [ConfigValueType(typeof(bool))] AutoRezOutOfParty = 15,
+
+    // 🔴 以下 16~25 的名稱與數值逐字照 `WrathCombo.API` 套件的
+    //    `Enum/AutoRotationConfigOption.cs`。順序或拼字只要差一個，跨 IPC 的呼叫端就會
+    //    拿到「合法但不是它要的那個選項」，而且完全不會報錯。**不要重新排序、不要補洞。**
+    //    標了「本 fork 尚未支援」的項目：列舉值必須存在（否則後面的編號會整排位移），
+    //    但本 fork 的自動循環沒有對應的設定欄位與行為，
+    //    因此 get 回 null、set 回 InvalidConfiguration，詳見 ProvideAutoRotConfig.cs。
+
+    /// <seealso cref="DPSSettings.DPSAoETargets" />
+    [ConfigValueType(typeof(int))] DPSAoETargets = 16,
+
+    /// <remarks>本 fork 尚未支援：自動循環沒有學者「深謀遠慮之策」的血量門檻設定。</remarks>
+    [ConfigValueType(typeof(int))] SingleTargetExcogHPP = 17,
+
+    /// <remarks>本 fork 尚未支援：自動復活沒有「只復活補職」的細分選項。</remarks>
+    [ConfigValueType(typeof(bool))] AutoRezDPSJobsHealersOnly = 18,
+
+    /// <remarks>
+    ///     本 fork 尚未支援：上游是在「自動循環不再改變硬目標」之後才加的選項，
+    ///     本 fork 仍是舊行為。與本 fork 的 <c>DPSSettings.AlwaysSelectTarget</c> 語意不同，
+    ///     不要互相對應。
+    /// </remarks>
+    [ConfigValueType(typeof(bool))] DPSAlwaysHardTarget = 19,
+
+    /// <remarks>本 fork 尚未支援，理由同 <see cref="DPSAlwaysHardTarget" />。</remarks>
+    [ConfigValueType(typeof(bool))] HealerAlwaysHardTarget = 20,
+
+    /// <remarks>被繞過的是 <see cref="InCombatOnly" />。</remarks>
+    /// <seealso cref="AutoRotationConfig.BypassQuest" />
+    [ConfigValueType(typeof(bool))] BypassQuest = 21,
+
+    /// <remarks>被繞過的是 <see cref="InCombatOnly" />。</remarks>
+    /// <seealso cref="AutoRotationConfig.BypassFATE" />
+    [ConfigValueType(typeof(bool))] BypassFATE = 22,
+
+    /// <remarks>本 fork 尚未支援：自動循環沒有「王戰時忽略距離上限」的設定。</remarks>
+    [ConfigValueType(typeof(bool))] IgnoreRangeInBoss = 23,
+
+    /// <remarks>本 fork 尚未支援：自動循環沒有處理「灼熱」這類懲罰性機制的取消目標邏輯。</remarks>
+    [ConfigValueType(typeof(bool))] UnTargetAndDisableForPenalty = 24,
+
+    /// <remarks>
+    ///     本 fork 尚未支援：自動循環的血量門檻沒有「把護盾算進去」的總開關。
+    ///     （各職業連段自己的 <c>*_IncludeShields</c> 選項是另一回事，走 SetComboOptionState。）
+    /// </remarks>
+    [ConfigValueType(typeof(bool))] IncludeShields = 25,
 }
 
 #region Type Attribute

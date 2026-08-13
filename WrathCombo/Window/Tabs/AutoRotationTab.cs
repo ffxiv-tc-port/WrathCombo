@@ -108,12 +108,21 @@ namespace WrathCombo.Window.Tabs
                     changed |= ImGui.Checkbox("Bypass When Combo Suggests Self-Use Action".Loc(), ref cfg.BypassBuffs);
                     ImGuiComponents.HelpMarker("Many jobs have an out of combat action that can be used, for example, ?? or ??. This will allow these to be used without being in combnat.".Loc(RPR.Soulsow.ActionName(), MNK.ForbiddenMeditation.ActionName()));
 
+                    // 這兩項現在可以被其他外掛用租約接管（BypassQuest / BypassFATE），
+                    // 所以改用會顯示「被誰接管」的版本 —— 否則使用者會看到自己的勾選狀態、
+                    // 實際生效的卻是別人設的值，而且沒有任何提示。
+                    P.UIHelper.ShowIPCControlledIndicatorIfNeeded("BypassQuest");
                     ImGuiExtensions.Prefix(false);
-                    changed |= ImGui.Checkbox("Bypass Only in Combat for Quest Targets".Loc(), ref cfg.BypassQuest);
+                    changed |= P.UIHelper.ShowIPCControlledCheckboxIfNeeded(
+                        "Bypass Only in Combat for Quest Targets".Loc(),
+                        ref cfg.BypassQuest, "BypassQuest");
                     ImGuiComponents.HelpMarker("Disables Auto-Mode outside of combat unless you're within range of a quest target.".Loc());
 
+                    P.UIHelper.ShowIPCControlledIndicatorIfNeeded("BypassFATE");
                     ImGuiExtensions.Prefix(false);
-                    changed |= ImGui.Checkbox("Bypass Only in Combat for FATE Targets".Loc(), ref cfg.BypassFATE);
+                    changed |= P.UIHelper.ShowIPCControlledCheckboxIfNeeded(
+                        "Bypass Only in Combat for FATE Targets".Loc(),
+                        ref cfg.BypassFATE, "BypassFATE");
                     ImGuiComponents.HelpMarker("Disables Auto-Mode outside of combat unless you're synced to a FATE.".Loc());
 
                     ImGuiExtensions.Prefix(true);
@@ -156,6 +165,10 @@ namespace WrathCombo.Window.Tabs
                     ImGuiComponents.HelpMarker("For all other targeting modes, AoE will target based on highest number of targets hit. In manual mode, it will only do this if you tick this box.".Loc());
                 }
 
+                // DPSAoETargets 現在也能被租約接管。這個欄位是 int?，沒有對應的
+                // ShowIPCControlled* 版本可用，所以只加「被誰接管」的提示列，
+                // 輸入框本身維持原樣（讓使用者看得見接管狀態，不是把控制權藏起來）。
+                P.UIHelper.ShowIPCControlledIndicatorIfNeeded("DPSAoETargets");
                 var input = ImGuiEx.InputInt(100f.Scale(), "Targets Required for AoE Damage Features".Loc(), ref cfg.DPSSettings.DPSAoETargets);
                 if (input)
                 {

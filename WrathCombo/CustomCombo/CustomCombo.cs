@@ -9,6 +9,7 @@ using WrathCombo.Combos;
 using WrathCombo.Combos.PvE;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Services;
+using WrathCombo.Services.ActionRequestIPC;
 
 namespace WrathCombo.CustomComboNS
 {
@@ -85,6 +86,14 @@ namespace WrathCombo.CustomComboNS
             if (JobID != ADV.JobID && ClassID != ADV.ClassID &&
                 JobID != classJobID && ClassID != classJobID)
                 return false;
+
+            // 其他外掛透過 WrathCombo.ActionRequest.RequestActionUse 送進來的動作優先。
+            // 沒有任何請求時（＝正常情況）這裡在第一個判斷就退出，對既有行為零影響。
+            if (ActionRequestIPCProvider.TryGetRequestedAction(out var requestedActionID))
+            {
+                newActionID = requestedActionID;
+                return true;
+            }
 
             OptionalTarget = targetOverride;
             uint resultingActionID = Invoke(actionID);

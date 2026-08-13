@@ -29,6 +29,7 @@ using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Data;
 using WrathCombo.Services;
+using WrathCombo.Services.ActionRequestIPC;
 using WrathCombo.Services.IPC;
 using WrathCombo.Window;
 using WrathCombo.Window.Tabs;
@@ -108,6 +109,12 @@ public sealed partial class WrathCombo : IDalamudPlugin
     public static void UpdateCaches
         (bool onJobChange, bool onTerritoryChange, bool firstRun)
     {
+        // 換職業／換地圖時把別的外掛送進來的動作請求與封鎖清空：
+        // 那些請求都是針對「當下那個情境」下的，換了情境再照著放會是錯的。
+        // ⚠️ 這裡刻意在 TM 佇列**之外**同步執行，因為佇列會延遲 1 秒才跑。
+        ActionRequestIPCProvider.ResetAllBlacklist();
+        ActionRequestIPCProvider.ResetAllRequests();
+
         TM.DelayNext(1000);
         TM.Enqueue(() =>
         {
@@ -157,6 +164,9 @@ public sealed partial class WrathCombo : IDalamudPlugin
         EzIpcFailureLog.Enable();
         PunishLibMain.Init(pluginInterface, "Wrath Combo");
         ECommons.LanguageHelpers.Localization.Init("ChineseTraditional");
+        // 動作請求／封鎖的 IPC 供應端（WrathCombo.ActionRequest.*）。
+        // 與 Provider.Init() 分開註冊，因為它是 static 型別、前綴也不同。
+        ActionRequestIPCProvider.Initialize();
 
         TM = new();
         RemoveNullAutos(); 
@@ -431,6 +441,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
         MoveHook?.Dispose();
 
         ConflictingPluginsChecks.Dispose();
+        ActionRequestIPCProvider.Dispose();
         AllStaticIPCSubscriptions.Dispose();
         Svc.ClientState.Login -= PrintLoginMessage;
         EzIpcFailureLog.Disable();

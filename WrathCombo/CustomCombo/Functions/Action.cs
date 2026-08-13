@@ -11,6 +11,7 @@ using System.Linq;
 using WrathCombo.Core;
 using WrathCombo.Data;
 using WrathCombo.Services;
+using WrathCombo.Services.ActionRequestIPC;
 using static WrathCombo.Data.ActionWatching;
 
 namespace WrathCombo.CustomComboNS.Functions;
@@ -117,6 +118,12 @@ internal abstract partial class CustomComboFunctions
     /// <param name="actionId"> The action ID. </param>
     public static unsafe bool ActionReady(uint actionId, bool recastCheck = false, bool castCheck = false)
     {
+        // 其他外掛透過 WrathCombo.ActionRequest.RequestBlacklist 封鎖的動作一律視為不可用。
+        // ⚠️ 比對的是「呼叫端傳進來的原始 ID」而不是 OriginalHook 之後的 ID，與上游一致：
+        //    封鎖的一方看到的是遊戲介面上的那個動作 ID。
+        if (ActionRequestIPCProvider.GetArtificialCooldown(ActionType.Action, actionId) > 0)
+            return false;
+
         uint hookedId = OriginalHook(actionId);
 
         return (HasCharges(hookedId) || (GetAttackType(hookedId) != ActionAttackType.Ability && GetCooldownRemainingTime(hookedId) <= RemainingGCD + BaseActionQueue)) &&
