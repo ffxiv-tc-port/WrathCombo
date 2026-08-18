@@ -246,8 +246,8 @@ internal partial class AST
     {
         get
         {
-            if (Svc.ClientState.LocalPlayer is null ||
-                Svc.ClientState.LocalPlayer.ClassJob.RowId != JobID ||
+            if (Svc.Objects.LocalPlayer is null ||
+                Svc.Objects.LocalPlayer.ClassJob.RowId != JobID ||
                 Svc.Condition[ConditionFlag.BetweenAreas] ||
                 Svc.Condition[ConditionFlag.Unconscious] ||
                 Gauge.DrawnCards[0] == CardType.None ||

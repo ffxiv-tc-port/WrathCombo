@@ -94,7 +94,7 @@ public static class DebugFile
                 throw new InvalidOperationException();
             }
 
-            job = Svc.ClientState.LocalPlayer.ClassJob.Value;
+            job = Svc.Objects.LocalPlayer.ClassJob.Value;
         }
 
         using (_file = new StreamWriter(GetDebugFilePath(), append: false))
@@ -183,7 +183,7 @@ public static class DebugFile
 
     private static void AddPlayerInfo()
     {
-        var player = Svc.ClientState.LocalPlayer;
+        var player = Svc.Objects.LocalPlayer;
         var job = player.ClassJob.Value;
         var currentZone = "Unknown";
         try
@@ -216,7 +216,7 @@ public static class DebugFile
 
     private static void AddTargetInfo()
     {
-        var target = Svc.ClientState.LocalPlayer.TargetObject;
+        var target = Svc.Objects.LocalPlayer.TargetObject;
 
         AddLine($"Target: {target?.GameObjectId.ToString() ?? "None"}");
 
@@ -507,8 +507,8 @@ public static class DebugFile
 
     private static void AddStatusEffects()
     {
-        var playerID = Svc.ClientState.LocalPlayer.GameObjectId;
-        var statusEffects = Svc.ClientState.LocalPlayer.StatusList;
+        var playerID = Svc.Objects.LocalPlayer.GameObjectId;
+        var statusEffects = Svc.Objects.LocalPlayer.StatusList;
 
         var statusEffectsCount = 0;
         foreach (var _ in statusEffects)

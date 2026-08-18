@@ -129,7 +129,7 @@ internal class Debug : ConfigWindow, IDisposable
         ImGuiEx.Spacing(new Vector2(0f, SpacingMedium));
 
         var target = Svc.Targets.Target;
-        var player = Svc.ClientState.LocalPlayer;
+        var player = Svc.Objects.LocalPlayer;
 
         // Custom 2-Column Styling
         static void CustomStyleText(string firstColumn, object? secondColumn, bool useMonofont = false, Vector4? optionalColor = null)
@@ -410,7 +410,7 @@ internal class Debug : ConfigWindow, IDisposable
 
             if (ImGui.TreeNode("Object Data"))
             {
-                CustomStyleText("DataId:", target?.DataId);
+                CustomStyleText("DataId:", target?.BaseId);
 
                 // Display 'EntityId' only if it differs from 'GameObjectId'
                 if (target is not null && target.EntityId != target.GameObjectId)

@@ -303,9 +303,9 @@ public sealed partial class WrathCombo : IDalamudPlugin
 
     private void OnFrameworkUpdate(IFramework framework)
     {
-        if (Svc.ClientState.LocalPlayer is not null)
+        if (Svc.Objects.LocalPlayer is not null)
         {
-            JobID = Svc.ClientState.LocalPlayer?.ClassJob.RowId;
+            JobID = Svc.Objects.LocalPlayer?.ClassJob.RowId;
             CustomComboFunctions.IsMoving(); //Hacky workaround to ensure it's always running
         }
 

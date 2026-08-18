@@ -103,7 +103,7 @@ internal sealed class ActionReplacer : IDisposable
             // Bail if not wanting to replace actions in this manner
             if (Service.Configuration.PerformanceMode)
                 return OriginalHook(actionID);
-            if (Svc.ClientState.LocalPlayer == null)
+            if (Svc.Objects.LocalPlayer == null)
                 return OriginalHook(actionID);
 
             // Only refresh every so often
@@ -133,8 +133,8 @@ internal sealed class ActionReplacer : IDisposable
         try
         {
             if (ClassLocked() ||
-                (DisabledJobsPVE.Any(x => x == Svc.ClientState.LocalPlayer.ClassJob.RowId) && !Svc.ClientState.IsPvP) ||
-                (DisabledJobsPVP.Any(x => x == Svc.ClientState.LocalPlayer.ClassJob.RowId) && Svc.ClientState.IsPvP))
+                (DisabledJobsPVE.Any(x => x == Svc.Objects.LocalPlayer.ClassJob.RowId) && !Svc.ClientState.IsPvP) ||
+                (DisabledJobsPVP.Any(x => x == Svc.Objects.LocalPlayer.ClassJob.RowId) && Svc.ClientState.IsPvP))
                 return OriginalHook(actionID);
 
             foreach (CustomCombo? combo in FilteredCombos)
@@ -170,20 +170,20 @@ internal sealed class ActionReplacer : IDisposable
     /// </returns>
     public static unsafe bool ClassLocked()
     {
-        if (Svc.ClientState.LocalPlayer is null) return false;
+        if (Svc.Objects.LocalPlayer is null) return false;
 
-        if (Svc.ClientState.LocalPlayer.Level <= 35) return false;
+        if (Svc.Objects.LocalPlayer.Level <= 35) return false;
 
-        if (Svc.ClientState.LocalPlayer.ClassJob.RowId is
+        if (Svc.Objects.LocalPlayer.ClassJob.RowId is
             (>= 8 and <= 25) or 27 or 28 or >= 30)
             return false;
 
         if (!UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(66049))
             return false;
 
-        if ((Svc.ClientState.LocalPlayer.ClassJob.RowId is 1 or 2 or 3 or 4 or 5 or 6 or 7 or 26 or 29) &&
+        if ((Svc.Objects.LocalPlayer.ClassJob.RowId is 1 or 2 or 3 or 4 or 5 or 6 or 7 or 26 or 29) &&
             Svc.Condition[ConditionFlag.BoundByDuty56] && // in an instance duty
-            Svc.ClientState.LocalPlayer.Level > 35) return true;
+            Svc.Objects.LocalPlayer.Level > 35) return true;
 
         return false;
     }
