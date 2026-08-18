@@ -55,7 +55,14 @@ namespace WrathCombo.CustomComboNS.Functions
 
         public static unsafe bool InFATE()
         {
-            var currentFate = FateManager.Instance()->CurrentFate;
+            // FateManager.Instance() 在 CS 裡是 [StaticAddress(..., isPointer: true)] —— 讀的是「指標的位址」,
+            // 遊戲還沒把它配起來(登入前、換區中)時那個槽就是 0,回來的是貨真價實的 null。
+            // 解參考就是攔不到的 AVE,而這支在自動輪替的判定路徑上(AutoRotationController 的 CombatBypass
+            // 與 FATE 目標優先)會被反覆呼叫。讀不到回 false —— 對「還沒進場」來說「不在 FATE 裡」就是正確答案。
+            var fateManager = FateManager.Instance();
+            if (fateManager == null)
+                return false;
+            var currentFate = fateManager->CurrentFate;
             return currentFate is not null && LocalPlayer.Level <= currentFate->MaxLevel;
         }
 
