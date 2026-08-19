@@ -325,7 +325,23 @@ internal abstract partial class CustomComboFunctions
         RaycastHit hit;
         var flags = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
 
-        return !Framework.Instance()->BGCollisionModule->RaycastMaterialFilter(&hit, &sourcePos, &direction, distance, 1, flags);
+        // 🔴 Framework.Instance() 是 [StaticAddress("48 8B 1D ?? ?? ?? ?? 8B 7C 24 64", 3, isPointer: true)]
+        //    （宣告在 Dalamud 自帶的 lib/FFXIVClientStructs/.../Client/System/Framework/Framework.cs:23；
+        //    本專案沒有 CustomCS 子模組，直接參考 $(DalamudLibPath)FFXIVClientStructs.dll，所以那份才是真值來源）
+        //    ——isPointer:true 的產生器回的是全域指標槽的**內容**，遊戲還沒建好／正在拆掉 Framework 時
+        //    合法為 null；BGCollisionModule（FieldOffset 0x2B58）也只是普通指標欄位，場景載入前同樣可能是 null。
+        //    原本整條裸鏈解參考就是 AccessViolationException，而 AVE 在 .NET Core 是 corrupted-state
+        //    exception，try/catch 與 HookSafety 都攔不到，沒有第二道防線。
+        // 🔴 這支是每幀熱路徑：AutoRotationController 有 6 個呼叫點，都在逐一篩選候選目標時呼叫，
+        //    所以刻意不寫 log ——真的發生時會是每幀每目標一筆。
+        //    fail-closed：拿不到碰撞模組就回 false＝「沒有視線」，這幀不把該目標選進來、不出手。
+        //    回 false 才是中性值：回 true 等於在零依據下宣稱「看得到」，會讓 rotation 對著牆後的目標放技能。
+        var framework = Framework.Instance();
+        var collision = framework != null ? framework->BGCollisionModule : null;
+        if (collision == null)
+            return false;
+
+        return !collision->RaycastMaterialFilter(&hit, &sourcePos, &direction, distance, 1, flags);
     }
 
     #endregion
