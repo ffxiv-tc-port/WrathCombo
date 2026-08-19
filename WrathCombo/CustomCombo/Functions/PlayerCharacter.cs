@@ -97,8 +97,18 @@ namespace WrathCombo.CustomComboNS.Functions
         {
             if (GroupManager.Instance()->MainGroup.IsAlliance)
             {
-                var array = UIModule.Instance()->GetRaptureAtkModule()->AtkModule.AtkArrayDataHolder.StringArrays[3]->StringArray[4];
+                // UIModule.Instance() 是手寫包裝(UIModule 未建立時合法回 null),整條四跳鏈逐節判空;
+                // 取不到=回 NotInAlliance(視為不在聯盟團),不解參考。StringArrays[3] 的槽位元素也可為 null。
+                var uiModule = UIModule.Instance();
+                if (uiModule == null) return AllianceGroup.NotInAlliance;
+                var atkModule = uiModule->GetRaptureAtkModule();
+                if (atkModule == null) return AllianceGroup.NotInAlliance;
+                var stringArrayData = atkModule->AtkModule.AtkArrayDataHolder.StringArrays[3];
+                if (stringArrayData == null || stringArrayData->StringArray == null) return AllianceGroup.NotInAlliance;
+                var array = stringArrayData->StringArray[4];
+                if (array == null) return AllianceGroup.NotInAlliance;
                 var str = MemoryHelper.ReadSeStringNullTerminated(new System.IntPtr(array));
+                if (str.TextValue.Length == 0) return AllianceGroup.NotInAlliance;
                 var lastChar = str.TextValue.Last();
 
                 return lastChar switch
