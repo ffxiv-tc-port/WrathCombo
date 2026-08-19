@@ -291,11 +291,15 @@ internal static class SimpleTarget
     {
         get
         {
-            if (!PronounService.PronounsReady) return null;
             unsafe
             {
+                // 直接判 Module 本身,不要靠 PronounsReady 當前置條件 ——
+                // 兩者各自重新解析,拿 Module 才是真正要解參考的那個指標。
+                var module = PronounService.Module;
+                if (module == null) return null;
+
                 return GameObjectExtensions.GetObjectFrom(
-                    PronounService.Module->UiMouseOverTarget);
+                    module->UiMouseOverTarget);
             }
         }
     }
