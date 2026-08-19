@@ -36,6 +36,14 @@ namespace WrathCombo.CustomComboNS.Functions
 
             var existingIds = _partyList.Select(x => x.GameObjectId).ToHashSet();
 
+            // InfoProxyPartyMember 走 InfoModule 鏈:UIModule 與 InfoModule 皆可能為 null,
+            // proxy 未註冊時 GetInfoProxyById 也回 null。CharDataSpan 是手寫屬性
+            // `new(CharData, EntryCount)` —— 擁有者為 null 時光是讀 CharData(位移 0xB0)
+            // 就已經在解參考位址 0xB0,而 AVE 是 corrupted-state exception,try/catch 攔不到。
+            // 同一次呼叫內取一次即可,不跨幀保存。取不到就跳過 NPC 職業的補寫:
+            // 這是輪詢路徑,安靜退化、不記 log。
+            var partyMemberInfo = InfoProxyPartyMember.Instance();
+
             for (int i = 1; i <= 8; i++)
             {
                 var member = SimpleTarget.GetPartyMemberInSlotSlot(i);
@@ -46,9 +54,9 @@ namespace WrathCombo.CustomComboNS.Functions
                     {
                         // Update existing member's properties as needed
                         existingMember.CurrentHP = chara.CurrentHp;
-                        if (member is IBattleNpc)
+                        if (member is IBattleNpc && partyMemberInfo != null)
                         {
-                            foreach (var p in InfoProxyPartyMember.Instance()->CharDataSpan)
+                            foreach (var p in partyMemberInfo->CharDataSpan)
                             {
                                 if (p.Sort == i - 1)
                                     existingMember.NPCClassJob = p.Job;
@@ -62,9 +70,9 @@ namespace WrathCombo.CustomComboNS.Functions
                             GameObjectId = chara.GameObjectId,
                             CurrentHP = chara.CurrentHp
                         };
-                        if (member is IBattleNpc)
+                        if (member is IBattleNpc && partyMemberInfo != null)
                         {
-                            foreach (var p in InfoProxyPartyMember.Instance()->CharDataSpan)
+                            foreach (var p in partyMemberInfo->CharDataSpan)
                             {
                                 if (p.Sort == i - 1)
                                     wmember.NPCClassJob = p.Job;
