@@ -110,13 +110,42 @@ public static class ConflictingPluginsChecks
             }
         }
 
+        private bool _ipcAvailable;
+        private bool _ipcAvailablePrimed;
+
+        // ⚠️ 不要用 long.MinValue 當「還沒查過」的哨兵：
+        // now - long.MinValue 會溢位成負數，減法比較就永遠不成立、快取永不更新。
+        private long _ipcAvailableCheckedAt;
+
         /// <summary>
         ///     這一份 BossMod(Reborn) 的 IPC 是否可用（版本夠新／有安裝）。
+        ///     最多每 2 秒真的問一次，其餘走快取。
         /// </summary>
         /// <remarks>
         ///     給 <see cref="WrathCombo.Data.MechanicHints" /> 決定要問哪一個實例用的。
+        ///     <br />
+        ///     🔴 <b>一定要快取</b>：<see cref="ReusableIPC.IsEnabled" /> 走
+        ///     <c>DalamudReflector.TryGetDalamudPlugin(…, ignoreCache: true)</c>，
+        ///     每次呼叫都用反射重掃一遍已安裝外掛清單。機制提示是逐幀路徑，
+        ///     直接 60fps 打下去就是把「外掛裝了沒」的查詢做成主執行緒卡頓來源。
+        ///     外掛的安裝狀態本來就不會逐幀改變，2 秒的粒度綽綽有餘
+        ///     （與同類別的 <see cref="ManualQueueTakeover" /> 同一形狀）。
         /// </remarks>
-        public bool IpcAvailable => IPC.IsEnabled;
+        public bool IpcAvailable
+        {
+            get
+            {
+                var now = Environment.TickCount64;
+                if (!_ipcAvailablePrimed || now - _ipcAvailableCheckedAt >= 2000)
+                {
+                    _ipcAvailablePrimed = true;
+                    _ipcAvailableCheckedAt = now;
+                    _ipcAvailable = IPC.IsEnabled;
+                }
+
+                return _ipcAvailable;
+            }
+        }
 
         /// <inheritdoc cref="BossModIPC.ShouldInterruptTargets" />
         public ulong[] InterruptHints() => IPC.ShouldInterruptTargets();
