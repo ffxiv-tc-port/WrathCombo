@@ -6,6 +6,7 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using WrathCombo.Attributes;
 using WrathCombo.Combos.PvE;
@@ -349,26 +350,68 @@ internal static class SimpleTarget
             .FirstOrDefault();
 
     public static IGameObject? InterruptableEnemy =>
-        Svc.Objects
-            .OfType<IBattleChara>()
-            .Where(x => x.IsHostile() && x.IsTargetable &&
-                        x.IsWithinRange(3) && x.IsCastInterruptible)
-            .OrderByDescending(x => Svc.Targets.Target?.GameObjectId == x.GameObjectId)
-            .FirstOrDefault();
+        PickEnemy(
+            Svc.Objects
+                .OfType<IBattleChara>()
+                .Where(x => x.IsHostile() && x.IsTargetable &&
+                            x.IsWithinRange(3) && x.IsCastInterruptible),
+            MechanicHints.HintKind.Interrupt);
 
     public static IGameObject? StunnableEnemy(int reStunCheck = 3) =>
-        Svc.Objects
-            .OfType<IBattleChara>()
-            .Where(x => x.IsHostile() && x.IsTargetable &&
-                        !x.IsBoss() && x.IsWithinRange(3) &&
-                        !CustomComboFunctions.HasStatusEffect(All.Debuffs.Stun, x) &&
-                        (ICDTracker.StatusIsExpired(All.Debuffs.Stun, x.GameObjectId) ||
-                         ICDTracker.Trackers.FirstOrDefault(y =>
-                             y.StatusID == All.Debuffs.Stun &&
-                             x.GameObjectId == y.GameObjectId)?
-                             .TimesApplied < reStunCheck))
-            .OrderByDescending(x => Svc.Targets.Target?.GameObjectId == x.GameObjectId)
+        PickEnemy(
+            Svc.Objects
+                .OfType<IBattleChara>()
+                .Where(x => x.IsHostile() && x.IsTargetable &&
+                            !x.IsBoss() && x.IsWithinRange(3) &&
+                            !CustomComboFunctions.HasStatusEffect(All.Debuffs.Stun, x) &&
+                            (ICDTracker.StatusIsExpired(All.Debuffs.Stun, x.GameObjectId) ||
+                             ICDTracker.Trackers.FirstOrDefault(y =>
+                                 y.StatusID == All.Debuffs.Stun &&
+                                 x.GameObjectId == y.GameObjectId)?
+                                 .TimesApplied < reStunCheck) &&
+                            // MonsterDex 明確說「不吃暈眩」才排除；
+                            // 功能關閉／沒安裝／查無資料一律放行。
+                            MonsterVulnerability.CanBeStunned(x)),
+            MechanicHints.HintKind.Stun);
+
+    /// <summary>
+    ///     從已經過濾好的候選敵人裡挑一個，並套用「機制感知」偏好。
+    /// </summary>
+    /// <param name="candidates">
+    ///     <b>已經</b>通過所有既有條件（敵對／可選取／距離／可打斷／ICD…）的候選。
+    /// </param>
+    /// <param name="kind">要問 BossMod(Reborn) 哪一份提示清單。</param>
+    /// <returns>
+    ///     功能關閉時 ＝ 與改動前<b>逐字相同</b>的行為（現有硬目標優先，其餘取第一個）。<br />
+    ///     功能開啟、非嚴格：BMR 標記過的排前面，沒有標記時退化成上面那條。<br />
+    ///     功能開啟、嚴格：候選先與 BMR 標記<b>取交集</b>，交集為空就回
+    ///     <see langword="null" />（＝不出手）。
+    /// </returns>
+    /// <remarks>
+    ///     🔴 BMR 回的是模組原始標記，不含 InCombat／詠唱中之類的策略過濾 ——
+    ///     所以這裡永遠是「既有過濾 ∩ 標記」，標記從來不會放寬既有條件。
+    /// </remarks>
+    private static IGameObject? PickEnemy
+        (IEnumerable<IBattleChara> candidates, MechanicHints.HintKind kind)
+    {
+        // 功能關閉時完全不碰 IPC。
+        if (!MechanicHints.Enabled)
+            return candidates
+                .OrderByDescending(x =>
+                    Svc.Targets.Target?.GameObjectId == x.GameObjectId)
+                .FirstOrDefault();
+
+        var hints = MechanicHints.Hints(kind);
+
+        if (MechanicHints.StrictOnly)
+            candidates = candidates.Where(x => MechanicHints.IsFlagged(hints, x));
+
+        return candidates
+            .OrderByDescending(x => MechanicHints.IsFlagged(hints, x))
+            .ThenByDescending(x =>
+                Svc.Targets.Target?.GameObjectId == x.GameObjectId)
             .FirstOrDefault();
+    }
 
     public static IGameObject? DottableEnemy
     (uint dotAction,

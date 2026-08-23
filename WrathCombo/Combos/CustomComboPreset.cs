@@ -567,6 +567,19 @@ public enum CustomComboPreset
         "Replaces Foot Graze with Head Graze when target can be interrupted.", ADV.JobID)]
     ALL_Ranged_Interrupt = 100041,
 
+    [Role(JobRole.RangedDPS)]
+    [ReplaceSkill(RoleActions.PhysRanged.FootGraze)]
+    [ParentCombo(ALL_Ranged_Menu)]
+    [CustomComboInfo("物理遠程: 自動傷腿（加重）",
+        "自動化功能，預設關閉。\n" +
+        "目標身上沒有「加重」時，把傷足替換成傷腿，替它補上移動減速。\n" +
+        "首領不列入對象。\n" +
+        "同時啟用「遠程打斷功能」時，可以打斷的當下一律以傷頭優先。\n" +
+        "同一隻身上重複施加會依遞減免疫追蹤自動停手。\n" +
+        "若有安裝 MonsterDex，被明確標示為不吃加重的敵人會被跳過；查不到資料時照常施放。",
+        ADV.JobID)]
+    ALL_Ranged_LegGraze = 100042,
+
     #endregion
 
     //Non-gameplay Features

@@ -5,6 +5,8 @@ using ECommons;
 using ECommons.EzIpcManager;
 using ECommons.Logging;
 using ECommons.Reflection;
+using EZ = ECommons.Throttlers.EzThrottler;
+using TS = System.TimeSpan;
 
 // ReSharper disable InlineTemporaryVariable
 
@@ -179,6 +181,69 @@ internal sealed class BossModIPC(
         return !aiForbidActions && !aiManualTarget;
     }
 
+    /// <summary>
+    ///     BossMod(Reborn) 目前標記為「這一發該打斷」的敵人 InstanceID 清單。
+    /// </summary>
+    /// <returns>
+    ///     空陣列 ＝ 沒有任何標記、對方沒安裝、端點不存在、或呼叫擲了例外。<br />
+    ///     呼叫端一律把空陣列當成「沒有機制資訊」，<b>退回現行行為</b>。
+    /// </returns>
+    /// <remarks>
+    ///     🔴 對方回的是<b>模組的原始標記</b>，刻意不含 InCombat／是否正在詠唱之類的
+    ///     策略過濾（BMR 自己的消費端是在旗標之外另外加的）。所以這份清單只能當
+    ///     「優先名單」跟 Wrath 既有的過濾條件<b>取交集</b>，不可以拿來取代既有過濾。
+    /// </remarks>
+    public ulong[] ShouldInterruptTargets() =>
+        SafeHintList(_shouldInterruptTargets, "Hints.ShouldInterruptTargets");
+
+    /// <summary>
+    ///     BossMod(Reborn) 目前標記為「這一發該暈眩」的敵人 InstanceID 清單。
+    /// </summary>
+    /// <inheritdoc cref="ShouldInterruptTargets" />
+    public ulong[] ShouldStunTargets() =>
+        SafeHintList(_shouldStunTargets, "Hints.ShouldStunTargets");
+
+    /// <summary>
+    ///     取一份提示清單，任何失敗都降級成「沒有機制資訊」（空陣列）。
+    /// </summary>
+    /// <remarks>
+    ///     ⚠️ <c>ulong[]</c> 這種<b>陣列</b>回傳型別在 BMR 端沒有實機先例
+    ///     （既有端點全是純量／字串／<c>Vector3?</c>／<c>DateTime</c>）。
+    ///     若執行期型別對不上，Dalamud 會擲出的<b>不是</b>
+    ///     <c>IpcNotReadyError</c> —— 而 ECommons 的 <c>TryInvoke</c>
+    ///     <b>只攔 <c>IpcNotReadyError</c></b>，其餘例外會一路穿到連段裡。
+    ///     所以這裡另外包一層 <see langword="try" />：任何例外都吃掉並回空陣列，
+    ///     ＝功能降級成「BMR 不在」，不是壞掉。
+    /// </remarks>
+    private ulong[] SafeHintList(Func<ulong[]> ipc, string tag)
+    {
+        if (!IsEnabled)
+            return [];
+
+        try
+        {
+            if (!ipc.TryInvoke(out var hints))
+            {
+                PluginLog.Verbose($"[MechanicHints] [{PluginName}] " +
+                                  $"`{tag}` IPC not available.");
+                return [];
+            }
+
+            return hints ?? [];
+        }
+        catch (Exception e)
+        {
+            // 一律 Information：使用者的記錄等級會把 Debug/Verbose 濾掉，
+            // 而這條正是「功能悄悄不動」時唯一查得到的線索。
+            if (EZ.Throttle($"MechanicHintsFailure_{tag}", TS.FromMinutes(1)))
+                PluginLog.Information(
+                    $"[MechanicHints] [{PluginName}] `{tag}` 呼叫失敗，" +
+                    $"本次視同「沒有機制資訊」並退回現行的打斷／暈眩目標選擇：" +
+                    e.ToStringFull());
+            return [];
+        }
+    }
+
     public DateTime LastModified()
     {
         if (!IsEnabled) return DateTime.MinValue;
@@ -206,5 +271,11 @@ internal sealed class BossModIPC(
 
     [EzIPC("BossMod.ActionQueue.UseManualQueueEnabled", false)]
     private readonly Func<bool> _useManualQueueEnabled = null!;
+
+    [EzIPC("BossMod.Hints.ShouldInterruptTargets", false)]
+    private readonly Func<ulong[]> _shouldInterruptTargets = null!;
+
+    [EzIPC("BossMod.Hints.ShouldStunTargets", false)]
+    private readonly Func<ulong[]> _shouldStunTargets = null!;
 #pragma warning restore CS8618, CS0649
 }

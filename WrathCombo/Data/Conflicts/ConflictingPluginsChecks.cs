@@ -110,6 +110,20 @@ public static class ConflictingPluginsChecks
             }
         }
 
+        /// <summary>
+        ///     這一份 BossMod(Reborn) 的 IPC 是否可用（版本夠新／有安裝）。
+        /// </summary>
+        /// <remarks>
+        ///     給 <see cref="WrathCombo.Data.MechanicHints" /> 決定要問哪一個實例用的。
+        /// </remarks>
+        public bool IpcAvailable => IPC.IsEnabled;
+
+        /// <inheritdoc cref="BossModIPC.ShouldInterruptTargets" />
+        public ulong[] InterruptHints() => IPC.ShouldInterruptTargets();
+
+        /// <inheritdoc cref="BossModIPC.ShouldStunTargets" />
+        public ulong[] StunHints() => IPC.ShouldStunTargets();
+
         public override void CheckForConflict()
         {
             if (!ThrottlePassed(8, false))

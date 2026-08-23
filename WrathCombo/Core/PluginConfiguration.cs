@@ -94,6 +94,41 @@ namespace WrathCombo.Core
 
         public bool UseCustomHealStack = false;
 
+        #region Mechanic-Aware Enemy Targeting
+
+        /// <summary>
+        ///     打斷／暈眩的目標選擇要不要參考 BossMod(Reborn) 的機制標記。
+        /// </summary>
+        /// <remarks>
+        ///     預設 <see langword="false" /> ＝ 完全維持現行行為。<br />
+        ///     開啟後只是把 BMR 標記過的敵人<b>排到前面</b>，仍然要通過既有的
+        ///     敵對／可選取／距離／可打斷／ICD 判斷。BMR 缺席或沒標記任何東西時，
+        ///     排序沒有東西可排，結果與關閉時相同。
+        /// </remarks>
+        public bool MechanicAwareTargeting = false;
+
+        /// <summary>
+        ///     嚴格模式：只把 BMR 標記過的敵人列入候選。
+        /// </summary>
+        /// <remarks>
+        ///     🔴 這一條會<b>減少</b>出手：BMR 缺席或清單為空時，打斷／暈眩的目標
+        ///     選擇一律回 <see langword="null" />（＝不出手）。
+        ///     只在 <see cref="MechanicAwareTargeting" /> 開啟時有效。
+        /// </remarks>
+        public bool MechanicAwareTargetingStrictOnly = false;
+
+        /// <summary>
+        ///     暈眩目標選擇要不要跳過 MonsterDex 明確標示為「不吃暈眩」的敵人。
+        /// </summary>
+        /// <remarks>
+        ///     🔴 只有在 MonsterDex <b>明確回報 bit0 ＝ 0</b> 時才排除。
+        ///     沒安裝、端點不存在、查無資料（回 <c>-1</c>）一律<b>放行</b>，
+        ///     絕不把「不知道」當成「免疫」。
+        /// </remarks>
+        public bool MonsterDexStunGate = false;
+
+        #endregion
+
         // Just has value so the UI element for it is more obvious from the get-go
         public string[] CustomHealStack = [
             "FocusTarget",

@@ -356,6 +356,63 @@ namespace WrathCombo.Window.Tabs
                 ImGuiEx.Spacing(new Vector2(0, 20));
                 ImGuiEx.TextUnderlined("Targeting Options".Loc());
 
+                #region Mechanic-Aware Interrupt / Stun Targeting
+
+                var mechanicAware = Service.Configuration.MechanicAwareTargeting;
+                if (ImGui.Checkbox("Mechanic-Aware Interrupt & Stun Targeting".Loc(),
+                        ref mechanicAware))
+                {
+                    Service.Configuration.MechanicAwareTargeting = mechanicAware;
+                    Service.Configuration.Save();
+                }
+
+                ImGuiComponents.HelpMarker((
+                    "When picking a target to Interrupt or Stun, prefer the enemies that BossMod (Reborn) has flagged as the ones that actually need it for the current mechanic.\n\n" +
+                    "Without this, Wrath interrupts anything that reports an interruptible cast, and stuns anything that is not a boss - which wastes cooldowns on casts that do not matter.\n\n" +
+                    "The flags are only used to re-order the candidates Wrath already accepted; every existing check (hostile, targetable, in range, interruptible, stun immunity tracking) still applies.\n" +
+                    "If BossMod (Reborn) is not installed, or it has nothing flagged right now, this behaves exactly like it is off.\n\n" +
+                    "Default: Off").Loc());
+
+                if (mechanicAware)
+                {
+                    ImGui.Indent();
+
+                    var strictOnly =
+                        Service.Configuration.MechanicAwareTargetingStrictOnly;
+                    if (ImGui.Checkbox("Only act on flagged targets".Loc(),
+                            ref strictOnly))
+                    {
+                        Service.Configuration.MechanicAwareTargetingStrictOnly =
+                            strictOnly;
+                        Service.Configuration.Save();
+                    }
+
+                    ImGuiComponents.HelpMarker((
+                        "Stricter: instead of merely preferring the flagged enemies, only flagged enemies are considered at all.\n\n" +
+                        "This REDUCES how often you interrupt and stun. If BossMod (Reborn) is missing, or has nothing flagged, no target is picked and nothing is used.\n" +
+                        "A one-off note is written to the log (Information level) while this is on and no flags can be read, so a silent 'the feature stopped working' can be told apart from 'there was nothing to interrupt'.\n\n" +
+                        "Default: Off").Loc());
+
+                    ImGui.Unindent();
+                }
+
+                var dexStunGate = Service.Configuration.MonsterDexStunGate;
+                if (ImGui.Checkbox("Skip Stun-Immune Enemies (MonsterDex)".Loc(),
+                        ref dexStunGate))
+                {
+                    Service.Configuration.MonsterDexStunGate = dexStunGate;
+                    Service.Configuration.Save();
+                }
+
+                ImGuiComponents.HelpMarker((
+                    "Ask MonsterDex whether the enemy can be stunned at all, and skip it when the answer is a definite no.\n\n" +
+                    "Only a definite 'not stunnable' excludes an enemy. MonsterDex not installed, no entry for that enemy, or any failed lookup all count as 'unknown', and unknown always passes - so this can never silently disable your stuns.\n\n" +
+                    "Default: Off").Loc());
+
+                ImGuiEx.Spacing(new Vector2(0, 10));
+
+                #endregion
+
                 var useCusHealStack = Service.Configuration.UseCustomHealStack;
 
                 #region Retarget ST Healing Actions
