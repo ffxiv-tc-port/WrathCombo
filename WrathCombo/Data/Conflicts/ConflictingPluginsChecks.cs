@@ -67,6 +67,9 @@ public static class ConflictingPluginsChecks
     }
 
     internal sealed class BossModCheck(bool reborn = false)
+        // 注意：下面這個字串是 Dalamud 內部名（用來偵測外掛裝了沒、以及當 log 標籤），
+        // 不是 IPC 前綴 —— BossModReborn 的 IPC 一律註冊在 "BossMod." 底下。
+        // 訂閱端已改成寫完整標籤名 + applyPrefix: false，見 BossModIPC 的類別註解。
         : ConflictCheck(!reborn
             ? new BossModIPC("BossMod", new Version(0, 3, 1, 0))
             : new BossModIPC("BossModReborn", new Version(7, 2, 5, 90)))
@@ -79,6 +82,33 @@ public static class ConflictingPluginsChecks
         public bool SettingConflicted;
 
         protected override BossModIPC IPC => (BossModIPC)_ipc;
+
+        private bool _manualQueueTakeover;
+        private long _manualQueueTakeoverCheckedAt;
+
+        /// <summary>
+        ///     對方的「手動動作佇列」接管是否啟用（最多每 2 秒問一次 IPC，其餘走快取）。
+        /// </summary>
+        /// <remarks>
+        ///     給 <c>AutoRotationController</c> 判斷 <c>UseAction</c> 回傳 <c>false</c>
+        ///     到底是「真的失敗」還是「已被 BossMod(Reborn) 收進佇列」用的。<br />
+        ///     這裡刻意不用 <c>EzThrottler</c>：它的 key 是全域持久的、而且第一次呼叫必定
+        ///     放行，在這種「每個自動循環週期都可能被問好幾次」的路徑上語意不好推。
+        /// </remarks>
+        public bool ManualQueueTakeover
+        {
+            get
+            {
+                var now = Environment.TickCount64;
+                if (now - _manualQueueTakeoverCheckedAt >= 2000)
+                {
+                    _manualQueueTakeoverCheckedAt = now;
+                    _manualQueueTakeover = IPC.IsManualQueueTakeoverEnabled();
+                }
+
+                return _manualQueueTakeover;
+            }
+        }
 
         public override void CheckForConflict()
         {
