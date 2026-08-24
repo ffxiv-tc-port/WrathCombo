@@ -4994,7 +4994,7 @@ public enum CustomComboPreset
     RPR_ST_SoD = 12003,
 
     [ParentCombo(RPR_ST_AdvancedMode)]
-    [CustomComboInfo("Soulsow", "在非戰鬥狀態且沒有播魂種buff時新增播魂種。", RPR.JobID)]
+    [CustomComboInfo("Soulsow", "在非戰鬥狀態且沒有播魂種效果時新增播魂種。", RPR.JobID)]
     RPR_ST_SoulSow = 12020,
 
     [ParentCombo(RPR_ST_AdvancedMode)]

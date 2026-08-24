@@ -45,6 +45,10 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Lady of Crowns", AST.LadyOfCrown.ActionName()),
                 KeyValuePair.Create("Lazy Lady", AST.LadyOfCrown.ActionName()),
                 KeyValuePair.Create("Lady Option", $"{AST.LadyOfCrown.ActionName()}選項"),
+                // 補上整段 preset 名稱的鍵："Lady Option" 只覆蓋到後半段，
+                // 前面的 "Lazy" 沒有任何鍵能吃到，會在 CustomComboPreset.cs:853
+                // 的 "Lazy Lady Option" 顯示成中英夾雜。整段對應同一顆 Lady of Crowns。
+                KeyValuePair.Create("Lazy Lady Option", $"{AST.LadyOfCrown.ActionName()}選項"),
                 // "Turns Fall Malefic into an all-in-one damage button." lives in
                 // ASTDescriptions.cs (Description layer, processed before this Skill-layer
                 // file) -- a duplicate key here would always lose the key de-dup and never

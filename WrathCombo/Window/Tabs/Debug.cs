@@ -15,6 +15,7 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
+using ECommons.LanguageHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
@@ -72,7 +73,7 @@ internal class Debug : ConfigWindow, IDisposable
 
     internal new static unsafe void Draw()
     {
-        ImGui.Text("This is where you can figure out where it all went wrong.");
+        ImGui.Text("This is where you can figure out where it all went wrong.".Loc());
 
         ImGuiEx.Spacing(new Vector2(0f, SpacingMedium));
 
@@ -87,7 +88,7 @@ internal class Debug : ConfigWindow, IDisposable
         if (_debugError != "")
             ImGuiEx.Text(ImGuiColors.DalamudRed, _debugError);
 
-        ImGui.Text("Debug Config: ");
+        ImGui.Text("Debug Config: ".Loc());
         ImGui.SameLine();
         if (ImGui.InputText("##debugConfig", ref _debugConfig, 2000000))
         {
@@ -115,13 +116,13 @@ internal class Debug : ConfigWindow, IDisposable
         }
 
         ImGuiComponents.HelpMarker(
-            "Paste a base64 encoded configuration here to load it into the plugin." +
+            ("Paste a base64 encoded configuration here to load it into the plugin." +
             "\nThis comes from a debug file." +
             "\nThis will overwrite your current configuration temporarily, restoring your own configuration when you disable debug mode." +
-            "\nDebug mode will also be disabled if you unload the plugin.");
+            "\nDebug mode will also be disabled if you unload the plugin.").Loc());
 
         if (DebugConfig)
-            if (ImGui.Button("Disable Debug Config Mode"))
+            if (ImGui.Button("Disable Debug Config Mode".Loc()))
                 DisableDebugConfig();
 
         #endregion
@@ -157,13 +158,13 @@ internal class Debug : ConfigWindow, IDisposable
 
         if (player is null)
         {
-            ImGui.TextUnformatted("Please log into the game to use this tab.");
+            ImGui.TextUnformatted("Please log into the game to use this tab.".Loc());
             return;
         }
 
         #region Statuses
 
-        ImGui.Text("Status Effects");
+        ImGui.Text("Status Effects".Loc());
         ImGui.Separator();
 
         if (ImGui.CollapsingHeader("Player Statuses"))
@@ -269,7 +270,7 @@ internal class Debug : ConfigWindow, IDisposable
 
         #region Character
 
-        ImGui.Text("Character");
+        ImGui.Text("Character".Loc());
         ImGui.Separator();
 
         if (ImGui.CollapsingHeader("Player Data"))
@@ -487,7 +488,7 @@ internal class Debug : ConfigWindow, IDisposable
 
         #region Party
 
-        ImGui.Text("Party");
+        ImGui.Text("Party".Loc());
         ImGui.Separator();
 
         if (ImGui.CollapsingHeader("Party Data"))
@@ -530,7 +531,7 @@ internal class Debug : ConfigWindow, IDisposable
 
         #region Actions
 
-        ImGui.Text("Action");
+        ImGui.Text("Action".Loc());
         ImGui.Separator();
 
         // ActionSheet Reference
@@ -856,7 +857,7 @@ internal class Debug : ConfigWindow, IDisposable
                 $"{retargets.Select(x => x.Value.ID)
                     .Distinct().Count()}");
             CustomStyleText("Current Total Retargeting entries:", $"{retargets.Count}");
-            ImGuiComponents.HelpMarker("This includes all entries for combos' Replaced Actions as well.");
+            ImGuiComponents.HelpMarker("This includes all entries for combos' Replaced Actions as well.".Loc());
 
             if (retargets.Count > 0)
             {
@@ -881,21 +882,21 @@ internal class Debug : ConfigWindow, IDisposable
                     ImGui.SameLine();
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 110f.Scale() - width);
                     ImGui.Text("");
-                    ImGuiComponents.HelpMarker("If you see the ID constantly changing, that's a sign that the Retarget is constantly being Partially Overwritten.\n\nThis occurs when two different Retargets keep being registered, which do not fully overwrite each other (they do not share the same Replaced Actions).\nUsually this is when you have a retargeting of an action in Feature and also in a Main Combo, and is a sign that both/all the Retargets will likely work.");
+                    ImGuiComponents.HelpMarker("If you see the ID constantly changing, that's a sign that the Retarget is constantly being Partially Overwritten.\n\nThis occurs when two different Retargets keep being registered, which do not fully overwrite each other (they do not share the same Replaced Actions).\nUsually this is when you have a retargeting of an action in Feature and also in a Main Combo, and is a sign that both/all the Retargets will likely work.".Loc());
 
                     ImGui.Indent();
 
                     ImGui.Indent(10f.Scale());
                     var replacedActionsString = string.Join(", ",
                         retarget.ReplacedActions.Select(x => x.ActionName()));
-                    ImGuiEx.Text("Replaced Actions:");
+                    ImGuiEx.Text("Replaced Actions:".Loc());
                     ImGui.SameLine();
                     ImGuiEx.TextWrapped(ImGuiColors.DalamudGrey, replacedActionsString);
                     ImGui.Unindent(10f.Scale());
 
                     CustomStyleText($"Resolver: {retarget.ResolverName}",
                         $"Resolved Target: '{retarget.Resolver()?.Name ?? "Null"}'");
-                    ImGuiComponents.HelpMarker("Resolvers may only resolve to a fallback target,\nexcept under conditions where the Retargeting would actually be applied.");
+                    ImGuiComponents.HelpMarker("Resolvers may only resolve to a fallback target,\nexcept under conditions where the Retargeting would actually be applied.".Loc());
 
                     var createdTimeString = retarget.Created.ToString(@"HH\:mm\:ss");
                     CustomStyleText($"Created: {createdTimeString}",
@@ -915,7 +916,7 @@ internal class Debug : ConfigWindow, IDisposable
 
         #region Misc
 
-        ImGui.Text("Other");
+        ImGui.Text("Other".Loc());
         ImGui.Separator();
 
         if (ImGui.CollapsingHeader("Blue Mage Data"))
@@ -942,7 +943,7 @@ internal class Debug : ConfigWindow, IDisposable
 
         #region IPC
 
-        ImGui.Text("IPC");
+        ImGui.Text("IPC".Loc());
         ImGui.Separator();
 
         static void WrathIPCCallback(int cancellationReason, string extraInfo)
@@ -956,7 +957,7 @@ internal class Debug : ConfigWindow, IDisposable
             if (_wrathLease is null)
             {
                 ImGui.Indent();
-                if (ImGui.Button("Register"))
+                if (ImGui.Button("Register".Loc()))
                 {
                     _wrathLease = P.IPC.RegisterForLease("WrathCombo", "WrathCombo", WrathIPCCallback);
                 }
@@ -970,26 +971,26 @@ internal class Debug : ConfigWindow, IDisposable
 
                 ImGuiEx.Spacing(new Vector2(20, 20));
 
-                if (ImGui.Button("Release"))
+                if (ImGui.Button("Release".Loc()))
                 {
                     P.IPC.ReleaseControl(_wrathLease.Value);
                     _wrathLease = null;
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Set Autorot For Job"))
+                if (ImGui.Button("Set Autorot For Job".Loc()))
                 {
                     P.IPC.SetCurrentJobAutoRotationReady(_wrathLease!.Value);
                 }
                 ImGui.SameLine();
-                if (ImGui.Button("Set Autorot For WHM"))
+                if (ImGui.Button("Set Autorot For WHM".Loc()))
                 {
                     P.IPC.Leasing.AddRegistrationForCurrentJob(_wrathLease!.Value, Job.WHM);
                 }
 
                 ImGuiEx.Spacing(new Vector2(20, 20));
 
-                if (ImGui.Button("Mimic AutoDuty"))
+                if (ImGui.Button("Mimic AutoDuty".Loc()))
                 {
                     // https://github.com/ffxivcode/AutoDuty/blob/master/AutoDuty/IPC/IPCSubscriber.cs#L460
                     if (!P.IPC.IsCurrentJobAutoRotationReady())
@@ -1004,7 +1005,7 @@ internal class Debug : ConfigWindow, IDisposable
                     P.IPC.SetAutoRotationConfigState(_wrathLease!.Value, AutoRotationConfigOption.HealerRotationMode, HealerRotationMode.Lowest_Current);
                 }
                 ImGui.SameLine();
-                if (ImGui.Button("Mimic Questionable"))
+                if (ImGui.Button("Mimic Questionable".Loc()))
                 {
                     // https://git.carvel.li/liza/Questionable/src/commit/de90882ecbb609c2f79fecc1ec17b751dc8763f2/Questionable/Controller/CombatModules/WrathComboModule.cs#L68
                     P.IPC.SetAutoRotationState(_wrathLease!.Value);
@@ -1019,7 +1020,7 @@ internal class Debug : ConfigWindow, IDisposable
             if (P.IPC.Leasing.Registrations.Count > 0)
             {
                 ImGui.SameLine();
-                if (ImGui.Button("Release All Leases"))
+                if (ImGui.Button("Release All Leases".Loc()))
                 {
                     P.IPC.Leasing.SuspendLeases();
                     _wrathLease = null;
@@ -1045,7 +1046,7 @@ internal class Debug : ConfigWindow, IDisposable
                     ImGui.NewLine();
                     ImGuiEx.Spacing(new Vector2(10, 0));
                     ImGui.SameLine();
-                    if (ImGui.Button("Release"))
+                    if (ImGui.Button("Release".Loc()))
                     {
                         P.IPC.ReleaseControl(registration.Key);
                     }
@@ -1072,7 +1073,7 @@ internal class Debug : ConfigWindow, IDisposable
                 CustomStyleText("Plugin Enabled:", OrbwalkerIPC.PluginEnabled());
 
                 ImGui.Indent();
-                if (ImGui.Button("Set Enabled"))
+                if (ImGui.Button("Set Enabled".Loc()))
                 {
                     OrbwalkerIPC.SetPluginEnabled(!OrbwalkerIPC.PluginEnabled());
                 }
@@ -1083,7 +1084,7 @@ internal class Debug : ConfigWindow, IDisposable
                 CustomStyleText("Orbwalking Jobs:", string.Join(", ", jobs));
 
                 ImGui.Indent();
-                if (ImGui.Button("Toggle Current Job Enabled"))
+                if (ImGui.Button("Toggle Current Job Enabled".Loc()))
                 {
                     OrbwalkerIPC.SetEnabledJob((uint)Player.Job, jobs.All(x => x != (int)Player.Job));
                 }
@@ -1097,11 +1098,11 @@ internal class Debug : ConfigWindow, IDisposable
 
         #region Hidden Features
 
-        if (ImGui.Checkbox("Show Hidden Features",
+        if (ImGui.Checkbox("Show Hidden Features".Loc(),
                 ref Service.Configuration.ShowHiddenFeatures))
             Service.Configuration.Save();
 
-        ImGuiComponents.HelpMarker("Some features can be marked as hidden, and will only be shown if this setting is enabled.\nThis is here instead of on the Settings tab while this behavior is still early in its life, and to keep such features more secretive.");
+        ImGuiComponents.HelpMarker("Some features can be marked as hidden, and will only be shown if this setting is enabled.\nThis is here instead of on the Settings tab while this behavior is still early in its life, and to keep such features more secretive.".Loc());
 
         ImGui.SameLine();
         ImGui.TextColored(ImGuiColors.DalamudGrey, "(Do NOT publicly direct users to this setting!)");
