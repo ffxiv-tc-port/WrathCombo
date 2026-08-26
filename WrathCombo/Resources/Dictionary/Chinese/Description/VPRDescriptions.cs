@@ -43,7 +43,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Adds Twinfang and Twinblood to the rotation.", "將Twinfang和Twinblood加入循環。"),
                 KeyValuePair.Create("Disables the range check for Reawaken, so it will be used even without a target selected.", "禁用Reawaken的範圍檢查，即使沒有選擇目標也會使用。"),
                 KeyValuePair.Create("Replaces Vicewinder with Hunter's/Swiftskin's Coils.", "用Hunter's Coils/Swiftskin's Coils替換Vicewinder。"),
-                KeyValuePair.Create("Replaces Vicepit with Hunter's/Swiftskin's Dens.", "用Hunter's Coils/Swiftskin's Dens替換Vicepit。"),
+                // 譯文原本誤植成 Hunter's Coils（複製上一行忘了改），會顯示成錯誤的技能。
+                KeyValuePair.Create("Replaces Vicepit with Hunter's/Swiftskin's Dens.", "用Hunter's Dens/Swiftskin's Dens替換Vicepit。"),
                 KeyValuePair.Create("Replaces Uncoiled Fury with Uncoiled Twinfang and Uncoiled Twinblood.", "用Uncoiled Twinfang和Uncoiled Twinblood替換Uncoiled Fury。"),
                 KeyValuePair.Create("Replaces Option with the Generations.", "用祖靈之牙替換。"),
                 KeyValuePair.Create("Replaces Option with the Legacys.", "用祖靈之蛇替換。"),

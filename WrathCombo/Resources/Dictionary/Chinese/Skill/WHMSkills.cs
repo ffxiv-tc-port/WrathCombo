@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using WrathCombo.Combos.PvE;
@@ -19,6 +19,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Generation Time: 2025-03-13 18:45:21  
                 #region WHM                
                 // Heals
+                KeyValuePair.Create("Adds Cure 3 to Burst combo when the Cure 3 Ready buff is under 6 seconds", $"當{WHM.Cure3.ActionName()}預備buff剩餘時間低於6秒時，將{WHM.Cure3.ActionName()}加入爆發連段"),
                 KeyValuePair.Create("Cure III", WHM.Cure3.ActionName()),
                 KeyValuePair.Create("Cure II", WHM.Cure2.ActionName()),
                 KeyValuePair.Create("Cure", WHM.Cure.ActionName()),
@@ -39,19 +40,23 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 //KeyValuePair.Create("Glare1", WHM.Glare1.ActionName()),
                 //KeyValuePair.Create("Glare3", WHM.Glare3.ActionName()),
                 KeyValuePair.Create("Glare IV", WHM.Glare4.ActionName()),
+                // 複數形（"Glares/Stones/Aeros/Dia"、"Apply options to all Stones and Glares."）
+                // 需要自己的條目，否則加上詞界後就不再被翻譯。
+                KeyValuePair.Create("Glares", WHM.Glare1.ActionName()),
                 KeyValuePair.Create("Glare", WHM.Glare1.ActionName()),
-                KeyValuePair.Create("Stone", WHM.Stone1.ActionName()),
-                KeyValuePair.Create("Stone1", WHM.Stone1.ActionName()),
+                KeyValuePair.Create("Stones", WHM.Stone1.ActionName()),
                 KeyValuePair.Create("Stone2", WHM.Stone2.ActionName()),
                 KeyValuePair.Create("Stone3", WHM.Stone3.ActionName()),
                 KeyValuePair.Create("Stone4", WHM.Stone4.ActionName()),
+                KeyValuePair.Create("Stone", WHM.Stone1.ActionName()),
                 KeyValuePair.Create("Assize", WHM.Assize.ActionName()),
                 KeyValuePair.Create("Holy III", WHM.Holy3.ActionName()),
                 KeyValuePair.Create("Holy", WHM.Holy.ActionName()),
 
                 // DoT
-                KeyValuePair.Create("Aero", WHM.Aero.ActionName()),
+                KeyValuePair.Create("Aeros", WHM.Aero.ActionName()),
                 KeyValuePair.Create("Aero2", WHM.Aero2.ActionName()),
+                KeyValuePair.Create("Aero", WHM.Aero.ActionName()),
                 KeyValuePair.Create("Dia", WHM.Dia.ActionName()),
 
                 // Buffs

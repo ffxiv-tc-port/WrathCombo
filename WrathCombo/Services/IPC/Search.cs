@@ -436,11 +436,11 @@ public class Search(Leasing leasing)
                             x.ComboType switch
                             {
                                 ComboType.Healing =>
-                                    x.Info.Name.Contains("single target", ToLower)
+                                    x.Info.InternalName.Contains("single target", ToLower)
                                         ? ComboTargetTypeKeys.HealST
                                         : ComboTargetTypeKeys.HealMT,
                                 ComboType.Advanced or ComboType.Simple =>
-                                    x.Info.Name.Contains("single target", ToLower)
+                                    x.Info.InternalName.Contains("single target", ToLower)
                                         ? ComboTargetTypeKeys.SingleTarget
                                         : ComboTargetTypeKeys.MultiTarget,
                                 _ => ComboTargetTypeKeys.Other,

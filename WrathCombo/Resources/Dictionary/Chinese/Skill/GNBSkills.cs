@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -59,8 +59,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
 
                 // Defensive
                 KeyValuePair.Create("Camouflage", GNB.Camouflage.ActionName()),
-                KeyValuePair.Create("Royal Guard", GNB.RoyalGuard.ActionName()),
-                KeyValuePair.Create("Release Royal Guard", GNB.ReleaseRoyalGuard.ActionName()),
+                KeyValuePair.Create("Great Nebula", GNB.GreatNebula.ActionName()),
                 KeyValuePair.Create("Nebula", GNB.Nebula.ActionName()),
                 KeyValuePair.Create("Aurora", GNB.Aurora.ActionName()),
                 KeyValuePair.Create("Superbolide", GNB.Superbolide.ActionName()),
@@ -70,7 +69,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Trajectory", GNB.Trajectory.ActionName()),
                 KeyValuePair.Create("Heart of Corundum", GNB.HeartOfCorundum.ActionName()),
                 KeyValuePair.Create("Corundum", GNB.HeartOfCorundum.ActionName()),
-                KeyValuePair.Create("Great Nebula", GNB.GreatNebula.ActionName()),
 
                 // GNB PvP
                 KeyValuePair.Create("Rough Divide", GNBPvP.RoughDivide.ActionName()),

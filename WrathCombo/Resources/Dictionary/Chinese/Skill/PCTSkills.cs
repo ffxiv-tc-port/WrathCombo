@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -18,17 +18,13 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Generation Time: 2025-03-13 18:45:21  
                 #region PCT
                 KeyValuePair.Create("Holy in White", PCTPvP.HolyInWhite.ActionName()),
-                KeyValuePair.Create("Blizzard in Cyan", PCT.BlizzardinCyan.ActionName()),
                 KeyValuePair.Create("Stone in Yellow", PCT.StoneinYellow.ActionName()),
-                KeyValuePair.Create("Blizzard II in Cyan", PCT.BlizzardIIinCyan.ActionName()),
                 KeyValuePair.Create("Claw Motif", PCT.ClawMotif.ActionName()),
                 KeyValuePair.Create("Clawed Muse", PCT.ClawedMuse.ActionName()),
                 KeyValuePair.Create("Comet in Black", PCT.CometinBlack.ActionName()),
                 KeyValuePair.Create("Creature Motif", PCT.CreatureMotif.ActionName()),
-                KeyValuePair.Create("Fire in Red", PCT.FireInRed.ActionName()),
                 KeyValuePair.Create("Aero in Green", PCT.AeroInGreen.ActionName()),
                 KeyValuePair.Create("Water in Blue", PCT.WaterInBlue.ActionName()),
-                KeyValuePair.Create("Fire II in Red", PCT.FireIIinRed.ActionName()),
                 KeyValuePair.Create("Aero II in Green", PCT.AeroIIinGreen.ActionName()),
                 KeyValuePair.Create("Hammer Motif", PCT.HammerMotif.ActionName()),
                 KeyValuePair.Create("Winged Muse", PCT.WingedMuse.ActionName()),
@@ -52,8 +48,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Steel Muse", PCT.SteelMuse.ActionName()),
                 KeyValuePair.Create("Subtractive Palette", PCT.SubtractivePalette.ActionName()),
                 KeyValuePair.Create("Stone II in Yellow", PCT.StoneIIinYellow.ActionName()),
-                KeyValuePair.Create("Thunder II in Magenta", PCT.ThunderIIinMagenta.ActionName()),
-                KeyValuePair.Create("Thunder in Magenta", PCT.ThunderinMagenta.ActionName()),
                 KeyValuePair.Create("Weapon Motif", PCT.WeaponMotif.ActionName()),
                 KeyValuePair.Create("Wing Motif", PCT.WingMotif.ActionName()),
                 #endregion

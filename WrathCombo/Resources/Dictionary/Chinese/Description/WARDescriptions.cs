@@ -1,4 +1,4 @@
-﻿using Lumina.Data.Parsing;
+using Lumina.Data.Parsing;
 using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
@@ -18,6 +18,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region WARPvE
+                KeyValuePair.Create("Use only under Lost Font of Power.", "僅在Lost Font of Power下使用。"),
                 KeyValuePair.Create("Replaces Heavy Swing with a full one-button single target rotation.", "用一鍵完整單體循環替換Heavy Swing。"),
                 KeyValuePair.Create("This is the ideal option for newcomers to the job.", "這是新手玩家的理想選擇。"),
                 KeyValuePair.Create("Replaces Overpower with a full one-button AoE rotation.", "用一鍵完整AOE循環替換Overpower。"),
@@ -36,7 +37,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Adds Primal Rend into the rotation.", "將Primal Rend加入循環。"),
                 KeyValuePair.Create("Only uses when in the Target's target ring (or within 1 yalm) & when not moving.", "僅在目標的環形範圍內（或1碼內）且不移動時使用。"),
                 KeyValuePair.Create("Adds Primal Wrath into the rotation.", "將Primal Wrath加入循環。"),
-                KeyValuePair.Create("Adds Primal Ruination into the rotation.", "將Primal Ruination加入循環。"),
                 KeyValuePair.Create("Adds Orogeny into the rotation.", "將Orogeny加入循環。"),
                 KeyValuePair.Create("Uses Primal Rend after you consume 3 stacks of Inner Release & after Primal Wrath.", "在你消耗3層Inner Release後及Primal Wrath後使用Primal Rend。"),
                 KeyValuePair.Create("Adds defensive actions into the rotation based on Health percentage remaining.", "根據剩餘生命值百分比將防禦技能加入循環。"),

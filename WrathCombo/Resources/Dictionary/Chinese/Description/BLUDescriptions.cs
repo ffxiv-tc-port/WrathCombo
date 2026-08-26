@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -41,9 +41,13 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Turns Song of Torment into Bristle so Song of Torment is buffed.", "將Song of Torment變為Bristle，以便Song of Torment獲得增益。"),
                 KeyValuePair.Create("Turns Peripheral Synthesis into Mustard Bomb when target is under the effect of Lightheaded.", "當目標處於Lightheaded效果下時，將Peripheral Synthesis變為Mustard Bomb。"),
                 KeyValuePair.Create("Turns Sonic Boom into Sharpened Knife when in melee range.", "當在近戰範圍內時，將Sonic Boom變為Sharpened Knife。"),
-                KeyValuePair.Create("Turns Magic Hammer into Addle when off cooldown.", "當不在冷卻中時，將Magic Hammer變為Addle。"),
                 KeyValuePair.Create("Turns Black Knight's Tour or White Knight's Tour into its counterpart when the enemy is under the effect of the spell's debuff.", "當敵人處於技能減益效果下時，將Black Knight's Tour或White Knight's Tour變為其對應技能。"),
                 KeyValuePair.Create("Puts Devour, Off-Guard, Lucid Dreaming, and Bad Breath into one button when under Tank Mimicry.", "在乙太複製：防護職業狀態下，將Devour、破防、Lucid Dreaming和Bad Breath合併為一個按鈕。"),
+                // 上面那條是描述，這條補上同一個 preset 的名稱鍵
+                // （CustomComboPreset.cs BLU_DebuffCombo，"Tank Debuff"）：
+                // "Tank"單獨有鍵（→防護職業），但"Debuff"沒有任何鍵能吃到，
+                // 顯示會變成中英夾雜。"防護職業"沿用遊戲內乙太複製：防護狀態說明的用字。
+                KeyValuePair.Create("Tank Debuff", "防護減益"),
                 KeyValuePair.Create("Changes Deep Clean to Peat Pelt if current target is not inflicted with Begrimed.", "如果當前目標沒有Begrimed效果，則將Deep Clean變為Peat Pelt。"),
                 KeyValuePair.Create("Turns Perpetual Ray into Sharpened Knife when target is stunned and in melee range.", "當目標處於眩暈狀態且在近戰範圍內時，將PerpetualRay替換為SharpenedKnife"),
                 KeyValuePair.Create("Perpetual Ray into Sharpened Knife", "Perpetual Ray轉為Sharpened Knife"),

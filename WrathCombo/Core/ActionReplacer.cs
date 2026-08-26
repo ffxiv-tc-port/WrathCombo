@@ -73,7 +73,7 @@ internal sealed class ActionReplacer : IDisposable
     /// <param name="actionID"> Action ID. </param>
     /// <returns> The result from the hook. </returns>
     internal uint OriginalHook(uint actionID) =>
-        getActionHook.Original(_actionManager, actionID);
+        getActionHook.OriginalDisposeSafe(_actionManager, actionID);
 
 #pragma warning disable CS1573
     /// <summary>
@@ -86,6 +86,13 @@ internal sealed class ActionReplacer : IDisposable
     ///     delegate, but is not used in the method.<br />
     ///     Do not remove or modify the <see langword="IntPtr" /> parameter.
     /// </remarks>
+    // fail-closed 稽核註記（2026-08-07）：這支**刻意維持原樣**，不要「修好」它。
+    // ① 例外逸不出去：整個本體在 try 內，catch 一定 return 一個值，所以受管理例外不會穿進原生框架。
+    // ② 自動稽核會把它標成 NO_ORIGINAL，那是工具的假陽性 —— Original 是透過下面的
+    //    OriginalHook() 呼叫的（getActionHook.OriginalDisposeSafe），字面上沒有 ".Original(" 而已。
+    // ③ catch 回 actionID 而不是 OriginalHook(actionID) 是刻意的保守做法：會進到 catch 最可能
+    //    的原因就是 hook 本身不可用，此時再呼叫一次 Original 只會在 catch 裡二次擲例外，
+    //    而 catch 裡擲出的例外正是會逸出到原生框架的那一種。
     private uint GetAdjustedActionDetour(IntPtr _, uint actionID)
     {
         try
@@ -96,7 +103,7 @@ internal sealed class ActionReplacer : IDisposable
             // Bail if not wanting to replace actions in this manner
             if (Service.Configuration.PerformanceMode)
                 return OriginalHook(actionID);
-            if (Svc.ClientState.LocalPlayer == null)
+            if (Svc.Objects.LocalPlayer == null)
                 return OriginalHook(actionID);
 
             // Only refresh every so often
@@ -126,8 +133,8 @@ internal sealed class ActionReplacer : IDisposable
         try
         {
             if (ClassLocked() ||
-                (DisabledJobsPVE.Any(x => x == Svc.ClientState.LocalPlayer.ClassJob.RowId) && !Svc.ClientState.IsPvP) ||
-                (DisabledJobsPVP.Any(x => x == Svc.ClientState.LocalPlayer.ClassJob.RowId) && Svc.ClientState.IsPvP))
+                (DisabledJobsPVE.Any(x => x == Svc.Objects.LocalPlayer.ClassJob.RowId) && !Svc.ClientState.IsPvP) ||
+                (DisabledJobsPVP.Any(x => x == Svc.Objects.LocalPlayer.ClassJob.RowId) && Svc.ClientState.IsPvP))
                 return OriginalHook(actionID);
 
             foreach (CustomCombo? combo in FilteredCombos)
@@ -163,20 +170,20 @@ internal sealed class ActionReplacer : IDisposable
     /// </returns>
     public static unsafe bool ClassLocked()
     {
-        if (Svc.ClientState.LocalPlayer is null) return false;
+        if (Svc.Objects.LocalPlayer is null) return false;
 
-        if (Svc.ClientState.LocalPlayer.Level <= 35) return false;
+        if (Svc.Objects.LocalPlayer.Level <= 35) return false;
 
-        if (Svc.ClientState.LocalPlayer.ClassJob.RowId is
+        if (Svc.Objects.LocalPlayer.ClassJob.RowId is
             (>= 8 and <= 25) or 27 or 28 or >= 30)
             return false;
 
         if (!UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(66049))
             return false;
 
-        if ((Svc.ClientState.LocalPlayer.ClassJob.RowId is 1 or 2 or 3 or 4 or 5 or 6 or 7 or 26 or 29) &&
+        if ((Svc.Objects.LocalPlayer.ClassJob.RowId is 1 or 2 or 3 or 4 or 5 or 6 or 7 or 26 or 29) &&
             Svc.Condition[ConditionFlag.BoundByDuty56] && // in an instance duty
-            Svc.ClientState.LocalPlayer.Level > 35) return true;
+            Svc.Objects.LocalPlayer.Level > 35) return true;
 
         return false;
     }

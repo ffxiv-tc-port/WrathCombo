@@ -15,6 +15,7 @@ using System.Numerics;
 using WrathCombo.Combos;
 using WrathCombo.Combos.PvE;
 using WrathCombo.CustomComboNS.Functions;
+using WrathCombo.Data.Conflicts;
 using WrathCombo.Extensions;
 using WrathCombo.Services;
 using WrathCombo.Services.IPC_Subscriber;
@@ -76,6 +77,55 @@ namespace WrathCombo.AutoRotation
         }
 
         private static bool _ninjaLockedAoE;
+
+        /// <summary>
+        ///     BossMod(Reborn) 的手動動作佇列是不是正在接管我們送出的技能。
+        /// </summary>
+        /// <remarks>
+        ///     BMR 的 <c>ActionManagerEx.UseActionDetour</c> 在
+        ///     <c>mode == UseActionMode.None</c> 且動作型別是 <c>Spell</c>／<c>Item</c>
+        ///     （<c>BossMod.ActionType.Spell == 1 == CS 的 ActionType.Action</c>，
+        ///     也就是本檔所有 <c>UseAction</c> 呼叫）時，會把技能推進它自己的手動佇列，
+        ///     然後<b>回傳 <c>false</c></b>、不讓遊戲看到這次呼叫。
+        /// </remarks>
+        private static bool BossModRebornQueueTakeover =>
+            ConflictingPluginsChecks.BossModReborn.ManualQueueTakeover;
+
+        /// <summary>
+        ///     這次 <c>ActionManager.UseAction</c> 是否「實際上被接受了」。
+        /// </summary>
+        /// <param name="ret">
+        ///     <c>UseAction</c> 的原始回傳值。
+        /// </param>
+        /// <returns>
+        ///     <c>ret</c> 為真，或 BossMod(Reborn) 的手動佇列正在接管（此時
+        ///     <c>ret == false</c> 代表<b>已排隊、稍後由對方送出</b>，不是失敗）。
+        /// </returns>
+        /// <remarks>
+        ///     <para>
+        ///         沒有這一層的話，治療節流（<see cref="LastHealAt" />）與忍術印記鎖
+        ///         （<see cref="_ninjaLockedAoE" />）永遠推不動，Wrath 會以遠高於設計值的
+        ///         頻率重試 —— 這正是使用者機器上實際在發生的事。
+        ///     </para>
+        ///     <para>
+        ///         注意：這裡<b>只改記帳，絕不重送</b>。技能已經在對方佇列裡，重送＝雙重施放。
+        ///     </para>
+        ///     <para>
+        ///         取捨（讀 <c>BossMod/ActionTweaks/ManualActionQueueTweak.cs</c> 得出）：
+        ///         佇列裡的項目<b>不保證一定送得出去</b> —— GCD 項目 1 秒、oGCD 項目 3 秒後
+        ///         過期就被 <c>RemoveExpired</c> 丟掉，目標消失也丟，同冷卻組被別的技能
+        ///         Push 進來還會被替換掉。另外 <c>Push</c> 本身也可能回 <c>false</c>
+        ///         （技能還在 CD、解不出目標），那時 detour 會轉交原生呼叫、回傳遊戲的真實結果。
+        ///         所以「視同成功」偶爾會白等一個節流週期。
+        ///     </para>
+        ///     <para>
+        ///         兩害相權取其輕：照字面當失敗＝<b>每個節流週期都重打同一發治療</b>，
+        ///         而重複 Push 同一個動作還會讓 BMR 進入 emergency 模式（清空佇列裡其他項目、
+        ///         強制插隊）；視同成功最壞只是偶爾晚約 1.2 秒（＋詠唱時間）。取後者。
+        ///     </para>
+        /// </remarks>
+        private static bool ActionAccepted(bool ret) =>
+            ret || BossModRebornQueueTakeover;
 
         static bool CombatBypass => (cfg.BypassQuest && DPSTargeting.BaseSelection.Any(x => IsQuestMob(x))) || (cfg.BypassFATE && InFATE());
         static bool NotInCombat => !GetPartyMembers().Any(x => x.BattleChara is not null && x.BattleChara.Struct()->InCombat) || PartyEngageDuration().TotalSeconds < cfg.CombatDelay;
@@ -506,11 +556,12 @@ namespace WrathCombo.AutoRotation
                             return false;
 
                         var ret = ActionManager.Instance()->UseAction(ActionType.Action, Service.ActionReplacer.getActionHook.IsEnabled ? gameAct : outAct);
+                        var accepted = ActionAccepted(ret);
 
-                        if (ret)
+                        if (accepted)
                             LastHealAt = Environment.TickCount64 + castTime;
 
-                        return ret;
+                        return accepted;
                     }
                 }
                 else
@@ -568,7 +619,7 @@ namespace WrathCombo.AutoRotation
                         Service.ActionReplacer.getActionHook.IsEnabled ? gameAct : outAct,
                         (mustTarget && target != null) || switched ? target.GameObjectId : Player.Object.GameObjectId);
 
-                    if (outAct is NIN.Ten or NIN.Chi or NIN.Jin or NIN.TenCombo or NIN.ChiCombo or NIN.JinCombo && ret)
+                    if (outAct is NIN.Ten or NIN.Chi or NIN.Jin or NIN.TenCombo or NIN.ChiCombo or NIN.JinCombo && ActionAccepted(ret))
                         _ninjaLockedAoE = true;
                     else
                         _ninjaLockedAoE = false;
@@ -626,10 +677,11 @@ namespace WrathCombo.AutoRotation
                 if (canUse && (inRange || areaTargeted))
                 {
                     var ret = ActionManager.Instance()->UseAction(ActionType.Action, Service.ActionReplacer.getActionHook.IsEnabled ? gameAct : outAct, canUseTarget || areaTargeted ? target.GameObjectId : Player.Object.GameObjectId);
-                    if (mode is HealerRotationMode && ret)
+                    var accepted = ActionAccepted(ret);
+                    if (mode is HealerRotationMode && accepted)
                         LastHealAt = Environment.TickCount64 + castTime;
 
-                    return ret;
+                    return accepted;
                 }
 
                 return false;
@@ -687,7 +739,7 @@ namespace WrathCombo.AutoRotation
                 IsInRange(chara, cfg.DPSSettings.MaxDistance) &&
                 GetTargetHeightDifference(chara) <= cfg.DPSSettings.MaxDistance &&
                 !TargetIsInvincible(chara) &&
-                !Service.Configuration.IgnoredNPCs.ContainsKey(chara.DataId) &&
+                !Service.Configuration.IgnoredNPCs.ContainsKey(chara.BaseId) &&
                 ((cfg.DPSSettings.OnlyAttackInCombat && chara.Struct()->InCombat) || !cfg.DPSSettings.OnlyAttackInCombat) &&
                 IsInLineOfSight(chara);
 

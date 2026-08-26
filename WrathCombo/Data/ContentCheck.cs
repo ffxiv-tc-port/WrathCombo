@@ -134,8 +134,10 @@ public class ContentCheck
             if (!EZ.Throttle("contentCheckInPVP", TS.FromSeconds(5)))
                 return field;
 
+            // 台服 TerritoryName 是繁中(狼獄停船場),英文字串永遠比對不到;
+            // 改用 TerritoryType ID 250 判定,語言無關。
             field = (Content.ContentType is ContentType.OverWorld &&
-                     Content.TerritoryName == "Wolves' Den Pier") ||
+                     Content.TerritoryID == 250) ||
                     Content.ContentType is ContentType.PVP;
             return field;
         }

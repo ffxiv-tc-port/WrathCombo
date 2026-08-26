@@ -67,6 +67,9 @@ public static class ConflictingPluginsChecks
     }
 
     internal sealed class BossModCheck(bool reborn = false)
+        // 注意：下面這個字串是 Dalamud 內部名（用來偵測外掛裝了沒、以及當 log 標籤），
+        // 不是 IPC 前綴 —— BossModReborn 的 IPC 一律註冊在 "BossMod." 底下。
+        // 訂閱端已改成寫完整標籤名 + applyPrefix: false，見 BossModIPC 的類別註解。
         : ConflictCheck(!reborn
             ? new BossModIPC("BossMod", new Version(0, 3, 1, 0))
             : new BossModIPC("BossModReborn", new Version(7, 2, 5, 90)))
@@ -79,6 +82,76 @@ public static class ConflictingPluginsChecks
         public bool SettingConflicted;
 
         protected override BossModIPC IPC => (BossModIPC)_ipc;
+
+        private bool _manualQueueTakeover;
+        private long _manualQueueTakeoverCheckedAt;
+
+        /// <summary>
+        ///     對方的「手動動作佇列」接管是否啟用（最多每 2 秒問一次 IPC，其餘走快取）。
+        /// </summary>
+        /// <remarks>
+        ///     給 <c>AutoRotationController</c> 判斷 <c>UseAction</c> 回傳 <c>false</c>
+        ///     到底是「真的失敗」還是「已被 BossMod(Reborn) 收進佇列」用的。<br />
+        ///     這裡刻意不用 <c>EzThrottler</c>：它的 key 是全域持久的、而且第一次呼叫必定
+        ///     放行，在這種「每個自動循環週期都可能被問好幾次」的路徑上語意不好推。
+        /// </remarks>
+        public bool ManualQueueTakeover
+        {
+            get
+            {
+                var now = Environment.TickCount64;
+                if (now - _manualQueueTakeoverCheckedAt >= 2000)
+                {
+                    _manualQueueTakeoverCheckedAt = now;
+                    _manualQueueTakeover = IPC.IsManualQueueTakeoverEnabled();
+                }
+
+                return _manualQueueTakeover;
+            }
+        }
+
+        private bool _ipcAvailable;
+        private bool _ipcAvailablePrimed;
+
+        // ⚠️ 不要用 long.MinValue 當「還沒查過」的哨兵：
+        // now - long.MinValue 會溢位成負數，減法比較就永遠不成立、快取永不更新。
+        private long _ipcAvailableCheckedAt;
+
+        /// <summary>
+        ///     這一份 BossMod(Reborn) 的 IPC 是否可用（版本夠新／有安裝）。
+        ///     最多每 2 秒真的問一次，其餘走快取。
+        /// </summary>
+        /// <remarks>
+        ///     給 <see cref="WrathCombo.Data.MechanicHints" /> 決定要問哪一個實例用的。
+        ///     <br />
+        ///     🔴 <b>一定要快取</b>：<see cref="ReusableIPC.IsEnabled" /> 走
+        ///     <c>DalamudReflector.TryGetDalamudPlugin(…, ignoreCache: true)</c>，
+        ///     每次呼叫都用反射重掃一遍已安裝外掛清單。機制提示是逐幀路徑，
+        ///     直接 60fps 打下去就是把「外掛裝了沒」的查詢做成主執行緒卡頓來源。
+        ///     外掛的安裝狀態本來就不會逐幀改變，2 秒的粒度綽綽有餘
+        ///     （與同類別的 <see cref="ManualQueueTakeover" /> 同一形狀）。
+        /// </remarks>
+        public bool IpcAvailable
+        {
+            get
+            {
+                var now = Environment.TickCount64;
+                if (!_ipcAvailablePrimed || now - _ipcAvailableCheckedAt >= 2000)
+                {
+                    _ipcAvailablePrimed = true;
+                    _ipcAvailableCheckedAt = now;
+                    _ipcAvailable = IPC.IsEnabled;
+                }
+
+                return _ipcAvailable;
+            }
+        }
+
+        /// <inheritdoc cref="BossModIPC.ShouldInterruptTargets" />
+        public ulong[] InterruptHints() => IPC.ShouldInterruptTargets();
+
+        /// <inheritdoc cref="BossModIPC.ShouldStunTargets" />
+        public ulong[] StunHints() => IPC.ShouldStunTargets();
 
         public override void CheckForConflict()
         {

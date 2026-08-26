@@ -18,7 +18,7 @@ namespace WrathCombo.CustomComboNS.Functions
     internal abstract partial class CustomComboFunctions
     {
         /// <summary> Gets the player or null. </summary>
-        public static IPlayerCharacter? LocalPlayer => Svc.ClientState.LocalPlayer;
+        public static IPlayerCharacter? LocalPlayer => Svc.Objects.LocalPlayer;
 
         /// <summary> Find if the player has a certain condition. </summary>
         /// <param name="flag"> Condition flag. </param>
@@ -55,7 +55,14 @@ namespace WrathCombo.CustomComboNS.Functions
 
         public static unsafe bool InFATE()
         {
-            var currentFate = FateManager.Instance()->CurrentFate;
+            // FateManager.Instance() 在 CS 裡是 [StaticAddress(..., isPointer: true)] —— 讀的是「指標的位址」,
+            // 遊戲還沒把它配起來(登入前、換區中)時那個槽就是 0,回來的是貨真價實的 null。
+            // 解參考就是攔不到的 AVE,而這支在自動輪替的判定路徑上(AutoRotationController 的 CombatBypass
+            // 與 FATE 目標優先)會被反覆呼叫。讀不到回 false —— 對「還沒進場」來說「不在 FATE 裡」就是正確答案。
+            var fateManager = FateManager.Instance();
+            if (fateManager == null)
+                return false;
+            var currentFate = fateManager->CurrentFate;
             return currentFate is not null && LocalPlayer.Level <= currentFate->MaxLevel;
         }
 
@@ -90,8 +97,18 @@ namespace WrathCombo.CustomComboNS.Functions
         {
             if (GroupManager.Instance()->MainGroup.IsAlliance)
             {
-                var array = UIModule.Instance()->GetRaptureAtkModule()->AtkModule.AtkArrayDataHolder.StringArrays[3]->StringArray[4];
+                // UIModule.Instance() 是手寫包裝(UIModule 未建立時合法回 null),整條四跳鏈逐節判空;
+                // 取不到=回 NotInAlliance(視為不在聯盟團),不解參考。StringArrays[3] 的槽位元素也可為 null。
+                var uiModule = UIModule.Instance();
+                if (uiModule == null) return AllianceGroup.NotInAlliance;
+                var atkModule = uiModule->GetRaptureAtkModule();
+                if (atkModule == null) return AllianceGroup.NotInAlliance;
+                var stringArrayData = atkModule->AtkModule.AtkArrayDataHolder.StringArrays[3];
+                if (stringArrayData == null || stringArrayData->StringArray == null) return AllianceGroup.NotInAlliance;
+                var array = stringArrayData->StringArray[4];
+                if (array == null) return AllianceGroup.NotInAlliance;
                 var str = MemoryHelper.ReadSeStringNullTerminated(new System.IntPtr(array));
+                if (str.TextValue.Length == 0) return AllianceGroup.NotInAlliance;
                 var lastChar = str.TextValue.Last();
 
                 return lastChar switch

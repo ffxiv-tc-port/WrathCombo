@@ -144,7 +144,7 @@ namespace WrathCombo.CustomComboNS.Functions
 
             // Turn Target's status to uint hashset
             var targetStatuses = tar.StatusList.Select(s => s.StatusId).ToHashSet();
-            uint targetID = tar.DataId;
+            uint targetID = tar.BaseId;
 
             switch (Svc.ClientState.TerritoryType)
             {
@@ -229,7 +229,7 @@ namespace WrathCombo.CustomComboNS.Functions
 
                     return false;
                 case 952:  //ToZ final boss (technically not invincible)
-                    if (targetID is (13298 or 13299) && Svc.Objects.Any(y => y.DataId is 13297 && !y.IsDead))
+                    if (targetID is (13298 or 13299) && Svc.Objects.Any(y => y.BaseId is 13297 && !y.IsDead))
                         return true;
 
                     return false;

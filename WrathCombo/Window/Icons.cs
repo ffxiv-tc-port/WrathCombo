@@ -5,6 +5,7 @@ using ECommons.DalamudServices;
 using ECommons.Throttlers;
 using Lumina.Data.Files;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using WrathCombo.Combos.PvE;
@@ -14,8 +15,14 @@ namespace WrathCombo.Window
 {
     internal static class Icons
     {
-        public static Dictionary<uint, IDalamudTextureWrap> CachedModdedIcons = new();
-        private static readonly HashSet<uint> LoadingModdedIcons = new();
+        // 🔴 這兩個集合會被兩條執行緒同時碰：繪製執行緒讀取／加入，Task.Run 的背景執行緒移除。
+        // 原本是 Dictionary 與 HashSet，兩者都不是執行緒安全的——並行寫入會弄壞內部陣列，
+        // 症狀是 HashSet.AddIfNotPresent 丟 IndexOutOfRangeException，整個設定視窗變成
+        // 「繪製此視窗時發生錯誤」（2026-08-01 實機，PvEFeatures 分頁）。
+        // ⚠️ 這是我們自己在 02afc550「Fix main-thread stutter when opening config window」
+        // 把圖示載入移到背景執行緒時引入的，不是上游的問題。
+        public static readonly ConcurrentDictionary<uint, IDalamudTextureWrap> CachedModdedIcons = new();
+        private static readonly ConcurrentDictionary<uint, byte> LoadingModdedIcons = new();
         public static Dictionary<int, IDalamudTextureWrap?> OccultIcons = [];
         private static int OccultIdx = -1; // Instead of 0 to show Freelancer
         public static IDalamudTextureWrap? GetJobIcon(uint jobId)
@@ -74,7 +81,7 @@ namespace WrathCombo.Window
             // Fallback for modded icons not resolvable via GetFromFile: load off the
             // main thread so a burst of uncached icons (e.g. the job list on first
             // window open) doesn't block Draw() with synchronous disk reads.
-            if (LoadingModdedIcons.Add(iconId))
+            if (LoadingModdedIcons.TryAdd(iconId, 0))
             {
                 Task.Run(() =>
                 {
@@ -93,7 +100,7 @@ namespace WrathCombo.Window
                     catch { }
                     finally
                     {
-                        LoadingModdedIcons.Remove(iconId);
+                        LoadingModdedIcons.TryRemove(iconId, out _);
                     }
                 });
             }

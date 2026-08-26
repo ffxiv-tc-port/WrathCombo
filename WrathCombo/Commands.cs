@@ -6,6 +6,7 @@ using System.Linq;
 using ECommons;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
+using ECommons.LanguageHelpers;
 using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using WrathCombo.Combos;
@@ -33,11 +34,15 @@ public partial class WrathCombo
     /// </summary>
     private void RegisterCommands()
     {
+        // 說明文字原本是直接寫死的簡體中文(來自 CN fork),既不是本專案的正體中文,
+        // 也繞過了 ini,英文使用者反而看不到原文。改回上游英文原文當 key,
+        // 譯文放進 LanguageChineseTraditional.ini;指令名用 ?? 佔位符帶入,
+        // 這樣 Command/OldCommand 之後改名也不會讓 key 對不上。
         EzCmd.Add(Command, OnCommand,
-            "打开自定义连击设置窗口。\n" +
-            $"{Command} auto → 切换自动循环开/关。\n" +
-            $"{Command} debug → 将调试日志导出到桌面，供开发者使用。\n" +
-            $"{OldCommand} → 来自 XIVSlothCombo 的旧别名，仍然有效！");
+            ("Open a window to edit custom combo settings.\n" +
+             "?? auto → Toggle Auto-rotation on/off.\n" +
+             "?? debug → Dumps a debug log onto your desktop for developers.\n" +
+             "?? → Old alias from XIVSlothCombo, still works!").Loc(Command, Command, OldCommand));
         EzCmd.Add(OldCommand, OnCommand);
     }
 
@@ -515,19 +520,19 @@ public partial class WrathCombo
             return;
         }
 
-        if (Service.Configuration.IgnoredNPCs.Any(x => x.Key == target.DataId))
+        if (Service.Configuration.IgnoredNPCs.Any(x => x.Key == target.BaseId))
         {
             DuoLog.Error(
-                $"{target.Name} (ID: {target.DataId}) is already on the ignored list");
+                $"{target.Name} (ID: {target.BaseId}) is already on the ignored list");
             return;
         }
 
-        if (Service.Configuration.IgnoredNPCs.All(x => x.Key != target.DataId))
+        if (Service.Configuration.IgnoredNPCs.All(x => x.Key != target.BaseId))
         {
-            Service.Configuration.IgnoredNPCs.Add(target.DataId, target.GetNameId());
+            Service.Configuration.IgnoredNPCs.Add(target.BaseId, target.GetNameId());
 
             DuoLog.Information(
-                $"Successfully added {target.Name} (ID: {target.DataId}) to ignored list");
+                $"Successfully added {target.Name} (ID: {target.BaseId}) to ignored list");
         }
     }
 
@@ -610,7 +615,7 @@ public partial class WrathCombo
                 }
 
                 if (job.Value.RowId !=
-                    Svc.ClientState.LocalPlayer.ClassJob.Value.RowId)
+                    Svc.Objects.LocalPlayer.ClassJob.Value.RowId)
                     DuoLog.Warning($"You are not on {job.Value.Name}");
             }
 

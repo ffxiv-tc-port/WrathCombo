@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -18,12 +18,12 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Generation Time: 2025-03-13 18:45:21  
                 #region MCH
                 // Basic Shots
-                KeyValuePair.Create("Clean Shot", MCH.CleanShot.ActionName()),
                 KeyValuePair.Create("Heated Clean Shot", MCH.HeatedCleanShot.ActionName()),
-                KeyValuePair.Create("Split Shot", MCH.SplitShot.ActionName()),
+                KeyValuePair.Create("Clean Shot", MCH.CleanShot.ActionName()),
                 KeyValuePair.Create("Heated Split Shot", MCH.HeatedSplitShot.ActionName()),
-                KeyValuePair.Create("Slug Shot", MCH.SlugShot.ActionName()),
+                KeyValuePair.Create("Split Shot", MCH.SplitShot.ActionName()),
                 KeyValuePair.Create("Heated Slug Shot", MCH.HeatedSlugShot.ActionName()),
+                KeyValuePair.Create("Slug Shot", MCH.SlugShot.ActionName()),
                 KeyValuePair.Create("Gauss Round", MCH.GaussRound.ActionName()),
                 KeyValuePair.Create("Ricochet", MCH.Ricochet.ActionName()),
 

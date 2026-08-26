@@ -68,7 +68,7 @@ public static class ActionWatching
     /// <summary> Handles logic when an action causes an effect. </summary>
     private unsafe static void ReceiveActionEffectDetour(uint casterEntityId, Character* casterPtr, Vector3* targetPos, Header* header, TargetEffects* effects, GameObjectId* targetEntityIds)
     {
-        ReceiveActionEffectHook!.Original(casterEntityId, casterPtr, targetPos, header, effects, targetEntityIds);
+        ReceiveActionEffectHook!.OriginalDisposeSafe(casterEntityId, casterPtr, targetPos, header, effects, targetEntityIds);
 
         try
         {
@@ -268,14 +268,17 @@ public static class ActionWatching
                 $"Params: [{a5}, {a6}, {a7}, {a8}, {a9}]"
             );
 #endif
-
-            SendActionHook!.Original(targetObjectId, actionType, actionId, sequence, a5, a6, a7, a8, a9);
         }
         catch (Exception ex)
         {
             Svc.Log.Error(ex, "SendActionDetour");
-            SendActionHook!.Original(targetObjectId, actionType, actionId, sequence, a5, a6, a7, a8, a9);
         }
+
+        // fail-closed: Original is deliberately OUTSIDE the try, and appears exactly once.
+        // It used to sit at the end of the try *and* be repeated in the catch, which meant an
+        // exception thrown by Original itself (or by the catch's own logging) would have sent the
+        // action a second time. Our bookkeeping failing must never change what the game does.
+        SendActionHook!.OriginalDisposeSafe(targetObjectId, actionType, actionId, sequence, a5, a6, a7, a8, a9);
     }
 
     /// <summary> Checks if at least two abilities were used between GCDs. </summary>
@@ -328,11 +331,24 @@ public static class ActionWatching
     }
 
     /// <summary> Handles logic when an action is used. </summary>
+    // fail-closed: Original is called exactly ONCE and from outside every try.
+    // 🔴 The previous shape had Original inside the try with a second copy in the catch, so anything
+    //    throwing *after* Original had already run - most realistically
+    //    `ActionManager.Instance()` (a ClientStructs [StaticAddress] member, which throws
+    //    InvalidOperationException when its signature stops resolving) on the ground-target line -
+    //    made the catch fire the action a SECOND time. `ActionSheet[replacedWith]` (a Dictionary
+    //    indexer, KeyNotFoundException on an unknown action) is a pre-Original thrower and is the
+    //    reason the guard has to exist at all.
+    // On failure we fall back to the action/target the game asked for, i.e. no combo, no retargeting.
     private unsafe static bool UseActionDetour(ActionManager* actionManager, ActionType actionType, uint actionId, ulong targetId, uint extraParam, ActionManager.UseActionMode mode, uint comboRouteId, bool* outOptAreaTargeted)
     {
-        try
+        var requestedActionId = actionId; //What the game asked for, used to roll back if our logic throws
+        var requestedTargetId = targetId;
+        var changed = false;
+
+        if (actionType is ActionType.Action or ActionType.Ability)
         {
-            if (actionType is ActionType.Action or ActionType.Ability)
+            try
             {
                 var original = actionId; //Save the original action, do not modify
                 var originalTargetId = targetId; //Save the original target, do not modify
@@ -350,7 +366,7 @@ public static class ActionWatching
                     }
                 }
 
-                var changed = CheckForChangedTarget(original, ref targetId,
+                changed = CheckForChangedTarget(original, ref targetId,
                     out var replacedWith); //Passes the original action to the retargeting framework, outputs a targetId and a replaced action
 
                 var areaTargeted = ActionSheet[replacedWith].TargetArea;
@@ -361,27 +377,35 @@ public static class ActionWatching
                             .FirstOrDefault(x => x.GameObjectId == targetId)
                             .Struct()))
                         targetId = originalTargetId;
-
-                //Important to pass actionId here and not replaced. Performance mode = result from earlier, which could be modified. Non-performance mode = original action, which gets modified by the hook. Same result.
-                var hookResult = UseActionHook.Original(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
-
-                // If the target was changed, support changing the target for ground actions, too
-                if (changed)
-                    ActionManager.Instance()->AreaTargetingExecuteAtObject =
-                        targetId;
-
-                return hookResult;
             }
-            else
+            catch (Exception ex)
             {
-                return UseActionHook.Original(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
+                Svc.Log.Error(ex, "UseActionDetour");
+                actionId = requestedActionId;
+                targetId = requestedTargetId;
+                changed = false;
             }
         }
-        catch (Exception ex)
+
+        //Important to pass actionId here and not replaced. Performance mode = result from earlier, which could be modified. Non-performance mode = original action, which gets modified by the hook. Same result.
+        var hookResult = UseActionHook.OriginalDisposeSafe(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
+
+        // If the target was changed, support changing the target for ground actions, too
+        if (changed)
         {
-            Svc.Log.Error(ex, "UseActionDetour");
-            return UseActionHook.Original(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
+            try
+            {
+                ActionManager.Instance()->AreaTargetingExecuteAtObject =
+                    targetId;
+            }
+            catch (Exception ex)
+            {
+                // The action has already been sent at this point; all we lose is the ground-target fixup.
+                Svc.Log.Error(ex, "UseActionDetour (ground target)");
+            }
         }
+
+        return hookResult;
     }
 
     private static bool CheckForChangedTarget(uint actionId, ref ulong targetObjectId, out uint replacedWith)

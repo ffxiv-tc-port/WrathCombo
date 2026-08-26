@@ -2,6 +2,7 @@
 
 using Dalamud.Interface.Colors;
 using ECommons.ImGuiMethods;
+using ECommons.LanguageHelpers;
 using Dalamud.Bindings.ImGui;
 using System.Linq;
 using System.Numerics;
@@ -43,7 +44,7 @@ internal partial class DNC
                 _ => ImGuiColors.DalamudRed,
             };
             ImGui.SameLine();
-            ImGui.Text("GCD: " );
+            ImGui.Text("GCD: ".Loc());
             ImGui.SameLine();
             ImGui.TextColored(color, $"{GCD:0.00}");
             ImGui.NewLine();

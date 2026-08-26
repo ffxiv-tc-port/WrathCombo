@@ -93,10 +93,11 @@ namespace WrathCombo.Window.Tabs
 
                 Vector4 colour = Service.Configuration.TargetHighlightColor;
                 if (ImGui.ColorEdit4("Target Highlight Colour".Loc(), ref colour, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.AlphaPreview | ImGuiColorEditFlags.AlphaBar))
-                {
-                    Service.Configuration.TargetHighlightColor = colour;
+                    Service.Configuration.TargetHighlightColor = colour;   // 即時預覽，保持每幀更新
+
+                // 在色盤上拖曳時 ColorEdit4 每幀都回傳 true，存檔改到編輯結束時做。
+                if (ImGui.IsItemDeactivatedAfterEdit())
                     Service.Configuration.Save();
-                }
 
                 ImGuiComponents.HelpMarker("Draws a box around party members in the vanilla Party List, as targeted by certain features.\nSet Alpha to 0 to hide the box.".Loc());
 
@@ -315,8 +316,11 @@ namespace WrathCombo.Window.Tabs
                     delay = delay.RoundOff(SliderIncrements.Fives);
 
                     Service.Configuration.InterruptDelay = ((double)delay) / 100d;
-                    Service.Configuration.Save();
                 }
+
+                // 拖曳中每幀都回傳 true，存檔改到編輯結束時做。
+                if (ImGui.IsItemDeactivatedAfterEdit())
+                    Service.Configuration.Save();
                 ImGui.SameLine();
                 ImGui.Text("%% of cast".Loc());
                 ImGui.SameLine( pos);
@@ -329,7 +333,9 @@ namespace WrathCombo.Window.Tabs
                 #region Maximum Weaves
 
                 ImGui.PushItemWidth(75);
-                if (ImGui.SliderInt("###MaximumWeaves", ref Service.Configuration.MaximumWeavesPerWindow, 1, 3))
+                ImGui.SliderInt("###MaximumWeaves", ref Service.Configuration.MaximumWeavesPerWindow, 1, 3);
+                // 拖曳中每幀都回傳 true，存檔改到編輯結束時做。
+                if (ImGui.IsItemDeactivatedAfterEdit())
                     Service.Configuration.Save();
 
                 ImGui.SameLine();
@@ -349,6 +355,63 @@ namespace WrathCombo.Window.Tabs
 
                 ImGuiEx.Spacing(new Vector2(0, 20));
                 ImGuiEx.TextUnderlined("Targeting Options".Loc());
+
+                #region Mechanic-Aware Interrupt / Stun Targeting
+
+                var mechanicAware = Service.Configuration.MechanicAwareTargeting;
+                if (ImGui.Checkbox("Mechanic-Aware Interrupt & Stun Targeting".Loc(),
+                        ref mechanicAware))
+                {
+                    Service.Configuration.MechanicAwareTargeting = mechanicAware;
+                    Service.Configuration.Save();
+                }
+
+                ImGuiComponents.HelpMarker((
+                    "When picking a target to Interrupt or Stun, prefer the enemies that BossMod (Reborn) has flagged as the ones that actually need it for the current mechanic.\n\n" +
+                    "Without this, Wrath interrupts anything that reports an interruptible cast, and stuns anything that is not a boss - which wastes cooldowns on casts that do not matter.\n\n" +
+                    "The flags are only used to re-order the candidates Wrath already accepted; every existing check (hostile, targetable, in range, interruptible, stun immunity tracking) still applies.\n" +
+                    "If BossMod (Reborn) is not installed, or it has nothing flagged right now, this behaves exactly like it is off.\n\n" +
+                    "Default: Off").Loc());
+
+                if (mechanicAware)
+                {
+                    ImGui.Indent();
+
+                    var strictOnly =
+                        Service.Configuration.MechanicAwareTargetingStrictOnly;
+                    if (ImGui.Checkbox("Only act on flagged targets".Loc(),
+                            ref strictOnly))
+                    {
+                        Service.Configuration.MechanicAwareTargetingStrictOnly =
+                            strictOnly;
+                        Service.Configuration.Save();
+                    }
+
+                    ImGuiComponents.HelpMarker((
+                        "Stricter: instead of merely preferring the flagged enemies, only flagged enemies are considered at all.\n\n" +
+                        "This REDUCES how often you interrupt and stun. If BossMod (Reborn) is missing, or has nothing flagged, no target is picked and nothing is used.\n" +
+                        "A one-off note is written to the log (Information level) while this is on and no flags can be read, so a silent 'the feature stopped working' can be told apart from 'there was nothing to interrupt'.\n\n" +
+                        "Default: Off").Loc());
+
+                    ImGui.Unindent();
+                }
+
+                var dexStunGate = Service.Configuration.MonsterDexStunGate;
+                if (ImGui.Checkbox("Skip Stun-Immune Enemies (MonsterDex)".Loc(),
+                        ref dexStunGate))
+                {
+                    Service.Configuration.MonsterDexStunGate = dexStunGate;
+                    Service.Configuration.Save();
+                }
+
+                ImGuiComponents.HelpMarker((
+                    "Ask MonsterDex whether the enemy can be stunned at all, and skip it when the answer is a definite no.\n\n" +
+                    "Only a definite 'not stunnable' excludes an enemy. MonsterDex not installed, no entry for that enemy, or any failed lookup all count as 'unknown', and unknown always passes - so this can never silently disable your stuns.\n\n" +
+                    "Default: Off").Loc());
+
+                ImGuiEx.Spacing(new Vector2(0, 10));
+
+                #endregion
 
                 var useCusHealStack = Service.Configuration.UseCustomHealStack;
 
@@ -663,20 +726,20 @@ namespace WrathCombo.Window.Tabs
                 #endregion
 
                 #if DEBUG
-                // 在生成调试文件按钮下方添加
-                if (ImGui.Button("生成键值对调试文件"))
+                // 在生成調試檔案按鈕下方添加
+                if (ImGui.Button("生成鍵值對調試檔案"))
                 {
                     DictionaryDebugger.ExportDebugFile();
                 }
-                ImGuiComponents.HelpMarker("将在桌面生成中文翻译键值对调试文件。\n包含未被替换的英文文本和未被使用的键值对词典。");
+                ImGuiComponents.HelpMarker("將在桌面生成中文翻譯鍵值對調試檔案。\n包含未被替換的英文文字和未被使用的鍵值對詞典。");
                 #endif
 
                 #if DEBUG
-                if (ImGui.Button("生成技能对照表"))
+                if (ImGui.Button("生成技能對照表"))
                 {
                     SkillTranslationTableGenerator.GenerateSkillTranslationTable();
                 }
-                ImGuiComponents.HelpMarker("将在桌面生成MD格式的技能名称中英文对照表。");
+                ImGuiComponents.HelpMarker("將在桌面生成MD格式的技能名稱中英文對照表。");
                 #endif
 
                 #endregion

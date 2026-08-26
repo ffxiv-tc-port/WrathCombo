@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
 using WrathCombo.Extensions;
@@ -20,8 +20,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Malefic IV", AST.Malefic4.ActionName()),
                 KeyValuePair.Create("Malefic III", AST.Malefic3.ActionName()),
                 KeyValuePair.Create("Malefic II", AST.Malefic2.ActionName()),
-                KeyValuePair.Create("Malefic", AST.Malefic.ActionName()),
                 KeyValuePair.Create("Fall Malefic", AST.FallMalefic.ActionName()),
+                KeyValuePair.Create("Malefic", AST.Malefic.ActionName()),
                 KeyValuePair.Create("Gravity II", AST.Gravity2.ActionName()),
                 KeyValuePair.Create("Gravity", AST.Gravity.ActionName()),
                 KeyValuePair.Create("Oracle", AST.Oracle.ActionName()),
@@ -44,7 +44,16 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Lord of Crowns", AST.LordOfCrowns.ActionName()),
                 KeyValuePair.Create("Lady of Crowns", AST.LadyOfCrown.ActionName()),
                 KeyValuePair.Create("Lazy Lady", AST.LadyOfCrown.ActionName()),
-                
+                KeyValuePair.Create("Lady Option", $"{AST.LadyOfCrown.ActionName()}選項"),
+                // 補上整段 preset 名稱的鍵："Lady Option" 只覆蓋到後半段，
+                // 前面的 "Lazy" 沒有任何鍵能吃到，會在 CustomComboPreset.cs:853
+                // 的 "Lazy Lady Option" 顯示成中英夾雜。整段對應同一顆 Lady of Crowns。
+                KeyValuePair.Create("Lazy Lady Option", $"{AST.LadyOfCrown.ActionName()}選項"),
+                // "Turns Fall Malefic into an all-in-one damage button." lives in
+                // ASTDescriptions.cs (Description layer, processed before this Skill-layer
+                // file) -- a duplicate key here would always lose the key de-dup and never
+                // fire, so it was removed rather than kept as dead weight.
+
                 // Utility
                 KeyValuePair.Create("Divination", AST.Divination.ActionName()),
                 KeyValuePair.Create("Lightspeed", AST.Lightspeed.ActionName()),

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -24,13 +24,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Summon Topaz", SMN.SummonTopaz.ActionName()),
                 KeyValuePair.Create("Summon Emerald", SMN.SummonEmerald.ActionName()),
 
-                KeyValuePair.Create("Summon Ifrit", SMN.SummonIfrit.ActionName()),
-                KeyValuePair.Create("Summon Titan", SMN.SummonTitan.ActionName()),
-                KeyValuePair.Create("Summon Garuda", SMN.SummonGaruda.ActionName()),
 
-                KeyValuePair.Create("Summon Ifrit II", SMN.SummonIfrit2.ActionName()),
-                KeyValuePair.Create("Summon Titan II", SMN.SummonTitan2.ActionName()),
-                KeyValuePair.Create("Summon Garuda II", SMN.SummonGaruda2.ActionName()),
 
                 KeyValuePair.Create("Summon Carbuncle", SMN.SummonCarbuncle.ActionName()),
 
@@ -51,10 +45,10 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Emerald Ruin I", SMN.EmeralRuin1.ActionName()),
 
                 // Summon Outbursts
-                KeyValuePair.Create("Outburst", SMN.Outburst.ActionName()),
-                KeyValuePair.Create("Ruby Outburst", SMN.RubyOutburst.ActionName()),
-                KeyValuePair.Create("Topaz Outburst", SMN.TopazOutburst.ActionName()),
                 KeyValuePair.Create("Emerald Outburst", SMN.EmeraldOutburst.ActionName()),
+                KeyValuePair.Create("Topaz Outburst", SMN.TopazOutburst.ActionName()),
+                KeyValuePair.Create("Ruby Outburst", SMN.RubyOutburst.ActionName()),
+                KeyValuePair.Create("Outburst", SMN.Outburst.ActionName()),
 
                 // Summon single targets
                 KeyValuePair.Create("Ruby Rite", SMN.RubyRite.ActionName()),
@@ -79,17 +73,14 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
 
                 // Demi summon abilities
                 KeyValuePair.Create("Astral Impulse", SMN.AstralImpulse.ActionName()), // Single target Bahamut GCD
-                KeyValuePair.Create("Astral Flare", SMN.AstralFlare.ActionName()),   // AoE Bahamut GCD
                 KeyValuePair.Create("Deathflare", SMN.Deathflare.ActionName()),     // Damage oGCD Bahamut
                 KeyValuePair.Create("Enkindle Bahamut", SMN.EnkindleBahamut.ActionName()),
 
-                KeyValuePair.Create("Fountain of Fire", SMN.FountainOfFire.ActionName()), // Single target Phoenix GCD
                 KeyValuePair.Create("Brand of Purgatory", SMN.BrandOfPurgatory.ActionName()), // AoE Phoenix GCD
                 KeyValuePair.Create("Rekindle", SMN.Rekindle.ActionName()),         // Healing oGCD Phoenix
                 KeyValuePair.Create("Enkindle Phoenix", SMN.EnkindlePhoenix.ActionName()),
 
                 KeyValuePair.Create("Umbral Impulse", SMN.UmbralImpulse.ActionName()),     // Single target Solar Bahamut GCD
-                KeyValuePair.Create("Umbral Flare", SMN.UmbralFlare.ActionName()),       // AoE Solar Bahamut GCD
                 KeyValuePair.Create("Sunflare", SMN.Sunflare.ActionName()),           // Damage oGCD Solar Bahamut
                 KeyValuePair.Create("Enkindle Solar Bahamut", SMN.EnkindleSolarBahamut.ActionName()),
                 KeyValuePair.Create("Lux Solaris", SMN.LuxSolaris.ActionName()),        // Healing oGCD Solar Bahamut

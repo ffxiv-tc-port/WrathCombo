@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -17,6 +17,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region PLD
+                KeyValuePair.Create("- Requires Requiescat to be ready.", "- 需要安魂祈禱準備就緒。"),
                 KeyValuePair.Create("Replaces Fast Blade with a full one-button single target rotation.", "用一鍵式單體循環替換Fast Blade。"),
                 KeyValuePair.Create("Replaces Total Eclipse with a full one-button AoE rotation.", "用一鍵式AOE循環替換Total Eclipse。"),
                 KeyValuePair.Create("Adds Fight or Flight to Advanced Mode.", "將Fight or Flight新增到高階模式。"),
@@ -67,7 +68,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Gives max priority to Hallowed Ground when the Health percentage threshold is met.", "當HP百分比達到閾值時，優先使用Hallowed Ground。"),
                 KeyValuePair.Create("Adds Sheltron to the one-button mitigation.", "將Sheltron新增到一鍵式減傷按鈕。"),
                 KeyValuePair.Create("Adds Divine Veil to the one-button mitigation.", "將Divine Veil新增到一鍵式減傷按鈕。"),
-                KeyValuePair.Create("Adds Sentinel / Guardian to the one-button mitigation.", "將Sentinel / Guardian新增到一鍵式減傷按鈕。"),
                 KeyValuePair.Create("Adds Hallowed Ground to the one-button mitigation.", "將Hallowed Ground新增到一鍵式減傷按鈕。"),
                 KeyValuePair.Create("Adds Clemency to the one-button mitigation.", "將Clemency新增到一鍵式減傷按鈕。"),
                 KeyValuePair.Create("Replaces Requiescat with all Requiescat-related actions.", "用所有與Requiescat相關的技能替換Requiescat。"),

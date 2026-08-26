@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvE.Content;
@@ -63,6 +63,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Skill
                 KeyValuePair.Create("Sleep", RoleActions.Caster.Sleep.ActionName()),
 
                 // Multi-role actions
+                KeyValuePair.Create("Uses Second Wind when below set HP percentage.", "血量低於設定百分比時使用內丹。"),
                 KeyValuePair.Create("Second Wind", "內丹"),
                 KeyValuePair.Create("Lucid Dreaming", "醒夢"),
                 KeyValuePair.Create("Swiftcast", "即刻詠唱"),
@@ -75,6 +76,39 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Skill
                 KeyValuePair.Create("Raise", "復活"),
                 KeyValuePair.Create("Solid Reason", DOL.SolidReason.ActionName()),
                 KeyValuePair.Create("Ageless Words", DOL.AgelessWords.ActionName()),
+
+                // Common config option labels/descriptions (2026-08-07 sweep: these are
+                // generic combo-option strings shared across many jobs' *_Config.cs and
+                // CustomComboInfo attributes, routed through ReplaceWithChinese() same as
+                // everything else above).
+                KeyValuePair.Create("Interrupt Option", "打斷選項"),
+                KeyValuePair.Create("Interrupt with Stun Option", "暈眩打斷選項"),
+                KeyValuePair.Create("Mitigation Options", "減傷選項"),
+                KeyValuePair.Create("Combo Heals Option", "連段自療選項"),
+                KeyValuePair.Create("Not on Bosses", "不對首領使用"),
+                KeyValuePair.Create("Only Weave", "僅插入使用"),
+                KeyValuePair.Create("Hidden Options", "隱藏選項"),
+                KeyValuePair.Create("Will not use on ST in Boss encounters.", "首領戰中不會對單體目標使用。"),
+                KeyValuePair.Create("Collection of Mitigation features.", "減傷功能集合。"),
+                KeyValuePair.Create("Output Combat Log", "輸出戰鬥紀錄"),
+                KeyValuePair.Create("Include Mitigations", "包含減傷"),
+                KeyValuePair.Create("Exclude Mitigations", "排除減傷"),
+                KeyValuePair.Create("Enables the use of mitigations in Simple Mode.", "在簡易模式中啟用減傷技能。"),
+                KeyValuePair.Create("Disables the use of mitigations in Simple Mode.", "在簡易模式中停用減傷技能。"),
+                KeyValuePair.Create("Non-boss Encounters Only", "僅非Boss遭遇戰"),
+                KeyValuePair.Create("Buffs Option", "增益選項"),
+                KeyValuePair.Create("Buffs AoE Option", "AoE增益選項"),
+                KeyValuePair.Create("Normal Opener", "一般起手式"),
+                KeyValuePair.Create("Early Opener", "提前起手式"),
+                // "Opener (Level 100)" is NOT here on purpose: it's a substring of the
+                // pre-existing, more specific "Balance Opener (Level 100)" entry in
+                // ApocalypseDescriptions.cs (which is merged LAST). Adding a bare
+                // "Opener (Level 100)" entry in THIS file (merged much earlier, right
+                // after Bozja) would fire first and pre-empt/shadow that better
+                // translation, replacing "平衡起手式（等級100）" with a half-English
+                // "Balance起手式(100級)" -- see ApocalypseDescriptions.cs for the actual
+                // placement (positioned after the "Balance Opener (Level 100)" family so
+                // it only catches the genuinely-standalone RDM_Balance_Opener case).
                 #endregion
 
                 #region PVP

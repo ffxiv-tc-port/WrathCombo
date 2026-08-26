@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -87,7 +87,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Uses Meikyo Shisui when available.", "在可用時使用Meikyo Shisui。"),
                 KeyValuePair.Create("- Requires target to be in melee range.", "- 需要目標在近戰範圍內。"),
                 KeyValuePair.Create("Uses Chiten when available.", "在可用時使用Chiten。"),
-                KeyValuePair.Create("- Will not use outside combat.", "- 不會在戰鬥外使用。"),
                 KeyValuePair.Create("Uses Mineuchi when available.", "在可用時使用Mineuchi。"),
                 KeyValuePair.Create("Uses Soten when available.", "在可用時使用Soten。"),
                 KeyValuePair.Create("- Will not use if already under Kaiten's effect.", "- 如果已經處於Kaiten效果下則不會使用。"),

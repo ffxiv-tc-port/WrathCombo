@@ -87,9 +87,9 @@ public partial class Helper(ref Leasing leasing)
 
         // Detect the target type
         var targetType =
-            attr.CustomComboInfo.Name.Contains("single target", lower)
+            attr.CustomComboInfo.InternalName.Contains("single target", lower)
                 ? ComboTargetTypeKeys.SingleTarget
-                : (attr.CustomComboInfo.Name.Contains("- aoe", lower))
+                : (attr.CustomComboInfo.InternalName.Contains("- aoe", lower))
                     ? ComboTargetTypeKeys.MultiTarget
                     : ComboTargetTypeKeys.Other;
 
@@ -489,6 +489,16 @@ internal static class Logging
 
     public static void Log(string message) =>
         PluginLog.Debug(Prefix + PrefixMethod + message);
+
+    /// <summary>
+    ///     要請使用者回報的診斷訊息用這個。
+    /// </summary>
+    /// <remarks>
+    ///     📌 使用者跑的是 LogLevel 2，<see cref="Log" />（Debug）與 <see cref="Verbose" />
+    ///     都收不到，只有 Information 以上才會進實機 log。
+    /// </remarks>
+    public static void Information(string message) =>
+        PluginLog.Information(Prefix + PrefixMethod + message);
 
     public static void Warn(string message) =>
         PluginLog.Warning(Prefix + PrefixMethod + message

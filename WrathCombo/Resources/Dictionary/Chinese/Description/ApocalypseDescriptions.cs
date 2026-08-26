@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -35,6 +35,12 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Balance Opener (Level 100)", "平衡起手式（等級100）"),
                 KeyValuePair.Create("Adds the Balance opener from level 92 onwards.", "從92級開始新增由The Balance社群建議的開場輸出循環。"),
                 KeyValuePair.Create("Adds the Balance opener at level 100.", "在100級時新增由The Balance社群建議的開場輸出循環。"),
+                // Deliberately placed AFTER "Balance Opener (Level 100)" above (same
+                // file, same array -- earlier entries always win the substring match).
+                // Only catches the genuinely-standalone case (RDM_Balance_Opener,
+                // CustomComboPreset.cs) once the more specific "Balance ..." entries
+                // have already had first chance to match.
+                KeyValuePair.Create("Opener (Level 100)", "起手式(100級)"),
                 KeyValuePair.Create("with Stun", "(使用眩暈技能)"),
                 KeyValuePair.Create("Target HP% to use at or below", "目標生命值百分比低於此值時使用"),
                 KeyValuePair.Create("HP% to use at or below", "生命值百分比低於此值時使用"),
@@ -93,7 +99,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("First positional: ", "第一個身位技能："),
                 KeyValuePair.Create("Priority:", "優先順序："),
                 KeyValuePair.Create("Select what difficulties ", "選擇"),
-                KeyValuePair.Create("Select what difficulties Emergency Living Dead should be used in:", "選擇緊急"),
                 KeyValuePair.Create("should be used in:", "應在哪些難度下使用："),
                 KeyValuePair.Create("Set to Zero to disable this check.", "設定為零禁用此檢測。"),
                 KeyValuePair.Create("Set to Zero to disable this check", "設定為零禁用此檢測"),
@@ -102,7 +107,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Allows you to only stop DoTing early when it's not a boss.", "允許你在敵人不是Boss時提前停用持續傷害技能。"),
                 KeyValuePair.Create("Only applies the HP check above to non-bosses.", "僅對非Boss敵人應用上述HP檢查。"),
                 KeyValuePair.Create("Number of charges to hold onto", "保留的充能層數"),
-                KeyValuePair.Create("Start using when below HP %. Set to 100 to disable this check.", "當血量低於此百分比時使用。設定為100以禁用此檢查。"),
                 KeyValuePair.Create("Start using when below party average HP %. Set to 100 to disable this check", "當隊伍平均血量低於此百分比時使用。設定為100以禁用此檢查"),
                 KeyValuePair.Create("Party UI Mouseover Checking", "小隊UI滑鼠懸停檢查"),
                 KeyValuePair.Create("Check party member's HP & Debuffs by using mouseover on the party list.", "透過滑鼠懸停在隊伍列表上檢查隊員的血量和減益效果。"),
@@ -161,8 +165,11 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Feature", "特性"),
                 KeyValuePair.Create("Options", ""),
                 KeyValuePair.Create("Option", ""),
-                KeyValuePair.Create("options", ""),
-                KeyValuePair.Create("option", ""),
+                // 小寫的 option(s) 幾乎都出現在句子中間（"the ideal option for newcomers"），
+                // 對應到空字串等於把句子裡的字直接刪掉，所以改成正常翻譯。
+                // 大寫 Option(s) 維持刪除：實測 618/622 次都是標題結尾的「XXX Option」。
+                KeyValuePair.Create("options", "選項"),
+                KeyValuePair.Create("option", "選項"),
                 KeyValuePair.Create("Replaces", "替換"),
                 KeyValuePair.Create("Weaves", "穿插"),
                 KeyValuePair.Create("Weave", "穿插"),
@@ -171,8 +178,14 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Filler", "覆蓋"),
                 KeyValuePair.Create("Only", "僅"),
                 KeyValuePair.Create("only", "僅"),
+                // 以下複數／變化形是配合詞界比對補上的：原本它們是靠「短鍵咬進長單字」
+                // 才順便被翻到（結果是 "防護職業s"、"打斷ing" 這種半殘字串），
+                // 加了詞界之後必須有自己的條目才不會退回英文。譯文沿用單數的既有翻譯。
+                KeyValuePair.Create("Interrupting", "打斷"),
                 KeyValuePair.Create("Interrupt", "打斷"),
+                KeyValuePair.Create("Tanks", "防護職業"),
                 KeyValuePair.Create("Tank", "防護職業"),
+                KeyValuePair.Create("Healers", "治療職業"),
                 KeyValuePair.Create("Healer", "治療職業"),
                 KeyValuePair.Create("Protection", "保護"),
                 KeyValuePair.Create("Double", "雙重"),
@@ -187,6 +200,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Mana", "魔力"),
                 KeyValuePair.Create("Spender", "消耗資源的技能"),
                 KeyValuePair.Create("Amount", "值"),
+                KeyValuePair.Create("Combos", "連擊"),
                 KeyValuePair.Create("Combo", "連擊"),
                 KeyValuePair.Create("Kenki", "劍氣"),
                 KeyValuePair.Create(" to ", "->"),
@@ -194,7 +208,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("movement", "移動"),
                 KeyValuePair.Create("Movement", "移動"),
                 KeyValuePair.Create("Moving", "移動"),
-                KeyValuePair.Create("below", ""),
+                // "below" -> "" 已移除：它在 66 個句子中間把比較詞整個刪掉
+                //（"when MP drops below slider value" 會變成 "when MP drops slider value"，語意相反）。
                 KeyValuePair.Create("Burst", "爆發"),
                 KeyValuePair.Create("Maintenance", "維持"),
                 KeyValuePair.Create("Emergency", "緊急使用"),
@@ -206,6 +221,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("First", "優先"),
                 KeyValuePair.Create("first", "優先"),
                 KeyValuePair.Create("Healing", "治療"),
+                KeyValuePair.Create("Heals", "治療"),
                 KeyValuePair.Create("Heal", "治療"),
                 KeyValuePair.Create("Reminder", "提醒"),
                 KeyValuePair.Create("Lily", "血百合"),
@@ -220,9 +236,11 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Dynamic", "動態"),
                 KeyValuePair.Create("Finisher", "收尾"),
                 KeyValuePair.Create("OGCD's", "能力技"),
+                KeyValuePair.Create("oGCDs", "能力技"),
                 KeyValuePair.Create("oGCD", "能力技"),
                 KeyValuePair.Create("Apply ", "應用"),
                 KeyValuePair.Create("Advanced", "高階"),
+                KeyValuePair.Create("mitigations", "減傷"),
                 KeyValuePair.Create("mitigation", "減傷"),
                 KeyValuePair.Create("Overlap", "覆蓋"),
                 KeyValuePair.Create("Eureka", "優雷卡"),
@@ -235,7 +253,9 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("None", "無"),
                 KeyValuePair.Create("Both", "兩者"),
                 KeyValuePair.Create("On ", ""),
-                KeyValuePair.Create("on ", "替換"),                
+                // "on " -> "替換" 已移除：這是誤植（"替換" 是 "Replaces" 的譯文），
+                // 它把介系詞 on 換成「替換」兩個字，例如
+                // "Use Variant Rampart on cooldown." -> "使用Variant Rampart替換cooldown."
                 KeyValuePair.Create("Priority", "優先順序"),
 
                 // Jobs
@@ -251,6 +271,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("MCH", "機工"),
                 KeyValuePair.Create("MNK", "武僧"),
                 KeyValuePair.Create("NIN", "忍者"),
+                KeyValuePair.Create("PLDs", "騎士"),
                 KeyValuePair.Create("PLD", "騎士"),
                 KeyValuePair.Create("RDM", "赤魔"),
                 KeyValuePair.Create("SAM", "武士"),

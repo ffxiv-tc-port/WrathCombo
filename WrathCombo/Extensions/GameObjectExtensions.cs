@@ -95,7 +95,7 @@ public static class GameObjectExtensions
     /// </summary>
     public static IGameObject? IfMissingHP (this IGameObject? obj) =>
         obj is IBattleChara battle &&
-        battle.CurrentHp / battle.MaxHp * 100 < 99
+        CustomComboFunctions.GetTargetHPPercent(battle) < 99
             ? obj
             : null;
 

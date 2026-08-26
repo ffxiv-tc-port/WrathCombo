@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -17,6 +17,21 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region ADV
+                // Cross-file dictionary-concatenation-order dead code fixes
+                // (2026-08-08 full-repo sweep, see commit message for the full
+                // triage). Relocated here (the earliest file this layer loads)
+                // so each entry fires before whatever was shadowing it. Sorted by
+                // descending key length so this block does not shadow itself.
+                KeyValuePair.Create("Target's HP% to be at or under", "目標血量百分比需低於或等於"),
+                KeyValuePair.Create("- Will not use outside combat.", "- 不會在戰鬥外使用。"),
+                KeyValuePair.Create("No Movement Option", "未移動時使用"),
+                KeyValuePair.Create("Summon Garuda II", SMN.SummonGaruda2.ActionName()),
+                KeyValuePair.Create("Summon Ifrit II", SMN.SummonIfrit2.ActionName()),
+                KeyValuePair.Create("Summon Titan II", SMN.SummonTitan2.ActionName()),
+                KeyValuePair.Create("Summon Garuda", SMN.SummonGaruda.ActionName()),
+                KeyValuePair.Create("Summon Ifrit", SMN.SummonIfrit.ActionName()),
+                KeyValuePair.Create("Summon Titan", SMN.SummonTitan.ActionName()),
+
                 KeyValuePair.Create("Island Sanctuary Sprint Feature", "無名島衝刺特性"),
                 KeyValuePair.Create("Replaces Sprint with Isle Sprint.", "用海島衝刺替換衝刺。"),
                 KeyValuePair.Create("Only works at the Island Sanctuary. Icon does not change.", "僅在無名島有效。圖示不會改變。"),
@@ -46,6 +61,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 
                 // Manually added
                 // PLD
+                KeyValuePair.Create("Adds Sentinel / Guardian to the one-button mitigation.", $"將{PLD.Sentinel.ActionName()} / {PLD.Guardian.ActionName()}新增到一鍵式減傷按鈕。"),
                 KeyValuePair.Create("Guardian", PLD.Guardian.ActionName()),
                 // WAR
                 KeyValuePair.Create("Primal Ruination", WAR.PrimalRuination.ActionName()),
@@ -55,6 +71,36 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Addersgall Threshold", "蛇膽閾值"),
                 // Config
                 KeyValuePair.Create("MP Threshold", "魔力閾值"),
+
+                // Hidden Features: R6S/R7S/M6S (shared full-sentence entries, placed here
+                // -- the earliest-processed Description file -- so they fire before any
+                // later generic fragment, e.g. "first"->"優先" in ApocalypseDescriptions.cs,
+                // could otherwise partially corrupt them via substring substitution.
+                // "Squirrels"/"manta" are translated as ordinary nouns (matches the
+                // pre-existing SAM M6S entry in CustomComboPreset.cs); "Jabberwock" has no
+                // official in-game name so it is kept in English.
+                KeyValuePair.Create("R6S: Hold Burst on Squirrels", "R6S：松鼠階段保留爆發"),
+                KeyValuePair.Create("M6S: Hold Burst on Squirrels", "M6S：松鼠階段保留爆發"),
+                KeyValuePair.Create("When you're targeting Squirrels in R6S add phase, hold burst.", "R6S小怪階段，鎖定松鼠時保留爆發。"),
+                KeyValuePair.Create("When you're targeting Squirrels in M6S add phase, hold burst.", "M6S小怪階段，鎖定松鼠時保留爆發。"),
+                KeyValuePair.Create("(until about the time the first manta is dying)", "（大約第一隻鰩魚快死時釋放）"),
+                KeyValuePair.Create("R6S: Only Stun Jabberwock", "R6S：僅眩暈Jabberwock"),
+                KeyValuePair.Create("When in R6S, stun will only ever be used on the Jabberwock.", "在R6S中，暈眩技能僅會用在Jabberwock身上。"),
+                KeyValuePair.Create("R7S: Only Interrupt the adds casting Circle AoEs", "R7S：僅打斷施放圓形AOE的小怪"),
+                KeyValuePair.Create("When you're in R7S, Interrupting will only work when you're targeting an add casting the circle AoE.", "在R7S中，打斷技能僅會在鎖定正在施放圓形AOE的小怪時作用。"),
+                KeyValuePair.Create("R6S: Save Reprisal and Dark Missionary", $"R6S：保留{RoleActions.Tank.Reprisal.ActionName()}和{DRK.DarkMissionary.ActionName()}"),
+                KeyValuePair.Create("When in R6S, never try use Reprisal or Dark Missionary automatically.", $"在R6S中，絕不會自動使用{RoleActions.Tank.Reprisal.ActionName()}或{DRK.DarkMissionary.ActionName()}。"),
+                KeyValuePair.Create("When in R6S, never try use Reprisal or Shake it Off automatically.", $"在R6S中，絕不會自動使用{RoleActions.Tank.Reprisal.ActionName()}或{WAR.ShakeItOff.ActionName()}。"),
+
+                // Hidden Features: shared "Hidden Options" category blurb (DRK/MNK/SGE/WAR)
+                KeyValuePair.Create("Collection of cheeky or encounter-specific extra options only available to those in the know.", "收錄一些俏皮惡搞或特定遭遇戰專屬的額外選項，僅供知情者使用。"),
+                KeyValuePair.Create("Do not expect these options to be maintained, or even kept, after they are no longer Current.", "在它們不再是最新內容後，請不要期待這些選項會被持續維護，甚至可能被直接移除。"),
+
+                // Balance-community opener labels/tooltips (RDM Balance Opener radio choice)
+                // -- placed here (before BRDDescriptions.cs's bare "Standard Opener") so
+                // they aren't shadowed by that shorter fragment.
+                KeyValuePair.Create("Balance Standard Opener", "Balance版標準起手"),
+                KeyValuePair.Create("GapClosing Adjusted Standard Opener", "位移調整標準起手"),
                 #endregion
 
                 #region PvP

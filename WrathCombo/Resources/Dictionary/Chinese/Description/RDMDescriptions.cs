@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -17,6 +17,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region RDMPvE
+                KeyValuePair.Create("Use Swiftcast for movement only.", "僅為了移動而使用即刻詠唱。"),
                 KeyValuePair.Create("Replaces Jolt with a full one-button single target rotation.", "用一鍵單體循環替換Jolt。"),
                 KeyValuePair.Create("To start the melee combo, you must be within melee range.", "要開始近戰連擊，你必須處於近戰範圍內。"),
                 KeyValuePair.Create("Replaces Scatter with a full one-button AoE rotation.", "用一鍵AOE循環替換Scatter。"),
@@ -88,7 +89,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Auto-Mode is enabled for this option.", "此選項已啟用自動模式。"),
                 KeyValuePair.Create($"{RDM.Zwerchhau.ActionName()} & {RDM.Redoublement.ActionName()} will be placed on {RDM.Jolt.ActionName()}", $"{RDM.Zwerchhau.ActionName()}和{RDM.Redoublement.ActionName()}將被放置在 {RDM.Jolt.ActionName()}上。"),
                 KeyValuePair.Create("Uses Prefulgence when available.", "當光芒四射可用時自動使用"),
-                KeyValuePair.Create("No Movement Option", "未移動時使用"),
                 KeyValuePair.Create("Uses Displacement only when not moving.", "僅在未移動時使用移轉。"),
                 KeyValuePair.Create("Uses Vice of Thorns when available.", "可用時使用荊棘環繞。"),
             ];

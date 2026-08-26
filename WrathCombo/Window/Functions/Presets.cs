@@ -176,7 +176,7 @@ namespace WrathCombo.Window.Functions
                 ImGui.Separator();
             }
 
-            if (info.Name.Contains(" - AoE") || info.Name.Contains(" - Sin"))
+            if (info.InternalName.Contains(" - AoE") || info.InternalName.Contains(" - Sin"))
                 if (P.UIHelper.PresetControlled(preset) is not null)
                     P.UIHelper.ShowIPCControlledIndicatorIfNeeded(preset);
 

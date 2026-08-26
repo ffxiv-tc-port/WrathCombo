@@ -112,9 +112,45 @@ namespace WrathCombo.CustomComboNS.Functions
                 combatStart = DateTime.Now;
         }
 
-        public static unsafe float CountdownRemaining => MathF.Max(0, AgentCountDownSettingDialog.Instance()->TimeRemaining);
+        /// <summary>
+        ///     🔴 <c>AgentCountDownSettingDialog.Instance()</c> 由
+        ///     <c>[Agent(AgentId.CountDownSettingDialog)]</c> 產生:內部鏈
+        ///     AgentModule → UIModule → Framework,任一層回 null 整條就回 null(登入前、
+        ///     切場景、登出後都是常態),而底層 <c>[StaticAddress]</c>／<c>[MemberFunction]</c>
+        ///     特徵碼失配時改為擲 <c>InvalidOperationException</c>——兩種失效模式並存,
+        ///     只擋一種等於假防護。裸解參考 null 原生指標是 AccessViolationException,
+        ///     在 .NET Core 屬 corrupted-state exception,<c>try/catch</c> 攔不到 ⇒ 只能事前判空。
+        ///     下面兩個屬性被連招邏輯每幀讀,所以判空後靜默回退成「沒有倒數」,不寫 log。
+        /// </summary>
+        private static unsafe AgentCountDownSettingDialog* CountDownAgentOrNull()
+        {
+            try
+            {
+                return AgentCountDownSettingDialog.Instance();
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
-        public static unsafe bool CountdownActive => AgentCountDownSettingDialog.Instance()->Active;
+        public static unsafe float CountdownRemaining
+        {
+            get
+            {
+                var agent = CountDownAgentOrNull();
+                return agent == null ? 0f : MathF.Max(0, agent->TimeRemaining);
+            }
+        }
+
+        public static unsafe bool CountdownActive
+        {
+            get
+            {
+                var agent = CountDownAgentOrNull();
+                return agent != null && agent->Active;
+            }
+        }
        
     }
 }

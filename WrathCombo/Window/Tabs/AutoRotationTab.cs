@@ -22,6 +22,18 @@ namespace WrathCombo.Window.Tabs
     {
         private static uint _selectedNpc = 0;
 
+        /// <summary>
+        ///     IgnoredNPCs 是設定檔回讀的字典，裡面的 BNpcName id 可能跨版本殘留，
+        ///     不保證存在於本地資料表。裸 GetRow 查無此列時 Lumina 會擲例外，而這個
+        ///     分頁在 Draw 路徑上，一擲整個設定視窗就不見。查不到時顯示「未知 NPC」，
+        ///     不要靜默把它從使用者的忽略清單裡移掉。
+        /// </summary>
+        private static string GetIgnoredNpcName(uint bNpcNameId)
+        {
+            var row = Svc.Data.Excel.GetSheet<BNpcName>().GetRowOrDefault(bNpcNameId);
+            return row == null ? "Unknown NPC".Loc() : row.Value.Singular.ToString();
+        }
+
         private static readonly Dictionary<DPSRotationMode, string> DPSRotationModeTranslations = new()
         {
             { DPSRotationMode.Manual, "Manual" },
@@ -96,12 +108,21 @@ namespace WrathCombo.Window.Tabs
                     changed |= ImGui.Checkbox("Bypass When Combo Suggests Self-Use Action".Loc(), ref cfg.BypassBuffs);
                     ImGuiComponents.HelpMarker("Many jobs have an out of combat action that can be used, for example, ?? or ??. This will allow these to be used without being in combnat.".Loc(RPR.Soulsow.ActionName(), MNK.ForbiddenMeditation.ActionName()));
 
+                    // 這兩項現在可以被其他外掛用租約接管（BypassQuest / BypassFATE），
+                    // 所以改用會顯示「被誰接管」的版本 —— 否則使用者會看到自己的勾選狀態、
+                    // 實際生效的卻是別人設的值，而且沒有任何提示。
+                    P.UIHelper.ShowIPCControlledIndicatorIfNeeded("BypassQuest");
                     ImGuiExtensions.Prefix(false);
-                    changed |= ImGui.Checkbox("Bypass Only in Combat for Quest Targets".Loc(), ref cfg.BypassQuest);
+                    changed |= P.UIHelper.ShowIPCControlledCheckboxIfNeeded(
+                        "Bypass Only in Combat for Quest Targets".Loc(),
+                        ref cfg.BypassQuest, "BypassQuest");
                     ImGuiComponents.HelpMarker("Disables Auto-Mode outside of combat unless you're within range of a quest target.".Loc());
 
+                    P.UIHelper.ShowIPCControlledIndicatorIfNeeded("BypassFATE");
                     ImGuiExtensions.Prefix(false);
-                    changed |= ImGui.Checkbox("Bypass Only in Combat for FATE Targets".Loc(), ref cfg.BypassFATE);
+                    changed |= P.UIHelper.ShowIPCControlledCheckboxIfNeeded(
+                        "Bypass Only in Combat for FATE Targets".Loc(),
+                        ref cfg.BypassFATE, "BypassFATE");
                     ImGuiComponents.HelpMarker("Disables Auto-Mode outside of combat unless you're synced to a FATE.".Loc());
 
                     ImGuiExtensions.Prefix(true);
@@ -144,6 +165,10 @@ namespace WrathCombo.Window.Tabs
                     ImGuiComponents.HelpMarker("For all other targeting modes, AoE will target based on highest number of targets hit. In manual mode, it will only do this if you tick this box.".Loc());
                 }
 
+                // DPSAoETargets 現在也能被租約接管。這個欄位是 int?，沒有對應的
+                // ShowIPCControlled* 版本可用，所以只加「被誰接管」的提示列，
+                // 輸入框本身維持原樣（讓使用者看得見接管狀態，不是把控制權藏起來）。
+                P.UIHelper.ShowIPCControlledIndicatorIfNeeded("DPSAoETargets");
                 var input = ImGuiEx.InputInt(100f.Scale(), "Targets Required for AoE Damage Features".Loc(), ref cfg.DPSSettings.DPSAoETargets);
                 if (input)
                 {
@@ -154,7 +179,11 @@ namespace WrathCombo.Window.Tabs
                 ImGuiComponents.HelpMarker("Disabling this will turn off AoE DPS features. Otherwise will require the amount of targets required to be in range of an AoE feature's attack to use. This applies to all 3 roles, and for any features that deal AoE damage.".Loc());
 
                 ImGuiEx.SetNextItemWidthScaled(100);
-                changed |= ImGui.SliderFloat("Max Target Distance".Loc(), ref cfg.DPSSettings.MaxDistance, 1, 30);
+                // SliderFloat 在拖曳過程中每一畫格都回傳 true，直接餵給 changed 會讓底下的
+                // if (changed) Configuration.Save() 以幀率同步寫磁碟。改用
+                // IsItemDeactivatedAfterEdit()：數值仍即時套用，但只在放開滑鼠時存檔一次。
+                ImGui.SliderFloat("Max Target Distance".Loc(), ref cfg.DPSSettings.MaxDistance, 1, 30);
+                changed |= ImGui.IsItemDeactivatedAfterEdit();
                 cfg.DPSSettings.MaxDistance =
                     Math.Clamp(cfg.DPSSettings.MaxDistance, 1, 30);
 
@@ -184,7 +213,7 @@ namespace WrathCombo.Window.Tabs
 
                 var npcs = Service.Configuration.IgnoredNPCs.ToList();
                 var selected = npcs.FirstOrNull(x => x.Key == _selectedNpc);
-                var prev = selected is null ? "" : $"{Svc.Data.Excel.GetSheet<BNpcName>().GetRow(selected.Value.Value).Singular} (ID: {selected.Value.Key})";
+                var prev = selected is null ? "" : $"{GetIgnoredNpcName(selected.Value.Value)} (ID: {selected.Value.Key})";
                 ImGuiEx.TextUnderlined("Ignored NPCs".Loc());
                 using (var combo = ImRaii.Combo("###Ignore", prev))
                 {
@@ -197,9 +226,7 @@ namespace WrathCombo.Window.Tabs
 
                         foreach (var npc in npcs)
                         {
-                            var npcData = Svc.Data.Excel
-                                .GetSheet<BNpcName>().GetRow(npc.Value);
-                            if (ImGui.Selectable($"{npcData.Singular} (ID: {npc.Key})"))
+                            if (ImGui.Selectable($"{GetIgnoredNpcName(npc.Value)} (ID: {npc.Key})"))
                             {
                                 _selectedNpc = npc.Key;
                             }

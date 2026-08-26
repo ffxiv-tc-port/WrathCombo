@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.DalamudServices;
+using ECommons.GameFunctions;
 using WrathCombo.Core;
 using WrathCombo.CustomComboNS;
 using WrathCombo.Data;
@@ -52,6 +54,9 @@ internal partial class All
     {
         public const ushort
             Stun = 2,
+            // 台服 Status.csv #14「加重」——移動速度降低，傷腿(7554) 施加的就是這個。
+            // ⚠️ 不要跟 #9「減速」(自動攻擊/詠唱變慢) 搞混，那是另一件事。
+            Heavy = 14,
             Weakness = 43,
             BrinkOfDeath = 44;
     }
@@ -293,5 +298,69 @@ internal partial class All
             actionID is RoleActions.PhysRanged.FootGraze && CanInterruptEnemy() && ActionReady(RoleActions.PhysRanged.HeadGraze)
                 ? RoleActions.PhysRanged.HeadGraze
                 : actionID;
+    }
+
+    /// <summary>
+    ///     自動傷腿：目標身上沒有「加重」時，把傷足換成傷腿補上移動減速。
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///         接線方式沿用同檔的 <see cref="ALL_Ranged_Interrupt" />（傷足→傷頭）：
+    ///         都是掛在「傷足」這顆工具鍵上的物理遠程 role 功能。
+    ///     </para>
+    ///     <para>
+    ///         ⚠️ 兩個功能共用同一顆按鍵。<c>ActionReplacer</c> 是
+    ///         <c>OrderByDescending(x =&gt; x.Preset)</c>，本功能的列舉值比打斷那條大，
+    ///         所以會<b>先</b>被評估到 —— 因此這裡主動讓路：可打斷時原樣回傳
+    ///         <c>actionID</c>，<c>TryInvoke</c> 就會回 <see langword="false" />，
+    ///         打斷那條才接得到。不要改成靠列舉值大小去隱含排序。
+    ///     </para>
+    /// </remarks>
+    internal class ALL_Ranged_LegGraze : CustomCombo
+    {
+        protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.ALL_Ranged_LegGraze;
+
+        protected override uint Invoke(uint actionID)
+        {
+            if (actionID is not RoleActions.PhysRanged.FootGraze)
+                return actionID;
+
+            // 打斷永遠比補加重重要 —— 讓路給 ALL_Ranged_Interrupt。
+            if (IsEnabled(CustomComboPreset.ALL_Ranged_Interrupt) &&
+                CanInterruptEnemy() &&
+                ActionReady(RoleActions.PhysRanged.HeadGraze))
+                return actionID;
+
+            if (!RoleActions.PhysRanged.CanLegGraze())
+                return actionID;
+
+            if (CurrentTarget is not IBattleChara target)
+                return actionID;
+
+            if (!target.IsHostile() || !target.IsTargetable || target.IsBoss())
+                return actionID;
+
+            // 觸發時機（預設＝只對正在以我為目標的敵人，也就是手動風箏的情境）。
+            if (Config.ALL_Ranged_LegGraze_Trigger == 0 &&
+                (LocalPlayer is null ||
+                 target.TargetObjectId != LocalPlayer.GameObjectId))
+                return actionID;
+
+            // 已經有加重就不要再補。
+            if (HasStatusEffect(Debuffs.Heavy, target, true))
+                return actionID;
+
+            // 遞減免疫：照暈眩的樣式，同一隻身上連續施加超過上限就停手。
+            if (!ICDTracker.StatusIsExpired(Debuffs.Heavy, target.GameObjectId) &&
+                ICDTracker.NumberOfTimesApplied(Debuffs.Heavy, target.GameObjectId) >=
+                Config.ALL_Ranged_LegGraze_MaxApplications)
+                return actionID;
+
+            // MonsterDex 明確說「不吃加重」才跳過；沒安裝／查無資料一律照放。
+            if (!MonsterVulnerability.CanBeHeavied(target))
+                return actionID;
+
+            return RoleActions.PhysRanged.LegGraze;
+        }
     }
 }

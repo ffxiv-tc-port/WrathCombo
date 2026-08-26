@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -31,7 +31,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Uses interrupt during the rotation if applicable.", "在循環中使用打斷技能（如果適用）。"),
                 KeyValuePair.Create("Adds enemy health checking on mobs for buffs, DoTs and Songs.", "新增對怪物生命值的檢查以應用增益、DoT和歌曲。"),
                 KeyValuePair.Create("They will not be reapplied if less than specified.", "如果低於指定值，則不會重新應用。"),
-                KeyValuePair.Create("Uses Second Wind when below set HP percentage.", "當HP低於設定百分比時使用Second Wind。"),
                 KeyValuePair.Create("Uses Wardens Paeon when you have a cleansable debuff.", "當你有可清除的減益時使用Wardens Paeon。"),
                 KeyValuePair.Create("Weave Songs on the Advanced AoE.", "在高階AoE中插入歌曲。"),
                 KeyValuePair.Create("Adds buffs onto the Advance AoE Bard feature.", "將增益效果新增到高階AoE吟遊詩人功能中。"),
