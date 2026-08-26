@@ -1,6 +1,6 @@
 ﻿using Dalamud.Interface.Colors;
 using ECommons.LanguageHelpers;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using WrathCombo.CustomComboNS.Functions;
 
 namespace WrathCombo.Window.MessagesNS
