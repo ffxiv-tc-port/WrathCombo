@@ -48,7 +48,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Magic Hammer", BLU.MagicHammer.ActionName()),
                 KeyValuePair.Create("White Knight's Tour", BLU.WhiteKnightsTour.ActionName()),
                 KeyValuePair.Create("Black Knight's Tour", BLU.BlackKnightsTour.ActionName()),
-                KeyValuePair.Create("Knight's Tour", "骑士之旅"),
+                KeyValuePair.Create("Knight's Tour", "騎士之旅"),
                 KeyValuePair.Create("Peripheral Synthesis", BLU.PeripheralSynthesis.ActionName()),
                 KeyValuePair.Create("Basic Instinct", BLU.BasicInstinct.ActionName()),
                 KeyValuePair.Create("Hydro Pull", BLU.HydroPull.ActionName()),

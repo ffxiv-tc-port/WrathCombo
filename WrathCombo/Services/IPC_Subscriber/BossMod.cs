@@ -21,33 +21,29 @@ internal sealed class BossModIPC(
     {
         if (!IsEnabled)
         {
-            PluginLog.Debug($"[ConflictingPlugins] [{PluginName}] " +
+            PluginLog.Verbose($"[ConflictingPlugins] [{PluginName}] " +
                             $"IPC is not enabled.");
             return false;
         }
 
-        try
+        if (!_hasEntries.TryInvoke(out var hasEntries))
         {
-            var hasEntries = _hasEntries();
-            PluginLog.Verbose(
-                $"[ConflictingPlugins] [{PluginName}] `ActionQueue.HasEntries`: " +
-                hasEntries);
-            return hasEntries;
-        }
-        catch (Exception e)
-        {
-            PluginLog.Warning($"[ConflictingPlugins] [{PluginName}] " +
-                              $"`ActionQueue.HasEntries` failed:" +
-                              e.ToStringFull());
+            PluginLog.Verbose($"[ConflictingPlugins] [{PluginName}] " +
+                            $"`ActionQueue.HasEntries` IPC not ready yet.");
             return false;
         }
+
+        PluginLog.Verbose(
+            $"[ConflictingPlugins] [{PluginName}] `ActionQueue.HasEntries`: " +
+            hasEntries);
+        return hasEntries;
     }
 
     public bool IsAutoTargetingEnabled()
     {
         if (!PluginIsLoaded)
         {
-            PluginLog.Debug($"[ConflictingPlugins] [{PluginName}] " +
+            PluginLog.Verbose($"[ConflictingPlugins] [{PluginName}] " +
                             $"Plugin is not loaded.");
             return false;
         }
@@ -55,7 +51,7 @@ internal sealed class BossModIPC(
         var ai = Plugin.GetFoP("_ai");
         if (ai == null)
         {
-            PluginLog.Debug(
+            PluginLog.Verbose(
                 $"[ConflictingPlugins] [{PluginName}] Could not access _ai field");
             return false;
         }
@@ -63,7 +59,7 @@ internal sealed class BossModIPC(
         var aiConfig = ai.GetFoP("Config");
         if (aiConfig == null)
         {
-            PluginLog.Debug(
+            PluginLog.Verbose(
                 $"[ConflictingPlugins] [{PluginName}] Could not access AI.Config field");
             return false;
         }

@@ -22,370 +22,370 @@ public enum CustomComboPreset
 
     #region PHANTOM ACTIONS
     [OccultCrescent(OccultCrescent.JobIDs.Freelancer)]
-    [CustomComboInfo("辅助自由人技能", "启用以将辅助自由人相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助自由人技能", "啟用以將輔助自由人相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Freelancer = 110000,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Freelancer)]
-    [CustomComboInfo("魔急救", "将魔急救加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔急救", "將魔急救加入循環。", OccultCrescent.JobID)]
     Phantom_Freelancer_OccultResuscitation = 110001,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Freelancer)]
-    [CustomComboInfo("魔寻宝", "将魔寻宝加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔尋寶", "將魔尋寶加入循環。", OccultCrescent.JobID)]
     Phantom_Freelancer_OccultTreasuresight = 110002,
 
     [OccultCrescent(OccultCrescent.JobIDs.Knight)]
-    [CustomComboInfo("辅助骑士", "启用以将辅助骑士相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助騎士", "啟用以將輔助騎士相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Knight = 110003,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Knight)]
-    [CustomComboInfo("防护", "将防护加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("防護", "將防護加入循環。", OccultCrescent.JobID)]
     Phantom_Knight_PhantomGuard = 110004,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Knight)]
-    [CustomComboInfo("祈祷", "将祈祷加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("祈禱", "將祈禱加入循環。", OccultCrescent.JobID)]
     Phantom_Knight_Pray = 110005,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Knight)]
-    [CustomComboInfo("魔疗愈", "将魔疗愈加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔療愈", "將魔療愈加入循環。", OccultCrescent.JobID)]
     Phantom_Knight_OccultHeal = 110006,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Knight)]
-    [CustomComboInfo("起誓", "将起誓加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("起誓", "將起誓加入循環。", OccultCrescent.JobID)]
     Phantom_Knight_Pledge = 110007,
 
     [OccultCrescent(OccultCrescent.JobIDs.Monk)]
-    [CustomComboInfo("辅助武僧", "启用以将辅助武僧相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助武僧", "啟用以將輔助武僧相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Monk = 110008,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Monk)]
-    [CustomComboInfo("踢击", "将踢击加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("踢擊", "將踢擊加入循環。", OccultCrescent.JobID)]
     Phantom_Monk_PhantomKick = 110009,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Monk)]
-    [CustomComboInfo("魔反击", "将魔反击加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔反擊", "將魔反擊加入循環。", OccultCrescent.JobID)]
     Phantom_Monk_OccultCounter = 110010,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Monk)]
-    [CustomComboInfo("架招", "将架招加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("架招", "將架招加入循環。", OccultCrescent.JobID)]
     Phantom_Monk_Counterstance = 110011,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Monk)]
-    [CustomComboInfo("魔脉轮", "将魔脉轮加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔脈輪", "將魔脈輪加入循環。", OccultCrescent.JobID)]
     Phantom_Monk_OccultChakra = 110012,
 
     [OccultCrescent(OccultCrescent.JobIDs.Thief)]
-    [CustomComboInfo("辅助盗贼", "启用以将辅助盗贼相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助盜賊", "啟用以將輔助盜賊相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Thief = 110013,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Thief)]
-    [CustomComboInfo("魔冲刺", "将魔冲刺加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔衝刺", "將魔衝刺加入循環。", OccultCrescent.JobID)]
     Phantom_Thief_OccultSprint = 110014,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Thief)]
-    [CustomComboInfo("偷盗", "将偷盗加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("偷盜", "將偷盜加入循環。", OccultCrescent.JobID)]
     Phantom_Thief_Steal = 110015,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Thief)]
-    [CustomComboInfo("警戒", "将警戒加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("警戒", "將警戒加入循環。", OccultCrescent.JobID)]
     Phantom_Thief_Vigilance = 110016,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Thief)]
-    [CustomComboInfo("陷阱感知", "将陷阱感知加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("陷阱感知", "將陷阱感知加入循環。", OccultCrescent.JobID)]
     Phantom_Thief_TrapDetection = 110017,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Thief)]
-    [CustomComboInfo("偷盗武器", "将偷盗武器加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("偷盜武器", "將偷盜武器加入循環。", OccultCrescent.JobID)]
     Phantom_Thief_PilferWeapon = 110018,
 
     [OccultCrescent(OccultCrescent.JobIDs.Samurai)]
-    [CustomComboInfo("辅助武士", "启用以将辅助武士相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助武士", "啟用以將輔助武士相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Samurai = 110053,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Samurai)]
-    [CustomComboInfo("刀背打", "将刀背打加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("刀背打", "將刀背打加入循環。", OccultCrescent.JobID)]
     Phantom_Samurai_Mineuchi = 110054,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Samurai)]
-    [CustomComboInfo("空手接白刃", "将空手接白刃加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("空手接白刃", "將空手接白刃加入循環。", OccultCrescent.JobID)]
     Phantom_Samurai_Shirahadori = 110055,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Samurai)]
-    [CustomComboInfo("居合斩", "将居合斩加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("拔刀斬", "將拔刀斬加入循環。", OccultCrescent.JobID)]
     Phantom_Samurai_Iainuki = 110056,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Samurai)]
-    [CustomComboInfo("扔钱", "将扔钱加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("扔錢", "將扔錢加入循環。", OccultCrescent.JobID)]
     Phantom_Samurai_Zeninage = 110057,
 
     [OccultCrescent(OccultCrescent.JobIDs.Berserker)]
-    [CustomComboInfo("辅助狂战士", "启用以将狂战士相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助狂戰士", "啟用以將狂戰士相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Berserker = 110019,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Berserker)]
-    [CustomComboInfo("狂怒", "将狂怒加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("狂怒", "將狂怒加入循環。", OccultCrescent.JobID)]
     Phantom_Berserker_Rage = 110020,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Berserker)]
-    [CustomComboInfo("一击", "将一击加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("一擊", "將一擊加入循環。", OccultCrescent.JobID)]
     Phantom_Berserker_DeadlyBlow = 110021,
 
     [OccultCrescent(OccultCrescent.JobIDs.Ranger)]
-    [CustomComboInfo("辅助猎人", "启用以将辅助猎人相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助獵人", "啟用以將輔助獵人相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Ranger = 110022,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Ranger)]
-    [CustomComboInfo("狙击", "将狙击加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("狙擊", "將狙擊加入循環。", OccultCrescent.JobID)]
     Phantom_Ranger_PhantomAim = 110023,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Ranger)]
-    [CustomComboInfo("魔猎步", "将魔猎步加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔獵步", "將魔獵步加入循環。", OccultCrescent.JobID)]
     Phantom_Ranger_OccultFeatherfoot = 110024,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Ranger)]
-    [CustomComboInfo("魔猎鹰", "将魔猎鹰加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔獵鷹", "將魔獵鷹加入循環。", OccultCrescent.JobID)]
     Phantom_Ranger_OccultFalcon = 110025,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Ranger)]
-    [CustomComboInfo("魔独角兽", "将魔独角兽加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔獨角獸", "將魔獨角獸加入循環。", OccultCrescent.JobID)]
     Phantom_Ranger_OccultUnicorn = 110026,
 
     [OccultCrescent(OccultCrescent.JobIDs.TimeMage)]
-    [CustomComboInfo("辅助时魔法师", "启用以将辅助时魔法师相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助時魔法師", "啟用以將輔助時魔法師相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_TimeMage = 110027,
 
     [OccultCrescent]
     [ParentCombo(Phantom_TimeMage)]
-    [CustomComboInfo("魔强减速", "将魔强减速加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔強減速", "將魔強減速加入循環。", OccultCrescent.JobID)]
     Phantom_TimeMage_OccultSlowga = 110028,
 
     [OccultCrescent]
     [ParentCombo(Phantom_TimeMage_OccultSlowga)]
-    [CustomComboInfo("等待以获得更完整效果", "当重复使用的收益递减较大，或完全没有收益时，将不会使用魔强减速。", OccultCrescent.JobID)]
+    [CustomComboInfo("等待以獲得更完整效果", "當重複使用的收益遞減較大，或完全沒有收益時，將不會使用魔強減速。", OccultCrescent.JobID)]
     Phantom_TimeMage_OccultSlowga_Wait = 110075,
 
     [OccultCrescent]
     [ParentCombo(Phantom_TimeMage)]
-    [CustomComboInfo("魔彗星", "将魔彗星加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔彗星", "將魔彗星加入循環。", OccultCrescent.JobID)]
     Phantom_TimeMage_OccultComet = 110029,
 
     [OccultCrescent]
     [ParentCombo(Phantom_TimeMage)]
-    [CustomComboInfo("魔封魔", "将魔封魔加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔封魔", "將魔封魔加入循環。", OccultCrescent.JobID)]
     Phantom_TimeMage_OccultMageMasher = 110030,
 
     [OccultCrescent]
     [ParentCombo(Phantom_TimeMage)]
-    [CustomComboInfo("魔驱魔", "若目标具有可驱散的已知状态，将魔驱魔加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔驅魔", "若目標具有可驅散的已知狀態，將魔驅魔加入循環。", OccultCrescent.JobID)]
     Phantom_TimeMage_OccultDispel = 110031,
 
     [OccultCrescent]
     [ParentCombo(Phantom_TimeMage)]
-    [CustomComboInfo("魔神速", "将魔神速加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔神速", "將魔神速加入循環。", OccultCrescent.JobID)]
     Phantom_TimeMage_OccultQuick = 110032,
 
     [OccultCrescent(OccultCrescent.JobIDs.Chemist)]
-    [CustomComboInfo("辅助药剂师", "启用以将辅助药剂师相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助藥劑師", "啟用以將輔助藥劑師相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Chemist = 110033,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Chemist)]
-    [CustomComboInfo("魔恢复药", "将魔恢复药加入循环。\n需要背包中有魔恢复药。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔治療劑", "將魔治療劑加入循環。\n需要揹包中有魔治療劑。", OccultCrescent.JobID)]
     Phantom_Chemist_OccultPotion = 110034,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Chemist)]
-    [CustomComboInfo("魔以太药", "将魔以太药加入循环。\n需要背包中有魔恢复药。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔以太藥", "將魔以太藥加入循環。\n需要揹包中有魔治療劑。", OccultCrescent.JobID)]
     Phantom_Chemist_OccultEther = 110035,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Chemist)]
-    [CustomComboInfo("苏生", "将苏生加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("蘇生", "將蘇生加入循環。", OccultCrescent.JobID)]
     Phantom_Chemist_Revive = 110036,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Chemist)]
-    [CustomComboInfo("魔圣灵药", "将魔圣灵药加入循环。\n需要背包中有魔圣灵药。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔聖靈藥", "將魔聖靈藥加入循環。\n需要揹包中有魔聖靈藥。", OccultCrescent.JobID)]
     Phantom_Chemist_OccultElixir = 110037,
 
     [OccultCrescent(OccultCrescent.JobIDs.Bard)]
-    [CustomComboInfo("辅助吟游诗人", "启用以将辅助吟游诗人相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助吟遊詩人", "啟用以將輔助吟遊詩人相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Bard = 110038,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Bard)]
-    [CustomComboInfo("体力之歌", "将体力之歌加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("體力之歌", "將體力之歌加入循環。", OccultCrescent.JobID)]
     Phantom_Bard_MightyMarch = 110039,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Bard)]
-    [CustomComboInfo("攻击之歌", "将攻击之歌加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("攻擊之歌", "將攻擊之歌加入循環。", OccultCrescent.JobID)]
     Phantom_Bard_OffensiveAria = 110040,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Bard)]
-    [CustomComboInfo("爱之歌", "将爱之歌加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("愛之歌", "將愛之歌加入循環。", OccultCrescent.JobID)]
     Phantom_Bard_RomeosBallad = 110041,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Bard)]
-    [CustomComboInfo("英雄之歌", "将英雄之歌加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("英雄之歌", "將英雄之歌加入循環。", OccultCrescent.JobID)]
     Phantom_Bard_HerosRime = 110042,
 
     [OccultCrescent(OccultCrescent.JobIDs.Oracle)]
-    [CustomComboInfo("辅助预言师", "启用以将辅助预言师相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助預言師", "啟用以將輔助預言師相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Oracle = 110043,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Oracle)]
-    [CustomComboInfo("预言", "将预言加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("預言", "將預言加入循環。", OccultCrescent.JobID)]
     Phantom_Oracle_Predict = 110044,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Oracle)]
-    [CustomComboInfo("神圣审判", "将神圣审判加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("神聖審判", "將神聖審判加入循環。", OccultCrescent.JobID)]
     Phantom_Oracle_PhantomJudgment = 110045,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Oracle)]
-    [CustomComboInfo("天崩地裂", "将天崩地裂加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("天崩地裂", "將天崩地裂加入循環。", OccultCrescent.JobID)]
     Phantom_Oracle_Cleansing = 110046,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Oracle)]
-    [CustomComboInfo("天之恩典", "将天之恩典加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("天之恩典", "將天之恩典加入循環。", OccultCrescent.JobID)]
     Phantom_Oracle_Blessing = 110047,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Oracle)]
-    [CustomComboInfo("陨石", "将陨石加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("隕石", "將隕石加入循環。", OccultCrescent.JobID)]
     Phantom_Oracle_Starfall = 110048,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Oracle)]
-    [CustomComboInfo("痊愈宣告", "将痊愈宣告加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("痊癒宣告", "將痊癒宣告加入循環。", OccultCrescent.JobID)]
     Phantom_Oracle_Recuperation = 110049,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Oracle)]
-    [CustomComboInfo("死亡宣告", "将死亡宣告加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("死亡宣告", "將死亡宣告加入循環。", OccultCrescent.JobID)]
     Phantom_Oracle_PhantomDoom = 110050,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Oracle)]
-    [CustomComboInfo("治愈宣告", "将治愈宣告加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("治癒宣告", "將治癒宣告加入循環。", OccultCrescent.JobID)]
     Phantom_Oracle_PhantomRejuvenation = 110051,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Oracle)]
-    [CustomComboInfo("不死宣告", "将不死宣告加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("不死宣告", "將不死宣告加入循環。", OccultCrescent.JobID)]
     Phantom_Oracle_Invulnerability = 110052,
 
     [OccultCrescent(OccultCrescent.JobIDs.Cannoneer)]
-    [CustomComboInfo("辅助炮击士", "启用以将辅助炮击士相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助炮擊士", "啟用以將輔助炮擊士相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Cannoneer = 110058,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Cannoneer)]
-    [CustomComboInfo("炮击", "将炮击加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("炮擊", "將炮擊加入循環。", OccultCrescent.JobID)]
     Phantom_Cannoneer_PhantomFire = 110059,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Cannoneer)]
-    [CustomComboInfo("神圣炮", "将神圣炮加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("神聖炮", "將神聖炮加入循環。", OccultCrescent.JobID)]
     Phantom_Cannoneer_HolyCannon = 110060,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Cannoneer)]
-    [CustomComboInfo("暗黑炮", "将暗黑炮加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("暗黑炮", "將暗黑炮加入循環。", OccultCrescent.JobID)]
     Phantom_Cannoneer_DarkCannon = 110061,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Cannoneer)]
-    [CustomComboInfo("冲击炮", "将冲击炮加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("衝擊砲", "將衝擊砲加入循環。", OccultCrescent.JobID)]
     Phantom_Cannoneer_ShockCannon = 110062,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Cannoneer)]
-    [CustomComboInfo("老化炮", "将老化炮加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("老化炮", "將老化炮加入循環。", OccultCrescent.JobID)]
     Phantom_Cannoneer_SilverCannon = 110063,
 
     [OccultCrescent(OccultCrescent.JobIDs.Geomancer)]
-    [CustomComboInfo("辅助风水师", "启用以将辅助风水师相关技能加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("輔助風水師", "啟用以將輔助風水師相關技能加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer = 110064,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer)]
-    [CustomComboInfo("战斗之铃", "将战斗之铃加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("戰鬥之鈴", "將戰鬥之鈴加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_BattleBell = 110065,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer)]
-    [CustomComboInfo("休憩之铃", "将休憩之铃加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("休憩之鈴", "將休憩之鈴加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_RingingRespite = 110073,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer)]
-    [CustomComboInfo("浮空", "将浮空加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("浮空", "將浮空加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_Suspend = 110074,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer)]
-    [CustomComboInfo("天气", "将天气加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("天氣", "將天氣加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_Weather = 110066,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer_Weather)]
-    [CustomComboInfo("日光浴", "将日光浴加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("日光浴", "將日光浴加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_Sunbath = 110067,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer_Weather)]
-    [CustomComboInfo("晚风凉", "将晚风凉加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("晚風涼", "將晚風涼加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_CloudyCaress = 110068,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer_Weather)]
-    [CustomComboInfo("恩惠雨", "将恩惠雨加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("恩惠雨", "將恩惠雨加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_BlessedRain = 110069,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer_Weather)]
-    [CustomComboInfo("空蜃景", "将空蜃景加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("空蜃景", "將空蜃景加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_MistyMirage = 110070,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer_Weather)]
-    [CustomComboInfo("水蜃景", "将水蜃景加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("水蜃景", "將水蜃景加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_HastyMirage = 110071,
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer_Weather)]
-    [CustomComboInfo("以太浴", "将以太浴加入循环。", OccultCrescent.JobID)]
+    [CustomComboInfo("以太浴", "將以太浴加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_AetherialGain = 110072,
 
     //Last Value = 110075
@@ -419,7 +419,7 @@ public enum CustomComboPreset
 
     [ParentCombo(ALL_Tank_Interrupt)]
     [Retargeted(RoleActions.Tank.Interject, RoleActions.Tank.LowBlow)]
-    [CustomComboInfo("重定向打断目标", "如果施法者不是你的当前目标，将重新指定打断技能的目标。", ADV.JobID)]
+    [CustomComboInfo("重定向打斷目標", "如果施法者不是你的當前目標，將重新指定打斷技能的目標。", ADV.JobID)]
     ALL_Tank_Interrupt_Retarget = 100005,
 
     [Role(JobRole.Tank)]
@@ -432,22 +432,22 @@ public enum CustomComboPreset
     [Role(JobRole.Tank)]
     [ReplaceSkill(RoleActions.Tank.Shirk)]
     [ParentCombo(ALL_Tank_Menu)]
-    [CustomComboInfo("防护职业: 退避重定向",
-        "如果存在其他防护职业，将退避重定向到其他防护职业。", ADV.JobID)]
+    [CustomComboInfo("防護職業: 退避重定向",
+        "如果存在其他防護職業，將退避重定向到其他防護職業。", ADV.JobID)]
     [Retargeted(RoleActions.Tank.Shirk)]
     ALL_Tank_ShirkRetargeting = 100002,
 
     [Role(JobRole.Tank)]
     [ParentCombo(ALL_Tank_ShirkRetargeting)]
-    [CustomComboInfo("改为治疗职业",
-        "将退避重定向到治疗职业，而不是其他防护职业。\n仅在特定狂暴时推荐使用。", ADV.JobID)]
+    [CustomComboInfo("改為治療職業",
+        "將退避重定向到治療職業，而不是其他防護職業。\n僅在特定狂暴時推薦使用。", ADV.JobID)]
     [Retargeted]
     ALL_Tank_ShirkRetargeting_Healer = 100003,
 
     [Role(JobRole.Tank)]
     [ParentCombo(ALL_Tank_ShirkRetargeting)]
-    [CustomComboInfo("备用目标：任意支援职业",
-        "根据上方设置将退避重定向至防护职业或治疗职业，但若未找到符合设置的目标，将自动选择任意支援职业作为备用目标。\n确保您的退避技能始终有释放目标，即使预设玩家已阵亡。", ADV.JobID)]
+    [CustomComboInfo("備用目標：任意支援職業",
+        "根據上方設定將退避重定向至防護職業或治療職業，但若未找到符合設定的目標，將自動選擇任意支援職業作為備用目標。\n確保您的退避技能始終有釋放目標，即使預設玩家已陣亡。", ADV.JobID)]
     [Retargeted]
     ALL_Tank_ShirkRetargeting_Fallback = 100004,
 
@@ -469,22 +469,22 @@ public enum CustomComboPreset
     ALL_Healer_Raise = 100010,
 
     [ParentCombo(ALL_Healer_Raise)]
-    [CustomComboInfo("重定向复活目标", "将此范围内受影响的复活技能目标，重新指定为你的治疗集合目标。", ADV.JobID)]
+    [CustomComboInfo("重定向復活目標", "將此範圍內受影響的復活技能目標，重新指定為你的治療集合目標。", ADV.JobID)]
     [Retargeted(WHM.Raise, AST.Ascend, SGE.Egeiro, SCH.Resurrection)]
     ALL_Healer_Raise_Retarget = 100011,
 
     [Role(JobRole.Healer)]
     [ReplaceSkill(RoleActions.Healer.Esuna)]
     [ParentCombo(ALL_Healer_Menu)]
-    [CustomComboInfo("治疗职业: 康复重定向",
-        "将康复技能（在连击使用之外）重定向到你的治疗集合，检查集合中每个潜在目标是否具有可清除的减益效果。", ADV.JobID)]
+    [CustomComboInfo("治療職業: 康復重定向",
+        "將康復技能（在連擊使用之外）重定向到你的治療集合，檢查集合中每個潛在目標是否具有可清除的減益效果。", ADV.JobID)]
     [Retargeted(RoleActions.Healer.Esuna)]
     ALL_Healer_EsunaRetargeting = 100012,
     
     [Role(JobRole.Healer)]
     [ReplaceSkill(RoleActions.Healer.Rescue)]
     [ParentCombo(ALL_Healer_Menu)]
-    [CustomComboInfo("治疗职业: 营救重定向", "将营救技能（在连击使用之外）重定向到UI鼠标悬停位置和其他选项。", ADV.JobID)]
+    [CustomComboInfo("治療職業: 營救重定向", "將營救技能（在連擊使用之外）重定向到UI滑鼠懸停位置和其他選項。", ADV.JobID)]
     [Retargeted(RoleActions.Healer.Rescue)]
     ALL_Healer_RescueRetargeting = 100013,
     #endregion
@@ -514,7 +514,7 @@ public enum CustomComboPreset
     ALL_Caster_Raise = 100021,
 
     [ParentCombo(ALL_Caster_Raise)]
-    [CustomComboInfo("重定向复活目标", "将此范围内受影响的复活技能目标，重新指定为你的治疗集合目标。", ADV.JobID)]
+    [CustomComboInfo("重定向復活目標", "將此範圍內受影響的復活技能目標，重新指定為你的治療集合目標。", ADV.JobID)]
     [Retargeted(BLU.AngelWhisper, RDM.Verraise, SMN.Resurrection)]
     ALL_Caster_Raise_Retarget = 100022,
 
@@ -585,14 +585,14 @@ public enum CustomComboPreset
     [AutoAction(false, false)]
     [ReplaceSkill(AST.Malefic, AST.Malefic2, AST.Malefic3, AST.Malefic4, AST.FallMalefic)]
     [ConflictingCombos(AST_ST_DPS)]
-    [CustomComboInfo("一键输出-单目标", "将凶星替换为完整单体一键输出循环，并自动分配输出卡。\n适合新手使用。", AST.JobID)]
+    [CustomComboInfo("Simple DPS Mode - Single Target", "將凶星替換為完整單體一鍵輸出循環，並自動分配輸出卡。\n適合新手使用。", AST.JobID)]
     [SimpleCombo]
     AST_ST_Simple_DPS = 1179,
     
     [AutoAction(true, false)]
     [ReplaceSkill(AST.Gravity, AST.Gravity2)]
     [ConflictingCombos(AST_AOE_DPS)]
-    [CustomComboInfo("一键输出-多目标", "将重力替换为完整多目标一键输出循环，并自动分配输出卡。\n适合新手使用。", AST.JobID)]
+    [CustomComboInfo("Simple DPS Mode - AoE", "將重力替換為完整多目標一鍵輸出循環，並自動分配輸出卡。\n適合新手使用。", AST.JobID)]
     [SimpleCombo]
     AST_AOE_Simple_DPS = 1180,
         
@@ -622,7 +622,7 @@ public enum CustomComboPreset
     AST_DPS_LightSpeed = 1020,
 
     [ParentCombo(AST_DPS_LightSpeed)]
-    [CustomComboInfo("光速保留", "保留1层光速以便手动使用", AST.JobID)]
+    [CustomComboInfo("光速保留", "保留1層光速以便手動使用", AST.JobID)]
     AST_DPS_LightSpeedHold = 1061,   
 
     [ParentCombo(AST_ST_DPS)]
@@ -630,7 +630,7 @@ public enum CustomComboPreset
     AST_DPS_Divination = 1016,
 
     [ParentCombo(AST_DPS_Divination)]
-    [CustomComboInfo("光速爆发", "在占卜前加入光速。\n可与光速保留选项配合，确保有可用充能。", AST.JobID)]
+    [CustomComboInfo("Lightspeed Burst Option", "在占卜前加入光速。\n可與光速保留選項配合，確保有可用充能。", AST.JobID)]
     AST_DPS_LightspeedBurst = 1064,   
 
     [ParentCombo(AST_ST_DPS)]
@@ -644,7 +644,7 @@ public enum CustomComboPreset
     AST_DPS_AutoPlay = 1037,
 
     [ParentCombo(AST_DPS_AutoPlay)]
-    [CustomComboInfo("出卡保留", "为占卜团辅期保留输出卡",
+    [CustomComboInfo("Card Play Pooling Option", "為占卜團輔期保留輸出卡",
         AST.JobID)]
     AST_DPS_CardPool = 1055,
 
@@ -653,7 +653,7 @@ public enum CustomComboPreset
     AST_DPS_LazyLord = 1014,
 
     [ParentCombo(AST_DPS_LazyLord)]
-    [CustomComboInfo("王冠之领主保留", "为占卜团辅期保留王冠之领主", AST.JobID)]
+    [CustomComboInfo("Lord of Crowns Pooling Option", "為占卜團輔期保留王冠之領主", AST.JobID)]
     AST_DPS_LordPool = 1056,
 
     [ParentCombo(AST_ST_DPS)]
@@ -661,12 +661,12 @@ public enum CustomComboPreset
     AST_DPS_Oracle = 1015,
 
     [ParentCombo(AST_ST_DPS)]
-    [CustomComboInfo("地星", "在循环中加入地星放置（不包含引爆）。\n优先目标为任意敌人，其次为焦点目标，再次为软锁和硬锁目标，最后会放置在自己脚下。", AST.JobID)]
+    [CustomComboInfo("Earthly Star Option", "在循環中加入地星放置（不包含引爆）。\n優先目標為任意敵人，其次為焦點目標，再次為軟鎖和硬鎖目標，最後會放置在自己腳下。", AST.JobID)]
     [Retargeted(AST.EarthlyStar)]
     AST_ST_DPS_EarthlyStar = 1051,
     
     [ParentCombo(AST_ST_DPS)]
-    [CustomComboInfo("星体爆轰", "根据目标血量百分比和战斗类型，提前引爆星体爆轰（巨星主宰优先）", AST.JobID)]
+    [CustomComboInfo("Stellar Detonation Option", "根據目標血量百分比和戰鬥型別，提前引爆星體爆轟（巨星主宰優先）", AST.JobID)]
     AST_ST_DPS_StellarDetonation = 1081,
 
     [ParentCombo(AST_ST_DPS)]
@@ -693,7 +693,7 @@ public enum CustomComboPreset
     AST_AOE_LightSpeed = 1048,
 
     [ParentCombo(AST_AOE_LightSpeed)]
-    [CustomComboInfo("光速保留", "保留1层光速以便手动使用", AST.JobID)]
+    [CustomComboInfo("光速保留", "保留1層光速以便手動使用", AST.JobID)]
     AST_AOE_LightSpeedHold = 1062,    
 
     [ParentCombo(AST_AOE_DPS)]
@@ -701,7 +701,7 @@ public enum CustomComboPreset
     AST_AOE_Divination = 1043,
 
     [ParentCombo(AST_AOE_Divination)]
-    [CustomComboInfo("光速爆发", "在占卜前使用光速。\n可与光速保留搭配，确保有可用充能", AST.JobID)]
+    [CustomComboInfo("Lightspeed Burst Option", "在占卜前使用光速。\n可與光速保留搭配，確保有可用充能", AST.JobID)]
     AST_AOE_LightspeedBurst = 1063,    
 
     [ParentCombo(AST_AOE_DPS)]
@@ -715,7 +715,7 @@ public enum CustomComboPreset
     AST_AOE_AutoPlay = 1045,
 
     [ParentCombo(AST_AOE_AutoPlay)]
-    [CustomComboInfo("出卡保留", "为占卜团辅期保留输出卡",
+    [CustomComboInfo("Card Play Pooling Option", "為占卜團輔期保留輸出卡",
         AST.JobID)]
     AST_AOE_CardPool = 1057,
 
@@ -724,7 +724,7 @@ public enum CustomComboPreset
     AST_AOE_LazyLord = 1046,
 
     [ParentCombo(AST_AOE_LazyLord)]
-    [CustomComboInfo("王冠之领主保留", "为占卜团辅期保留王冠之领主", AST.JobID)]
+    [CustomComboInfo("Lord of Crowns Pooling Option", "為占卜團輔期保留王冠之領主", AST.JobID)]
     AST_AOE_LordPool = 1058,
 
     [ParentCombo(AST_AOE_DPS)]
@@ -732,16 +732,16 @@ public enum CustomComboPreset
     AST_AOE_Oracle = 1047,
 
     [ParentCombo(AST_AOE_DPS)]
-    [CustomComboInfo("地星", "在循环中自动放置地星（不包含引爆）。\n优先放置于专注目标，其次为软锁和硬锁目标，最后放置在自身脚下。", AST.JobID)]
+    [CustomComboInfo("Earthly Star Option", "在循環中自動放置地星（不包含引爆）。\n優先放置於專注目標，其次為軟鎖和硬鎖目標，最後放置在自身腳下。", AST.JobID)]
     [Retargeted(AST.EarthlyStar)]
     AST_AOE_DPS_EarthlyStar = 1052,
     
     [ParentCombo(AST_AOE_DPS)]
-    [CustomComboInfo("星体爆轰", "根据目标血量百分比和战斗类型，提前引爆巨星主宰的星体爆轰", AST.JobID)]
+    [CustomComboInfo("Stellar Detonation Option", "根據目標血量百分比和戰鬥型別，提前引爆巨星主宰的星體爆轟", AST.JobID)]
     AST_AOE_DPS_StellarDetonation = 1082,
 
     [ParentCombo(AST_AOE_DPS)]
-    [CustomComboInfo("大宇宙", "在AOE循环中于第3次GCD后自动施放大宇宙", AST.JobID)]    
+    [CustomComboInfo("大宇宙", "在AOE循環中於第3次GCD後自動施放大宇宙", AST.JobID)]    
     AST_AOE_DPS_MacroCosmos = 1066,
 
     [ParentCombo(AST_AOE_DPS)]
@@ -754,7 +754,7 @@ public enum CustomComboPreset
 
     [AutoAction(false, true)]
     [ReplaceSkill(AST.Benefic2)]
-    [CustomComboInfo("高级治疗模式-单目标", "Replaces Benefic II with a one button healing replacement.",
+    [CustomComboInfo("高階治療模式-單目標", "Replaces Benefic II with a one button healing replacement.",
         AST.JobID)]
     [PossiblyRetargeted(AST.Benefic2)]
     [HealingCombo]
@@ -811,7 +811,7 @@ public enum CustomComboPreset
     AST_ST_Heals_CelestialOpposition = 1068,
     
     [ParentCombo(AST_ST_Heals)]
-    [CustomComboInfo("命运之轮", "添加命运之轮（仅用于持续恢复，不会持续吟唱）", AST.JobID)]
+    [CustomComboInfo("Collective Unconscious Option", "新增命運之輪（僅用於持續恢復，不會持續吟唱）", AST.JobID)]
     AST_ST_Heals_CollectiveUnconscious = 1069,
     
     [ParentCombo(AST_ST_Heals)]
@@ -820,8 +820,8 @@ public enum CustomComboPreset
 
     [AutoAction(true, true)]
     [ReplaceSkill(AST.Helios, AST.AspectedHelios, AST.HeliosConjuction)]
-    [CustomComboInfo("高级治疗模式-多目标",
-        "将阳星相位/阳星合相或阳星替换为一键群体治疗。该技能始终为最低优先级，不受下方设置影响。", AST.JobID)]
+    [CustomComboInfo("高階治療模式-多目標",
+        "將陽星相位/陽星合相或陽星替換為一鍵群體治療。該技能始終為最低優先順序，不受下方設定影響。", AST.JobID)]
     AST_AoE_Heals = 1010,
     
     [ParentCombo(AST_AoE_Heals)]
@@ -841,7 +841,7 @@ public enum CustomComboPreset
     AST_AoE_Heals_LazyLady = 1022,
 
     [ParentCombo(AST_AoE_Heals)]
-    [CustomComboInfo("天宫图", "添加天宫图，随后接吉星相位或阳星。", AST.JobID)]
+    [CustomComboInfo("Horoscope Option", "新增天宮圖，隨後接吉星相位或陽星。", AST.JobID)]
     AST_AoE_Heals_Horoscope = 1026,
     
     [ParentCombo(AST_AoE_Heals)]
@@ -849,15 +849,15 @@ public enum CustomComboPreset
     AST_AoE_Heals_HoroscopeHeal = 1071,
 
     [ParentCombo(AST_AoE_Heals)]
-    [CustomComboInfo("中间学派", "添加中间学派及其后续的太阳星座。", AST.JobID)]
+    [CustomComboInfo("中間學派", "新增中間學派及其後續的太陽星座。", AST.JobID)]
     AST_AoE_Heals_NeutralSect = 1067,
     
     [ParentCombo(AST_AoE_Heals)]
-    [CustomComboInfo("星体爆轰", "在拥有巨星主宰效果时添加星体爆轰", AST.JobID)]
+    [CustomComboInfo("Stellar Detonation Option", "在擁有巨星主宰效果時新增星體爆轟", AST.JobID)]
     AST_AoE_Heals_StellarDetonation = 1072,
     
     [ParentCombo(AST_AoE_Heals)]
-    [CustomComboInfo("命运之轮", "添加命运之轮（仅用于持续恢复，不会持续吟唱）", AST.JobID)]
+    [CustomComboInfo("Collective Unconscious Option", "新增命運之輪（僅用於持續恢復，不會持續吟唱）", AST.JobID)]
     AST_AoE_Heals_CollectiveUnconscious = 1074,
 
     [ReplaceSkill(AST.Benefic2)]
@@ -875,16 +875,16 @@ public enum CustomComboPreset
     AST_Raise_Alternative = 1003,
 
     [ParentCombo(AST_Raise_Alternative)]
-    [CustomComboInfo("自动重定向复活目标", "将此处受影响的复活技能目标重新指定至你的治疗集合。", AST.JobID)]
+    [CustomComboInfo("自動重定向復活目標", "將此處受影響的復活技能目標重新指定至你的治療集合。", AST.JobID)]
     [Retargeted(AST.Ascend)]
     AST_Raise_Alternative_Retarget = 1060,
 
     [ReplaceSkill(AST.Lightspeed)]
-    [CustomComboInfo("光速保护", "在光速效果持续期间，禁用光速按钮。", AST.JobID)]
+    [CustomComboInfo("光速保護", "在光速效果持續期間，禁用光速按鈕。", AST.JobID)]
     AST_Lightspeed_Protection = 1065,    
 
     [ReplaceSkill(AST.EssentialDignity)]
-    [CustomComboInfo("重定向先天禀赋", "在非治疗连击时，将先天禀赋自动重定向至你的治疗集合目标。", AST.JobID)]
+    [CustomComboInfo("重定向先天稟賦", "在非治療連擊時，將先天稟賦自動重定向至你的治療集合目標。", AST.JobID)]
     [Retargeted(AST.EssentialDignity)]
     AST_RetargetEssentialDignity = 1059,
 
@@ -903,8 +903,8 @@ public enum CustomComboPreset
 
     #region Cards
 
-    [CustomComboInfo("快速目标伤害卡",
-        "在连击中打出太阳神之衡或战争神之枪时，自动为合适的队友上卡。\n优先选择最适合该卡的DPS（遵循The Balance优先级），如无合适目标或已有增益，则选择其他DPS。\n会跳过有伤害降低或复活虚弱的队员。\n如无合适目标则默认给自己。",
+    [CustomComboInfo("Quick Target Damage Cards",
+        "在連擊中打出太陽神之衡或戰爭神之槍時，自動為合適的隊友上卡。\n優先選擇最適合該卡的DPS（遵循The Balance優先順序），如無合適目標或已有增益，則選擇其他DPS。\n會跳過有傷害降低或復活虛弱的隊員。\n如無合適目標則預設給自己。",
         AST.JobID)]
     [Retargeted(AST.Play1, AST.Balance, AST.Spear)]
     AST_Cards_QuickTargetCards = 1029,
@@ -912,23 +912,23 @@ public enum CustomComboPreset
     #endregion
     
     #region Raidwide Features
-    [CustomComboInfo("团队范围技能选项",
-        "检测到团队范围攻击时尝试施放技能的工具集合。" +
-        "\n这对大多数但不是所有团队范围攻击都有效，不能替代学习战斗机制", AST.JobID)]
+    [CustomComboInfo("團隊範圍技能選項",
+        "檢測到團隊範圍攻擊時嘗試施放技能的工具集合。" +
+        "\n這對大多數但不是所有團隊範圍攻擊都有效，不能替代學習戰鬥機制", AST.JobID)]
     AST_Raidwide = 1075,
     
     [ParentCombo(AST_Raidwide)]
-    [CustomComboInfo("团队命运之轮", "团队范围技能时，尝试插入命运之轮。\n会在所有四个主连击中使用。", AST.JobID)]
+    [CustomComboInfo("團隊命運之輪", "團隊範圍技能時，嘗試插入命運之輪。\n會在所有四個主連擊中使用。", AST.JobID)]
     AST_Raidwide_CollectiveUnconscious = 1076,
     
     [ParentCombo(AST_Raidwide)]
-    [CustomComboInfo("团队中间学派连击", "团队范围技能时，尝试插入中间学派及太阳星座。" +
-                                                               "\n会在所有四个主连击中使用。", AST.JobID)]
+    [CustomComboInfo("團隊中間學派連擊", "團隊範圍技能時，嘗試插入中間學派及太陽星座。" +
+                                                               "\n會在所有四個主連擊中使用。", AST.JobID)]
     AST_Raidwide_NeutralSect = 1077,
     
     [ParentCombo(AST_Raidwide)]
-    [CustomComboInfo("团队阳星相位", "团队范围技能时，尝试在中间学派增益下释放阳星相位以获得护盾。" +
-                                                           "\n会在所有四个主连击中使用。", AST.JobID)]
+    [CustomComboInfo("團隊陽星相位", "團隊範圍技能時，嘗試在中間學派增益下釋放陽星相位以獲得護盾。" +
+                                                           "\n會在所有四個主連擊中使用。", AST.JobID)]
     AST_Raidwide_AspectedHelios = 1078,
     
     #endregion
@@ -971,55 +971,55 @@ public enum CustomComboPreset
     BLM_ST_Opener = 2101,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("星灵移位", "将星灵移位加入循环。", BLM.JobID)]
+    [CustomComboInfo("Transpose Option", "Add Transpose to the rotation.", BLM.JobID)]
     BLM_ST_Transpose = 2114,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("黑魔纹", "将黑魔纹加入循环。", BLM.JobID)]
+    [CustomComboInfo("Leylines Option", "Add Leylines to the rotation.", BLM.JobID)]
     BLM_ST_LeyLines = 2103,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("详述", "将详述加入循环。", BLM.JobID)]
+    [CustomComboInfo("Amplifier Option", "Add Amplifier to the rotation.", BLM.JobID)]
     BLM_ST_Amplifier = 2102,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("魔泉", "将魔泉加入循环。", BLM.JobID)]
+    [CustomComboInfo("Manafont Option", "Add Manafont to the rotation.", BLM.JobID)]
     BLM_ST_Manafont = 2108,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("（高）闪雷", "将（高）闪雷加入循环。", BLM.JobID)]
+    [CustomComboInfo("(High) Thunder Option", "Add (High) Thunder to the rotation.", BLM.JobID)]
     BLM_ST_Thunder = 2110,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("绝望", "将绝望加入循环。", BLM.JobID)]
+    [CustomComboInfo("Despair Option", "Add Despair to the rotation.", BLM.JobID)]
     BLM_ST_Despair = 2111,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("耀星", "将耀星加入循环。", BLM.JobID)]
+    [CustomComboInfo("Flare Star Option", "Add Flare Star to the rotation.", BLM.JobID)]
     BLM_ST_FlareStar = 2112,
     
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("迅速咏唱", "将迅速咏唱加入循环。", BLM.JobID)]
+    [CustomComboInfo("Swiftcast Option", "Add Swiftcast to the rotation.", BLM.JobID)]
     BLM_ST_Swiftcast = 2106,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("三连咏唱", "将三连咏唱加入循环。\n仅在迅速咏唱冷却时使用。", BLM.JobID)]
+    [CustomComboInfo("Triplecast Option", "將三連詠唱加入循環。\n僅在迅速詠唱冷卻時使用。", BLM.JobID)]
     BLM_ST_Triplecast = 2115,
     
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("秽浊/异言", "将秽浊/异言加入循环。", BLM.JobID)]
+    [CustomComboInfo("Foul/Xenoglossy Option", "Add Foul/Xenoglossy to the rotation.", BLM.JobID)]
     BLM_ST_UsePolyglot = 2104,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("移动相关", "加入所选的移动相关选项。", BLM.JobID)]
+    [CustomComboInfo("Movement Option", "加入所選的移動相關選項。", BLM.JobID)]
     BLM_ST_Movement = 2113,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("崩溃", "在移动且低于66级时加入崩溃。", BLM.JobID)]
+    [CustomComboInfo("Scathe Option", "在移動且低於66級時加入崩潰。", BLM.JobID)]
     BLM_ST_UseScathe = 2116,
 
     [ParentCombo(BLM_ST_AdvancedMode)]
-    [CustomComboInfo("魔罩", "将魔罩加入循环。", BLM.JobID)]
+    [CustomComboInfo("魔罩", "將魔罩加入循環。", BLM.JobID)]
     BLM_ST_Manaward = 2199,
 
     #endregion
@@ -1034,39 +1034,39 @@ public enum CustomComboPreset
     BLM_AoE_AdvancedMode = 2200,
 
     [ParentCombo(BLM_AoE_AdvancedMode)]
-    [CustomComboInfo("星灵移位", "将星灵移位加入循环。", BLM.JobID)]
+    [CustomComboInfo("Transpose Option", "Add Transpose to the rotation.", BLM.JobID)]
     BLM_AoE_Transpose = 2212,
 
     [ParentCombo(BLM_AoE_AdvancedMode)]
-    [CustomComboInfo("黑魔纹", "将黑魔纹加入循环。", BLM.JobID)]
+    [CustomComboInfo("Leylines Option", "Add Leylines to the rotation.", BLM.JobID)]
     BLM_AoE_LeyLines = 2202,
 
     [ParentCombo(BLM_AoE_AdvancedMode)]
-    [CustomComboInfo("详述", "将详述加入循环。", BLM.JobID)]
+    [CustomComboInfo("Amplifier Option", "Add Amplifier to the rotation.", BLM.JobID)]
     BLM_AoE_Amplifier = 2201,
 
     [ParentCombo(BLM_AoE_AdvancedMode)]
-    [CustomComboInfo("魔泉", "将魔泉加入循环。", BLM.JobID)]
+    [CustomComboInfo("Manafont Option", "Add Manafont to the rotation.", BLM.JobID)]
     BLM_AoE_Manafont = 2207,
 
     [ParentCombo(BLM_AoE_AdvancedMode)]
-    [CustomComboInfo("三连咏唱", "将三连咏唱加入循环。", BLM.JobID)]
+    [CustomComboInfo("Triplecast Option", "將三連詠唱加入循環。", BLM.JobID)]
     BLM_AoE_Triplecast = 2208,
 
     [ParentCombo(BLM_AoE_AdvancedMode)]
-    [CustomComboInfo("悖论填充", "在满级时将悖论作为填充技能加入循环。", BLM.JobID)]
+    [CustomComboInfo("Paradox Filler Option", "在滿級時將悖論作為填充技能加入循環。", BLM.JobID)]
     BLM_AoE_ParadoxFiller = 2210,
 
     [ParentCombo(BLM_AoE_AdvancedMode)]
-    [CustomComboInfo("（高）震雷", "将（高）震雷加入循环。", BLM.JobID)]
+    [CustomComboInfo("(High) Thunder II Option", "Add (High) Thunder II to the rotation.", BLM.JobID)]
     BLM_AoE_Thunder = 2209,
 
     [ParentCombo(BLM_AoE_AdvancedMode)]
-    [CustomComboInfo("秽浊", "将秽浊加入循环。", BLM.JobID)]
+    [CustomComboInfo("Foul Option", "Add Foul to the rotation.", BLM.JobID)]
     BLM_AoE_UsePolyglot = 2203,
 
     [ParentCombo(BLM_AoE_AdvancedMode)]
-    [CustomComboInfo("双目标冰澈", "双目标时将玄冰替换为冰澈。", BLM.JobID)]
+    [CustomComboInfo("雙目標超暴雪", "雙目標時將冰寒替換為超暴雪。", BLM.JobID)]
     BLM_AoE_Blizzard4Sub = 2211,
 
     #endregion
@@ -1092,75 +1092,75 @@ public enum CustomComboPreset
     #region Miscellaneous
 
     [ReplaceSkill(BLM.Triplecast)]
-    [CustomComboInfo("三连咏唱保护", "已拥有三连咏唱状态时，将三连咏唱替换为狂怒剑。", BLM.JobID)]
+    [CustomComboInfo("Triplecast Protection", "Replaces Triplecast with Savage Blade when you already have triplecast active.", BLM.JobID)]
     BLM_TriplecastProtection = 2056,
 
     [ReplaceSkill(BLM.Fire, BLM.Fire3)]
     [ConflictingCombos(BLM_ST_AdvancedMode, BLM_ST_SimpleMode, BLM_Fire1Despair)]
-    [CustomComboInfo("火炎/爆炎功能", "将火炎或爆炎进行替换。", BLM.JobID)]
+    [CustomComboInfo("Fire I/III Feature", "將火焰或大火焰進行替換。", BLM.JobID)]
     BLM_Fire1to3 = 2054,
 
     [ReplaceSkill(BLM.Blizzard, BLM.Blizzard3)]
     [ConflictingCombos(BLM_FreezeBlizzard2)]
-    [CustomComboInfo("冰结/冰封功能", "将冰结或冰封进行替换。\n同步等级低于40级时，将玄冰替换为冰冻。", BLM.JobID)]
+    [CustomComboInfo("Blizzard I/III Feature", "將暴雪或大暴雪進行替換。\n同步等級低於40級時，將冰寒替換為中暴雪。", BLM.JobID)]
     BLM_Blizzard1to3 = 2052,
 
     [ReplaceSkill(BLM.Fire4)]
     [ConflictingCombos(BLM_FireandIce)]
-    [CustomComboInfo("炽炎转爆炎", "未处于星极火3层或未战斗时，将炽炎替换为爆炎。", BLM.JobID)]
+    [CustomComboInfo("Fire 4 to 3", "未處於星極火3層或未戰鬥時，將超火焰替換為大火焰。", BLM.JobID)]
     BLM_Fire4to3 = 2059,
 
     [ReplaceSkill(BLM.Fire)]
     [ConflictingCombos(BLM_FireandIce, BLM_ST_AdvancedMode, BLM_ST_SimpleMode, BLM_Fire1to3)]
-    [CustomComboInfo("火炎->绝望", "在星极火时，将火炎替换为绝望。", BLM.JobID)]
+    [CustomComboInfo("Fire to Despair", "在星極火時，將火焰替換為絕望。", BLM.JobID)]
     BLM_Fire1Despair = 2065,
 
     [ReplaceSkill(BLM.Blizzard4)]
-    [CustomComboInfo("冰澈转绝望", "处于星极火时，将冰澈替换为绝望。", BLM.JobID)]
+    [CustomComboInfo("Blizzard 4 to Despair", "處於星極火時，將超暴雪替換為絕望。", BLM.JobID)]
     BLM_Blizzard4toDespair = 2060,
     
     [ReplaceSkill(BLM.Fire4, BLM.Flare)]
     [ConflictingCombos(BLM_Fire4to3)]
-    [CustomComboInfo("火冰切换", "处于灵极冰时，将炽炎替换为冰澈。\n处于灵极冰时，将核爆替换为玄冰。", BLM.JobID)]
+    [CustomComboInfo("Fire & Ice", "處於靈極冰時，將超火焰替換為超暴雪。\n處於靈極冰時，將核爆替換為冰寒。", BLM.JobID)]
     BLM_FireandIce = 2057,
 
     [ReplaceSkill(BLM.Blizzard, BLM.Blizzard3)]
     [ConflictingCombos(BLM_FreezeParadox, BLM_Blizzard1to3)]
-    [CustomComboInfo("玄冰转冰冻", "同步等级低于40级时，将玄冰替换为冰冻。", BLM.JobID)]
+    [CustomComboInfo("Freeze to Blizzard II", "同步等級低於40級時，將冰寒替換為中暴雪。", BLM.JobID)]
     BLM_FreezeBlizzard2 = 2064,
 
     [ReplaceSkill(BLM.Fire4, BLM.Flare)]
     [ConflictingCombos(BLM_Fire4to3, BLM_FireandIce)]
-    [CustomComboInfo("炽炎/核爆转耀星", "在耀星层数满时，将炽炎和核爆替换为耀星。", BLM.JobID)]
+    [CustomComboInfo("超火焰/核爆轉耀星", "在耀星層數滿時，將超火焰和核爆替換為耀星。", BLM.JobID)]
     BLM_FireFlarestar = 2058,
 
     [ReplaceSkill(BLM.Freeze)]
     [ConflictingCombos(BLM_FreezeBlizzard2)]
-    [CustomComboInfo("玄冰转悖论", "拥有3层灵极心时，将玄冰替换为冰属性悖论。", BLM.JobID)]
+    [CustomComboInfo("Freeze to Paradox", "擁有3層靈極心時，將冰寒替換為冰屬性悖論。", BLM.JobID)]
     BLM_FreezeParadox = 2062,
 
     [ReplaceSkill(BLM.FlareStar)]
-    [CustomComboInfo("耀星转悖论", "未满耀星层数时，将耀星替换为火属性悖论。", BLM.JobID)]
+    [CustomComboInfo("耀星轉悖論", "未滿耀星層數時，將耀星替換為火屬性悖論。", BLM.JobID)]
     BLM_FlareParadox = 2063,
 
     [ReplaceSkill(BLM.Amplifier)]
-    [CustomComboInfo("详述转异言", "通晓层数已满时，将详述替换为异言。", BLM.JobID)]
+    [CustomComboInfo("Amplifier to Xenoglossy", "通曉層數已滿時，將詳述替換為異言。", BLM.JobID)]
     BLM_AmplifierXeno = 2061,
     
     [ReplaceSkill(BLM.Transpose)]
-    [CustomComboInfo("灵极魂/星灵移位", "灵极魂可用时，将星灵移位替换为灵极魂。", BLM.JobID)]
+    [CustomComboInfo("Umbral Soul/Transpose Feature", "Replaces Transpose with Umbral Soul when Umbral Soul is available.", BLM.JobID)]
     BLM_UmbralSoul = 2050,
 
     [ReplaceSkill(BLM.Scathe)]
-    [CustomComboInfo("异言", "可用时，将崩溃替换为异言。", BLM.JobID)]
+    [CustomComboInfo("Xenoglossy Feature", "Replaces Scathe with Xenoglossy when available.", BLM.JobID)]
     BLM_ScatheXeno = 2053,
 
     [ReplaceSkill(BLM.LeyLines)]
-    [CustomComboInfo("黑魔纹", "黑魔纹激活时，将黑魔纹替换为魔纹步。", BLM.JobID)]
+    [CustomComboInfo("Between the Ley Lines Feature", "Replaces Ley Lines with Between the Lines when Ley Lines is active.", BLM.JobID)]
     BLM_Between_The_LeyLines = 2051,
 
     [ReplaceSkill(BLM.AetherialManipulation)]
-    [CustomComboInfo("以太步", "未处于黑魔纹且静止时，将以太步替换为魔纹步。", BLM.JobID)]
+    [CustomComboInfo("Aetherial Manipulation Feature", "Replaces Aetherial Manipulation with Between the Lines when you are out of active Ley Lines and standing still.", BLM.JobID)]
     BLM_Aetherial_Manipulation = 2055,
     
     #endregion
@@ -1369,51 +1369,51 @@ public enum CustomComboPreset
     BRD_Adv_Song = 3011,
 
     [ParentCombo(BRD_ST_AdvMode)]
-    [CustomComboInfo("DoT技能", "启用下方持续伤害相关子选项", BRD.JobID)]
+    [CustomComboInfo("Bard DoTs Option", "啟用下方持續傷害相關子選項", BRD.JobID)]
     BRD_Adv_DoT = 3010,
 
     [ParentCombo(BRD_Adv_DoT)]
-    [CustomComboInfo("伶牙俐齿", "启用使用伶牙俐齿刷新DoT", BRD.JobID)]
+    [CustomComboInfo("Iron Jaws Option", "啟用使用伶牙俐齒重新整理DoT", BRD.JobID)]
     BRD_Adv_IronJaws = 3060,
 
     [ParentCombo(BRD_Adv_DoT)]
-    [CustomComboInfo("DoT应用", "启用在起手外应用DoT", BRD.JobID)]
+    [CustomComboInfo("DoT應用", "啟用在起手外應用DoT", BRD.JobID)]
     BRD_Adv_ApplyDots = 3059,
 
     [ParentCombo(BRD_Adv_DoT)]
-    [CustomComboInfo("猛者强击快照", "在下方设置的猛者强击剩余时间内启用DoT快照", BRD.JobID)]
+    [CustomComboInfo("Raging Jaws Option", "Enable the snapshotting of DoTs, within the remaining time of Raging Strikes below:", BRD.JobID)]
     BRD_Adv_RagingJaws = 3025,
 
     [ParentCombo(BRD_ST_AdvMode)]
-    [CustomComboInfo("增益", "为吟游诗人高级单目标功能添加增益。\n全开则对齐团辅\n部分禁用则按优先级执行", BRD.JobID)]
+    [CustomComboInfo("增益", "為吟遊詩人高階單目標功能新增增益。\n全開則對齊團輔\n部分禁用則按優先順序執行", BRD.JobID)]
     BRD_Adv_Buffs = 3017,
 
     [ParentCombo(BRD_Adv_Buffs)]
-    [CustomComboInfo("猛者强击", "添加猛者强击", BRD.JobID)]
+    [CustomComboInfo("Raging Strikes Option", "Adds Raging Strikes", BRD.JobID)]
     BRD_Adv_Buffs_Raging = 3049,
 
     [ParentCombo(BRD_Adv_Buffs)]
-    [CustomComboInfo("战斗之声", "添加战斗之声", BRD.JobID)]
+    [CustomComboInfo("戰鬥之聲", "Adds Battle Voice", BRD.JobID)]
     BRD_Adv_Buffs_Battlevoice = 3050,
 
     [ParentCombo(BRD_Adv_Buffs)]
-    [CustomComboInfo("光明神的最终乐章", "添加光明神的最终乐章", BRD.JobID)]
+    [CustomComboInfo("Radiant Finale Option", "Adds Radiant Finale", BRD.JobID)]
     BRD_Adv_Buffs_RadiantFinale = 3051,
 
     [ParentCombo(BRD_Adv_Buffs)]
-    [CustomComboInfo("纷乱箭", "添加纷乱箭", BRD.JobID)]
+    [CustomComboInfo("Barrage Option", "Adds Barrage", BRD.JobID)]
     BRD_Adv_Buffs_Barrage = 3052,
 
     [ParentCombo(BRD_ST_AdvMode)]
-    [CustomComboInfo("共鸣箭", "在纷乱箭后添加共鸣箭", BRD.JobID)]
+    [CustomComboInfo("Resonant Option", "Adds Resonant Arrow to the Rotation after Barrage.", BRD.JobID)]
     BRD_Adv_BuffsResonant = 3041,
 
     [ParentCombo(BRD_ST_AdvMode)]
-    [CustomComboInfo("光明神的返场余音", "在最终乐章后添加光明神的返场余音", BRD.JobID)]
+    [CustomComboInfo("Encore Option", "Adds Radiant Encore to the Rotation after Finale.", BRD.JobID)]
     BRD_Adv_BuffsEncore = 3042,
 
     [ParentCombo(BRD_ST_AdvMode)]
-    [CustomComboInfo("绝峰箭", "添加绝峰箭与爆破箭", BRD.JobID)]
+    [CustomComboInfo("Apex Arrow Option", "Adds Apex Arrow and Blast shot", BRD.JobID)]
     BRD_ST_ApexArrow = 3021,
 
     [ParentCombo(BRD_ST_AdvMode)]
@@ -1422,11 +1422,11 @@ public enum CustomComboPreset
     BRD_ST_Adv_oGCD = 3038,
 
     [ParentCombo(BRD_ST_AdvMode)]
-    [CustomComboInfo("储能", "保留失血箭和侧风诱导箭以便爆发期使用", BRD.JobID)]
+    [CustomComboInfo("Pooling Option", "保留失血箭和側風誘導箭以便爆發期使用", BRD.JobID)]
     BRD_Adv_Pooling = 3023,
 
     [ParentCombo(BRD_ST_AdvMode)]
-    [CustomComboInfo("绝峰箭储能", "将绝峰箭留到团辅窗口期或团辅冷却剩余50-60秒时使用", BRD.JobID)]
+    [CustomComboInfo("Apex Pooling Option", "將絕峰箭留到團輔視窗期或團輔冷卻剩餘50-60秒時使用", BRD.JobID)]
     BRD_Adv_ApexPooling = 3057,
 
     [ParentCombo(BRD_ST_AdvMode)]
@@ -1442,7 +1442,7 @@ public enum CustomComboPreset
     BRD_ST_Wardens = 3047,
 
     [ParentCombo(BRD_ST_Wardens)]
-    [CustomComboInfo("团队净化", "当队伍中有人带有可净化的异常状态时，使用光阴神的礼赞凯歌（自动切换目标）", BRD.JobID)]
+    [CustomComboInfo("團隊淨化", "當隊伍中有人帶有可淨化的異常狀態時，使用光陰神的禮讚凱歌（自動切換目標）", BRD.JobID)]
     [Retargeted(BRD.TheWardensPaeon)]
     BRD_ST_WardensAuto = 3064,
 
@@ -1460,7 +1460,7 @@ public enum CustomComboPreset
     BRD_AoE_Adv_Songs = 3016,
 
     [ParentCombo(BRD_AoE_AdvMode)]
-    [CustomComboInfo("范围增益", "为吟游诗人高级多目标功能添加增益。\n全开则对齐团辅\n部分禁用则按优先级执行", BRD.JobID)]
+    [CustomComboInfo("範圍增益", "為吟遊詩人高階多目標功能新增增益。\n全開則對齊團輔\n部分禁用則按優先順序執行", BRD.JobID)]
     BRD_AoE_Adv_Buffs = 3032,
 
     [ParentCombo(BRD_AoE_Adv_Buffs)]
@@ -1468,7 +1468,7 @@ public enum CustomComboPreset
     BRD_AoE_Adv_Buffs_Raging = 3053,
 
     [ParentCombo(BRD_AoE_Adv_Buffs)]
-    [CustomComboInfo("战斗之声", "Adds Battle Voice", BRD.JobID)]
+    [CustomComboInfo("戰鬥之聲", "Adds Battle Voice", BRD.JobID)]
     BRD_AoE_Adv_Buffs_Battlevoice = 3054,
 
     [ParentCombo(BRD_AoE_Adv_Buffs)]
@@ -1485,11 +1485,11 @@ public enum CustomComboPreset
     BRD_AoE_Adv_oGCD = 3037,
 
     [ParentCombo(BRD_AoE_AdvMode)]
-    [CustomComboInfo("储能", "为爆发期保留死亡箭雨充能。", BRD.JobID)]
+    [CustomComboInfo("Pooling Option", "為爆發期保留死亡箭雨充能。", BRD.JobID)]
     BRD_AoE_Pooling = 3040,
 
     [ParentCombo(BRD_AoE_AdvMode)]
-    [CustomComboInfo("绝峰箭储能", "将绝峰箭留到爆发窗口或团辅CD剩余50-60秒时使用。", BRD.JobID)]
+    [CustomComboInfo("Apex Pooling Option", "將絕峰箭留到爆發視窗或團輔CD剩餘50-60秒時使用。", BRD.JobID)]
     BRD_AoE_ApexPooling = 3058,
 
     [ParentCombo(BRD_AoE_AdvMode)]
@@ -1517,7 +1517,7 @@ public enum CustomComboPreset
     BRD_AoE_Wardens = 3046,
 
     [ParentCombo(BRD_AoE_Wardens)]
-    [CustomComboInfo("团队净化", "当队伍中有人带有可净化的异常状态时，使用光阴神的礼赞凯歌（自动切换目标）", BRD.JobID)]
+    [CustomComboInfo("團隊淨化", "當隊伍中有人帶有可淨化的異常狀態時，使用光陰神的禮讚凱歌（自動切換目標）", BRD.JobID)]
     [Retargeted(BRD.TheWardensPaeon)]
     BRD_AoE_WardensAuto = 3063,
 
@@ -1671,20 +1671,20 @@ public enum CustomComboPreset
     DNC_ST_BalanceOpener = 4011,
 
     [ParentCombo(DNC_ST_BalanceOpener)]
-    [CustomComboInfo("等待倒计时", "非战斗状态下会变为狂怒剑以等待倒计时出现。\n主要用于在起手选择等待的倒计时窗口前锁定Boss目标。\n仅适合连续开怪时临时开启，不建议一直保持开启。", DNC.JobID)]
+    [CustomComboInfo("等待倒計時", "非戰鬥狀態下會變為狂怒劍以等待倒計時出現。\n主要用於在起手選擇等待的倒計時視窗前鎖定Boss目標。\n僅適合連續開怪時臨時開啟，不建議一直保持開啟。", DNC.JobID)]
     DNC_ST_Opener_BlockEarly = 4031,
 
     [ParentCombo(DNC_ST_AdvancedMode)]
-    [CustomComboInfo("舞伴提醒", "非战斗状态且没有舞伴时会包含闭式舞姿。", DNC.JobID)]
+    [CustomComboInfo("Dance Partner Reminder Option", "非戰鬥狀態且沒有舞伴時會包含閉式舞姿。", DNC.JobID)]
     DNC_ST_Adv_Partner = 4012,
 
     [ParentCombo(DNC_ST_Adv_Partner)]
-    [CustomComboInfo("自动切换最优舞伴", "非战斗状态下会自动将闭式舞姿指向最优舞伴。", DNC.JobID)]
+    [CustomComboInfo("自動切換最優舞伴", "非戰鬥狀態下會自動將閉式舞姿指向最優舞伴。", DNC.JobID)]
     [Retargeted(DNC.ClosedPosition)]
     DNC_ST_Adv_PartnerAuto = 4033,
 
     [ParentCombo(DNC_ST_AdvancedMode)]
-    [CustomComboInfo("最优舞伴", "当当前舞伴不是最优目标（如被减伤）时，轮换中会包含解除闭式舞姿和重新闭式舞姿。", DNC.JobID)]
+    [CustomComboInfo("最優舞伴", "噹噹前舞伴不是最優目標（如被減傷）時，輪換中會包含解除閉式舞姿和重新閉式舞姿。", DNC.JobID)]
     [Retargeted(DNC.ClosedPosition)]
     DNC_ST_Adv_AutoPartner = 4032,
 
@@ -1884,7 +1884,7 @@ public enum CustomComboPreset
     #region Basic combo
 
     [ReplaceSkill(DNC.Fountain)]
-    [CustomComboInfo("基础连击", "替换喷泉为基础连击。", DNC.JobID)]
+    [CustomComboInfo("基礎連擊", "替換噴泉為基礎連擊。", DNC.JobID)]
     [BasicCombo]
     DNC_ST_BasicCombo = 4003,
 
@@ -1947,8 +1947,8 @@ public enum CustomComboPreset
     #region Dance Partner Features
 
     [ReplaceSkill(DNC.ClosedPosition, DNC.Ending)]
-    [CustomComboInfo("自动选择最佳闭式舞伴",
-        "将闭式舞姿自动指向队伍中最合适的成员，无需手动选择目标或切换目标。\n当当前舞伴不再是最佳选择时，将显示解除闭式舞姿。", DNC.JobID)]
+    [CustomComboInfo("自動選擇最佳閉式舞伴",
+        "將閉式舞姿自動指向隊伍中最合適的成員，無需手動選擇目標或切換目標。\n噹噹前舞伴不再是最佳選擇時，將顯示解除閉式舞姿。", DNC.JobID)]
     [Retargeted(DNC.ClosedPosition)]
     DNC_DesirablePartner = 4175,
 
@@ -1957,21 +1957,21 @@ public enum CustomComboPreset
 
     #region Dance Features
 
-    [CustomComboInfo("自定义舞步功能",
-        "跳舞时将自定义动作变为舞步。\n即使开启连击功能，也能正常跳舞，无需使用上方的舞步连击功能。", DNC.JobID)]
+    [CustomComboInfo("Custom Dance Step Feature",
+        "跳舞時將自定義動作變為舞步。\n即使開啟連擊功能，也能正常跳舞，無需使用上方的舞步連擊功能。", DNC.JobID)]
     DNC_CustomDanceSteps = 4115,
 
     [ParentCombo(DNC_CustomDanceSteps)]
-    [CustomComboInfo("覆盖下方小功能", "启用后，跳舞时可选择被下方小功能替换的技能，并返回你设置的舞步。", DNC.JobID)]
+    [CustomComboInfo("Override Smaller Features", "If enabled, will let you choose actions that are replaced by the smaller features listed below here, and they will return the Step that you have set them to when dancing.", DNC.JobID)]
     DNC_CustomDanceSteps_Conflicts = 4116,
 
-    [CustomComboInfo("舞步相关功能", "标准舞步与技巧舞步的小型功能。", DNC.JobID)]
+    [CustomComboInfo("舞步相關功能", "標準舞步與技巧舞步的小型功能。", DNC.JobID)]
     DNC_DanceFeatures = 4111,
 
     [ParentCombo(DNC_DanceFeatures)]
     [ReplaceSkill(DNC.StandardStep)]
-    [CustomComboInfo("标准舞步连击功能",
-        "跳舞时将标准舞步依次变为各个舞步。", DNC.JobID)]
+    [CustomComboInfo("Standard Step Combo Feature",
+        "跳舞時將標準舞步依次變為各個舞步。", DNC.JobID)]
     DNC_StandardStepCombo = 4110,
 
     // StandardStep(or Finishing Move) --> Last Dance
@@ -2132,7 +2132,7 @@ public enum CustomComboPreset
     DRK_ST_CD_Interrupt = 5014,
 
     [ParentCombo(DRK_ST_CDs)]
-    [CustomComboInfo("打断（使用眩晕技能）", "当目标正在施法时，将下踢添加到连击中。\n不建议在野外内容之外使用，因为它可能会在无法击晕的敌人身上浪费大量下踢。会尝试不在首领战中使用。", DRK.JobID)]
+    [CustomComboInfo("Interrupt with Stun Option", "當目標正在施法時，將下踢新增到連擊中。\n不建議在野外內容之外使用，因為它可能會在無法擊暈的敵人身上浪費大量下踢。會嘗試不在首領戰中使用。", DRK.JobID)]
     DRK_ST_CD_Stun = 5040,
 
     [ParentCombo(DRK_ST_CDs)]
@@ -2199,12 +2199,12 @@ public enum CustomComboPreset
     #region Blood
 
     [ParentCombo(DRK_ST_Spenders)]
-    [CustomComboInfo("血溅", "在血乱状态下或在爆发后立即将血溅添加到连击循环中。", DRK.JobID)]
+    [CustomComboInfo("Bloodspiller Option", "在血亂狀態下或在爆發後立即將血濺新增到連擊循環中。", DRK.JobID)]
     DRK_ST_Sp_Bloodspiller = 5025,
 
     [ParentCombo(DRK_ST_Spenders)]
     [CustomComboInfo("Blood Gauge Overcap Option",
-        "当暗血值超过设定阈值时，在噬魂斩之前将血溅添加到连击循环中。", DRK.JobID)]
+        "當暗血值超過設定閾值時，在噬魂斬之前將血濺新增到連擊循環中。", DRK.JobID)]
     DRK_ST_Sp_BloodOvercap = 5026,
 
     #endregion
@@ -2216,7 +2216,7 @@ public enum CustomComboPreset
     DRK_ST_Sp_Edge = 5027,
 
     [ParentCombo(DRK_ST_Spenders)]
-    [CustomComboInfo("暗技防溢出", "当你的至黑之夜护盾激活时消耗暗技，除非正在保留用于爆发。", DRK.JobID)]
+    [CustomComboInfo("Dark Arts Drop Prevention", "當你的至黑之夜護盾啟用時消耗暗技，除非正在保留用於爆發。", DRK.JobID)]
     DRK_ST_Sp_DarkArts = 5028,
 
     [ParentCombo(DRK_ST_Spenders)]
@@ -2224,7 +2224,7 @@ public enum CustomComboPreset
     DRK_ST_Sp_EdgeDarkside = 5029,
 
     [ParentCombo(DRK_ST_Spenders)]
-    [CustomComboInfo("魔力溢出", "当你的魔力值达到或超过9,400时使用暗黑锋，除非正在保留用于爆发。", DRK.JobID)]
+    [CustomComboInfo("Mana Overcap Option", "當你的魔力值達到或超過9,400時使用暗黑鋒，除非正在保留用於爆發。", DRK.JobID)]
     DRK_ST_Sp_ManaOvercap = 5030,
 
     #endregion
@@ -2290,11 +2290,11 @@ public enum CustomComboPreset
     DRK_AoE_CDs = 5051,
 
     [ParentCombo(DRK_AoE_CDs)]
-    [CustomComboInfo("打断", "当目标施法可打断时，将插言加入循环。", DRK.JobID)]
+    [CustomComboInfo("Interrupt Option", "Adds Interject to the rotation when your target's cast is interruptible.", DRK.JobID)]
     DRK_AoE_Interrupt = 5052,
 
     [ParentCombo(DRK_AoE_CDs)]
-    [CustomComboInfo("眩晕打断", "当目标施法时，将下踢加入循环。", DRK.JobID)]
+    [CustomComboInfo("Interrupt with Stun Option", "當目標施法時，將下踢加入循環。", DRK.JobID)]
     DRK_AoE_Stun = 5053,
 
     [ParentCombo(DRK_AoE_CDs)]
@@ -2354,7 +2354,7 @@ public enum CustomComboPreset
     #region Blood
 
     [ParentCombo(DRK_AoE_Spenders)]
-    [CustomComboInfo("寂灭选项", "在血乱状态下或在爆发后立即将寂灭添加到连击中。", DRK.JobID)]
+    [CustomComboInfo("Quietus Option", "在血亂狀態下或在爆發後立即將寂滅新增到連擊中。", DRK.JobID)]
     DRK_AoE_Sp_Quietus = 5063,
 
     [ParentCombo(DRK_AoE_Spenders)]
@@ -2370,7 +2370,7 @@ public enum CustomComboPreset
     DRK_AoE_Sp_Flood = 5065,
 
     [ParentCombo(DRK_AoE_Spenders)]
-    [CustomComboInfo("魔力溢出", "当你的魔力值超过9,400时使用暗影波动。", DRK.JobID)]
+    [CustomComboInfo("Mana Overcap Option", "當你的魔力值超過9,400時使用暗影波動。", DRK.JobID)]
     DRK_AoE_Sp_ManaOvercap = 5066,
 
     #endregion
@@ -2396,7 +2396,7 @@ public enum CustomComboPreset
     DRK_AoE_Mit_Reprisal = 5070,
 
     [ParentCombo(DRK_AoE_Mitigation)]
-    [CustomComboInfo("弃明投暗", "将弃明投暗添加到连击中。", DRK.JobID)]
+    [CustomComboInfo("Dark Mind Option", "將棄明投暗新增到連擊中。", DRK.JobID)]
     DRK_AoE_Mit_DarkMind = 5075,
 
     [ParentCombo(DRK_AoE_Mitigation)]
@@ -2404,7 +2404,7 @@ public enum CustomComboPreset
     DRK_AoE_Mit_Rampart = 5071,
 
     [ParentCombo(DRK_AoE_Mitigation)]
-    [CustomComboInfo("青疏自行", "当指定数量的敌人进入你的攻击范围时，将青疏自行添加到连击中。", DRK.JobID)]
+    [CustomComboInfo("Arm's Length Option", "當指定數量的敵人進入你的攻擊範圍時，將青疏自行新增到連擊中。", DRK.JobID)]
     DRK_AoE_Mit_ArmsLength = 5072,
 
     [ParentCombo(DRK_AoE_Mitigation)]
@@ -2423,7 +2423,7 @@ public enum CustomComboPreset
     #region Basic combo
 
     [ReplaceSkill(DRK.Souleater)]
-    [CustomComboInfo("基础连击", "替换噬魂斩为基础连击。", DRK.JobID)]
+    [CustomComboInfo("基礎連擊", "替換噬魂斬為基礎連擊。", DRK.JobID)]
     [BasicCombo]
     DRK_ST_BasicCombo = 5003,
 
@@ -2479,7 +2479,7 @@ public enum CustomComboPreset
     DRK_Mit_ShadowWall = 5099,
 
     [ReplaceSkill(DRK.DarkMissionary)]
-    [CustomComboInfo("一键小队减伤特性", "雪仇就绪时，将暗黑布道替换为雪仇。", DRK.JobID)]
+    [CustomComboInfo("一鍵小隊減傷特性", "雪仇就緒時，將暗黑佈道替換為雪仇。", DRK.JobID)]
     [MitigationCombo]
     DRK_Mit_Party = 5100,
 
@@ -2526,27 +2526,27 @@ public enum CustomComboPreset
     #region Standalones
 
     [ReplaceSkill(DRK.BlackestNight)]
-    [CustomComboInfo("重定向至黑之夜", "在其他连击外将至黑之夜重定向至鼠标悬停目标（或友方硬选择目标）。", DRK.JobID)]
+    [CustomComboInfo("重定向至黑之夜", "在其他連擊外將至黑之夜重定向至滑鼠懸停目標（或友方硬選擇目標）。", DRK.JobID)]
     [Retargeted(DRK.BlackestNight)]
     DRK_Retarget_TBN = 5130,
 
     [ParentCombo(DRK_Retarget_TBN)]
-    [CustomComboInfo("包含目标的目标", "如果你的目标的目标不是你，将至黑之夜重定向到他们身上。\n(如果你不是最高仇恨，且没有鼠标悬停或硬选择友方目标)", DRK.JobID)]
+    [CustomComboInfo("包含目標的目標", "如果你的目標的目標不是你，將至黑之夜重定向到他們身上。\n(如果你不是最高仇恨，且沒有滑鼠懸停或硬選擇友方目標)", DRK.JobID)]
     [Retargeted]
     DRK_Retarget_TBN_TT = 5131,
 
     [ReplaceSkill(DRK.Oblation)]
-    [CustomComboInfo("重定向献奉", "在其他连击外将献奉重定向至鼠标悬停目标（或友方硬选择目标）。", DRK.JobID)]
+    [CustomComboInfo("重定向獻奉", "在其他連擊外將獻奉重定向至滑鼠懸停目標（或友方硬選擇目標）。", DRK.JobID)]
     [Retargeted(DRK.Oblation)]
     DRK_Retarget_Oblation = 5132,
 
     [ParentCombo(DRK_Retarget_Oblation)]
-    [CustomComboInfo("包含目标的目标", "如果你的目标的目标不是你，将献奉重定向到他们身上。\n(如果你不是最高仇恨，且没有鼠标悬停或硬选择友方目标)", DRK.JobID)]
+    [CustomComboInfo("包含目標的目標", "如果你的目標的目標不是你，將獻奉重定向到他們身上。\n(如果你不是最高仇恨，且沒有滑鼠懸停或硬選擇友方目標)", DRK.JobID)]
     [Retargeted]
     DRK_Retarget_Oblation_TT = 5133,
 
     [ParentCombo(DRK_Retarget_Oblation)]
-    [CustomComboInfo("防止双重献奉", "当你的目标已经有献奉效果时，将献奉改为狂怒剑。", DRK.JobID)]
+    [CustomComboInfo("防止雙重獻奉", "當你的目標已經有獻奉效果時，將獻奉改為狂怒劍。", DRK.JobID)]
     DRK_Retarget_Oblation_DoubleProtection = 5134,
 
     #endregion
@@ -2811,7 +2811,7 @@ public enum CustomComboPreset
     #region Basic Combo
 
     [ReplaceSkill(DRG.FullThrust, DRG.HeavensThrust)]
-    [CustomComboInfo("基础连击", "将直刺/苍穹刺替换为基础连击链。", DRG.JobID)]
+    [CustomComboInfo("基礎連擊", "將直刺/蒼天刺替換為基礎連擊鏈。", DRG.JobID)]
     [BasicCombo]
     DRG_BasicCombo = 6304,
     
@@ -2896,23 +2896,23 @@ public enum CustomComboPreset
     GNB_ST_BowShock = 7010,
 
     [ParentCombo(GNB_ST_Advanced)]
-    [CustomComboInfo("续剑", "在合适时机将续剑与超高速加入循环。", GNB.JobID)]
+    [CustomComboInfo("Continuation Option", "在合適時機將續劍與超高速加入循環。", GNB.JobID)]
     GNB_ST_Continuation = 7005,
 
     [ParentCombo(GNB_ST_Advanced)]
-    [CustomComboInfo("血壤", "在合适时机将血壤加入循环。", GNB.JobID)]
+    [CustomComboInfo("Bloodfest Option", "Adds Bloodfest into the rotation when appropriate.", GNB.JobID)]
     GNB_ST_Bloodfest = 7011,
 
     [ParentCombo(GNB_ST_Advanced)]
-    [CustomComboInfo("倍攻", "在合适时机将倍攻加入循环。", GNB.JobID)]
+    [CustomComboInfo("Double Down Option", "Adds Double Down into the rotation when appropriate.", GNB.JobID)]
     GNB_ST_DoubleDown = 7017,
 
     [ParentCombo(GNB_ST_Advanced)]
-    [CustomComboInfo("崛起之心连击", "在合适时机将崛起之心/支配之心/终结之心加入循环。", GNB.JobID)]
+    [CustomComboInfo("Reign Combo Option", "Adds Reign/Noble/Lionheart into the rotation when appropriate.", GNB.JobID)]
     GNB_ST_Reign = 7014,
 
     [ParentCombo(GNB_ST_Advanced)]
-    [CustomComboInfo("特殊条件迅连斩", "在特殊条件下将迅连斩加入循环：\n- 等级90或以上\n- 无情激活中\n- 仅有1发弹药\n- 上一次连击为残暴弹\n- 烈牙连击未激活", GNB.JobID)]
+    [CustomComboInfo("特殊條件迅連斬", "在特殊條件下將迅連斬加入循環：\n- 等級90或以上\n- 無情啟用中\n- 僅有1發彈藥\n- 上一次連擊為殘暴彈\n- 烈牙連擊未啟用", GNB.JobID)]
     GNB_ST_Scuffed = 7372,
 
     [ParentCombo(GNB_ST_Advanced)]
@@ -2924,7 +2924,7 @@ public enum CustomComboPreset
     GNB_ST_Interrupt = 7084,
 
     [ParentCombo(GNB_ST_Advanced)]
-    [CustomComboInfo("下踢", "当目标读条时加入下踢。\n不建议在副本等内容中使用，因大部分敌人无法被击晕，容易浪费下踢。Boss战中会尽量避免使用。", GNB.JobID)]
+    [CustomComboInfo("Interrupt with Stun Option", "當目標讀條時加入下踢。\n不建議在副本等內容中使用，因大部分敵人無法被擊暈，容易浪費下踢。Boss戰中會盡量避免使用。", GNB.JobID)]
     GNB_ST_Stun = 7086,
 
     #region Mitigations
@@ -3062,7 +3062,7 @@ public enum CustomComboPreset
 
     #region One-Button Mitigation
     [ReplaceSkill(GNB.Camouflage)]
-    [CustomComboInfo("一键减伤", "将伪装替换为一键减伤按钮。", GNB.JobID)]
+    [CustomComboInfo("One-Button Mitigation Feature", "Replaces Camouflage with an all-in-one mitigation button.", GNB.JobID)]
     [MitigationCombo]
     GNB_Mit_OneButton = 7074,
 
@@ -3115,7 +3115,7 @@ public enum CustomComboPreset
     #region Basic combo
 
     [ReplaceSkill(GNB.SolidBarrel)]
-    [CustomComboInfo("基础连击", "将迅连斩替换为其连击链。", GNB.JobID)]
+    [CustomComboInfo("基礎連擊", "將迅連斬替換為其連擊鏈。", GNB.JobID)]
     [BasicCombo]
     GNB_ST_BasicCombo = 7100,
 
@@ -3254,16 +3254,16 @@ public enum CustomComboPreset
 
     #region Aurora Protection
     [ReplaceSkill(GNB.Aurora)]
-    [CustomComboInfo("极光保护", "当目标身上已有极光效果时，将极光替换为狂怒剑以锁定极光。", GNB.JobID)]
+    [CustomComboInfo("Aurora Protection Feature", "Locks out Aurora if Aurora's effect is on the target by replacing it with Savage Blade.", GNB.JobID)]
     GNB_AuroraProtection = 7023,
     
     [ParentCombo(GNB_AuroraProtection)]
-    [CustomComboInfo("极光鼠标悬停", "如果鼠标悬停目标没有持续恢复效果，则将极光施放到该目标。", GNB.JobID)]
+    [CustomComboInfo("極光滑鼠懸停", "如果滑鼠懸停目標沒有持續恢復效果，則將極光施放到該目標。", GNB.JobID)]
     [Retargeted(GNB.Aurora)]
     GNB_RetargetAurora_MO = 7087,
     
     [ParentCombo(GNB_AuroraProtection)]
-    [CustomComboInfo("极光目标的目标", "如果目标的目标没有持续恢复效果且你没有仇恨，则将极光施放到目标的目标。", GNB.JobID)]
+    [CustomComboInfo("極光目標的目標", "如果目標的目標沒有持續恢復效果且你沒有仇恨，則將極光施放到目標的目標。", GNB.JobID)]
     [Retargeted(GNB.Aurora)]
     GNB_RetargetAurora_TT = 7088,
     
@@ -3271,12 +3271,12 @@ public enum CustomComboPreset
     
     #region Heart Of Stone Retarget
     [ReplaceSkill(GNB.HeartOfCorundum, GNB.HeartOfStone)]
-    [CustomComboInfo("石之心重定向", "在非连击状态下，将石之心/刚玉之心重定向到鼠标悬停目标或当前目标。", GNB.JobID)]
+    [CustomComboInfo("石之心重定向", "在非連擊狀態下，將石之心/剛玉之心重定向到滑鼠懸停目標或當前目標。", GNB.JobID)]
     [Retargeted(GNB.HeartOfCorundum, GNB.HeartOfStone)]
     GNB_RetargetHeartofStone = 7089,
     
     [ParentCombo(GNB_RetargetHeartofStone)]
-    [CustomComboInfo("石之心目标的目标", "如果你没有仇恨，则将石之心/刚玉之心重定向到目标的目标，鼠标悬停优先。", GNB.JobID)]
+    [CustomComboInfo("石之心目標的目標", "如果你沒有仇恨，則將石之心/剛玉之心重定向到目標的目標，滑鼠懸停優先。", GNB.JobID)]
     [Retargeted(GNB.HeartOfCorundum, GNB.HeartOfStone)]
     GNB_RetargetHeartofStone_TT = 7090,
     #endregion
@@ -3633,7 +3633,7 @@ public enum CustomComboPreset
     #region Basic combo
 
     [ReplaceSkill(MCH.CleanShot, MCH.HeatedCleanShot)]
-    [CustomComboInfo("基础连击", "替换狙击弹为连击链。", MCH.JobID)]
+    [CustomComboInfo("基礎連擊", "替換狙擊彈為連擊鏈。", MCH.JobID)]
     [BasicCombo]
     MCH_ST_BasicCombo = 8117,
 
@@ -4290,7 +4290,7 @@ public enum CustomComboPreset
     PCT_ST_Advanced_Openers = 20006,
 
     [ParentCombo(PCT_ST_AdvancedMode)]
-    [CustomComboInfo("最优爆发", "在100级时使用优化后的爆发循环", PCT.JobID)]
+    [CustomComboInfo("最優爆發", "在100級時使用最佳化後的爆發循環", PCT.JobID)]
     PCT_ST_AdvancedMode_Burst_Phase = 20010,
 
     [ParentCombo(PCT_ST_AdvancedMode)]
@@ -4298,7 +4298,7 @@ public enum CustomComboPreset
     PCT_ST_AdvancedMode_SubtractivePalette = 20025,
 
     [ParentCombo(PCT_ST_AdvancedMode)]
-    [CustomComboInfo("冰结之蓝青", "将冰结之蓝青加入循环。", PCT.JobID)]
+    [CustomComboInfo("Blizzard in Cyan Option", "Adds Blizzard in Cyan to the combo.", PCT.JobID)]
     PCT_ST_AdvancedMode_BlizzardInCyan = 20033,
 
     [ParentCombo(PCT_ST_AdvancedMode)]
@@ -4326,11 +4326,11 @@ public enum CustomComboPreset
     PCT_ST_AdvancedMode_ScenicMuse = 20021,
 
     [ParentCombo(PCT_ST_AdvancedMode)]
-    [CustomComboInfo("天星棱光", "添加天星棱光到循环", PCT.JobID)]
+    [CustomComboInfo("Star Prism Option", "新增天星棱光到循環", PCT.JobID)]
     PCT_ST_AdvancedMode_StarPrism = 20012,
 
     [ParentCombo(PCT_ST_AdvancedMode)]
-    [CustomComboInfo("彩虹点滴", "获得彩虹点滴效果提高状态时，将彩虹点滴加入循环。", PCT.JobID)]
+    [CustomComboInfo("Rainbow Drip Option", "獲得彩虹點滴效果提高狀態時，將彩虹點滴加入循環。", PCT.JobID)]
     PCT_ST_AdvancedMode_RainbowDrip = 20013,
 
     [ParentCombo(PCT_ST_AdvancedMode)]
@@ -4375,11 +4375,11 @@ public enum CustomComboPreset
     PCT_ST_AdvancedMode_MovementOption_HammerStampCombo = 20029,
 
     [ParentCombo(PCT_ST_AdvancedMode_MovementFeature)]
-    [CustomComboInfo("神圣之白", "移动时将神圣之白加入循环。\n若有减色混合预备和幻灵绘景则优先使用。", PCT.JobID)]
+    [CustomComboInfo("Holy in White Option", "移動時將神聖之白加入循環。\n若有減色混合預備和幻靈繪景則優先使用。", PCT.JobID)]
     PCT_ST_AdvancedMode_MovementOption_HolyInWhite = 20030,
 
     [ParentCombo(PCT_ST_AdvancedMode_MovementFeature)]
-    [CustomComboInfo("彗星之黑", "移动时将彗星之黑加入循环。\n若有减色混合预备和幻灵绘景则优先使用。", PCT.JobID)]
+    [CustomComboInfo("Comet in Black Option", "移動時將隕星之黑加入循環。\n若有減色混合預備和幻靈繪景則優先使用。", PCT.JobID)]
     PCT_ST_AdvancedMode_MovementOption_CometinBlack = 20031,
 
     [ParentCombo(PCT_ST_AdvancedMode_MovementFeature)]
@@ -4404,7 +4404,7 @@ public enum CustomComboPreset
     PCT_AoE_AdvancedMode_SubtractivePalette = 20058,
 
     [ParentCombo(PCT_AoE_AdvancedMode)]
-    [CustomComboInfo("冰冻之蓝青", "将冰冻之蓝青加入循环。", PCT.JobID)]
+    [CustomComboInfo("中暴雪之藍青", "將中暴雪之藍青加入循環。", PCT.JobID)]
     PCT_AoE_AdvancedMode_BlizzardInCyan = 20066,
 
     [ParentCombo(PCT_AoE_AdvancedMode)]
@@ -4485,11 +4485,11 @@ public enum CustomComboPreset
     PCT_AoE_AdvancedMode_MovementOption_HammerStampCombo = 20062,
 
     [ParentCombo(PCT_AoE_AdvancedMode_MovementFeature)]
-    [CustomComboInfo("神圣之白", "移动时加入神圣之白。\n若有减色混合预备与幻灵绘景则优先使用。", PCT.JobID)]
+    [CustomComboInfo("Holy in White Option", "移動時加入神聖之白。\n若有減色混合預備與幻靈繪景則優先使用。", PCT.JobID)]
     PCT_AoE_AdvancedMode_MovementOption_HolyInWhite = 20063,
 
     [ParentCombo(PCT_AoE_AdvancedMode_MovementFeature)]
-    [CustomComboInfo("彗星之黑", "移动时加入彗星之黑。\n若有减色混合预备与幻灵绘景则优先使用。", PCT.JobID)]
+    [CustomComboInfo("Comet in Black Option", "移動時加入隕星之黑。\n若有減色混合預備與幻靈繪景則優先使用。", PCT.JobID)]
     PCT_AoE_AdvancedMode_MovementOption_CometinBlack = 20064,
 
     [ParentCombo(PCT_AoE_AdvancedMode_MovementFeature)]
@@ -4577,11 +4577,11 @@ public enum CustomComboPreset
     PLD_ST_Interrupt = 11058,
 
     [ParentCombo(PLD_ST_AdvancedMode)]
-    [CustomComboInfo("使用下踢打断", "当目标正在读条时，将下踢加入循环。\n不建议在副本等内容中使用，因为可能会在无法被眩晕的敌人身上浪费大量下踢。\n在Boss战中会尽量避免使用。", PLD.JobID)]
+    [CustomComboInfo("使用下踢打斷", "當目標正在讀條時，將下踢加入循環。\n不建議在副本等內容中使用，因為可能會在無法被眩暈的敵人身上浪費大量下踢。\n在Boss戰中會盡量避免使用。", PLD.JobID)]
     PLD_ST_LowBlow = 11062,
 
     [ParentCombo(PLD_ST_AdvancedMode)]
-    [CustomComboInfo("使用盾牌猛击打断", "当目标正在读条时，将盾牌猛击加入循环。\n不建议在副本等内容中使用，因为可能会在无法被眩晕的敌人身上浪费大量GCD。\n在Boss战中会尽量避免使用。", PLD.JobID)]
+    [CustomComboInfo("使用盾牌猛擊打斷", "當目標正在讀條時，將盾牌猛擊加入循環。\n不建議在副本等內容中使用，因為可能會在無法被眩暈的敵人身上浪費大量GCD。\n在Boss戰中會盡量避免使用。", PLD.JobID)]
     PLD_ST_ShieldBash = 11066,
 
     [ParentCombo(PLD_ST_AdvancedMode)]
@@ -4698,11 +4698,11 @@ public enum CustomComboPreset
     PLD_AoE_Interrupt = 11059,
 
     [ParentCombo(PLD_AoE_AdvancedMode)]
-    [CustomComboInfo("使用下踢打断", "添加下踢到循环（目标正在施法时，无论是否可被打断）。", PLD.JobID)]
+    [CustomComboInfo("使用下踢打斷", "Adds Low Blow to the rotation when your target is casting, interruptible or not.", PLD.JobID)]
     PLD_AoE_LowBlow = 11060,
 
     [ParentCombo(PLD_AoE_AdvancedMode)]
-    [CustomComboInfo("使用盾牌猛击打断", "添加盾牌猛击到循环（目标正在施法时，无论是否可被打断）。", PLD.JobID)]
+    [CustomComboInfo("使用盾牌猛擊打斷", "新增盾牌猛擊到循環（目標正在施法時，無論是否可被打斷）。", PLD.JobID)]
     PLD_AoE_ShieldBash = 11065,
 
     [ParentCombo(PLD_AoE_AdvancedMode)]
@@ -4789,7 +4789,7 @@ public enum CustomComboPreset
     #region Basic combo
 
     [ReplaceSkill(PLD.RageOfHalone)]
-    [CustomComboInfo("基础连击", "替换战女神之怒为连击链。", PLD.JobID)]
+    [CustomComboInfo("基礎連擊", "替換戰女神之怒為連擊鏈。", PLD.JobID)]
     [BasicCombo]
     PLD_ST_BasicCombo = 11061,
 
@@ -4844,12 +4844,12 @@ public enum CustomComboPreset
     PLD_Mit_Clemency = 11057,
 
     [ReplaceSkill(PLD.DivineVeil)]
-    [CustomComboInfo("一键群体减伤", "雪仇就绪时，使用雪仇替换圣光幕帘。", PLD.JobID)]
+    [CustomComboInfo("一鍵群體減傷", "雪仇就緒時，使用雪仇替換聖光幕簾。", PLD.JobID)]
     [MitigationCombo]
     PLD_Mit_Party = 11063,
 
     [ParentCombo(PLD_Mit_Party)]
-    [CustomComboInfo("包含武装戍卫", "圣光幕帘和雪仇处于冷却时，包含武装戍卫。",
+    [CustomComboInfo("包含武裝戍衛", "聖光幕簾和雪仇處於冷卻時，包含武裝戍衛。",
         PLD.JobID)]
     PLD_Mit_Party_Wings = 11064,
     #endregion
@@ -4874,39 +4874,39 @@ public enum CustomComboPreset
     PLD_ShieldLob_Feature = 11027,
     
     [ReplaceSkill(PLD.Clemency)]
-    [CustomComboInfo("重定向深仁厚泽", "根据以下子选项重定向深仁厚泽。", PLD.JobID)]
+    [CustomComboInfo("重定向深仁厚澤", "根據以下子選項重定向深仁厚澤。", PLD.JobID)]
     [Retargeted(PLD.Clemency)]
     PLD_RetargetClemency = 11067,
     
     [ParentCombo(PLD_RetargetClemency)]
-    [CustomComboInfo("鼠标悬停深仁厚泽", "添加UI鼠标悬停到优先级。高于低HP选项。", PLD.JobID)]
+    [CustomComboInfo("滑鼠懸停深仁厚澤", "新增UI滑鼠懸停到優先順序。高於低HP選項。", PLD.JobID)]
     [Retargeted]
     PLD_RetargetClemency_MO = 11071,
     
     [ParentCombo(PLD_RetargetClemency)]
-    [CustomComboInfo("低HP深仁厚泽", "在低于设置的阈值之前，治疗HP%最低的队友。", PLD.JobID)]
+    [CustomComboInfo("低HP深仁厚澤", "在低於設定的閾值之前，治療HP%最低的隊友。", PLD.JobID)]
     [Retargeted]
     PLD_RetargetClemency_LowHP = 11072,
     
     [ReplaceSkill(PLD.Sheltron)]
-    [CustomComboInfo("盾阵→干预", "如果目标为队友，则使用干预。否则使用盾阵。" +
-                                                         "\n- UI鼠标悬停 > 硬锁目标 > 目标的目标 > 自身盾阵", PLD.JobID)]
+    [CustomComboInfo("Sheltron to Intervention Feature", "如果目標為隊友，則使用干預。否則使用盾陣。" +
+                                                         "\n- UI滑鼠懸停 > 硬鎖目標 > 目標的目標 > 自身盾陣", PLD.JobID)]
     [Retargeted(PLD.Sheltron)]
     PLD_RetargetSheltron = 11068,
     
     [ParentCombo(PLD_RetargetSheltron)]
-    [CustomComboInfo("鼠标悬停干预", "添加UI鼠标悬停到优先级。", PLD.JobID)]
+    [CustomComboInfo("滑鼠懸停干預", "新增UI滑鼠懸停到優先順序。", PLD.JobID)]
     [Retargeted]
     PLD_RetargetSheltron_MO = 11069,
     
     [ParentCombo(PLD_RetargetSheltron)]
-    [CustomComboInfo("目标的目标干预", "当你不是仇恨目标时，添加目标的目标到优先级。", PLD.JobID)]
+    [CustomComboInfo("目標的目標干預", "當你不是仇恨目標時，新增目標的目標到優先順序。", PLD.JobID)]
     [Retargeted]
     PLD_RetargetSheltron_TT = 11070,
 
     [Retargeted(PLD.ShieldBash)]
     [ConflictingCombos(ALL_Tank_Interrupt)]
-    [CustomComboInfo("重定向盾牌猛击", "如果当前目标无法被眩晕，则重定向盾牌猛击到可眩晕的敌人。", PLD.JobID)]
+    [CustomComboInfo("重定向盾牌猛擊", "如果當前目標無法被眩暈，則重定向盾牌猛擊到可眩暈的敵人。", PLD.JobID)]
     PLD_RetargetShieldBash = 11073,
 
     // Variant Features
@@ -4981,7 +4981,7 @@ public enum CustomComboPreset
     RPR_ST_SoD = 12003,
 
     [ParentCombo(RPR_ST_AdvancedMode)]
-    [CustomComboInfo("播魂种", "在非战斗状态且没有播魂种buff时添加播魂种。", RPR.JobID)]
+    [CustomComboInfo("Soulsow", "在非戰鬥狀態且沒有播魂種buff時新增播魂種。", RPR.JobID)]
     RPR_ST_SoulSow = 12020,
 
     [ParentCombo(RPR_ST_AdvancedMode)]
@@ -5116,7 +5116,7 @@ public enum CustomComboPreset
     #region Basic combo
 
     [ReplaceSkill(RPR.InfernalSlice)]
-    [CustomComboInfo("基础连击", "将地狱切割替换为基础连击链。", RPR.JobID)]
+    [CustomComboInfo("基礎連擊", "將地獄切割替換為基礎連擊鏈。", RPR.JobID)]
     [BasicCombo]
     RPR_ST_BasicCombo = 12021,
 
@@ -5145,7 +5145,7 @@ public enum CustomComboPreset
     RPR_GluttonyBloodSwathe_Sacrificium = 12203,
 
     [ParentCombo(RPR_GluttonyBloodSwathe)]
-    [CustomComboInfo("真北", "在暴食期间添加真北，如果选择了绞决/缢杀选项，则替换那些技能。", RPR.JobID)]
+    [CustomComboInfo("True North Feature", "Adds True North when under Gluttony and if Gibbet/Gallows options are selected to replace those skills.", RPR.JobID)]
     RPR_TrueNorthGluttony = 12310,
 
     // Last value = 12204
@@ -5190,7 +5190,7 @@ public enum CustomComboPreset
     RPR_EnshroudProtection = 12304,
 
     [ParentCombo(RPR_EnshroudProtection)]
-    [CustomComboInfo("真北", "在暴食期间添加真北。", RPR.JobID)]
+    [CustomComboInfo("True North Feature", "在暴食期間新增真北。", RPR.JobID)]
     RPR_TrueNorthEnshroud = 12308,
 
     [ReplaceSkill(RPR.Enshroud)]
@@ -5249,7 +5249,7 @@ public enum CustomComboPreset
 
     [ParentCombo(RDM_ST_DPS)]
     [CustomComboInfo("Opener (Level 100)",
-        "在100级时添加开场技能。\n**标准模式下必须在近战连击前进入近战范围**", RDM.JobID)]
+        "在100級時新增開場技能。\n**標準模式下必須在近戰連擊前進入近戰範圍**", RDM.JobID)]
     RDM_Balance_Opener = 13002,
 
     [ParentCombo(RDM_ST_DPS)]
@@ -5271,12 +5271,12 @@ public enum CustomComboPreset
 
     [ParentCombo(RDM_ST_MeleeCombo)]
     [CustomComboInfo("包含回刺",
-        "在连击开始时添加回刺。推荐用于自动循环。\n**必须在近战范围内或启用短兵相接进行接近**", RDM.JobID)]
+        "在連擊開始時新增回刺。推薦用於自動循環。\n**必須在近戰範圍內或啟用短兵相接進行接近**", RDM.JobID)]
     RDM_ST_MeleeCombo_IncludeRiposte = 13007,
     
     [ParentCombo(RDM_ST_MeleeCombo)]
-    [CustomComboInfo("使用短兵相接进行接近",
-        "当超出近战范围且拥有足够魔力开始近战连击或开始魔元化爆发时使用短兵相接。", RDM.JobID)]
+    [CustomComboInfo("使用短兵相接進行接近",
+        "當超出近戰範圍且擁有足夠魔力開始近戰連擊或開始魔元化爆發時使用短兵相接。", RDM.JobID)]
     RDM_ST_MeleeCombo_GapCloser = 13008,
     
     [ParentCombo(RDM_ST_MeleeCombo)]
@@ -5285,51 +5285,51 @@ public enum CustomComboPreset
     RDM_ST_MeleeCombo_MeleeCheck = 13009,
     
     [ParentCombo(RDM_ST_DPS)]
-    [CustomComboInfo("鼓励", "在可用时添加鼓励。", RDM.JobID)]
+    [CustomComboInfo("Embolden Option", "在可用時新增鼓勵。", RDM.JobID)]
     RDM_ST_Embolden = 13010,
     
     [ParentCombo(RDM_ST_Embolden)]
-    [CustomComboInfo("使用魔元化", "在鼓励前添加魔元化以进行爆发。", RDM.JobID)]
+    [CustomComboInfo("Use Manafication", "在鼓勵前新增魔元化以進行爆發。", RDM.JobID)]
     RDM_ST_Manafication = 13011,
     
     [ParentCombo(RDM_ST_DPS)]
-    [CustomComboInfo("荆棘环绕", "在可用时添加荆棘环绕。", RDM.JobID)]
+    [CustomComboInfo("荊棘環繞", "Add Vice of Thorns when available.", RDM.JobID)]
     RDM_ST_ViceOfThorns = 13012,
     
     [ParentCombo(RDM_ST_DPS)]
-    [CustomComboInfo("光芒四射", "在可用时添加光芒四射。", RDM.JobID)]
+    [CustomComboInfo("Prefulgence Option", "Add Prefulgence when available.", RDM.JobID)]
     RDM_ST_Prefulgence = 13013,
     
     [ParentCombo(RDM_ST_DPS)]
-    [CustomComboInfo("飞刺", "在可用时添加飞刺。", RDM.JobID)]
+    [CustomComboInfo("Fleche Option", "Add Fleche when available.", RDM.JobID)]
     RDM_ST_Fleche = 13014,
     
     [ParentCombo(RDM_ST_DPS)]
-    [CustomComboInfo("六分反击", "在可用时添加六分反击。", RDM.JobID)]
+    [CustomComboInfo("Contre Sixte Option", "Add Contre Sixte when available.", RDM.JobID)]
     RDM_ST_ContreSixte = 13015,
     
     [ParentCombo(RDM_ST_DPS)]
-    [CustomComboInfo("交剑", "在可用时添加交剑。", RDM.JobID)]
+    [CustomComboInfo("Engagement Option", "Add Engagement when available.", RDM.JobID)]
     RDM_ST_Engagement = 13016,
     
     [ParentCombo(RDM_ST_Engagement)]
-    [CustomComboInfo("交剑充能", "防止溢出但保留至少一个充能用于爆发窗口。", RDM.JobID)]
+    [CustomComboInfo("Engagement Pooling Option", "防止溢位但保留至少一個充能用於爆發視窗。", RDM.JobID)]
     RDM_ST_Engagement_Pooling = 13018,
     
     [ParentCombo(RDM_ST_DPS)]
-    [CustomComboInfo("短兵相接", "在可用时添加短兵相接用于输出。\n将保留一个充能用于接近。", RDM.JobID)]
+    [CustomComboInfo("Corps-a-corps Option", "在可用時新增短兵相接用於輸出。\n將保留一個充能用於接近。", RDM.JobID)]
     RDM_ST_Corpsacorps = 13017,
 
     [ParentCombo(RDM_ST_DPS)]
-    [CustomComboInfo("促进", "在可用时添加促进。", RDM.JobID)]
+    [CustomComboInfo("Acceleration Option", "Add Acceleration when available.", RDM.JobID)]
     RDM_ST_Acceleration = 13019,
 
     [ParentCombo(RDM_ST_Acceleration)]
-    [CustomComboInfo("促进移动", "使用促进进行移动。", RDM.JobID)]
+    [CustomComboInfo("Acceleration Movement Option", "使用促進進行移動。", RDM.JobID)]
     RDM_ST_Acceleration_Movement = 13020,
 
     [ParentCombo(RDM_ST_DPS)]
-    [CustomComboInfo("即刻咏唱选项", "在可用时添加即刻咏唱。", RDM.JobID)]
+    [CustomComboInfo("Swiftcast Option", "Add Swiftcast when available.", RDM.JobID)]
     RDM_ST_Swiftcast = 13021,
     
     [ParentCombo(RDM_ST_Swiftcast)]
@@ -5356,72 +5356,72 @@ public enum CustomComboPreset
     RDM_AoE_DPS = 13201,
     
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("闪雷/疾风", "在AoE循环中添加赤震雷和赤烈风。", RDM.JobID)]
+    [CustomComboInfo("Thunder/Aero Option", "在AoE循環中新增赤中雷電和赤中勁風。", RDM.JobID)]
     RDM_AoE_ThunderAero = 13202,
     
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("赤核爆/赤神圣", "在AoE循环中添加赤核爆和赤神圣。", RDM.JobID)]
+    [CustomComboInfo("Verflare/Verholy Option", "在AoE循環中新增赤火光和赤神聖。", RDM.JobID)]
     RDM_AoE_HolyFlare = 13203,
     
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("划圆斩近战连击", "在AoE循环中添加划圆斩。\n52级以下将使用单体近战连击。", RDM.JobID)]
+    [CustomComboInfo("Moulinet Melee Combo Option", "在AoE循環中新增劃圓斬。\n52級以下將使用單體近戰連擊。", RDM.JobID)]
     RDM_AoE_MeleeCombo = 13204,
     
     [ParentCombo(RDM_AoE_MeleeCombo)]
-    [CustomComboInfo("需求目标", "需要8米范围内的目标。\n技能本身通常不需要目标，此选项用于范围检查。", RDM.JobID)]
+    [CustomComboInfo("需求目標", "需要8米範圍內的目標。\n技能本身通常不需要目標，此選項用於範圍檢查。", RDM.JobID)]
     RDM_AoE_MeleeCombo_Target = 13205,
     
     [ParentCombo(RDM_AoE_MeleeCombo)]
     [CustomComboInfo("使用短兵相接接近",
-        "当超出近战范围且拥有足够魔力开始近战连击时使用短兵相接。", RDM.JobID)]
+        "Use Corp-a-corps when out of melee range and you have enough mana to start the melee combo.", RDM.JobID)]
     RDM_AoE_MeleeCombo_GapCloser = 13206,
     
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("鼓励", "在可用时添加鼓励。", RDM.JobID)]
+    [CustomComboInfo("Embolden Option", "在可用時新增鼓勵。", RDM.JobID)]
     RDM_AoE_Embolden = 13207,
     
     [ParentCombo(RDM_AoE_Embolden)]
-    [CustomComboInfo("使用魔元化", "在鼓励前添加魔元化以进行爆发。", RDM.JobID)]
+    [CustomComboInfo("Use Manafication", "在鼓勵前新增魔元化以進行爆發。", RDM.JobID)]
     RDM_AoE_Manafication = 13208,
     
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("荆棘环绕", "在可用时添加荆棘环绕。", RDM.JobID)]
+    [CustomComboInfo("荊棘環繞", "Add Vice of Thorns when available.", RDM.JobID)]
     RDM_AoE_ViceOfThorns = 13209,
     
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("光芒四射", "在可用时添加光芒四射。", RDM.JobID)]
+    [CustomComboInfo("Prefulgence Option", "Add Prefulgence when available.", RDM.JobID)]
     RDM_AoE_Prefulgence = 13210,
     
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("飞刺", "在可用时添加飞刺。", RDM.JobID)]
+    [CustomComboInfo("Fleche Option", "Add Fleche when available.", RDM.JobID)]
     RDM_AoE_Fleche = 13211,
     
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("六分反击", "在可用时添加六分反击。", RDM.JobID)]
+    [CustomComboInfo("Contre Sixte Option", "Add Contre Sixte when available.", RDM.JobID)]
     RDM_AoE_ContreSixte = 13212,
     
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("交剑", "在可用时添加交剑。", RDM.JobID)]
+    [CustomComboInfo("Engagement Option", "Add Engagement when available.", RDM.JobID)]
     RDM_AoE_Engagement = 13213,
     
     [ParentCombo(RDM_AoE_Engagement)]
-    [CustomComboInfo("交剑充能", "防止溢出但保留至少一个充能用于爆发期。", RDM.JobID)]
+    [CustomComboInfo("Engagement Pooling Option", "防止溢位但保留至少一個充能用於爆發期。", RDM.JobID)]
     RDM_AoE_Engagement_Pooling = 13215,
     
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("短兵相接", "在可用时添加短兵相接用于输出。\n将保留一个充能用于接近。", RDM.JobID)]
+    [CustomComboInfo("Corps-a-corps Option", "在可用時新增短兵相接用於輸出。\n將保留一個充能用於接近。", RDM.JobID)]
     RDM_AoE_Corpsacorps = 13214,
 
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("促进", "在可用时添加促进。", RDM.JobID)]
+    [CustomComboInfo("Acceleration Option", "Add Acceleration when available.", RDM.JobID)]
     RDM_AoE_Acceleration = 13216,
 
     [ParentCombo(RDM_AoE_Acceleration)]
-    [CustomComboInfo("促进移动", "使用促进进行移动。", RDM.JobID)]
+    [CustomComboInfo("Acceleration Movement Option", "使用促進進行移動。", RDM.JobID)]
     RDM_AoE_Acceleration_Movement = 13217,
 
     [ParentCombo(RDM_AoE_DPS)]
-    [CustomComboInfo("即刻咏唱", "在可用时添加即刻咏唱。", RDM.JobID)]
+    [CustomComboInfo("Swiftcast Option", "Add Swiftcast when available.", RDM.JobID)]
     RDM_AoE_Swiftcast = 13218,
     
     [ParentCombo(RDM_AoE_Swiftcast)]
@@ -5439,53 +5439,53 @@ public enum CustomComboPreset
     #region Stand Alone Features
 
     [ReplaceSkill(RDM.Veraero, RDM.Veraero3)]
-    [CustomComboInfo("赤疾风法术连击", "用摇荡替换赤疾风。", RDM.JobID)]
+    [CustomComboInfo("赤勁風法術連擊", "用搖盪替換赤勁風。", RDM.JobID)]
     RDM_VerAero = 13400,
 
     [ParentCombo(RDM_VerAero)]
-    [CustomComboInfo("添加赤飞石", "用赤飞石替换赤疾风。", RDM.JobID)]
+    [CustomComboInfo("Add Verstone", "用赤巨岩替換赤勁風。", RDM.JobID)]
     RDM_VerAero_Stone = 13401,
     
     [ReplaceSkill(RDM.Verthunder, RDM.Verthunder3)]
-    [CustomComboInfo("赤闪雷法术连击", "用摇荡替换赤闪雷。", RDM.JobID)]
+    [CustomComboInfo("赤雷電法術連擊", "用搖盪替換赤雷電。", RDM.JobID)]
     RDM_VerThunder = 13418,
 
     [ParentCombo(RDM_VerThunder)]
-    [CustomComboInfo("添加赤火炎", "用赤火炎替换赤闪雷。", RDM.JobID)]
+    [CustomComboInfo("Add Verfire", "用赤火焰替換赤雷電。", RDM.JobID)]
     RDM_VerThunder_Fire = 13419,
 
     [ReplaceSkill(RDM.Riposte)]
-    [CustomComboInfo("回刺近战连击", "用基础近战连击替换回刺。", RDM.JobID)]
+    [CustomComboInfo("Riposte Melee Combo", "用基礎近戰連擊替換回刺。", RDM.JobID)]
     RDM_Riposte = 13403,
     
     [ParentCombo(RDM_Riposte)]
     [CustomComboInfo("短兵相接接近",
-        "当超出近战范围且有足够的魔力或魔剑舞时使用短兵相接开始近战连击", RDM.JobID)]
+        "當超出近戰範圍且有足夠的魔力或魔劍舞時使用短兵相接開始近戰連擊", RDM.JobID)]
     RDM_Riposte_GapCloser = 13424,
     
     [ParentCombo(RDM_Riposte)]
-    [CustomComboInfo("回刺收尾", "添加赤神圣/赤核爆、焦热和决断", RDM.JobID)]
+    [CustomComboInfo("Riposte Finisher Option", "Adds Verholy/Verflare, Scorch, and Resolution", RDM.JobID)]
     RDM_Riposte_Finisher = 13423,
     
     [ParentCombo(RDM_Riposte)]
-    [CustomComboInfo("回刺防浪费", "当资源不足以完成连击时用狂怒剑替换回刺", RDM.JobID)]
+    [CustomComboInfo("回刺防浪費", "當資源不足以完成連擊時用狂怒劍替換回刺", RDM.JobID)]
     RDM_Riposte_NoWaste = 13429,
     
     [ReplaceSkill(RDM.Moulinet)]
-    [CustomComboInfo("划圆斩近战连击", "用基础近战AOE连击替换划圆斩。", RDM.JobID)]
+    [CustomComboInfo("Moulinet Melee Combo", "用基礎近戰AOE連擊替換劃圓斬。", RDM.JobID)]
     RDM_Moulinet= 13425,
     
     [ParentCombo(RDM_Moulinet)]
-    [CustomComboInfo("短兵相接接近选项",
-        "当超出近战范围且有足够的魔力或魔剑舞时使用短兵相接开始近战连击", RDM.JobID)]
+    [CustomComboInfo("短兵相接接近選項",
+        "當超出近戰範圍且有足夠的魔力或魔劍舞時使用短兵相接開始近戰連擊", RDM.JobID)]
     RDM_Moulinet_GapCloser = 13426,
     
     [ParentCombo(RDM_Moulinet)]
-    [CustomComboInfo("划圆斩收尾", "添加赤神圣/赤核爆、焦热和决断", RDM.JobID)]
+    [CustomComboInfo("Moulinet Finisher Option", "Adds Verholy/Verflare, Scorch, and Resolution", RDM.JobID)]
     RDM_Moulinet_Finisher = 13427,
     
     [ParentCombo(RDM_Moulinet)]
-    [CustomComboInfo("划圆斩防浪费", "当资源不足以完成连击时用狂怒剑替换划圆斩", RDM.JobID)]
+    [CustomComboInfo("劃圓斬防浪費", "當資源不足以完成連擊時用狂怒劍替換劃圓斬", RDM.JobID)]
     RDM_Moulinet_NoWaste = 13428,
 
     [ReplaceSkill(RoleActions.Magic.Swiftcast)]
@@ -5499,7 +5499,7 @@ public enum CustomComboPreset
     RDM_Raise_Vercure = 13407,
 
     [ParentCombo(RDM_Raise)]
-    [CustomComboInfo("重定向赤复活和赤治疗", "将赤复活和赤治疗重定向到你的治疗集合。", RDM.JobID)]
+    [CustomComboInfo("重定向赤復活和赤療傷", "將赤復活和赤療傷重定向到你的治療集合。", RDM.JobID)]
     [Retargeted(RDM.Verraise, RDM.Vercure)]
     RDM_Raise_Retarget = 13408,
 
@@ -5514,32 +5514,32 @@ public enum CustomComboPreset
     RDM_EmboldenProtection = 13412,
 
     [ParentCombo(RDM_EmboldenProtection)]
-    [CustomComboInfo("鼓励转魔元化", "当鼓励处于冷却时间或受到任何人的鼓励效果影响时，将鼓励更改为魔元化。",
+    [CustomComboInfo("Embolden to Manafication Option", "當鼓勵處於冷卻時間或受到任何人的鼓勵效果影響時，將鼓勵更改為魔元化。",
         RDM.JobID)]
     RDM_EmboldenManafication = 13410,
 
     [ParentCombo(RDM_MagickProtection)]
-    [CustomComboInfo("抗死转昏乱", "当抗死处于冷却时间时，将抗死更改为昏乱。\n如果两个技能都处于冷却时间，将显示冷却时间最短的技能。", RDM.JobID)]
+    [CustomComboInfo("Magick Barrier to Addle Option", "當抗死處於冷卻時間時，將抗死更改為昏亂。\n如果兩個技能都處於冷卻時間，將顯示冷卻時間最短的技能。", RDM.JobID)]
     RDM_MagickBarrierAddle = 13411,
 
     [ReplaceSkill(RDM.MagickBarrier)]
-    [CustomComboInfo("抗死防覆盖",
-        "当受到其他赤魔法师的抗死增益影响时，通过用狂怒剑替换来禁用抗死。\n同样适用于昏乱子选项。", RDM.JobID)]
+    [CustomComboInfo("Magick Barrier Overlap Protection",
+        "當受到其他赤魔道士的抗死增益影響時，透過用狂怒劍替換來禁用抗死。\n同樣適用於昏亂子選項。", RDM.JobID)]
     RDM_MagickProtection = 13413,
     
     [ReplaceSkill(RDM.Fleche)]
-    [CustomComboInfo("能力技一键功能",
-        "用六分反击、荆棘环绕、光芒四射、交剑和1次短兵相接充能替换飞刺。", RDM.JobID)]
+    [CustomComboInfo("能力技一鍵功能",
+        "用六分反擊、荊棘環繞、光芒四射、交劍和1次短兵相接充能替換飛刺。", RDM.JobID)]
     RDM_OGCDs = 13420,
     
     [ParentCombo(RDM_OGCDs)]
-    [CustomComboInfo("交剑充能",
-        "除非你有鼓励效果，否则不会消耗两次交剑充能。", RDM.JobID)]
+    [CustomComboInfo("Engagement Pooling Option",
+        "除非你有鼓勵效果，否則不會消耗兩次交劍充能。", RDM.JobID)]
     RDM_OGCDs_EngagementPool = 13421,
     
     [ParentCombo(RDM_OGCDs)]
-    [CustomComboInfo("仅近战时使用短兵相接",
-        "需要在近战范围内才能使用短兵相接。", RDM.JobID)]
+    [CustomComboInfo("Corps-a-corps Melee only Option",
+        "需要在近戰範圍內才能使用短兵相接。", RDM.JobID)]
     RDM_OGCDs_CorpsMelee = 13422,
 
     [Variant]
@@ -5672,7 +5672,7 @@ public enum CustomComboPreset
 
     [AutoAction(false, true)]
     [ReplaceSkill(SGE.Diagnosis)]
-    [CustomComboInfo("高级治疗模式-单目标", "将诊断变为多种选项。", SGE.JobID)]
+    [CustomComboInfo("高階治療模式-單目標", "將診斷變為多種選項。", SGE.JobID)]
     [PossiblyRetargeted(SGE.Diagnosis)]
     [HealingCombo]
     SGE_ST_Heal = 14014,
@@ -5686,12 +5686,12 @@ public enum CustomComboPreset
     SGE_ST_Heal_Rhizomata = 14023,
 
     [ParentCombo(SGE_ST_Heal)]
-    [CustomComboInfo("心关", "如果心关未应用于任何人，则应用心关。", SGE.JobID)]
+    [CustomComboInfo("Apply Kardia Option", "如果心關未應用於任何人，則應用心關。", SGE.JobID)]
     [Retargeted(SGE.Kardia)]
     SGE_ST_Heal_Kardia = 14016,
 
     [ParentCombo(SGE_ST_Heal)]
-    [CustomComboInfo("康复", "如果存在可清除的负面状态，则应用康复。", SGE.JobID)]
+    [CustomComboInfo("Esuna Option", "如果存在可清除的負面狀態，則應用康復。", SGE.JobID)]
     [PossiblyRetargeted(RoleActions.Healer.Esuna)]
     SGE_ST_Heal_Esuna = 14015,
 
@@ -5758,7 +5758,7 @@ public enum CustomComboPreset
 
     [AutoAction(true, true)]
     [ReplaceSkill(SGE.Prognosis)]
-    [CustomComboInfo("高级治疗模式-多目标", "将预后术替换为多种选项。", SGE.JobID)]
+    [CustomComboInfo("高階治療模式-多目標", "將預後術替換為多種選項。", SGE.JobID)]
     [HealingCombo]
     SGE_AoE_Heal = 14026,
 
@@ -5858,7 +5858,7 @@ public enum CustomComboPreset
     SGE_Raise = 14040,
 
     [ParentCombo(SGE_Raise)]
-    [CustomComboInfo("重定向复活", "将此处受影响的复活技能目标重新指定至你的治疗集合。", SGE.JobID)]
+    [CustomComboInfo("重定向復活", "將此處受影響的復活技能目標重新指定至你的治療集合。", SGE.JobID)]
     [Retargeted(SGE.Egeiro)]
     SGE_Raise_Retarget = 14061,
 
@@ -5886,33 +5886,33 @@ public enum CustomComboPreset
     
     #region Standalone Healing option
 
-    [CustomComboInfo("重定向选项", "重定向单体目标治疗选项。", SGE.JobID)]
+    [CustomComboInfo("重定向選項", "重定向單體目標治療選項。", SGE.JobID)]
     [Retargeted]
     SGE_Retarget = 14073,
 
     [ParentCombo(SGE_Retarget)]
-    [CustomComboInfo("输血", "根据你的治疗堆栈重定向输血。", SGE.JobID)]
+    [CustomComboInfo("Haima Options", "根據你的治療堆疊重定向輸血。", SGE.JobID)]
     [Retargeted(SGE.Haima)]
     SGE_Retarget_Haima = 14074,
 
     [ParentCombo(SGE_Retarget)]
-    [CustomComboInfo("灵橡清汁", "根据你的治疗堆栈重定向灵橡清汁。", SGE.JobID)]
+    [CustomComboInfo("Druochole Options", "根據你的治療堆疊重定向靈橡清汁。", SGE.JobID)]
     [Retargeted(SGE.Druochole)]
     SGE_Retarget_Druochole = 14075,
     
     [ConflictingCombos(SGE_TauroDruo)]
     [ParentCombo(SGE_Retarget)]
-    [CustomComboInfo("白牛清汁", "根据你的治疗堆栈重定向白牛清汁。", SGE.JobID)]
+    [CustomComboInfo("Taurochole Options", "根據你的治療堆疊重定向白牛清汁。", SGE.JobID)]
     [Retargeted(SGE.Taurochole)]
     SGE_Retarget_Taurochole = 14076,
 
     [ParentCombo(SGE_Retarget)]
-    [CustomComboInfo("混合", "根据你的治疗堆栈重定向混合。", SGE.JobID)]
+    [CustomComboInfo("Krasis Options", "根據你的治療堆疊重定向混合。", SGE.JobID)]
     [Retargeted(SGE.Krasis)]
     SGE_Retarget_Krasis = 14077,
 
     [ParentCombo(SGE_Retarget)]
-    [CustomComboInfo("心关", "根据你的治疗堆栈重定向心关。", SGE.JobID)]
+    [CustomComboInfo("Kardia Options", "根據你的治療堆疊重定向心關。", SGE.JobID)]
     [Retargeted(SGE.Kardia)]
     SGE_Retarget_Kardia = 14078,
     
@@ -5978,29 +5978,29 @@ public enum CustomComboPreset
     SAM_ST_Opener = 15006,
 
     [ParentCombo(SAM_ST_AdvancedMode)]
-    [CustomComboInfo("雪风连击", "在循环中加入雪风连击。", SAM.JobID)]
+    [CustomComboInfo("Yukikaze Combo", "Adds Yukikaze combo to the rotation.", SAM.JobID)]
     SAM_ST_Yukikaze = 15004,
 
     [ParentCombo(SAM_ST_AdvancedMode)]
-    [CustomComboInfo("花车连击", "在循环中加入花车连击。", SAM.JobID)]
+    [CustomComboInfo("Kasha Combo", "Adds Kasha combo to the rotation.", SAM.JobID)]
     SAM_ST_Kasha = 15005,
 
     [ParentCombo(SAM_ST_AdvancedMode)]
-    [CustomComboInfo("月光连击", "在循环中加入月光连击。", SAM.JobID)]
+    [CustomComboInfo("Gekko Combo", "在循環中加入月光連擊。", SAM.JobID)]
     SAM_ST_Gekko = 15022,
     
     #region cooldowns on Main Combo
 
     [ParentCombo(SAM_ST_AdvancedMode)]
-    [CustomComboInfo("主循环冷却技", "主循环冷却技集合。", SAM.JobID)]
+    [CustomComboInfo("主循環冷卻技", "主循環冷卻技集合。", SAM.JobID)]
     SAM_ST_CDs = 15011,
 
     [ParentCombo(SAM_ST_CDs)]
-    [CustomComboInfo("明镜止水", "在循环中加入明镜止水。\n会根据 2.14 或 2.08 GCD 动态调整使用方式。", SAM.JobID)]
+    [CustomComboInfo("Meikyo Shisui Option", "Adds Meikyo Shisui to the rotation.\n Dynamically changes usage for 2.14 or 2.08 GCD", SAM.JobID)]
     SAM_ST_CDs_MeikyoShisui = 15018,
 
     [ParentCombo(SAM_ST_CDs)]
-    [CustomComboInfo("意气冲天", "剑气≤50时加入意气冲天。\n剩余10秒时会消耗剑气以便使用意气冲天。", SAM.JobID)]
+    [CustomComboInfo("Ikishoten Option", "Adds Ikishoten when at or below 50 Kenki.\nWill dump Kenki at 10 seconds left to allow Ikishoten to be used.", SAM.JobID)]
     SAM_ST_CDs_Ikishoten = 15012,
 
     #endregion
@@ -6008,49 +6008,49 @@ public enum CustomComboPreset
     #region Damage skills
 
     [ParentCombo(SAM_ST_AdvancedMode)]
-    [CustomComboInfo("主循环伤害技能", "主循环伤害技能集合。", SAM.JobID)]
+    [CustomComboInfo("主循環傷害技能", "主循環傷害技能集合。", SAM.JobID)]
     SAM_ST_Damage = 15023,
 
     [ParentCombo(SAM_ST_Damage)]
-    [CustomComboInfo("居合术", "在循环中加入纷乱雪月花、彼岸花、回返雪月花。", SAM.JobID)]
+    [CustomComboInfo("Iaijutsu Option", "Adds Midare: Setsugekka, Higanbana, and Kaeshi: Setsugekka to the rotation.", SAM.JobID)]
     SAM_ST_CDs_Iaijutsu = 15013,
 
     [ParentCombo(SAM_ST_CDs_Iaijutsu)]
-    [CustomComboInfo("居合术（未移动时）", "未移动时在循环中加入纷乱雪月花和彼岸花。", SAM.JobID)]
+    [CustomComboInfo("Iajutsu movement Option", "未移動時在循環中加入紛亂雪月花和彼岸花。", SAM.JobID)]
     SAM_ST_CDs_Iaijutsu_Movement = 15014,
 
     [ParentCombo(SAM_ST_Damage)]
-    [CustomComboInfo("必杀剑·闪影", "在循环中加入必杀剑·闪影。", SAM.JobID)]
+    [CustomComboInfo("Senei Option", "Adds Senei to the rotation.", SAM.JobID)]
     SAM_ST_CDs_Senei = 15020,
     
     [ParentCombo(SAM_ST_Damage)]
-    [CustomComboInfo("奥义斩浪", "在循环中加入奥义斩浪和回返斩浪。", SAM.JobID)]
+    [CustomComboInfo("Ogi Namikiri Option", "Adds Ogi Namikiri and Kaeshi: Namikiri to the rotation.", SAM.JobID)]
     SAM_ST_CDs_OgiNamikiri = 15015,
 
     [ParentCombo(SAM_ST_Damage)]
-    [CustomComboInfo("残心", "可用时在循环中加入残心。", SAM.JobID)]
+    [CustomComboInfo("Zanshin Option", "Adds Zanshin when ready to the rotation.", SAM.JobID)]
     SAM_ST_CDs_Zanshin = 15017,
 
     [ParentCombo(SAM_ST_Damage)]
-    [CustomComboInfo("照破", "剑压层数达到3时在循环中加入照破。", SAM.JobID)]
+    [CustomComboInfo("Shoha Option", "Adds Shoha when you have three meditation stacks.", SAM.JobID)]
     SAM_ST_CDs_Shoha = 15019,
     
     #endregion
     
     [ParentCombo(SAM_ST_AdvancedMode)]
-    [CustomComboInfo("必杀剑·震天", "在循环中加入必杀剑·震天。", SAM.JobID)]
+    [CustomComboInfo("Shinten Option", "Adds Shinten to the rotation", SAM.JobID)]
     SAM_ST_Shinten = 15008,
     
     [ParentCombo(SAM_ST_AdvancedMode)]
-    [CustomComboInfo("真北", "未站在正确身位时自动使用真北。", SAM.JobID)]
+    [CustomComboInfo("True North Feature", "Adds True North when you are not in the correct position for the enhanced potency bonus.", SAM.JobID)]
     SAM_ST_TrueNorth = 15099,
 
     [ParentCombo(SAM_ST_AdvancedMode)]
-    [CustomComboInfo("远程输出", "脱离攻击距离时在循环中加入燕飞。", SAM.JobID)]
+    [CustomComboInfo("Ranged Uptime Feature", "Adds Enpi to the rotation when you are out of range.", SAM.JobID)]
     SAM_ST_RangedUptime = 15097,
 
     [ParentCombo(SAM_ST_AdvancedMode)]
-    [CustomComboInfo("自回技能", "在低于设定血量阈值时，在循环中加入浴血和内丹。", SAM.JobID)]
+    [CustomComboInfo("Combo Heals Option", "Adds Bloodbath and Second Wind to the combo, using them when below the HP Percentage threshold.", SAM.JobID)]
     SAM_ST_ComboHeals = 15098,
 
     #endregion
@@ -6060,30 +6060,30 @@ public enum CustomComboPreset
     [AutoAction(true, false)]
     [ReplaceSkill(SAM.Fuga, SAM.Fuko)]
     [ConflictingCombos(SAM_AoE_SimpleMode)]
-    [CustomComboInfo("高级模式-多目标", "将风雅替换为完整一键AOE循环。\n适合想自定义循环的玩家。", SAM.JobID)]
+    [CustomComboInfo("Advanced Mode - AoE", "Replaces Fuga with a full one-button AoE rotation.\nThese features are ideal if you want to customize the rotation.", SAM.JobID)]
     [AdvancedCombo]
     SAM_AoE_AdvancedMode = 15103,
 
     [ParentCombo(SAM_AoE_AdvancedMode)]
-    [CustomComboInfo("樱花连击", "在循环中加入樱花连击。", SAM.JobID)]
+    [CustomComboInfo("Oka Combo", "Adds Oka combo to the rotation.", SAM.JobID)]
     SAM_AoE_Oka = 15104,
 
     [ParentCombo(SAM_AoE_AdvancedMode)]
-    [CustomComboInfo("叶隐", "集齐三闪时在循环中加入叶隐。", SAM.JobID)]
+    [CustomComboInfo("Hagakure Option", "Adds Hagakure to the rotation when there are three Sen.", SAM.JobID)]
     SAM_AoE_Hagakure = 15113,
 
     #region Cooldowns on Main Combo
     
     [ParentCombo(SAM_AoE_AdvancedMode)]
-    [CustomComboInfo("主循环冷却技", "主循环冷却技集合。", SAM.JobID)]
+    [CustomComboInfo("主循環冷卻技", "主循環冷卻技集合。", SAM.JobID)]
     SAM_AoE_CDs = 15115,
 
     [ParentCombo(SAM_AoE_CDs)]
-    [CustomComboInfo("明镜止水", "在循环中加入明镜止水。", SAM.JobID)]
+    [CustomComboInfo("Meikyo Shisui Option", "Adds Meikyo Shisui to the rotation.", SAM.JobID)]
     SAM_AoE_MeikyoShisui = 15114,
 
     [ParentCombo(SAM_AoE_CDs)]
-    [CustomComboInfo("意气冲天", "剑气≤50时加入意气冲天。\n剩余10秒时会消耗剑气以便使用意气冲天。", SAM.JobID)]
+    [CustomComboInfo("Ikishoten Option", "Adds Ikishoten when at or below 50 Kenki.\nWill dump Kenki at 10 seconds left to allow Ikishoten to be used.", SAM.JobID)]
     SAM_AOE_CDs_Ikishoten = 15108,
     
     #endregion
@@ -6091,37 +6091,37 @@ public enum CustomComboPreset
     #region Damage Skills
 
     [ParentCombo(SAM_AoE_AdvancedMode)]
-    [CustomComboInfo("主循环伤害技能", "主循环伤害技能集合。", SAM.JobID)]
+    [CustomComboInfo("主循環傷害技能", "主循環傷害技能集合。", SAM.JobID)]
     SAM_AoE_Damage = 15116,
 
     [ParentCombo(SAM_AoE_Damage)]
-    [CustomComboInfo("居合术", "在可用且未移动时，加入天下五剑、纷乱雪月花、回返五剑。", SAM.JobID)]
+    [CustomComboInfo("Iaijutsu Option", "Adds Tenka Goken, Midare: Setsugekka, and Kaeshi: Goken when ready and when you're not moving to the rotation.", SAM.JobID)]
     SAM_AoE_TenkaGoken = 15107,
 
     [ParentCombo(SAM_AoE_Damage)]
-    [CustomComboInfo("必杀剑·红莲", "在循环中加入必杀剑·红莲。", SAM.JobID)]
+    [CustomComboInfo("Guren Option", "Adds Guren to the rotation.", SAM.JobID)]
     SAM_AoE_Guren = 15112,
 
     [ParentCombo(SAM_AoE_Damage)]
-    [CustomComboInfo("奥义斩浪", "在可用且未移动时，加入奥义斩浪与回返斩浪。", SAM.JobID)]
+    [CustomComboInfo("Ogi Namikiri Option", "Adds Ogi Namikiri and Kaeshi: Namikiri when ready and when you're not moving to the rotation.", SAM.JobID)]
     SAM_AoE_OgiNamikiri = 15109,
 
     [ParentCombo(SAM_AoE_Damage)]
-    [CustomComboInfo("残心", "在循环中加入残心。", SAM.JobID)]
+    [CustomComboInfo("Zanshin Option", "Adds Zanshin to the rotation.", SAM.JobID)]
     SAM_AoE_Zanshin = 15110,
 
     [ParentCombo(SAM_AoE_Damage)]
-    [CustomComboInfo("照破", "剑压层数为3时加入照破。", SAM.JobID)]
+    [CustomComboInfo("Shoha Option", "Adds Shoha when you have 3 meditation stacks.", SAM.JobID)]
     SAM_AoE_Shoha = 15111,
     
     #endregion
     
     [ParentCombo(SAM_AoE_AdvancedMode)]
-    [CustomComboInfo("必杀剑·九天", "在循环中加入必杀剑·九天。", SAM.JobID)]
+    [CustomComboInfo("Kyuten Option", "Adds Kyuten to the rotation.", SAM.JobID)]
     SAM_AoE_Kyuten = 15105,
 
     [ParentCombo(SAM_AoE_AdvancedMode)]
-    [CustomComboInfo("连击回血选项", "在血量低于阈值时，自动使用浴血与内丹。", SAM.JobID)]
+    [CustomComboInfo("Combo Heals Option", "Adds Bloodbath and Second Wind to the combo, using them when below the HP Percentage threshold.", SAM.JobID)]
     SAM_AoE_ComboHeals = 15199,
 
     #endregion
@@ -6129,23 +6129,23 @@ public enum CustomComboPreset
     #region Basic Combo
 
     [ReplaceSkill(SAM.Yukikaze)]
-    [CustomComboInfo("雪风连击", "将雪风替换为其连击链。", SAM.JobID)]
+    [CustomComboInfo("Yukikaze Combo", "Replace Yukikaze with its combo chain.", SAM.JobID)]
     SAM_ST_YukikazeCombo = 15000,
 
     [ReplaceSkill(SAM.Kasha)]
-    [CustomComboInfo("花车连击", "将花车替换为其连击链。", SAM.JobID)]
+    [CustomComboInfo("Kasha Combo", "Replace Kasha with its combo chain.", SAM.JobID)]
     SAM_ST_KashaCombo = 15001,
 
     [ReplaceSkill(SAM.Gekko)]
-    [CustomComboInfo("月光连击", "将月光替换为其连击链。", SAM.JobID)]
+    [CustomComboInfo("Gekko Combo", "Replace Gekko with its combo chain.", SAM.JobID)]
     SAM_ST_GekkoCombo = 15010,
 
     [ReplaceSkill(SAM.Oka)]
-    [CustomComboInfo("樱花连击", "将樱花替换为其连击链。", SAM.JobID)]
+    [CustomComboInfo("Oka Combo", "Replace Oka with its combo chain.", SAM.JobID)]
     SAM_AoE_OkaCombo = 15100,
 
     [ReplaceSkill(SAM.Mangetsu)]
-    [CustomComboInfo("满月连击", "将满月替换为其连击链。", SAM.JobID)]
+    [CustomComboInfo("Mangetsu Combo", "Replace Mangetsu with its combo chain.", SAM.JobID)]
     SAM_AoE_MangetsuCombo = 15101,
 
     #endregion
@@ -6154,12 +6154,12 @@ public enum CustomComboPreset
 
     [ReplaceSkill(SAM.MeikyoShisui)]
     [ConflictingCombos(SAM_MeikyoShisuiProtection)]
-    [CustomComboInfo("三闪特性", "根据所需，将明镜止水替换为月光、花车、雪风。", SAM.JobID)]
+    [CustomComboInfo("Sens Feature", "Replace Meikyo Shisui with Gekko, Kasha, and Yukikaze depending on what is needed.", SAM.JobID)]
     SAM_MeikyoSens = 15200,
 
     [ReplaceSkill(SAM.MeikyoShisui)]
     [ConflictingCombos(SAM_MeikyoSens)]
-    [CustomComboInfo("明镜止水保护", "已激活明镜止水时，将其替换为狂怒剑。", SAM.JobID)]
+    [CustomComboInfo("Meikyo Shisui Protection", "Replaces Meikyo Shisui with Savage Blade when you already have Meikyo Shisui active.", SAM.JobID)]
     SAM_MeikyoShisuiProtection = 15214,
 
     #endregion
@@ -6167,19 +6167,19 @@ public enum CustomComboPreset
     #region Iaijutsu Features
 
     [ReplaceSkill(SAM.Iaijutsu)]
-    [CustomComboInfo("居合术特性", "居合术相关特性集合。", SAM.JobID)]
+    [CustomComboInfo("Iaijutsu Features", "Collection of Iaijutsu Features.", SAM.JobID)]
     SAM_Iaijutsu = 15201,
 
     [ParentCombo(SAM_Iaijutsu)]
-    [CustomComboInfo("居合术->燕回返", "在合适时机将居合术替换为燕回返。", SAM.JobID)]
+    [CustomComboInfo("Iaijutsu to Tsubame-Gaeshi", "Replace Iaijutsu with Tsubame-gaeshi when appropriate.", SAM.JobID)]
     SAM_Iaijutsu_TsubameGaeshi = 15202,
 
     [ParentCombo(SAM_Iaijutsu)]
-    [CustomComboInfo("居合术->照破", "剑压层数为3时将居合术替换为照破。", SAM.JobID)]
+    [CustomComboInfo("Iaijutsu to Shoha", "Replace Iaijutsu with Shoha when meditation is 3.", SAM.JobID)]
     SAM_Iaijutsu_Shoha = 15203,
 
     [ParentCombo(SAM_Iaijutsu)]
-    [CustomComboInfo("居合术->奥义斩浪", "获得奥义斩浪预备时，将居合术替换为奥义斩浪与回返斩浪。", SAM.JobID)]
+    [CustomComboInfo("Iaijutsu to Ogi Namikiri", "Replace Iaijutsu with Ogi Namikiri and Kaeshi: Namikiri when buffed with Ogi Namikiri Ready.", SAM.JobID)]
     SAM_Iaijutsu_OgiNamikiri = 15204,
 
     #endregion
@@ -6187,19 +6187,19 @@ public enum CustomComboPreset
     #region Shinten Features
 
     [ReplaceSkill(SAM.Shinten)]
-    [CustomComboInfo("必杀剑·震天特性", "必杀剑·震天相关特性集合。", SAM.JobID)]
+    [CustomComboInfo("Shinten Features", "Collection of Hissatsu: Shinten Features.", SAM.JobID)]
     SAM_Shinten = 15251,
 
     [ParentCombo(SAM_Shinten)]
-    [CustomComboInfo("震天->照破", "剑压满时将必杀剑·震天替换为照破。", SAM.JobID)]
+    [CustomComboInfo("Shinten to Shoha", "Replace Hissatsu: Shinten with Shoha when Meditation is full.", SAM.JobID)]
     SAM_Shinten_Shoha = 15205,
 
     [ParentCombo(SAM_Shinten)]
-    [CustomComboInfo("震天->闪影", "闪影冷却好时将必杀剑·震天替换为必杀剑·闪影。", SAM.JobID)]
+    [CustomComboInfo("Shinten to Senei", "Replace Hissatsu: Shinten with Senei when its cooldown is up.", SAM.JobID)]
     SAM_Shinten_Senei = 15206,
 
     [ParentCombo(SAM_Shinten)]
-    [CustomComboInfo("震天->残心", "可用时将必杀剑·震天替换为残心。", SAM.JobID)]
+    [CustomComboInfo("Shinten to Zanshin", "Replace Hissatsu: Shinten with Zanshin when usable.", SAM.JobID)]
     SAM_Shinten_Zanshin = 15207,
 
     #endregion
@@ -6207,19 +6207,19 @@ public enum CustomComboPreset
     #region Kyuten Features
 
     [ReplaceSkill(SAM.Kyuten)]
-    [CustomComboInfo("必杀剑·九天特性", "必杀剑·九天相关特性集合。", SAM.JobID)]
+    [CustomComboInfo("Kyuten Features", "Collection of Hissatsu: Kyuten Features.", SAM.JobID)]
     SAM_Kyuten = 15252,
 
     [ParentCombo(SAM_Kyuten)]
-    [CustomComboInfo("九天->照破", "剑压满时将必杀剑·九天替换为照破。", SAM.JobID)]
+    [CustomComboInfo("Kyuten to Shoha", "Replace Hissatsu: Kyuten with Shoha when Meditation is full.", SAM.JobID)]
     SAM_Kyuten_Shoha = 15208,
 
     [ParentCombo(SAM_Kyuten)]
-    [CustomComboInfo("九天->红莲", "红莲冷却好时将必杀剑·九天替换为必杀剑·红莲。", SAM.JobID)]
+    [CustomComboInfo("Kyuten to Guren", "Replace Hissatsu: Kyuten with Guren when its cooldown is up.", SAM.JobID)]
     SAM_Kyuten_Guren = 15209,
 
     [ParentCombo(SAM_Kyuten)]
-    [CustomComboInfo("九天->残心", "可用时将必杀剑·九天替换为残心。", SAM.JobID)]
+    [CustomComboInfo("Kyuten to Zanshin", "Replace Hissatsu: Kyuten with Zanshin when usable.", SAM.JobID)]
     SAM_Kyuten_Zanshin = 15210,
 
     #endregion
@@ -6227,15 +6227,15 @@ public enum CustomComboPreset
     #region Ikishoten Features
 
     [ReplaceSkill(SAM.Ikishoten)]
-    [CustomComboInfo("意气冲天特性", "意气冲天相关特性集合。", SAM.JobID)]
+    [CustomComboInfo("Ikishoten Features", "Collection of Ikishoten Features.", SAM.JobID)]
     SAM_Ikishoten = 15253,
 
     [ParentCombo(SAM_Ikishoten)]
-    [CustomComboInfo("意气冲天->斩浪", "可用时将意气冲天替换为奥义斩浪与回返斩浪。", SAM.JobID)]
+    [CustomComboInfo("Ikishoten to Namikiri", "Replace Ikishoten with Ogi Namikiri & Kaeshi Namikiri when available.", SAM.JobID)]
     SAM_Ikishoten_Namikiri = 15212,
 
     [ParentCombo(SAM_Ikishoten)]
-    [CustomComboInfo("意气冲天->照破", "奥义斩浪前，剑压满时将意气冲天替换为照破。", SAM.JobID)]
+    [CustomComboInfo("Ikishoten to Shoha", "Replace Ikishoten with Shoha when Meditation is full before Ogi Namikiri.", SAM.JobID)]
     SAM_Ikishoten_Shoha = 15213,
 
     #endregion
@@ -6244,12 +6244,12 @@ public enum CustomComboPreset
 
     [Variant]
     [VariantParent(SAM_ST_AdvancedMode, SAM_AoE_AdvancedMode)]
-    [CustomComboInfo("多变治疗", "血量低于阈值时使用多变治疗。", SAM.JobID)]
+    [CustomComboInfo("Cure Option", "Use Variant Cure when HP is below set threshold.", SAM.JobID)]
     SAM_Variant_Cure = 15254,
 
     [Variant]
     [VariantParent(SAM_ST_AdvancedMode, SAM_AoE_AdvancedMode)]
-    [CustomComboInfo("多变铁壁", "多变铁壁冷却即用。", SAM.JobID)]
+    [CustomComboInfo("Rampart Option", "Use Variant Rampart on cooldown.", SAM.JobID)]
     SAM_Variant_Rampart = 15255,
 
     #endregion
@@ -6257,23 +6257,23 @@ public enum CustomComboPreset
     #region Other
 
     [ReplaceSkill(SAM.Gyoten)]
-    [CustomComboInfo("晓天-夜天特性", "必杀剑·晓天根据距离自动切换为夜天/晓天。", SAM.JobID)]
+    [CustomComboInfo("Gyoten Feature", "Hissatsu: Gyoten becomes Yaten/Gyoten depending on the distance from your target.", SAM.JobID)]
     SAM_GyotenYaten = 15211,
 
     [ReplaceSkill(SAM.Senei)]
-    [CustomComboInfo("闪影-红莲特性", "同步等级低于72级时，必杀剑·闪影变为必杀剑·红莲。", SAM.JobID)]
+    [CustomComboInfo("Senei - Guren Feature", "同步等級低於72級時，必殺劍·閃影變為必殺劍·紅蓮。", SAM.JobID)]
     SAM_SeneiGuren = 15215,
 
     #endregion
 
     #region Hidden Features
 
-    [CustomComboInfo("隐藏选项", "仅对知情者开放的特殊或副本专用选项集合。\n这些选项可能随时被移除或不再维护。", SAM.JobID)]
+    [CustomComboInfo("隱藏選項", "僅對知情者開放的特殊或副本專用選項集合。\n這些選項可能隨時被移除或不再維護。", SAM.JobID)]
     [Hidden]
     SAM_Hidden = 15300,
 
     [ParentCombo(SAM_Hidden)]
-    [CustomComboInfo("M6S：松鼠阶段保留爆发", "M6S小怪阶段，锁定松鼠时保留爆发。\n（大约第一只鳐鱼快死时释放）", SAM.JobID)]
+    [CustomComboInfo("M6S：松鼠階段保留爆發", "M6S小怪階段，鎖定松鼠時保留爆發。\n（大約第一隻鰩魚快死時釋放）", SAM.JobID)]
     [Hidden]
     SAM_Hid_M6SHoldSquirrelBurst = 15301,
 
@@ -6294,7 +6294,7 @@ public enum CustomComboPreset
     [ReplaceSkill(SCH.Ruin, SCH.Broil, SCH.Broil2, SCH.Broil3, SCH.Broil4)]
     [SimpleCombo]
     [ConflictingCombos(SCH_ST_ADV_DPS)]
-    [CustomComboInfo("简单输出模式-单目标", "将医术/气炎法等替换为完整单目标一键输出循环。\n非常适合新手学者使用。", SCH.JobID)]
+    [CustomComboInfo("Simple DPS Mode - Single Target", "將醫術/氣炎法等替換為完整單目標一鍵輸出循環。\n非常適合新手學者使用。", SCH.JobID)]
     SCH_ST_Simple_DPS = 16070,
     
     
@@ -6302,7 +6302,7 @@ public enum CustomComboPreset
     [ReplaceSkill(SCH.ArtOfWar, SCH.ArtOfWarII)]
     [SimpleCombo]
     [ConflictingCombos(SCH_AoE_ADV_DPS)]
-    [CustomComboInfo("简单输出模式-多目标", "将破阵法替换为完整多目标一键输出循环。\n非常适合新手学者使用。", SCH.JobID)]
+    [CustomComboInfo("Simple DPS Mode - AoE", "將破陣法替換為完整多目標一鍵輸出循環。\n非常適合新手學者使用。", SCH.JobID)]
     SCH_AoE_Simple_DPS = 16071,
     
     #endregion
@@ -6335,7 +6335,7 @@ public enum CustomComboPreset
     SCH_ST_ADV_DPS_EnergyDrain = 16005,
     
     [ParentCombo(SCH_ST_ADV_DPS)]
-    [CustomComboInfo("连环计", "冷却时自动使用连环计，并防止覆盖。", SCH.JobID)]
+    [CustomComboInfo("Chain Stratagem", "冷卻時自動使用連環計，並防止覆蓋。", SCH.JobID)]
     SCH_ST_ADV_DPS_ChainStrat = 16003,
     
     [ParentCombo(SCH_ST_ADV_DPS)]
@@ -6376,7 +6376,7 @@ public enum CustomComboPreset
     SCH_AoE_ADV_DPS_EnergyDrain = 16056,
     
     [ParentCombo(SCH_AoE_ADV_DPS)]
-    [CustomComboInfo("连环计", "冷却时自动使用连环计，并防止覆盖。", SCH.JobID)]
+    [CustomComboInfo("Chain Stratagem", "冷卻時自動使用連環計，並防止覆蓋。", SCH.JobID)]
     SCH_AoE_ADV_DPS_ChainStrat = 16054,
     
     [ParentCombo(SCH_AoE_ADV_DPS)]
@@ -6401,8 +6401,8 @@ public enum CustomComboPreset
     #region  ST Healing
     [AutoAction(false, true)]
     [ReplaceSkill(SCH.Physick)]
-    [CustomComboInfo("高级治疗模式-单目标",
-        "根据下方选项替换医术。", SCH.JobID)]
+    [CustomComboInfo("高階治療模式-單目標",
+        "根據下方選項替換醫術。", SCH.JobID)]
     [PossiblyRetargeted(SCH.Physick)]
     [HealingCombo]
     SCH_ST_Heal = 16023,
@@ -6463,7 +6463,7 @@ public enum CustomComboPreset
 
     [AutoAction(true, true)]
     [ReplaceSkill(SCH.Succor)]
-    [CustomComboInfo("高级治疗模式 - 多目标", "将士气高扬之策替换为以下选项：", SCH.JobID)]
+    [CustomComboInfo("高階治療模式 - 多目標", "Replaces Succor with options below:", SCH.JobID)]
     [HealingCombo]
     SCH_AoE_Heal = 16018,
     
@@ -6471,7 +6471,7 @@ public enum CustomComboPreset
     
     #region AoE Healing
     [ParentCombo(SCH_AoE_Heal)]
-    [CustomComboInfo("不屈不挠之策", "使用不屈不挠之策", SCH.JobID)]
+    [CustomComboInfo("Indomitability Option", "使用不屈不撓之策", SCH.JobID)]
     SCH_AoE_Heal_Indomitability = 16022,
     
     [ParentCombo(SCH_AoE_Heal)]
@@ -6479,7 +6479,7 @@ public enum CustomComboPreset
     SCH_AoE_Heal_WhisperingDawn = 16043,
     
     [ParentCombo(SCH_AoE_Heal)]
-    [CustomComboInfo("异想的幻光", "使用异想的幻光", SCH.JobID)]
+    [CustomComboInfo("Fey Illumination Option", "Use Fey Illumination", SCH.JobID)]
     SCH_AoE_Heal_FeyIllumination = 16042,
     
     [ParentCombo(SCH_AoE_Heal)]
@@ -6534,17 +6534,17 @@ public enum CustomComboPreset
     SCH_Lustrate = 16014,
     
     [ReplaceSkill(SCH.SacredSoil)]
-    [CustomComboInfo("野战治疗阵重定向", "为野战治疗阵添加自我重定向功能", SCH.JobID)]
+    [CustomComboInfo("野戰治療陣重定向", "為野戰治療陣新增自我重定向功能", SCH.JobID)]
     [Retargeted(SCH.SacredSoil)]
     SCH_SacredSoil = 16066,
     
     [ParentCombo(SCH_SacredSoil)]
-    [CustomComboInfo("队友放置", "将任意队友（鼠标悬停、专注目标、软选目标或硬选目标）作为野战治疗阵的优先重定向目标。\n优先级低于敌方放置，高于自身。", SCH.JobID)]
+    [CustomComboInfo("隊友放置", "將任意隊友（滑鼠懸停、專注目標、軟選目標或硬選目標）作為野戰治療陣的優先重定向目標。\n優先順序低於敵方放置，高於自身。", SCH.JobID)]
     [Retargeted]
     SCH_SacredSoil_Allies = 16061,
     
     [ParentCombo(SCH_SacredSoil)]
-    [CustomComboInfo("敌方放置", "将敌方硬选目标作为野战治疗阵的最高优先级重定向目标", SCH.JobID)]
+    [CustomComboInfo("敵方放置", "將敵方硬選目標作為野戰治療陣的最高優先順序重定向目標", SCH.JobID)]
     [Retargeted]
     SCH_SacredSoil_Enemy = 16060,
     
@@ -6590,7 +6590,7 @@ public enum CustomComboPreset
     SCH_Raise = 16032,
 
     [ParentCombo(SCH_Raise)]
-    [CustomComboInfo("重定向复活", "将此处受影响的复活技能目标重新指定至你的治疗集合。", SCH.JobID)]
+    [CustomComboInfo("重定向復活", "將此處受影響的復活技能目標重新指定至你的治療集合。", SCH.JobID)]
     [Retargeted(SCH.Resurrection)]
     SCH_Raise_Retarget = 16050,
     
@@ -6608,21 +6608,21 @@ public enum CustomComboPreset
     #endregion
     
     #region Raidwide Features
-    [CustomComboInfo("团队范围技能选项", "检测到团队范围攻击时尝试施放技能的工具集合。" +
-                                         "\n这对大多数但不是所有团队范围攻击都有效，不能替代学习战斗机制", SCH.JobID)]
+    [CustomComboInfo("團隊範圍技能選項", "檢測到團隊範圍攻擊時嘗試施放技能的工具集合。" +
+                                         "\n這對大多數但不是所有團隊範圍攻擊都有效，不能替代學習戰鬥機制", SCH.JobID)]
     SCH_Hidden = 16065,
     
     [ParentCombo(SCH_Hidden)]
-    [CustomComboInfo("团队范围士气高扬之策", "检测到团队范围技能施放时，如果士气高扬之策的护盾检查通过，将尝试施放士气高扬之策。\n将在所有4个高级连击中使用。", SCH.JobID)]
+    [CustomComboInfo("團隊範圍士氣高揚之策", "檢測到團隊範圍技能施放時，如果士氣高揚之策的護盾檢查透過，將嘗試施放士氣高揚之策。\n將在所有4個高階連擊中使用。", SCH.JobID)]
     SCH_Raidwide_Succor = 16062,
     
     [ParentCombo(SCH_Hidden)]
-    [CustomComboInfo("野战治疗阵", "检测到团队范围技能施放时，将尝试对自己使用野战治疗阵。\n将在所有4个高级连击中使用", SCH.JobID)]
+    [CustomComboInfo("Sacred Soil Option", "檢測到團隊範圍技能施放時，將嘗試對自己使用野戰治療陣。\n將在所有4個高階連擊中使用", SCH.JobID)]
     [Retargeted(SCH.SacredSoil)]
     SCH_Raidwide_SacredSoil = 16059,
     
     [ParentCombo(SCH_Hidden)]
-    [CustomComboInfo("疾风怒涛之计", "检测到团队范围技能施放时，将尝试使用疾风怒涛之计。\n将在所有4个高级连击中使用。", SCH.JobID)]
+    [CustomComboInfo("疾風怒濤之計", "檢測到團隊範圍技能施放時，將嘗試使用疾風怒濤之計。\n將在所有4個高階連擊中使用。", SCH.JobID)]
     SCH_Raidwide_Expedient = 16064,
     #endregion
 
@@ -6681,20 +6681,20 @@ public enum CustomComboPreset
     SMN_ST_Advanced_Combo_DemiSummons_Rekindle = 17028,
 
     [ParentCombo(SMN_ST_Advanced_Combo_DemiSummons_Rekindle)]
-    [CustomComboInfo("自动重定向苏生之炎", "将苏生之炎重新定向到需要治疗的坦克，然后是需要治疗的队友，最后是自己。", SMN.JobID)]
+    [CustomComboInfo("自動重定向蘇生之炎", "將蘇生之炎重新定向到需要治療的坦克，然後是需要治療的隊友，最後是自己。", SMN.JobID)]
     [Retargeted(SMN.Rekindle)]
     SMN_ST_Advanced_Combo_DemiSummons_Rekindle_Retarget = 17080,    
 
     [ParentCombo(SMN_ST_Advanced_Combo)]
-    [CustomComboInfo("召唤土神", "将土神添加到单体目标循环中", SMN.JobID)]
+    [CustomComboInfo("召喚土神", "將土神新增到單體目標循環中", SMN.JobID)]
     SMN_ST_Advanced_Combo_Titan = 17073,
 
     [ParentCombo(SMN_ST_Advanced_Combo)]
-    [CustomComboInfo("召唤风神", "将风神添加到单体目标循环中", SMN.JobID)]
+    [CustomComboInfo("召喚風神", "將風神新增到單體目標循環中", SMN.JobID)]
     SMN_ST_Advanced_Combo_Garuda = 17074,
 
     [ParentCombo(SMN_ST_Advanced_Combo)]
-    [CustomComboInfo("召唤火神", "将火神添加到单体目标循环中", SMN.JobID)]
+    [CustomComboInfo("召喚火神", "將火神新增到單體目標循環中", SMN.JobID)]
     SMN_ST_Advanced_Combo_Ifrit = 17075,
 
     [ParentCombo(SMN_ST_Advanced_Combo)]
@@ -6702,8 +6702,8 @@ public enum CustomComboPreset
     SMN_ST_Advanced_Combo_EgiSummons_Attacks = 17004,
 
     [ParentCombo(SMN_ST_Advanced_Combo_EgiSummons_Attacks)]
-    [CustomComboInfo("在54到72级之间站立不动时使用毁荡而非绿宝石毁荡",
-        "当站立不动且毁灭精通III未激活时，在循环中用毁荡替换绿宝石毁荡。",
+    [CustomComboInfo("在54到72級之間站立不動時使用大毀滅而非綠寶石大毀滅",
+        "Replaces Emerald Ruin III with Ruin III in the rotation when standing still and Ruin Mastery III is not active.",
         SMN.JobID)]
     SMN_ST_Ruin3_Emerald_Ruin3 = 17067,
 
@@ -6721,8 +6721,8 @@ public enum CustomComboPreset
     SMN_ST_Advanced_Combo_EDFester = 17014,
 
     [ParentCombo(SMN_ST_Advanced_Combo_EDFester)]
-    [CustomComboInfo("储备能力技",
-        "储备用于输出的能力技，在灼热之光增益效果期间使用。",
+    [CustomComboInfo("Pooled oGCDs Option",
+        "儲備用於輸出的能力技，在灼熱之光增益效果期間使用。",
         SMN.JobID)]
     SMN_ST_Advanced_Combo_oGCDPooling = 17025,
 
@@ -6732,8 +6732,8 @@ public enum CustomComboPreset
     SMN_ST_Advanced_Combo_SearingLight = 17017,
 
     [ParentCombo(SMN_ST_Advanced_Combo_SearingLight)]
-    [CustomComboInfo("灼热之光爆发",
-        "仅在亚灵神阶段施放灼热之光。\n咏速配装需关闭此功能。",
+    [CustomComboInfo("Searing Light Burst Option",
+        "僅在亞靈神階段施放灼熱之光。\n詠速配裝需關閉此功能。",
         SMN.JobID)]
     SMN_ST_Advanced_Combo_SearingLight_Burst = 17018,
 
@@ -6752,7 +6752,7 @@ public enum CustomComboPreset
     SMN_ST_Advanced_Combo_DemiSummons_LuxSolaris = 17029,
 
     [ParentCombo(SMN_ST_Advanced_Combo)]
-    [CustomComboInfo("守护之光", "当拥有2层充能时使用守护之光（30秒自身护盾）以防止浪费", SMN.JobID)]
+    [CustomComboInfo("Radiant Aegis Option", "當擁有2層充能時使用守護之光（30秒自身護盾）以防止浪費", SMN.JobID)]
     SMN_ST_Advanced_Combo_Radiant = 17071,
 
     [ParentCombo(SMN_ST_Advanced_Combo)]
@@ -6786,20 +6786,20 @@ public enum CustomComboPreset
     SMN_AoE_Advanced_Combo_DemiSummons_Rekindle = 17056,
 
     [ParentCombo(SMN_AoE_Advanced_Combo_DemiSummons_Rekindle)]
-    [CustomComboInfo("重定向苏生之炎", "将苏生之炎重新定向到需要治疗的坦克，然后是需要治疗的队友，最后是自己。", SMN.JobID)]
+    [CustomComboInfo("重定向蘇生之炎", "將蘇生之炎重新定向到需要治療的坦克，然後是需要治療的隊友，最後是自己。", SMN.JobID)]
     [Retargeted(SMN.Rekindle)]
     SMN_AoE_Advanced_Combo_DemiSummons_Rekindle_Retarget = 17081,    
 
     [ParentCombo(SMN_AoE_Advanced_Combo)]
-    [CustomComboInfo("召唤土神", "将土神添加到多目标循环中", SMN.JobID)]
+    [CustomComboInfo("召喚土神", "將土神新增到多目標循環中", SMN.JobID)]
     SMN_AoE_Advanced_Combo_Titan = 17076,
 
     [ParentCombo(SMN_AoE_Advanced_Combo)]
-    [CustomComboInfo("召唤风神", "将风神添加到多目标循环中", SMN.JobID)]
+    [CustomComboInfo("召喚風神", "將風神新增到多目標循環中", SMN.JobID)]
     SMN_AoE_Advanced_Combo_Garuda = 17077,
 
     [ParentCombo(SMN_AoE_Advanced_Combo)]
-    [CustomComboInfo("召唤火神", "将火神添加到多目标循环中", SMN.JobID)]
+    [CustomComboInfo("召喚火神", "將火神新增到多目標循環中", SMN.JobID)]
     SMN_AoE_Advanced_Combo_Ifrit = 17078,
 
     [ParentCombo(SMN_AoE_Advanced_Combo)]
@@ -6820,8 +6820,8 @@ public enum CustomComboPreset
     SMN_AoE_Advanced_Combo_ESPainflare = 17051,
 
     [ParentCombo(SMN_AoE_Advanced_Combo_ESPainflare)]
-    [CustomComboInfo("储备能力技",
-        "储备用于输出的能力技，在灼热之光增益效果期间使用。",
+    [CustomComboInfo("Pooled oGCDs Option",
+        "儲備用於輸出的能力技，在灼熱之光增益效果期間使用。",
         SMN.JobID)]
     SMN_AoE_Advanced_Combo_oGCDPooling = 17050,    
 
@@ -6831,8 +6831,8 @@ public enum CustomComboPreset
     SMN_AoE_Advanced_Combo_SearingLight = 17053,
 
     [ParentCombo(SMN_AoE_Advanced_Combo_SearingLight)]
-    [CustomComboInfo("灼热之光爆发",
-        "仅在亚灵神阶段施放灼热之光。\n咏速配装需关闭此功能。",
+    [CustomComboInfo("Searing Light Burst Option",
+        "僅在亞靈神階段施放灼熱之光。\n詠速配裝需關閉此功能。",
         SMN.JobID)]
     SMN_AoE_Advanced_Combo_SearingLight_Burst = 17054,
 
@@ -6851,7 +6851,7 @@ public enum CustomComboPreset
     SMN_AoE_Advanced_Combo_DemiSummons_LuxSolaris = 17059,
 
     [ParentCombo(SMN_AoE_Advanced_Combo)]
-    [CustomComboInfo("守护之光", "当拥有2层充能时使用守护之光（30秒自身护盾）以防止浪费", SMN.JobID)]
+    [CustomComboInfo("Radiant Aegis Option", "當擁有2層充能時使用守護之光（30秒自身護盾）以防止浪費", SMN.JobID)]
     SMN_AoE_Advanced_Combo_Radiant = 17070,
 
     [ParentCombo(SMN_AoE_Advanced_Combo)]
@@ -6890,7 +6890,7 @@ public enum CustomComboPreset
     SMN_Raise = 17027,
 
     [ParentCombo(SMN_Raise)]
-    [CustomComboInfo("重定向复活", "将此处受影响的复活技能自动重定向至你的治疗集合目标。", SMN.JobID)]
+    [CustomComboInfo("重定向復活", "將此處受影響的復活技能自動重定向至你的治療集合目標。", SMN.JobID)]
     [Retargeted(SMN.Resurrection)]
     SMN_Raise_Retarget = 17079,
 
@@ -6910,8 +6910,8 @@ public enum CustomComboPreset
         SMN.JobID)]
     SMN_ESPainflare_Ruin4 = 17039,
 
-    [CustomComboInfo("灼热之光防覆盖功能",
-           "当队伍中有其他召唤师的增益时，自动将灼热之光替换为狂怒剑，防止增益覆盖。", SMN.JobID)]
+    [CustomComboInfo("灼熱之光防覆蓋功能",
+           "當隊伍中有其他召喚士的增益時，自動將灼熱之光替換為狂怒劍，防止增益覆蓋。", SMN.JobID)]
     SMN_Searing = 17072,
     #endregion
 
@@ -6972,43 +6972,43 @@ public enum CustomComboPreset
     VPR_ST_Opener = 30002,
 
     [ParentCombo(VPR_ST_AdvancedMode)]
-    [CustomComboInfo("蛇灵气", "将蛇灵气加入连击。", VPR.JobID)]
+    [CustomComboInfo("Serpents Ire", "Adds Serpents Ire to the rotation.", VPR.JobID)]
     VPR_ST_SerpentsIre = 30005,
 
     [ParentCombo(VPR_ST_AdvancedMode)]
-    [CustomComboInfo("强碎灵蛇", "将强碎灵蛇加入连击。", VPR.JobID)]
+    [CustomComboInfo("Vicewinder", "Adds Vicewinder to the rotation.", VPR.JobID)]
     VPR_ST_Vicewinder = 30006,
     
     [ParentCombo(VPR_ST_AdvancedMode)]
-    [CustomComboInfo("强碎灵蛇连击", "将疾速盘蛇和猛袭盘蛇加入连击。\n会根据你的站位自动切换。", VPR.JobID)]
+    [CustomComboInfo("Vicewinder Combo", "Adds Swiftskin's Coil and Hunter's Coil to the rotation.\nWill automatically swap depending on your position.", VPR.JobID)]
     VPR_ST_VicewinderCombo = 30007,
     
     [ParentCombo(VPR_ST_AdvancedMode)]
-    [CustomComboInfo("强碎灵蛇乱击", "将双牙连击和双牙乱击加入连击。", VPR.JobID)]
+    [CustomComboInfo("Vicewinder Weaves", "將雙牙連擊和雙牙亂擊加入連擊。", VPR.JobID)]
     VPR_ST_VicewinderWeaves = 30013,
 
     [ParentCombo(VPR_ST_AdvancedMode)]
-    [CustomComboInfo("蛇尾术", "将蛇尾术加入连击。", VPR.JobID)]
+    [CustomComboInfo("Serpents Tail", "Adds Serpents Tail to the rotation.", VPR.JobID)]
     VPR_ST_SerpentsTail = 30008,
 
     [ParentCombo(VPR_ST_AdvancedMode)]
-    [CustomComboInfo("飞蛇之尾", "将飞蛇之尾加入连击。", VPR.JobID)]
+    [CustomComboInfo("Uncoiled Fury", "Adds Uncoiled Fury to the rotation.", VPR.JobID)]
     VPR_ST_UncoiledFury = 30009,
 
     [ParentCombo(VPR_ST_AdvancedMode)]
-    [CustomComboInfo("飞蛇之尾连击", "将飞蛇连尾击和飞蛇乱尾击加入连击。", VPR.JobID)]
+    [CustomComboInfo("Uncoiled Fury Combo", "Adds Uncoiled Twinfang and Uncoiled Twinblood to the rotation.", VPR.JobID)]
     VPR_ST_UncoiledFuryCombo = 30010,
 
     [ParentCombo(VPR_ST_AdvancedMode)]
-    [CustomComboInfo("祖灵降临", "将祖灵降临加入连击。", VPR.JobID)]
+    [CustomComboInfo("Reawaken", "Adds Reawaken to the rotation.", VPR.JobID)]
     VPR_ST_Reawaken = 30011,
 
     [ParentCombo(VPR_ST_AdvancedMode)]
-    [CustomComboInfo("祖灵之牙连击", "将祖灵之牙一式、二式、三式、四式加入连击。", VPR.JobID)]
+    [CustomComboInfo("祖靈之牙連擊", "將祖靈之牙【壹】、二式、三式、四式加入連擊。", VPR.JobID)]
     VPR_ST_GenerationCombo = 30012,
 
     [ParentCombo(VPR_ST_AdvancedMode)]
-    [CustomComboInfo("插入能力技祖灵之蛇", "将祖灵之蛇一式、二式、三式、四式加入连击。", VPR.JobID)]
+    [CustomComboInfo("插入能力技祖靈之蛇", "將祖靈之蛇【壹】、二式、三式、四式加入連擊。", VPR.JobID)]
     VPR_ST_LegacyWeaves = 30014,
 
     [ParentCombo(VPR_ST_AdvancedMode)]
@@ -7043,35 +7043,35 @@ public enum CustomComboPreset
     VPR_AoE_Vicepit = 30105,
     
     [ParentCombo(VPR_AoE_AdvancedMode)]
-    [CustomComboInfo("强碎灵蝰连击", "将疾速盘蝰和猛袭盘蝰加入连击。", VPR.JobID)]
+    [CustomComboInfo("Vicepit Combo", "Adds Swiftskin's Den and Hunter's Den to the rotation.", VPR.JobID)]
     VPR_AoE_VicepitCombo = 30106,
     
     [ParentCombo(VPR_AoE_AdvancedMode)]
-    [CustomComboInfo("强碎灵蝰乱击", "将双牙连闪和双牙乱闪加入连击。", VPR.JobID)]
+    [CustomComboInfo("Vicepit Weaves", "將雙牙連閃和雙牙亂閃加入連擊。", VPR.JobID)]
     VPR_AoE_VicepitWeaves = 30115,
 
     [ParentCombo(VPR_AoE_AdvancedMode)]
-    [CustomComboInfo("蛇尾术", "将蛇尾术加入连击。", VPR.JobID)]
+    [CustomComboInfo("Serpents Tail", "Adds Serpents Tail to the rotation.", VPR.JobID)]
     VPR_AoE_SerpentsTail = 30107,
 
     [ParentCombo(VPR_AoE_AdvancedMode)]
-    [CustomComboInfo("飞蛇之尾", "将飞蛇之尾加入连击。", VPR.JobID)]
+    [CustomComboInfo("Uncoiled Fury", "Adds Uncoiled Fury to the rotation.", VPR.JobID)]
     VPR_AoE_UncoiledFury = 30108,
 
     [ParentCombo(VPR_AoE_AdvancedMode)]
-    [CustomComboInfo("飞蛇连尾击", "将飞蛇连尾击和飞蛇乱尾击加入连击。", VPR.JobID)]
+    [CustomComboInfo("Uncoiled Fury Combo", "Adds Uncoiled Twinfang and Uncoiled Twinblood to the rotation.", VPR.JobID)]
     VPR_AoE_UncoiledFuryCombo = 30109,
 
     [ParentCombo(VPR_AoE_AdvancedMode)]
-    [CustomComboInfo("祖灵降临", "将祖灵降临添加到连击中。", VPR.JobID)]
+    [CustomComboInfo("Reawaken", "Adds Reawaken to the rotation.", VPR.JobID)]
     VPR_AoE_Reawaken = 30110,
     
     [ParentCombo(VPR_AoE_AdvancedMode)]
-    [CustomComboInfo("祖灵连击", "将祖灵之牙与祖灵之蛇等衍生技能添加到连击中。", VPR.JobID)]
+    [CustomComboInfo("Reawaken Combo", "將祖靈之牙與祖靈之蛇等衍生技能新增到連擊中。", VPR.JobID)]
     VPR_AoE_ReawakenCombo = 30112,
 
     [ParentCombo(VPR_AoE_AdvancedMode)]
-    [CustomComboInfo("连击治疗选项", "将浴血和内丹添加到连击中。", VPR.JobID)]
+    [CustomComboInfo("Combo Heals Option", "Adds Bloodbath and Second Wind to the rotation.", VPR.JobID)]
     VPR_AoE_ComboHeals = 30199,
 
     #endregion
@@ -7080,7 +7080,7 @@ public enum CustomComboPreset
 
     [ReplaceSkill(VPR.ReavingFangs)]
     [ConflictingCombos(VPR_ReawakenLegacy, VPR_Legacies, VPR_SerpentsTail)]
-    [CustomComboInfo("基础连击", "将穿裂尖齿替换为其连击链。", VPR.JobID)]
+    [CustomComboInfo("基礎連擊", "將壹之牙【穿裂】 替換為其連擊鏈。", VPR.JobID)]
     [BasicCombo]
     VPR_ST_BasicCombo = 30015,
 
@@ -7187,88 +7187,88 @@ public enum CustomComboPreset
     WAR_ST_BalanceOpener = 18058,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("暴风碎", "在循环中加入暴风碎。", WAR.JobID)]
+    [CustomComboInfo("Storm's Eye Option", "Adds Storm's Eye into the rotation.", WAR.JobID)]
     WAR_ST_StormsEye = 18005,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("原初的解放", "在循环中加入狂暴/原初的解放。", WAR.JobID)]
+    [CustomComboInfo("Inner Release Option", "Adds Berserk / Inner Release into the rotation.", WAR.JobID)]
     WAR_ST_InnerRelease = 18003,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("裂石飞环", "在循环中加入原初之魂/裂石飞环。\n- 会在设置的最低兽魂值或消耗原初的解放层数时使用\n- 有狂魂时也会包含", WAR.JobID)]
+    [CustomComboInfo("Fell Cleave Option", "在循環中加入原初之魂/裂石飛環。\n- 會在設定的最低獸魂值或消耗原初的解放層數時使用\n- 有狂魂時也會包含", WAR.JobID)]
     WAR_ST_FellCleave = 18006,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("战嚎", "在循环中加入战嚎。", WAR.JobID)]
+    [CustomComboInfo("Infuriate Option", "Adds Infuriate into the rotation.", WAR.JobID)]
     WAR_ST_Infuriate = 18007,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("猛攻", "在循环中加入猛攻。", WAR.JobID)]
+    [CustomComboInfo("Onslaught Option", "Adds Onslaught into the rotation.", WAR.JobID)]
     WAR_ST_Onslaught = 18008,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("动乱", "在循环中加入动乱。", WAR.JobID)]
+    [CustomComboInfo("Upheaval Option", "Adds Upheaval into the rotation.", WAR.JobID)]
     WAR_ST_Upheaval = 18009,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("蛮荒崩裂", "在循环中加入蛮荒崩裂。", WAR.JobID)]
+    [CustomComboInfo("Primal Rend Option", "Adds Primal Rend into the rotation.", WAR.JobID)]
     WAR_ST_PrimalRend = 18013,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("原初的怒震", "在循环中加入原初的怒震。", WAR.JobID)]
+    [CustomComboInfo("Primal Wrath Option", "Adds Primal Wrath into the rotation.", WAR.JobID)]
     WAR_ST_PrimalWrath = 18010,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("尽毁", "在循环中加入尽毁。", WAR.JobID)]
+    [CustomComboInfo("Primal Ruination Option", "Adds Primal Ruination into the rotation.", WAR.JobID)]
     WAR_ST_PrimalRuination = 18011,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("飞斧", "距离过远时在循环中加入飞斧。", WAR.JobID)]
+    [CustomComboInfo("Tomahawk Uptime Option", "Adds Tomahawk into the rotation when you are out of range.", WAR.JobID)]
     WAR_ST_RangedUptime = 18004,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("打断", "目标可被打断时在循环中加入插言。", WAR.JobID)]
+    [CustomComboInfo("Interrupt Option", "Adds Interject to the rotation when your target's cast is interruptible.", WAR.JobID)]
     WAR_ST_Interrupt = 18066,
 
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("打断并眩晕", "目标读条时在循环中加入下踢。\n不建议在野外内容外使用，因为可能会浪费下踢在无法眩晕的敌人身上，BOSS战会尽量避免使用。", WAR.JobID)]
+    [CustomComboInfo("Interrupt with Stun Option", "目標讀條時在循環中加入下踢。\n不建議在野外內容外使用，因為可能會浪費下踢在無法眩暈的敵人身上，BOSS戰會盡量避免使用。", WAR.JobID)]
     WAR_ST_Stun = 18112,
 
     #region Mitigations
     [ParentCombo(WAR_ST_Advanced)]
-    [CustomComboInfo("减伤", "根据剩余血量百分比在循环中加入防御技能。", WAR.JobID)]
+    [CustomComboInfo("Mitigation Options", "Adds defensive actions into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_ST_Mitigation = 18040,
 
     [ParentCombo(WAR_ST_Mitigation)]
-    [CustomComboInfo("原初的血气", "根据剩余血量百分比在循环中加入原初的直觉/原初的血气。", WAR.JobID)]
+    [CustomComboInfo("Bloodwhetting Option", "Adds Raw Intuition / Bloodwhetting into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_ST_Bloodwhetting = 18031,
 
     [ParentCombo(WAR_ST_Mitigation)]
-    [CustomComboInfo("泰然自若", "根据剩余血量百分比在循环中加入泰然自若。", WAR.JobID)]
+    [CustomComboInfo("Equilibrium Option", "Adds Equilibrium into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_ST_Equilibrium = 18043,
 
     [ParentCombo(WAR_ST_Mitigation)]
-    [CustomComboInfo("铁壁", "根据剩余血量百分比在循环中加入铁壁。", WAR.JobID)]
+    [CustomComboInfo("Rampart Option", "Adds Rampart into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_ST_Rampart = 18032,
 
     [ParentCombo(WAR_ST_Mitigation)]
-    [CustomComboInfo("战栗", "根据剩余血量百分比在循环中加入战栗。", WAR.JobID)]
+    [CustomComboInfo("Thrill of Battle Option", "Adds Thrill of Battle into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_ST_Thrill = 18042,
 
     [ParentCombo(WAR_ST_Mitigation)]
-    [CustomComboInfo("复仇", "根据剩余血量百分比在循环中加入复仇/戮罪。", WAR.JobID)]
+    [CustomComboInfo("Vengeance Option", "Adds Vengeance / Damnation into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_ST_Vengeance = 18033,
 
     [ParentCombo(WAR_ST_Mitigation)]
-    [CustomComboInfo("死斗", "根据剩余血量百分比在循环中加入死斗。", WAR.JobID)]
+    [CustomComboInfo("Holmgang Option", "Adds Holmgang into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_ST_Holmgang = 18034,
 
     [ParentCombo(WAR_ST_Mitigation)]
-    [CustomComboInfo("预警", "根据剩余血量百分比在循环中加入预警。", WAR.JobID)]
+    [CustomComboInfo("Reprisal Option", "Adds Reprisal into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_ST_Reprisal = 18061,
 
     [ParentCombo(WAR_ST_Mitigation)]
-    [CustomComboInfo("亲疏自行", "根据剩余血量百分比在循环中加入亲疏自行。", WAR.JobID)]
+    [CustomComboInfo("Arm's Length Option", "Adds Arm's Length into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_ST_ArmsLength = 18062,
     #endregion
 
@@ -7283,84 +7283,84 @@ public enum CustomComboPreset
     WAR_AoE_Advanced = 18016,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("狂暴/原初的解放", "在AOE循环中加入狂暴/原初的解放。", WAR.JobID)]
+    [CustomComboInfo("Berserk / Inner Release Option", "在AOE循環中加入狂暴/原初的解放。", WAR.JobID)]
     WAR_AoE_InnerRelease = 18019,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("钢铁旋风/地毁人亡", "在AOE循环中加入钢铁旋风/地毁人亡。", WAR.JobID)]
+    [CustomComboInfo("Steel Cyclone / Decimate Option", "在AOE循環中加入鋼鐵旋風/地毀人亡。", WAR.JobID)]
     WAR_AoE_Decimate = 18023,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("战嚎", "在AOE循环中加入战嚎。", WAR.JobID)]
+    [CustomComboInfo("Infuriate Option", "在AOE循環中加入戰嚎。", WAR.JobID)]
     WAR_AoE_Infuriate = 18018,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("猛攻", "在AOE循环中加入猛攻。", WAR.JobID)]
+    [CustomComboInfo("Onslaught Option", "在AOE循環中加入猛攻。", WAR.JobID)]
     WAR_AoE_Onslaught = 18071,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("群山隆起", "在AOE循环中加入群山隆起。", WAR.JobID)]
+    [CustomComboInfo("Orogeny Option", "在AOE循環中加入群山隆起。", WAR.JobID)]
     WAR_AoE_Orogeny = 18012,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("蛮荒崩裂", "在AOE循环中加入蛮荒崩裂。", WAR.JobID)]
+    [CustomComboInfo("Primal Rend Option", "在AOE循環中加入蠻荒崩裂。", WAR.JobID)]
     WAR_AoE_PrimalRend = 18021,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("原初的怒震", "在AOE循环中加入原初的怒震。", WAR.JobID)]
+    [CustomComboInfo("Primal Wrath Option", "在AOE循環中加入原初的激震。", WAR.JobID)]
     WAR_AoE_PrimalWrath = 18020,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("尽毁", "在AOE循环中加入尽毁。", WAR.JobID)]
+    [CustomComboInfo("Primal Ruination Option", "在AOE循環中加入盡毀。", WAR.JobID)]
     WAR_AoE_PrimalRuination = 18022,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("飞斧覆盖", "距离过远时在循环中加入飞斧。", WAR.JobID)]
+    [CustomComboInfo("Tomahawk Uptime Option", "Adds Tomahawk into the rotation when you are out of range.", WAR.JobID)]
     WAR_AoE_RangedUptime = 18110,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("插言", "当目标可被打断时在AOE循环中加入插言。", WAR.JobID)]
+    [CustomComboInfo("Interrupt Option", "當目標可被打斷時在AOE循環中加入插言。", WAR.JobID)]
     WAR_AoE_Interrupt = 18067,
 
     [ParentCombo(WAR_AoE_Interrupt)]
-    [CustomComboInfo("下踢", "当目标施法时（无论是否可打断）在AOE循环中加入下踢。", WAR.JobID)]
+    [CustomComboInfo("Interrupt with Stun Option", "當目標施法時（無論是否可打斷）在AOE循環中加入下踢。", WAR.JobID)]
     WAR_AoE_Stun = 18068,
 
     #region Mitigations
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("减伤", "根据剩余血量百分比在循环中加入防御技能。", WAR.JobID)]
+    [CustomComboInfo("Mitigation Options", "Adds defensive actions into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_AoE_Mitigation = 18035,
 
     [ParentCombo(WAR_AoE_Mitigation)]
-    [CustomComboInfo("原初的血气", "根据剩余血量百分比在循环中加入原初的直觉/原初的血气。", WAR.JobID)]
+    [CustomComboInfo("Bloodwhetting Option", "Adds Raw Intuition / Bloodwhetting into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_AoE_Bloodwhetting = 18036,
 
     [ParentCombo(WAR_AoE_Mitigation)]
-    [CustomComboInfo("泰然自若", "根据剩余血量百分比在循环中加入泰然自若。", WAR.JobID)]
+    [CustomComboInfo("Equilibrium Option", "Adds Equilibrium into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_AoE_Equilibrium = 18044,
 
     [ParentCombo(WAR_AoE_Mitigation)]
-    [CustomComboInfo("铁壁", "根据剩余血量百分比在循环中加入铁壁。", WAR.JobID)]
+    [CustomComboInfo("Rampart Option", "Adds Rampart into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_AoE_Rampart = 18037,
 
     [ParentCombo(WAR_AoE_Mitigation)]
-    [CustomComboInfo("战栗", "根据剩余血量百分比在循环中加入战栗。", WAR.JobID)]
+    [CustomComboInfo("Thrill of Battle Option", "Adds Thrill of Battle into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_AoE_Thrill = 18041,
 
     [ParentCombo(WAR_AoE_Mitigation)]
-    [CustomComboInfo("复仇/戮罪", "根据剩余血量百分比在循环中加入复仇/戮罪。", WAR.JobID)]
+    [CustomComboInfo("Vengeance Option", "Adds Vengeance / Damnation into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_AoE_Vengeance = 18038,
 
     [ParentCombo(WAR_AoE_Mitigation)]
-    [CustomComboInfo("死斗", "根据剩余血量百分比在循环中加入死斗。", WAR.JobID)]
+    [CustomComboInfo("Holmgang Option", "Adds Holmgang into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_AoE_Holmgang = 18039,
 
     [ParentCombo(WAR_AoE_Mitigation)]
-    [CustomComboInfo("雪仇", "根据剩余血量百分比在循环中加入雪仇。", WAR.JobID)]
+    [CustomComboInfo("Reprisal Option", "Adds Reprisal into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_AoE_Reprisal = 18063,
 
     [ParentCombo(WAR_AoE_Mitigation)]
-    [CustomComboInfo("亲疏自行", "根据剩余血量百分比在循环中加入亲疏自行。", WAR.JobID)]
+    [CustomComboInfo("Arm's Length Option", "Adds Arm's Length into the rotation based on Health percentage remaining.", WAR.JobID)]
     WAR_AoE_ArmsLength = 18064,
     #endregion
 
@@ -7368,48 +7368,48 @@ public enum CustomComboPreset
 
     #region One-Button Mitigation
     [ReplaceSkill(WAR.ThrillOfBattle)]
-    [CustomComboInfo("一键减伤", "将战栗替换为一键减伤按钮。", WAR.JobID)]
+    [CustomComboInfo("One-Button Mitigation Feature", "Replaces Thrill Of Battle with an all-in-one mitigation button.", WAR.JobID)]
     [MitigationCombo]
     WAR_Mit_OneButton = 18045,
 
     [ParentCombo(WAR_Mit_OneButton)]
-    [CustomComboInfo("死斗优先", "当血量低于阈值时优先使用死斗。", WAR.JobID)]
+    [CustomComboInfo("Holmgang Emergency Option", "Gives max priority to Holmgang when the Health percentage threshold is met.", WAR.JobID)]
     WAR_Mit_Holmgang_Max = 18046,
 
     [ParentCombo(WAR_Mit_OneButton)]
-    [CustomComboInfo("原初的血气", "在一键减伤中加入原初的直觉/原初的血气。", WAR.JobID)]
+    [CustomComboInfo("Bloodwhetting Option", "Adds Raw Intuition / Bloodwhetting to the one-button mitigation.", WAR.JobID)]
     WAR_Mit_Bloodwhetting = 18047,
 
     [ParentCombo(WAR_Mit_OneButton)]
-    [CustomComboInfo("泰然自若", "在一键减伤中加入泰然自若。", WAR.JobID)]
+    [CustomComboInfo("Equilibrium Option", "Adds Equilibrium to the one-button mitigation.", WAR.JobID)]
     WAR_Mit_Equilibrium = 18048,
 
     [ParentCombo(WAR_Mit_OneButton)]
-    [CustomComboInfo("雪仇", "在一键减伤中加入雪仇。\n注意：仅在有目标且在范围内时使用，防止浪费。", WAR.JobID)]
+    [CustomComboInfo("Reprisal Option", "Adds Reprisal to the one-button mitigation.\nNOTE: Will not use unless there is a target within range to prevent waste", WAR.JobID)]
     WAR_Mit_Reprisal = 18049,
 
     [ParentCombo(WAR_Mit_OneButton)]
-    [CustomComboInfo("优先战栗", "在一键减伤中优先加入战栗。\n注意：即使关闭，仍会作为最低优先级尝试使用战栗。", WAR.JobID)]
+    [CustomComboInfo("Thrill Of Battle First Option", "Adds Thrill Of Battle to the one-button mitigation.\nNOTE: even if disabled, will still try to use Thrill Of Battle as the lowest priority.", WAR.JobID)]
     WAR_Mit_ThrillOfBattle = 18050,
 
     [ParentCombo(WAR_Mit_OneButton)]
-    [CustomComboInfo("铁壁", "在一键减伤中加入铁壁。", WAR.JobID)]
+    [CustomComboInfo("Rampart Option", "Adds Rampart to the one-button mitigation.", WAR.JobID)]
     WAR_Mit_Rampart = 18051,
 
     [ParentCombo(WAR_Mit_OneButton)]
-    [CustomComboInfo("摆脱", "在一键减伤中加入摆脱。", WAR.JobID)]
+    [CustomComboInfo("Shake It Off Option", "Adds Shake It Off to the one-button mitigation.", WAR.JobID)]
     WAR_Mit_ShakeItOff = 18052,
 
     [ParentCombo(WAR_Mit_OneButton)]
-    [CustomComboInfo("亲疏自行", "在一键减伤中加入亲疏自行。", WAR.JobID)]
+    [CustomComboInfo("Arm's Length Option", "Adds Arm's Length to the one-button mitigation.", WAR.JobID)]
     WAR_Mit_ArmsLength = 18053,
 
     [ParentCombo(WAR_Mit_OneButton)]
-    [CustomComboInfo("复仇", "在一键减伤中加入复仇。", WAR.JobID)]
+    [CustomComboInfo("Vengeance Option", "Adds Vengeance to the one-button mitigation.", WAR.JobID)]
     WAR_Mit_Vengeance = 18054,
 
     [ReplaceSkill(WAR.ShakeItOff)]
-    [CustomComboInfo("一键团队减伤", "将摆脱替换为雪仇（可用时）。", WAR.JobID)]
+    [CustomComboInfo("一鍵團隊減傷", "將擺脫替換為雪仇（可用時）。", WAR.JobID)]
     [MitigationCombo]
     WAR_Mit_Party = 18111,
     #endregion
@@ -7419,63 +7419,63 @@ public enum CustomComboPreset
     #region Fell Cleave Features
     [ReplaceSkill(WAR.FellCleave)]
     [ConflictingCombos(WAR_InfuriateFellCleave)]
-    [CustomComboInfo("裂石飞环功能", "裂石飞环相关功能集合。\n全部启用时可作为单体爆发一键宏。", WAR.JobID)]
+    [CustomComboInfo("Fell Cleave Features", "裂石飛環相關功能集合。\n全部啟用時可作為單體爆發一鍵宏。", WAR.JobID)]
     WAR_FC_Features = 18122,
 
     [ParentCombo(WAR_FC_Features)]
-    [CustomComboInfo("原初的解放", "有可用时在裂石飞环中加入狂暴/原初的解放。", WAR.JobID)]
+    [CustomComboInfo("Inner Release Option", "Adds Berserk / Inner Release to Fell Cleave when available.", WAR.JobID)]
     WAR_FC_InnerRelease = 18123,
 
     [ParentCombo(WAR_FC_Features)]
-    [CustomComboInfo("战嚎", "有可用时在裂石飞环中加入战嚎。", WAR.JobID)]
+    [CustomComboInfo("Infuriate Option", "Adds Infuriate to Fell Cleave when available.", WAR.JobID)]
     WAR_FC_Infuriate = 18124,
 
     [ParentCombo(WAR_FC_Features)]
-    [CustomComboInfo("猛攻", "有可用时在裂石飞环中加入猛攻。", WAR.JobID)]
+    [CustomComboInfo("Onslaught Option", "Adds Onslaught to Fell Cleave when available.", WAR.JobID)]
     WAR_FC_Onslaught = 18125,
 
     [ParentCombo(WAR_FC_Features)]
-    [CustomComboInfo("动乱", "有可用时在裂石飞环中加入动乱。", WAR.JobID)]
+    [CustomComboInfo("Upheaval Option", "Adds Upheaval to Fell Cleave when available.", WAR.JobID)]
     WAR_FC_Upheaval = 18126,
 
     [ParentCombo(WAR_FC_Features)]
-    [CustomComboInfo("蛮荒崩裂", "有可用时在裂石飞环中加入蛮荒崩裂。", WAR.JobID)]
+    [CustomComboInfo("Primal Rend Option", "Adds Primal Rend to Fell Cleave when available.", WAR.JobID)]
     WAR_FC_PrimalRend = 18127,
 
     [ParentCombo(WAR_FC_Features)]
-    [CustomComboInfo("原初的怒震", "有可用时在裂石飞环中加入原初的怒震。", WAR.JobID)]
+    [CustomComboInfo("Primal Wrath Option", "Adds Primal Wrath to Fell Cleave when available.", WAR.JobID)]
     WAR_FC_PrimalWrath = 18128,
 
     [ParentCombo(WAR_FC_Features)]
-    [CustomComboInfo("尽毁", "有可用时在裂石飞环中加入尽毁。", WAR.JobID)]
+    [CustomComboInfo("Primal Ruination Option", "Adds Primal Ruination to Fell Cleave when available.", WAR.JobID)]
     WAR_FC_PrimalRuination = 18129,
     #endregion
 
     #region Basic Combo
     [ReplaceSkill(WAR.StormsPath)]
-    [CustomComboInfo("暴风斩连段", "将暴风斩替换为其连段技能。", WAR.JobID)]
+    [CustomComboInfo("Storm's Path Combo", "將暴風斬替換為其連段技能。", WAR.JobID)]
     WAR_ST_StormsPathCombo = 18069,
 
     [ReplaceSkill(WAR.StormsEye)]
-    [CustomComboInfo("暴风碎连段", "将暴风碎替换为其连段技能。", WAR.JobID)]
+    [CustomComboInfo("Storm's Eye Combo", "Replace Storm's Eye with its combo chain.", WAR.JobID)]
     WAR_ST_StormsEyeCombo = 18070,
     #endregion
 
     [ReplaceSkill(WAR.FellCleave, WAR.Decimate)]
     [ConflictingCombos(WAR_FC_Features)]
-    [CustomComboInfo("战嚎替换裂石飞环/地毁人亡", "当兽魂槽低于设定值时，将裂石飞环和地毁人亡变为战嚎。", WAR.JobID)]
+    [CustomComboInfo("Infuriate on Fell Cleave / Decimate Feature", "Turns Fell Cleave and Decimate into Infuriate if at or under set gauge value.", WAR.JobID)]
     WAR_InfuriateFellCleave = 18024,
 
     [ParentCombo(WAR_InfuriateFellCleave)]
-    [CustomComboInfo("优先原初的解放", "有原初的解放层数时不使用战嚎。", WAR.JobID)]
+    [CustomComboInfo("Inner Release Priority Option", "Prevents the use of Infuriate while you have Inner Release stacks available.", WAR.JobID)]
     WAR_InfuriateFellCleave_IRFirst = 18027,
 
     [ReplaceSkill(WAR.StormsPath)]
-    [CustomComboInfo("暴风碎刷新", "当战场风暴需要刷新时，将暴风斩替换为暴风碎。", WAR.JobID)]
+    [CustomComboInfo("Storm's Eye Feature", "Replaces Storm's Path with Storm's Eye when Surging Tempest buff needs refreshing.", WAR.JobID)]
     WAR_EyePath = 18057,
 
     [ReplaceSkill(WAR.Berserk, WAR.InnerRelease)]
-    [CustomComboInfo("原初连段", "使用时将狂暴/原初的解放变为原初连段（蛮荒崩裂→尽毁）。", WAR.JobID)]
+    [CustomComboInfo("Primal Combo Feature", "使用時將狂暴/原初的解放變為原初連段（蠻荒崩裂→盡毀）。", WAR.JobID)]
     WAR_PrimalCombo_InnerRelease = 18026,
 
     [Variant]
@@ -7494,30 +7494,30 @@ public enum CustomComboPreset
     WAR_Variant_Ultimatum = 18030,
 
     [ReplaceSkill(WAR.Equilibrium)]
-    [CustomComboInfo("泰然自若→战栗", "可用时将泰然自若替换为战栗。", WAR.JobID)]
+    [CustomComboInfo("泰然自若→戰慄", "可用時將泰然自若替換為戰慄。", WAR.JobID)]
     WAR_ThrillEquilibrium = 18055,
 
     [ReplaceSkill(WAR.NascentFlash)]
-    [CustomComboInfo("原初的勇猛替换", "同步等级低于76时，将原初的勇猛替换为原初的直觉。", WAR.JobID)]
+    [CustomComboInfo("Nascent Flash Feature", "Replace Nascent Flash with Raw intuition when level synced below 76.", WAR.JobID)]
     WAR_NascentFlash = 18017,
     
     [ReplaceSkill(WAR.RawIntuition, WAR.Bloodwhetting)]
-    [CustomComboInfo("原初的直觉/原初的血气->原初的勇猛（重定向）", "如可用，硬选中队友时将原初的直觉/原初的血气替换为原初的勇猛。", WAR.JobID)]
+    [CustomComboInfo("原初的直覺/原初的血氣->原初的勇猛（重定向）", "如可用，硬選中隊友時將原初的直覺/原初的血氣替換為原初的勇猛。", WAR.JobID)]
     [Retargeted(WAR.NascentFlash)]
     WAR_RawIntuition_Targeting = 18119,
 
     [ParentCombo(WAR_RawIntuition_Targeting)]
-    [CustomComboInfo("包含鼠标悬停目标", "在UI中鼠标悬停队友时，将原初的勇猛重定向至该队友。", WAR.JobID)]
+    [CustomComboInfo("包含滑鼠懸停目標", "在UI中滑鼠懸停隊友時，將原初的勇猛重定向至該隊友。", WAR.JobID)]
     [Retargeted]
     WAR_RawIntuition_Targeting_MO = 18120,
 
     [ParentCombo(WAR_RawIntuition_Targeting)]
-    [CustomComboInfo("包含目标的目标", "如果你的目标的目标不是自己，将原初的勇猛重定向至其目标。\n（即你不是最高仇恨，且未鼠标悬停或硬选中队友时）", WAR.JobID)]
+    [CustomComboInfo("包含目標的目標", "如果你的目標的目標不是自己，將原初的勇猛重定向至其目標。\n（即你不是最高仇恨，且未滑鼠懸停或硬選中隊友時）", WAR.JobID)]
     [Retargeted]
     WAR_RawIntuition_Targeting_TT = 18121,
 
     [ReplaceSkill(WAR.Holmgang)]
-    [CustomComboInfo("死斗重定向", "将死斗重定向至自己，而不是敌人。", WAR.JobID)]
+    [CustomComboInfo("死鬥重定向", "將死鬥重定向至自己，而不是敵人。", WAR.JobID)]
     [Retargeted(WAR.Holmgang)]
     WAR_RetargetHolmgang = 18130,
 
@@ -7793,7 +7793,7 @@ public enum CustomComboPreset
     [AutoAction(true, false)]
     [ReplaceSkill(WHM.Holy, WHM.Holy3)]
     [ConflictingCombos(WHM_AoE_Simple_DPS)]
-    [CustomComboInfo("高级输出模式-多目标", "Collection of cooldowns and spell features on Holy/Holy III.", WHM.JobID)]
+    [CustomComboInfo("Advanced DPS Mode - AoE", "Collection of cooldowns and spell features on Holy/Holy III.", WHM.JobID)]
     [AdvancedCombo]
     WHM_AoE_DPS = 19190,
 
@@ -7828,8 +7828,8 @@ public enum CustomComboPreset
     WHM_AoE_DPS_LilyOvercap = 19193,
 
     [ParentCombo(WHM_AoE_DPS)]
-    [CustomComboInfo("神速咏唱",
-        "添加神速咏唱到AoE连击", WHM.JobID)]
+    [CustomComboInfo("Presence of Mind Option",
+        "新增神速詠唱到AoE連擊", WHM.JobID)]
     WHM_AoE_DPS_PresenceOfMind = 19195,
 
     [ParentCombo(WHM_AoE_DPS)]
@@ -7844,7 +7844,7 @@ public enum CustomComboPreset
 
     [AutoAction(false, true)]
     [ReplaceSkill(WHM.Cure)]
-    [CustomComboInfo("高级治疗模式-单目标", "Replaces Cure with a one button single target healing setup.",
+    [CustomComboInfo("高階治療模式-單目標", "Replaces Cure with a one button single target healing setup.",
         WHM.JobID)]
     [PossiblyRetargeted(WHM.Cure)]
     [HealingCombo]
@@ -7894,7 +7894,7 @@ public enum CustomComboPreset
     WHM_STHeals_Benediction = 19302,
 
     [ParentCombo(WHM_STHeals)]
-    [CustomComboInfo("节制", "添加节制和接下来的神爱抚。", WHM.JobID)]
+    [CustomComboInfo("節制", "新增節制和接下來的神愛撫。", WHM.JobID)]
     [PossiblyRetargeted]
     WHM_STHeals_Temperance = 19310,
     
@@ -7914,7 +7914,7 @@ public enum CustomComboPreset
 
     [AutoAction(true, true)]
     [ReplaceSkill(WHM.Medica1)]
-    [CustomComboInfo("高级治疗模式-多目标", "Replaces Medica with a one button AoE healing setup.", WHM.JobID)]
+    [CustomComboInfo("高階治療模式-多目標", "Replaces Medica with a one button AoE healing setup.", WHM.JobID)]
     [HealingCombo]
     WHM_AoEHeals = 19007,
     
@@ -7953,12 +7953,12 @@ public enum CustomComboPreset
     WHM_AoEHeals_Plenary = 19203,
     
     [ParentCombo(WHM_AoEHeals)]
-    [CustomComboInfo("庇护所", "在站立不动时，将庇护所的释放加入循环。\n会自动将其放置在自己身上。", WHM.JobID)]
+    [CustomComboInfo("Asylum Option", "在站立不動時，將庇護所的釋放加入循環。\n會自動將其放置在自己身上。", WHM.JobID)]
     [Retargeted]
     WHM_AoEHeals_Asylum = 19028,
 
     [ParentCombo(WHM_AoEHeals)]
-    [CustomComboInfo("节制", "当队伍平均血量低于设定阈值时，在可用时使用节制以获得治疗增益。", WHM.JobID)]
+    [CustomComboInfo("節制", "當隊伍平均血量低於設定閾值時，在可用時使用節制以獲得治療增益。", WHM.JobID)]
     WHM_AoEHeals_Temperance = 19210,
 
     [ParentCombo(WHM_AoEHeals)]
@@ -7966,7 +7966,7 @@ public enum CustomComboPreset
     WHM_AoEHeals_DivineCaress = 19207,
 
     [ParentCombo(WHM_AoEHeals)]
-    [CustomComboInfo("礼仪之铃", "在循环中添加礼仪之铃（百合铃）的放置。", WHM.JobID)]
+    [CustomComboInfo("Liturgy of the Bell Option", "在循環中新增禮儀之鈴（百合鈴）的放置。", WHM.JobID)]
     [Retargeted(WHM.LiturgyOfTheBell)]
     WHM_AoEHeals_LiturgyOfTheBell = 19206,
     
@@ -7975,38 +7975,38 @@ public enum CustomComboPreset
     #region Mitigation Features
 
     [ReplaceSkill(WHM.Aquaveil)]
-    [CustomComboInfo("减伤功能 - 单体目标", "使用水流幕后将其变为神名和/或神祝祷。\n每个技能都可以通过下方的重定向功能进行重定向。", WHM.JobID)]
-    [PossiblyRetargeted("下方重定向功能，启用水流幕（以及可选的神名和神祝祷）", Condition.WHMRetargetingFeaturesEnabledForSTMit)]
+    [CustomComboInfo("Mitigation Feature - Single Target", "使用水流幕後將其變為神名和/或神祝禱。\n每個技能都可以透過下方的重定向功能進行重定向。", WHM.JobID)]
+    [PossiblyRetargeted("下方重定向功能，啟用水流幕（以及可選的神名和神祝禱）", Condition.WHMRetargetingFeaturesEnabledForSTMit)]
     WHM_Mit_ST = 19041,
     
     [ReplaceSkill(WHM.Asylum)]
-    [CustomComboInfo("减伤功能 - 群体", "使用庇护所后将其变为节制，然后是神爱抚。\n可以通过下方的重定向功能进行重定向。", WHM.JobID)]
-    [PossiblyRetargeted("下方重定向功能，启用庇护所", Condition.WHMRetargetingFeaturesEnabledForAoEMit)]
+    [CustomComboInfo("Mitigation Feature - AoE", "使用庇護所後將其變為節制，然後是神愛撫。\n可以透過下方的重定向功能進行重定向。", WHM.JobID)]
+    [PossiblyRetargeted("下方重定向功能，啟用庇護所", Condition.WHMRetargetingFeaturesEnabledForAoEMit)]
     WHM_Mit_AoE = 19040,
 
     #endregion
     
     #region Raidwide Heals
     
-    [CustomComboInfo("Boss团队范围攻击选项",
-        "一套工具集合，旨在检测到团队范围攻击时尝试施法。" +
-        "\n这对大多数但不是所有团队范围攻击都有效，不能替代学习战斗", WHM.JobID)]
+    [CustomComboInfo("Boss團隊範圍攻擊選項",
+        "一套工具集合，旨在檢測到團隊範圍攻擊時嘗試施法。" +
+        "\n這對大多數但不是所有團隊範圍攻擊都有效，不能替代學習戰鬥", WHM.JobID)]
     WHM_Raidwide = 19220,
     
     [ParentCombo(WHM_Raidwide)]
-    [CustomComboInfo("团队范围庇护所", "在团队范围攻击施法时尝试穿插庇护所。\n将在所有4个主要连击中使用。", WHM.JobID)]
+    [CustomComboInfo("團隊範圍庇護所", "在團隊範圍攻擊施法時嘗試穿插庇護所。\n將在所有4個主要連擊中使用。", WHM.JobID)]
     WHM_Raidwide_Asylum = 19221,
     
     [ParentCombo(WHM_Raidwide)]
-    [CustomComboInfo("团队范围节制连击",
-        "在团队范围攻击施法时尝试穿插节制和神爱抚。" +
-        "\n将在所有4个主要连击中使用。", WHM.JobID)]
+    [CustomComboInfo("團隊範圍節制連擊",
+        "在團隊範圍攻擊施法時嘗試穿插節制和神愛撫。" +
+        "\n將在所有4個主要連擊中使用。", WHM.JobID)]
     WHM_Raidwide_Temperance = 19222,
     
     [ParentCombo(WHM_Raidwide)]
-    [CustomComboInfo("团队范围礼仪之铃",
-        "在团队范围攻击施法时尝试穿插礼仪之铃。" +
-        "\n将在所有4个主要连击中使用。", WHM.JobID)]
+    [CustomComboInfo("團隊範圍禮儀之鈴",
+        "在團隊範圍攻擊施法時嘗試穿插禮儀之鈴。" +
+        "\n將在所有4個主要連擊中使用。", WHM.JobID)]
     WHM_Raidwide_LiturgyOfTheBell = 19223,
     
     #endregion
@@ -8014,34 +8014,34 @@ public enum CustomComboPreset
     #region Small Features
     
     [ReplaceSkill(WHM.AfflatusSolace)]
-    [CustomComboInfo("安慰之心转苦难之心",
-        "当苦难之心准备好使用时，将安慰之心替换为苦难之心。\n安慰之心可以通过下方的重定向功能进行重定向。", WHM.JobID)]
-    [PossiblyRetargeted("下方重定向功能，启用安慰之心", 
+    [CustomComboInfo("Solace into Misery Feature",
+        "當苦難之心準備好使用時，將安慰之心替換為苦難之心。\n安慰之心可以透過下方的重定向功能進行重定向。", WHM.JobID)]
+    [PossiblyRetargeted("下方重定向功能，啟用安慰之心", 
         Condition.WHMRetargetingFeaturesEnabledForSolace)]
     WHM_SolaceMisery = 19000,
 
     [ReplaceSkill(WHM.AfflatusRapture)]
-    [CustomComboInfo("狂喜之心转苦难之心",
-        "当苦难之心准备好使用时，将狂喜之心替换为苦难之心。", WHM.JobID)]
+    [CustomComboInfo("Rapture into Misery Feature",
+        "Replaces Afflatus Rapture with Afflatus Misery when it is ready to be used.", WHM.JobID)]
     WHM_RaptureMisery = 19001,
 
     [ReplaceSkill(WHM.Cure2)]
-    [CustomComboInfo("救疗同步", "在同步到30级以下时将救疗改为治疗。\n可以通过下方的重定向功能进行重定向。", WHM.JobID)]
-    [PossiblyRetargeted("下方重定向功能，启用治疗", Condition.WHMRetargetingFeaturesEnabledForCure)]
+    [CustomComboInfo("Cure II Sync Feature", "在同步到30級以下時將中療傷改為治療。\n可以透過下方的重定向功能進行重定向。", WHM.JobID)]
+    [PossiblyRetargeted("下方重定向功能，啟用治療", Condition.WHMRetargetingFeaturesEnabledForCure)]
     WHM_CureSync = 19002,
 
     [ReplaceSkill( RoleActions.Magic.Swiftcast)]
     [ConflictingCombos(ALL_Healer_Raise)]
-    [CustomComboInfo("替代复活", "将即刻咏唱改为复活。", WHM.JobID)]
+    [CustomComboInfo("Alternative Raise Feature", "Changes Swiftcast to Raise.", WHM.JobID)]
     WHM_Raise = 19004,
 
     [ParentCombo(WHM_Raise)]
-    [CustomComboInfo("重定向复活", "将此处受影响的复活重定向到你的复活堆栈。", WHM.JobID)]
+    [CustomComboInfo("重定向復活", "將此處受影響的復活重定向到你的復活堆疊。", WHM.JobID)]
     [Retargeted(WHM.Raise)]
     WHM_Raise_Retarget = 19029,
 
     [ReplaceSkill(WHM.Raise)]
-    [CustomComboInfo("无中生有复活", "为全局复活功能/替代复活功能添加无中生有。",
+    [CustomComboInfo("Thin Air Raise Feature", "Adds Thin Air to the Global Raise Feature/Alternative Raise Feature.",
         WHM.JobID)]
     WHM_ThinAirRaise = 19014,
 
@@ -8049,66 +8049,66 @@ public enum CustomComboPreset
 
     #region Retargeting
 
-    [CustomComboInfo("重定向", "手动使用单体目标治疗的重新定向选项集合。", WHM.JobID)]
+    [CustomComboInfo("重定向", "手動使用單體目標治療的重新定向選項集合。", WHM.JobID)]
     WHM_Retargets = 19037,
     
     [ParentCombo(WHM_Retargets)]
     [ReplaceSkill(WHM.Aquaveil)]
-    [CustomComboInfo("治疗", "将治疗和救疗重定向到治疗堆栈（即使来自上面的救疗同步功能）。", WHM.JobID)]
+    [CustomComboInfo("Cure Option", "將治療和中療傷重定向到治療堆疊（即使來自上面的中療傷同步功能）。", WHM.JobID)]
     [Retargeted(WHM.Cure, WHM.Cure2)]
     WHM_Re_Cure = 19038,
     
     [ParentCombo(WHM_Retargets)]
     [ReplaceSkill(WHM.Aquaveil)]
-    [CustomComboInfo("安慰之心", "将安慰之心重定向到治疗堆栈（即使来自上面的安慰之心转苦难之心功能）。", WHM.JobID)]
+    [CustomComboInfo("Afflatus Solace Option", "將安慰之心重定向到治療堆疊（即使來自上面的安慰之心轉苦難之心功能）。", WHM.JobID)]
     [Retargeted(WHM.AfflatusSolace)]
     WHM_Re_Solace = 19039,
     
     [ParentCombo(WHM_Retargets)]
     [ReplaceSkill(WHM.Aquaveil)]
-    [CustomComboInfo("水流幕", "将水流幕重定向到治疗堆栈（即使来自上面的减伤功能）。", WHM.JobID)]
+    [CustomComboInfo("Aquaveil Option", "將水流幕重定向到治療堆疊（即使來自上面的減傷功能）。", WHM.JobID)]
     [Retargeted(WHM.Aquaveil)]
     WHM_Re_Aquaveil = 19036,
     
     [ParentCombo(WHM_Retargets)]
     [ReplaceSkill(WHM.Asylum)]
-    [CustomComboInfo("庇护所", "将庇护所重定向到自己（即使来自上面的减伤功能）。", WHM.JobID)]
+    [CustomComboInfo("Asylum Option", "將庇護所重定向到自己（即使來自上面的減傷功能）。", WHM.JobID)]
     [Retargeted(WHM.Asylum)]
     WHM_Re_Asylum = 19027,
     
     [ParentCombo(WHM_Retargets)]
     [ReplaceSkill(WHM.LiturgyOfTheBell)]
-    [CustomComboInfo("礼仪之铃", "将礼仪之铃重定向到自己。", WHM.JobID)]
+    [CustomComboInfo("禮儀之鈴", "將禮儀之鈴重定向到自己。", WHM.JobID)]
     [Retargeted(WHM.LiturgyOfTheBell)]
     WHM_Re_LiturgyOfTheBell = 19030,
     
     [ParentCombo(WHM_Retargets)]
     [ReplaceSkill(WHM.Cure3)]
-    [CustomComboInfo("愈疗重定向", "将愈疗重定向到治疗堆栈。", WHM.JobID)]
+    [CustomComboInfo("大療傷重定向", "將大療傷重定向到治療堆疊。", WHM.JobID)]
     [Retargeted(WHM.Cure3)]
     WHM_Re_Cure3 = 19031,
     
     [ParentCombo(WHM_Retargets)]
     [ReplaceSkill(WHM.Benediction)]
-    [CustomComboInfo("天赐祝福", "将天赐祝福重定向到治疗堆栈。", WHM.JobID)]
+    [CustomComboInfo("Benediction Option", "將天賜祝福重定向到治療堆疊。", WHM.JobID)]
     [Retargeted(WHM.Benediction)]
     WHM_Re_Benediction = 19032,
     
     [ParentCombo(WHM_Retargets)]
     [ReplaceSkill(WHM.Tetragrammaton)]
-    [CustomComboInfo("神名", "将神名重定向到治疗堆栈（即使来自上面的减伤功能）。", WHM.JobID)]
+    [CustomComboInfo("Tetragrammaton Option", "將神名重定向到治療堆疊（即使來自上面的減傷功能）。", WHM.JobID)]
     [Retargeted(WHM.Tetragrammaton)]
     WHM_Re_Tetragrammaton = 19033,
     
     [ParentCombo(WHM_Retargets)]
     [ReplaceSkill(WHM.Regen)]
-    [CustomComboInfo("再生", "将再生重定向到治疗堆栈。", WHM.JobID)]
+    [CustomComboInfo("Regen Option", "將再生重定向到治療堆疊。", WHM.JobID)]
     [Retargeted(WHM.Regen)]
     WHM_Re_Regen = 19034,
     
     [ParentCombo(WHM_Retargets)]
     [ReplaceSkill(WHM.DivineBenison)]
-    [CustomComboInfo("神祝祷", "将神祝祷重定向到治疗堆栈（即使来自上面的减伤功能）。", WHM.JobID)]
+    [CustomComboInfo("Divine Benison Option", "將神祝禱重定向到治療堆疊（即使來自上面的減傷功能）。", WHM.JobID)]
     [Retargeted(WHM.DivineBenison)]
     WHM_Re_DivineBenison = 19035,
 

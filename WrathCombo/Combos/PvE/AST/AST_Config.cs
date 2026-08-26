@@ -108,25 +108,25 @@ internal partial class AST
                     break;
 
                 case CustomComboPreset.AST_DPS_Lucid:
-                    DrawSliderInt(4000, 9500, AST_ST_DPS_LucidDreaming, "设置MP阈值，当MP达到或低于此值时启用此功能", 150, Hundreds);
+                    DrawSliderInt(4000, 9500, AST_ST_DPS_LucidDreaming, "設定MP閾值，當MP達到或低於此值時啟用此功能", 150, Hundreds);
                     break;
 
                 case CustomComboPreset.AST_ST_DPS_CombustUptime:
                     DrawSliderInt(0, 50, AST_ST_DPS_CombustOption, "Stop using at Enemy HP %. Set to Zero to disable this check.");
                     ImGui.Indent();
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
                     DrawHorizontalRadioButton(AST_ST_DPS_CombustSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.\nAllows you to only stop DoTing early when it's not a boss.", 0);
                     DrawHorizontalRadioButton(AST_ST_DPS_CombustSubOption,
                         "All Enemies", "Applies the HP check above to all enemies.", 1);
-                    DrawRoundedSliderFloat(0, 4, AST_ST_DPS_CombustUptime_Threshold, "剩余多少秒应用DoT。设置为零禁用此检测。", digits: 1);
+                    DrawRoundedSliderFloat(0, 4, AST_ST_DPS_CombustUptime_Threshold, "剩餘多少秒應用DoT。設定為零禁用此檢測。", digits: 1);
                     ImGui.Unindent();
                     break;
 
                 case CustomComboPreset.AST_DPS_Divination:
                     DrawSliderInt(0, 100, AST_ST_DPS_DivinationOption, "Stop using at Enemy HP %. Set to Zero to disable this check.");
                     ImGui.Indent();
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
                     DrawHorizontalRadioButton(AST_ST_DPS_DivinationSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.", 0);
                     DrawHorizontalRadioButton(AST_ST_DPS_DivinationSubOption,
@@ -154,13 +154,13 @@ internal partial class AST
                     break;
                 
                 case CustomComboPreset.AST_AOE_Lucid:
-                    DrawSliderInt(4000, 9500, AST_AOE_LucidDreaming, "设置MP阈值，当MP达到或低于此值时启用此功能", 150, Hundreds);
+                    DrawSliderInt(4000, 9500, AST_AOE_LucidDreaming, "設定MP閾值，當MP達到或低於此值時啟用此功能", 150, Hundreds);
                     break;
 
                 case CustomComboPreset.AST_AOE_Divination:
                     DrawSliderInt(0, 100, AST_AOE_DivinationOption, "Stop using at Enemy HP %. Set to Zero to disable this check.");
                     ImGui.Indent();
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
                     DrawHorizontalRadioButton(AST_AOE_DivinationSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.", 0);
                     DrawHorizontalRadioButton(AST_AOE_DivinationSubOption,
@@ -261,9 +261,9 @@ internal partial class AST
                     break;
                 
                 case CustomComboPreset.AST_ST_Heals_AspectedBenefic:
-                    DrawSliderInt(0, 100, AST_ST_SimpleHeals_AspectedBeneficHigh, "低于该HP百分比时开始使用（设为100则不检查）");
-                    DrawSliderInt(0, 100, AST_ST_SimpleHeals_AspectedBeneficLow, "低于该百分比时停止使用");
-                    DrawSliderInt(0, 15, AST_ST_SimpleHeals_AspectedBeneficRefresh, "剩余多少秒重新应用（0=不提前重新应用）");
+                    DrawSliderInt(0, 100, AST_ST_SimpleHeals_AspectedBeneficHigh, "Start using when below HP %. Set to 100 to disable this check");
+                    DrawSliderInt(0, 100, AST_ST_SimpleHeals_AspectedBeneficLow, "低於該百分比時停止使用");
+                    DrawSliderInt(0, 15, AST_ST_SimpleHeals_AspectedBeneficRefresh, "剩餘多少秒重新應用（0=不提前重新應用）");
                     DrawPriorityInput(AST_ST_SimpleHeals_Priority, 11, 7, $"{AspectedBenefic.ActionName()} Priority: ");
                     break;
                 
@@ -356,18 +356,18 @@ internal partial class AST
                 #region Standalone
                 case CustomComboPreset.AST_Cards_QuickTargetCards:
                     DrawAdditionalBoolChoice(AST_QuickTarget_Manuals,
-                        "同时重定向手动使用的卡牌",
-                        "会自动为你手动使用的卡牌（即非输出循环中的卡牌）选择目标。",
+                        "同時重定向手動使用的卡牌",
+                        "會自動為你手動使用的卡牌（即非輸出循環中的卡牌）選擇目標。",
                         indentDescription: true);
 
                     ImGui.Indent();
-                    ImGui.TextWrapped("目标覆盖方式：（将鼠标悬停以查看更多信息）");
+                    ImGui.TextWrapped("目標覆蓋方式：（將滑鼠懸停以檢視更多資訊）");
                     ImGui.Unindent();
                     ImGui.NewLine();
-                    DrawRadioButton(AST_QuickTarget_Override, "不覆盖", "不会用任何手动输入覆盖自动队伍目标检测。\n卡牌会根据The Balance的优先级和状态检测自动选择目标（如不会重复发卡、不会发给有伤害降低或复活虚弱的目标等）。", 0, descriptionAsTooltip: true);
-                    DrawRadioButton(AST_QuickTarget_Override, "强制目标覆盖", "如果你有一个在范围内且没有伤害降低或复活虚弱的强制目标，将用该目标覆盖选择。", 1, descriptionAsTooltip: true);
-                    DrawRadioButton(AST_QuickTarget_Override, "UI鼠标悬停覆盖", "如果你有一个在范围内且没有伤害降低或复活虚弱的UI鼠标悬停目标，将用该目标覆盖选择。", 2, descriptionAsTooltip: true);
-                    DrawRadioButton(AST_QuickTarget_Override, "任意鼠标悬停覆盖", "如果你有一个在范围内且没有伤害降低或复活虚弱的UI、姓名板或模型鼠标悬停目标（按此顺序），将用该目标覆盖选择。", 3, descriptionAsTooltip: true);
+                    DrawRadioButton(AST_QuickTarget_Override, "No Override", "不會用任何手動輸入覆蓋自動隊伍目標檢測。\n卡牌會根據The Balance的優先順序和狀態檢測自動選擇目標（如不會重複髮卡、不會發給有傷害降低或復活虛弱的目標等）。", 0, descriptionAsTooltip: true);
+                    DrawRadioButton(AST_QuickTarget_Override, "Hard Target Override", "如果你有一個在範圍內且沒有傷害降低或復活虛弱的強制目標，將用該目標覆蓋選擇。", 1, descriptionAsTooltip: true);
+                    DrawRadioButton(AST_QuickTarget_Override, "UI滑鼠懸停覆蓋", "如果你有一個在範圍內且沒有傷害降低或復活虛弱的UI滑鼠懸停目標，將用該目標覆蓋選擇。", 2, descriptionAsTooltip: true);
+                    DrawRadioButton(AST_QuickTarget_Override, "任意滑鼠懸停覆蓋", "如果你有一個在範圍內且沒有傷害降低或復活虛弱的UI、姓名板或模型滑鼠懸停目標（按此順序），將用該目標覆蓋選擇。", 3, descriptionAsTooltip: true);
                     break;
                 #endregion
             }

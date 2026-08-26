@@ -14,7 +14,7 @@ internal partial class DRG
             {
                 case CustomComboPreset.DRG_ST_Opener:
                     DrawHorizontalRadioButton(DRG_SelectedOpener,
-                        "标准起手", "使用标准起手",
+                        "Standard opener", "Uses Standard opener",
                         0);
 
                     DrawHorizontalRadioButton(DRG_SelectedOpener,
@@ -27,103 +27,103 @@ internal partial class DRG
 
                 case CustomComboPreset.DRG_ST_Litany:
                     DrawHorizontalRadioButton(DRG_ST_Litany_SubOption,
-                        "所有内容", $"无论内容如何都使用{BattleLitany.ActionName()}", 0);
+                        "All content", $"Uses {BattleLitany.ActionName()} regardless of content.", 0);
 
                     DrawHorizontalRadioButton(DRG_ST_Litany_SubOption,
-                        "仅Boss战", $"仅在Boss战中使用{BattleLitany.ActionName()}", 1);
+                        "Boss encounters Only", $"Only uses {BattleLitany.ActionName()} when in Boss encounters.", 1);
                     break;
 
                 case CustomComboPreset.DRG_ST_Lance:
 
                     DrawHorizontalRadioButton(DRG_ST_Lance_SubOption,
-                        "所有内容", $"无论内容如何都使用{LanceCharge.ActionName()}", 0);
+                        "All content", $"Uses {LanceCharge.ActionName()} regardless of content.", 0);
 
                     DrawHorizontalRadioButton(DRG_ST_Lance_SubOption,
-                        "仅Boss战", $"仅在Boss战中使用{LanceCharge.ActionName()}", 1);
+                        "Boss encounters Only", $"Only uses {LanceCharge.ActionName()} when in Boss encounters.", 1);
                     break;
 
                 case CustomComboPreset.DRG_ST_HighJump:
                     DrawHorizontalMultiChoice(DRG_ST_Jump_Options,
-                        "不移动时", $"仅在不移动时使用{Jump.ActionName()}", 2, 0);
+                        "不移動時", $"僅在不移動時使用{Jump.ActionName()}", 2, 0);
 
                     DrawHorizontalMultiChoice(DRG_ST_Jump_Options,
-                        "近战范围内", $"仅在近战范围内使用{Jump.ActionName()}", 2, 1);
+                        "近戰範圍內", $"僅在近戰範圍內使用{Jump.ActionName()}", 2, 1);
                     break;
 
                 case CustomComboPreset.DRG_ST_Mirage:
                     DrawAdditionalBoolChoice(DRG_ST_DoubleMirage,
-                        "苍天龙血期间爆发幻象冲", "在苍天龙血效果下将幻象冲添加到循环中");
+                        "蒼天龍血期間爆發幻象衝", "在蒼天龍血效果下將幻象衝新增到循環中");
                     break;
 
                 case CustomComboPreset.DRG_ST_DragonfireDive:
                     DrawHorizontalMultiChoice(DRG_ST_DragonfireDive_Options,
-                        "不移动时", $"仅在不移动时使用{DragonfireDive.ActionName()}", 2, 0);
+                        "不移動時", $"僅在不移動時使用{DragonfireDive.ActionName()}", 2, 0);
 
                     DrawHorizontalMultiChoice(DRG_ST_DragonfireDive_Options,
-                        "近战范围内", $"仅在近战范围内使用{DragonfireDive.ActionName()}", 2, 1);
+                        "近戰範圍內", $"僅在近戰範圍內使用{DragonfireDive.ActionName()}", 2, 1);
                     break;
 
                 case CustomComboPreset.DRG_ST_Stardiver:
                     DrawHorizontalMultiChoice(DRG_ST_Stardiver_Options,
-                        "不移动时", $"仅在不移动时使用{Stardiver.ActionName()}", 2, 0);
+                        "不移動時", $"僅在不移動時使用{Stardiver.ActionName()}", 2, 0);
 
                     DrawHorizontalMultiChoice(DRG_ST_Stardiver_Options,
-                        "近战范围内", $"仅在近战范围内使用{Stardiver.ActionName()}", 2, 1);
+                        "近戰範圍內", $"僅在近戰範圍內使用{Stardiver.ActionName()}", 2, 1);
                     break;
 
                 case CustomComboPreset.DRG_ST_ComboHeals:
                     DrawSliderInt(0, 100, DRG_ST_SecondWind_Threshold,
-                        $"{Role.SecondWind.ActionName()}血量百分比阈值");
+                        $"{Role.SecondWind.ActionName()} HP percentage threshold");
 
                     DrawSliderInt(0, 100, DRG_ST_Bloodbath_Threshold,
-                        $"{Role.Bloodbath.ActionName()}血量百分比阈值");
+                        $"{Role.Bloodbath.ActionName()} HP percentage threshold");
                     break;
 
                 case CustomComboPreset.DRG_AoE_Litany:
                     DrawSliderInt(0, 100, DRG_AoE_LitanyHP,
-                        $"当目标血量百分比达到或低于此值时停止使用{BattleLitany.ActionName()}（设为0禁用此检查）");
+                        $"當目標血量百分比達到或低於此值時停止使用{BattleLitany.ActionName()}（設為0禁用此檢查）");
                     break;
 
                 case CustomComboPreset.DRG_AoE_Lance:
                     DrawSliderInt(0, 100, DRG_AoE_LanceChargeHP,
-                        $"当目标血量百分比达到或低于此值时停止使用{LanceCharge.ActionName()}（设为0禁用此检查）");
+                        $"當目標血量百分比達到或低於此值時停止使用{LanceCharge.ActionName()}（設為0禁用此檢查）");
                     break;
 
                 case CustomComboPreset.DRG_AoE_HighJump:
                     DrawHorizontalMultiChoice(DRG_AoE_Jump_Options,
-                        "不移动时", $"仅在不移动时使用{Jump.ActionName()}", 2, 0);
+                        "不移動時", $"僅在不移動時使用{Jump.ActionName()}", 2, 0);
 
                     DrawHorizontalMultiChoice(DRG_AoE_Jump_Options,
-                        "近战范围内", $"仅在近战范围内使用{Jump.ActionName()}", 2, 1);
+                        "近戰範圍內", $"僅在近戰範圍內使用{Jump.ActionName()}", 2, 1);
                     break;
 
                 case CustomComboPreset.DRG_AoE_DragonfireDive:
                     DrawHorizontalMultiChoice(DRG_AoE_DragonfireDive_Options,
-                        "不移动时", $"仅在不移动时使用{DragonfireDive.ActionName()}", 2, 0);
+                        "不移動時", $"僅在不移動時使用{DragonfireDive.ActionName()}", 2, 0);
 
                     DrawHorizontalMultiChoice(DRG_AoE_DragonfireDive_Options,
-                        "近战范围内", $"仅在近战范围内使用{DragonfireDive.ActionName()}", 2, 1);
+                        "近戰範圍內", $"僅在近戰範圍內使用{DragonfireDive.ActionName()}", 2, 1);
                     break;
 
                 case CustomComboPreset.DRG_AoE_Stardiver:
                     DrawHorizontalMultiChoice(DRG_AoE_Stardiver_Options,
-                        "不移动时", $"仅在不移动时使用{Stardiver.ActionName()}", 2, 0);
+                        "不移動時", $"僅在不移動時使用{Stardiver.ActionName()}", 2, 0);
 
                     DrawHorizontalMultiChoice(DRG_AoE_Stardiver_Options,
-                        "近战范围内", $"仅在近战范围内使用{Stardiver.ActionName()}", 2, 1);
+                        "近戰範圍內", $"僅在近戰範圍內使用{Stardiver.ActionName()}", 2, 1);
                     break;
 
                 case CustomComboPreset.DRG_AoE_ComboHeals:
                     DrawSliderInt(0, 100, DRG_AoE_SecondWind_Threshold,
-                        $"{Role.SecondWind.ActionName()}血量百分比阈值");
+                        $"{Role.SecondWind.ActionName()} HP percentage threshold");
 
                     DrawSliderInt(0, 100, DRG_AoE_Bloodbath_Threshold,
-                        $"{Role.Bloodbath.ActionName()}血量百分比阈值");
+                        $"{Role.Bloodbath.ActionName()} HP percentage threshold");
                     break;
 
                 case CustomComboPreset.DRG_Variant_Cure:
                     DrawSliderInt(1, 100, DRG_Variant_Cure,
-                        "血量百分比达到或低于此值", 200);
+                        "HP% to be at or under", 200);
                     break;
             }
         }

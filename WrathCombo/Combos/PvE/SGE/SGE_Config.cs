@@ -37,7 +37,7 @@ internal partial class SGE
                         "Stop using at Enemy HP %. Set to Zero to disable this check.");
 
                     ImGui.Indent();
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
 
                     DrawHorizontalRadioButton(SGE_ST_DPS_EDosisSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.\nAllows you to only stop DoTing early when it's not a boss.", 0);
@@ -46,7 +46,7 @@ internal partial class SGE
                         "All Enemies", "Applies the HP check above to all enemies.", 1);
 
                     DrawRoundedSliderFloat(0, 5, SGE_ST_DPS_EDosisRefresh,
-                        "剩余多少秒应用DoT。设置为零禁用此检测。", digits: 1);
+                        "剩餘多少秒應用DoT。設定為零禁用此檢測。", digits: 1);
                     ImGui.Unindent();
                     break;
 
@@ -64,11 +64,11 @@ internal partial class SGE
                     if (!SGE_ST_DPS_Phlegma_Burst)
                     {
                         DrawSliderInt(0, 1, SGE_ST_DPS_Phlegma,
-                            "保留的发炎充能数\n爆发时会无视此设置消耗所有充能。");
+                            "保留的發炎充能數\n爆發時會無視此設定消耗所有充能。");
                     }
 
                     DrawAdditionalBoolChoice(SGE_ST_DPS_Phlegma_Burst,
-                        "爆发模式", "为爆发阶段保留发炎充能。");
+                        "Burst option", "為爆發階段保留髮炎充能。");
                     break;
 
                 case CustomComboPreset.SGE_ST_DPS_AddersgallProtect:
@@ -205,7 +205,7 @@ internal partial class SGE
                         "Sage Shield Check", "Enable to not override an existing Sage's shield.", 2, 0);
 
                     DrawHorizontalMultiChoice(SGE_ST_Heal_EDiagnosisOpts,
-                        "学者护盾检查", "Enable to not override an existing Scholar's shield.", 2, 1);
+                        "學者護盾檢查", "Enable to not override an existing Scholar's shield.", 2, 1);
 
                     DrawPriorityInput(SGE_ST_Heals_Priority,
                         12, 7, $"{EukrasianDiagnosis.ActionName()} Priority: ");
@@ -265,7 +265,7 @@ internal partial class SGE
                         "Start using when below party average HP %. Set to 100 to disable this check");
 
                     DrawAdditionalBoolChoice(SGE_AoE_Heal_KeracholeTrait,
-                        "检查强化坚角清汁特性（持续治疗）", $"启用后，当{Kerachole.ActionName()}的持续治疗特性不可用时，将不会使用该技能。");
+                        "檢查強化堅角清汁特性（持續治療）", $"啟用後，當{Kerachole.ActionName()}的持續治療特性不可用時，將不會使用該技能。");
 
                     DrawPriorityInput(SGE_AoE_Heals_Priority,
                         9, 0, $"{Kerachole.ActionName()} Priority: ");

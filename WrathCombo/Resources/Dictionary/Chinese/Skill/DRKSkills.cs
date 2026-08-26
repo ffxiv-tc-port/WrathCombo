@@ -55,9 +55,9 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Oblation", DRK.Oblation.ActionName()),
                 KeyValuePair.Create("Shadowed Vigil", DRK.ShadowedVigil.ActionName()),
                 KeyValuePair.Create("Vigil", DRK.ShadowedVigil.ActionName()),
-                KeyValuePair.Create("Walking Dead", "行尸走肉"),
-                KeyValuePair.Create("Blackest Night Shield", "至黑之夜护盾"),
-                KeyValuePair.Create("Blackest Night", "至黑之夜护盾"),
+                KeyValuePair.Create("Walking Dead", "行屍走肉"),
+                KeyValuePair.Create("Blackest Night Shield", "至黑之夜護盾"),
+                KeyValuePair.Create("Blackest Night", "至黑之夜護盾"),
 
                 // Buffs
                 KeyValuePair.Create("Darkside", DRK.Buffs.Darkside.StatusName()),

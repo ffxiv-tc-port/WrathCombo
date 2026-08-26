@@ -32,7 +32,7 @@ internal partial class DNC
         private static void DrawAntiDriftOptions()
         {
             ImGuiEx.Spacing(new Vector2(40, 12));
-            ImGui.Text("防偏移选项：     （悬停以查看更多信息）");
+            ImGui.Text("防偏移選項：     （懸停以檢視更多資訊）");
 
             #region Show a colored display of the user's current detected GCD
 
@@ -83,7 +83,7 @@ internal partial class DNC
             var pos = ImGui.GetCursorPos();
 
             // Determine which recommendation text to show
-            const string rec = "（推荐）";
+            const string rec = "（推薦）";
             var recTriple = GCDValue is GCDRange.Perfect ? rec : "";
             var recHold = GCDValue is not GCDRange.Perfect ? rec : "";
 
@@ -107,7 +107,7 @@ internal partial class DNC
         private static void DrawPartnerInfo()
         {
             ImGuiEx.TextWrapped(ImGuiColors.DalamudGrey,
-                "This will check through your party members, and select the most desirable Partner, based on The Balance's priority list as well as stuff like Rez Sickness and Damage Downs.");
+                "這將檢查你的隊伍成員，並根據The Balance的優先順序列表以及復生虛弱、損傷降低等狀態，選擇最理想的舞伴。");
         }
 
         internal static void Draw(Preset preset)
@@ -119,15 +119,15 @@ internal partial class DNC
 
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
                     ImGui.TextWrapped(
-                        "此功能的设置不提供支持！");
+                        "此功能的設定不提供支援！");
                     ImGui.PopStyleColor();
 
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudGrey);
                     ImGui.TextWrapped(
-                        "\n你可以通过为每个舞步输入技能ID来更改相应的动作。" +
-                        "\n默认值为瀑泻、百花争艳、扇舞·序和扇舞·破。" +
-                        "\n如果设置为0，它们将重置为这些技能。" +
-                        "\n（你可以通过Garland Tools搜索技能并点击齿轮图标获取技能ID。）");
+                        "\n你可以透過為每個舞步輸入技能ID來更改相應的動作。" +
+                        "\n預設值為瀑瀉、百花爭艷、扇舞·序和扇舞·破。" +
+                        "\n如果設定為0，它們將重置為這些技能。" +
+                        "\n（你可以透過Garland Tools搜尋技能並點選齒輪圖示獲取技能ID。）");
                     ImGui.PopStyleColor();
 
                     int[] actions = Service.Configuration.DancerDanceCompatActionIDs
@@ -136,29 +136,29 @@ internal partial class DNC
                     bool inputChanged = false;
                     ImGuiEx.SetNextItemWidthScaled(50);
                     inputChanged |= ImGui.InputInt(
-                        "（红色）蔷薇曲脚步 替换技能ID",
+                        "（紅色）薔薇曲腳步 替換技能ID",
                         ref actions[0], 0);
                     ImGuiEx.SetNextItemWidthScaled(50);
                     inputChanged |= ImGui.InputInt(
-                        "（蓝色）小鸟交叠跳 替换技能ID",
+                        "（藍色）小鳥交疊跳 替換技能ID",
                         ref actions[1], 0);
                     ImGuiEx.SetNextItemWidthScaled(50);
                     inputChanged |= ImGui.InputInt(
-                        "（绿色）绿叶小踢腿 替换技能ID",
+                        "（綠色）綠葉小踢腿 替換技能ID",
                         ref actions[2], 0);
                     ImGuiEx.SetNextItemWidthScaled(50);
                     inputChanged |= ImGui.InputInt(
-                        "（黄色）金冠趾尖转 替换技能ID",
+                        "（黃色）金冠趾尖轉 替換技能ID",
                         ref actions[3], 0);
 
                     ImGuiEx.Spacing(new Vector2(0, 12));
 
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
                     ImGui.TextWrapped(
-                        "这可能会导致冲突！");
+                        "這可能會導致衝突！");
                     ImGui.PopStyleColor();
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudGrey);
-                    ImGui.TextWrapped("请仔细检查你设置的技能是否与你使用的其他连击冲突，或启用以下功能！");
+                    ImGui.TextWrapped("請仔細檢查你設定的技能是否與你使用的其他連擊衝突，或啟用以下功能！");
                     ImGui.PopStyleColor();
 
                     if (inputChanged)
@@ -179,7 +179,7 @@ internal partial class DNC
                     ImGui.Indent();
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudGrey);
                     ImGui.TextWrapped(
-                        "起手式变体：     （悬停以查看更多信息）");
+                        "起手式變體：     （懸停以檢視更多資訊）");
                     ImGui.PopStyleColor();
                     ImGui.Unindent();
 
@@ -208,21 +208,21 @@ internal partial class DNC
                     ImGui.Indent();
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudGrey);
                     ImGui.TextWrapped(
-                        "起手式选项：");
+                        "起手式選項：");
                     ImGui.PopStyleColor();
 
                     UserConfig.DrawAdditionalBoolChoice(DNC_ST_OpenerOption_Peloton,
                         $"包含 {Peloton.ActionName()}", "");
 
-                    UserConfig.DrawBossOnlyChoice(DNC_ST_OpenerDifficulty, "选择在哪类内容中使用此起手式：");
+                    UserConfig.DrawBossOnlyChoice(DNC_ST_OpenerDifficulty, "選擇在哪類內容中使用此起手式：");
                     ImGui.Unindent();
 
                     break;
 
                 case Preset.DNC_ST_Adv_PartnerAuto:
                     UserConfig.DrawAdditionalBoolChoice(DNC_Partner_FocusOverride,
-                        "Prioritize your Focus Target##DPFocusOver0",
-                        "If you have a focus target that is within range, it will be prioritized over The Balance's suggested Dance Partner.",
+                        "優先聚焦目標##DPFocusOver0",
+                        "如果你有一個在範圍內的聚焦目標，將優先於The Balance建議的舞伴。",
                         indentDescription: true);
 
                     break;
@@ -233,8 +233,8 @@ internal partial class DNC
                     ImGui.Unindent(29f.Scale());
 
                     UserConfig.DrawAdditionalBoolChoice(DNC_Partner_FocusOverride,
-                        "Prioritize your Focus Target##DPFocusOver1",
-                        "If you have a focus target that is within range, alive, and has no rez sickness or damage down, it will be prioritized over The Balance's suggested Dance Partner.",
+                        "優先聚焦目標##DPFocusOver1",
+                        "如果你有一個在範圍內、存活、且沒有復生虛弱或損傷降低的聚焦目標，將優先於The Balance建議的舞伴。",
                         indentDescription: true);
 
                     break;
@@ -431,33 +431,33 @@ internal partial class DNC
                     ImGuiEx.Spacing(new Vector2(0, 12));
 
                     UserConfig.DrawAdditionalBoolChoice(DNC_Partner_FocusOverride,
-                        "Prioritize your Focus Target##DPFocusOver2",
-                        "If you have a focus target that is within range, alive, and has no rez sickness or damage down, it will be prioritized over The Balance's suggested Dance Partner.",
+                        "優先聚焦目標##DPFocusOver2",
+                        "如果你有一個在範圍內、存活、且沒有復生虛弱或損傷降低的聚焦目標，將優先於The Balance建議的舞伴。",
                         indentDescription: true);
 
                     ImGuiEx.Spacing(new Vector2(29, 12));
-                    ImGui.Text("Action to Show when Partner is Optimal Options:     (hover each for more info)");
+                    ImGui.Text("舞伴最佳時顯示的動作：     (懸停檢視詳情)");
                     ImGui.NewLine();
                     UserConfig.DrawRadioButton(
-                        DNC_Partner_ActionToShow, "Let Game Decide",
-                        "Will not change the action shown in the hotbar from what FFXIV puts there.\n" +
-                        "When you have a Dance Partner, it will show Ending, as usual.\n\n" +
-                        "This is the default behavior.",
+                        DNC_Partner_ActionToShow, "由遊戲決定",
+                        "不會更改FFXIV在快捷欄中放置的動作。\n" +
+                        "當你有舞伴時，會照常顯示終舞。\n\n" +
+                        "這是預設行為。",
                         outputValue: (int)PartnerShowAction.Default,
                         descriptionAsTooltip: true);
                     UserConfig.DrawRadioButton(
                         DNC_Partner_ActionToShow, "Closed Position",
-                        "When your current partner is optimal Closed Position will be shown.\n" +
-                        "This will block you from using Closed Position or Ending\n(unless you hard target a friendly other than your partner).\n\n" +
-                        "This is less distracting than the Savage Blade option.",
+                        "當前舞伴最佳時會顯示華麗舞姿。\n" +
+                        "這會阻止你使用華麗舞姿或終舞\n(除非你硬指向舞伴以外的友方)。\n\n" +
+                        "比蠻神之劍選項干擾更小。",
                         outputValue: (int)PartnerShowAction.ClosedPosition,
                         descriptionAsTooltip: true);
                     UserConfig.DrawRadioButton(
                         DNC_Partner_ActionToShow, "Savage Blade",
-                        "When your current partner is optimal Savage Blade will be shown.\n" +
-                        "Savage Blade is a removed action that we use to block input.\n" +
-                        "This will block you from using Closed Position or Ending.\n\n" +
-                        "This is the recommended option, to keep you from mistakenly switching partners.",
+                        "當前舞伴最佳時會顯示蠻神之劍。\n" +
+                        "蠻神之劍是一個已移除的動作，我們用它來阻擋輸入。\n" +
+                        "這會阻止你使用華麗舞姿或終舞。\n\n" +
+                        "這是推薦選項，可避免你誤切換舞伴。",
                         outputValue: (int)PartnerShowAction.SavageBlade,
                         descriptionAsTooltip: true);
 

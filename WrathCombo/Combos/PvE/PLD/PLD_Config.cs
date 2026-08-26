@@ -292,16 +292,16 @@ internal partial class PLD
                 case CustomComboPreset.PLD_RetargetSheltron_TT:
                     ImGui.Indent();
                     ImGuiEx.TextWrapped(ImGuiColors.DalamudGrey,
-                        "注意：如果你是副坦，并希望对自己使用盾阵，建议通过“一键减伤”功能或循环中的盾阵选项来实现。\n" +
-                        "你也可以在队伍列表中鼠标悬停自己来释放盾阵。\n" +
-                        "如果不这样做，干预将会替换连击，并施放到主坦克身上。\n" +
-                        "如果你不打算用这些功能来进行个人减伤，建议不要启用此选项。");
+                        "注意：如果你是副坦，並希望對自己使用盾陣，建議透過“一鍵減傷”功能或循環中的盾陣選項來實現。\n" +
+                        "你也可以在隊伍列表中滑鼠懸停自己來釋放盾陣。\n" +
+                        "如果不這樣做，干預將會替換連擊，並施放到主坦克身上。\n" +
+                        "如果你不打算用這些功能來進行個人減傷，建議不要啟用此選項。");
                     ImGui.Unindent();
                     break;
                 case CustomComboPreset.PLD_RetargetShieldBash:
-                    UserConfig.DrawAdditionalBoolChoice(Config.PLD_RetargetStunLockout, "锁定技能", "如果没有可被眩晕的目标，则用狂怒剑锁定该技能");
+                    UserConfig.DrawAdditionalBoolChoice(Config.PLD_RetargetStunLockout, "鎖定技能", "如果沒有可被眩暈的目標，則用狂怒劍鎖定該技能");
                     if (Config.PLD_RetargetStunLockout)
-                        UserConfig.DrawSliderInt(1, 3, Config.PLD_RetargetShieldBash_Strength, "在眩晕已被施加指定次数后锁定", 200);
+                        UserConfig.DrawSliderInt(1, 3, Config.PLD_RetargetShieldBash_Strength, "在眩暈已被施加指定次數後鎖定", 200);
                     break;
 
                 #region One-Button Mitigation

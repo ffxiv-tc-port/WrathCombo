@@ -46,7 +46,7 @@ internal partial class RDM
                     {
                         ImGui.Indent();
                         ImGui.TextColored(ImGuiColors.DalamudRed, "WARNING: RIPOSTE IS NOT ENABLED.");
-                        ImGui.TextColored(ImGuiColors.DalamudRed, "自动循环将不会自动启动近战连击");
+                        ImGui.TextColored(ImGuiColors.DalamudRed, "自動循環將不會自動啟動近戰連擊");
                         ImGui.Unindent();
                     }
                     break;

@@ -45,8 +45,8 @@ internal partial class SMN
             switch (preset)
             {
                 case CustomComboPreset.SMN_ST_Advanced_Combo:
-                    DrawRadioButton(SMN_ST_Advanced_Combo_AltMode, "在毁灭、毁坏和毁荡上", "", 0);
-                    DrawRadioButton(SMN_ST_Advanced_Combo_AltMode, "仅在毁灭和毁坏上", "替代DPS模式。保持毁荡独立以获得纯DPS。", 1);
+                    DrawRadioButton(SMN_ST_Advanced_Combo_AltMode, "On Ruin 1, 2, and 3", "", 0);
+                    DrawRadioButton(SMN_ST_Advanced_Combo_AltMode, "On Ruin 1 and 2 Only", "替代DPS模式。保持大毀滅獨立以獲得純DPS。", 1);
                     break;
 
                 case CustomComboPreset.SMN_ST_Advanced_Combo_Balance_Opener:
@@ -55,11 +55,11 @@ internal partial class SMN
 
                     ImGui.NewLine();
 
-                    DrawHorizontalRadioButton(SMN_Opener_SkipSwiftcast, "使用即刻咏唱",
-                        "将在起手式中插入即刻咏唱，确保药水效果覆盖到短GCD技能。", 1);
+                    DrawHorizontalRadioButton(SMN_Opener_SkipSwiftcast, "Use Swiftcast",
+                        "將在起手式中插入即刻詠唱，確保藥水效果覆蓋到短GCD技能。", 1);
 
-                    DrawHorizontalRadioButton(SMN_Opener_SkipSwiftcast, "跳过即刻咏唱",
-                        "不在起手式中插入即刻咏唱，优先保证高GCD技能覆盖。", 2);
+                    DrawHorizontalRadioButton(SMN_Opener_SkipSwiftcast, "跳過即刻詠唱",
+                        "不在起手式中插入即刻詠唱，優先保證高GCD技能覆蓋。", 2);
                     break;
 
                 case CustomComboPreset.SMN_ST_Advanced_Combo_Titan:
@@ -116,14 +116,14 @@ internal partial class SMN
 
                 case CustomComboPreset.SMN_ST_Advanced_Combo_Lucid:
                     DrawSliderInt(4000, 9500, SMN_ST_Lucid,
-                        "设置魔力值阈值，当魔力值达到或低于此值时此功能生效。", 150,
+                        "設定魔力值閾值，當魔力值達到或低於此值時此功能生效。", 150,
                         SliderIncrements.Hundreds);
 
                     break;
 
                 case CustomComboPreset.SMN_AoE_Advanced_Combo_Lucid:
                     DrawSliderInt(4000, 9500, SMN_AoE_Lucid,
-                        "设置魔力值阈值，当魔力值达到或低于此值时此功能生效。", 150,
+                        "設定魔力值閾值，當魔力值達到或低於此值時此功能生效。", 150,
                         SliderIncrements.Hundreds);
 
                     break;

@@ -69,28 +69,28 @@ internal partial class DRK
                     ImGui.Unindent();
                     ImGui.NewLine();
                     ImGui.Indent();
-                    ImGui.Text("选择开怪技能:     (悬停查看详细信息)");
+                    ImGui.Text("選擇開怪技能:     (懸停檢視詳細資訊)");
                     ImGui.Unindent();
                     ImGui.NewLine();
                     UserConfig.DrawRadioButton(DRK_ST_OpenerAction,
-                        "伤残 (标准)",
-                        "如果选择，将使用伤残开怪。\n" +
-                        "应该在-1.0秒时开始。\n\n" +
-                        "The Balance推荐。",
+                        "傷殘 (標準)",
+                        "如果選擇，將使用傷殘開怪。\n" +
+                        "應該在-1.0秒時開始。\n\n" +
+                        "The Balance推薦。",
                         outputValue: (int) PullAction.Unmend,
                         descriptionAsTooltip: true);
                     UserConfig.DrawRadioButton(DRK_ST_OpenerAction,
                         "暗影步",
-                        "如果选择，将使用暗影步开怪。\n" +
-                        "在掠影的蔑视前会额外使用一次重斩。\n" +
-                        "应该在-0.7秒时开始。",
+                        "如果選擇，將使用暗影步開怪。\n" +
+                        "在掠影的蔑視前會額外使用一次重斬。\n" +
+                        "應該在-0.7秒時開始。",
                         outputValue: (int) PullAction.Shadowstride,
                         descriptionAsTooltip: true);
                     UserConfig.DrawRadioButton(DRK_ST_OpenerAction,
-                        "重斩 (面向或手动开怪)",
-                        "如果选择，将不使用任何技能开怪，直接使用重斩。\n" +
-                        "在掠影的蔑视前会额外使用一次重斩。\n" +
-                        "应该在0.0秒时开始。",
+                        "重斬 (面向或手動開怪)",
+                        "如果選擇，將不使用任何技能開怪，直接使用重斬。\n" +
+                        "在掠影的蔑視前會額外使用一次重斬。\n" +
+                        "應該在0.0秒時開始。",
                         outputValue: (int) PullAction.HardSlash,
                         descriptionAsTooltip: true);
                     break;
@@ -138,7 +138,7 @@ internal partial class DRK
 
                 case CustomComboPreset.DRK_ST_Sp_Edge:
                     UserConfig.DrawSliderInt(0, 3000, DRK_ST_ManaSpenderPooling,
-                        "为黑盾保留的魔力值（0 = 全部使用）",
+                        "為黑盾保留的魔力值（0 = 全部使用）",
                         itemWidth: biggest,
                         sliderIncrement: SliderIncrements.Thousands);
                     UserConfig.DrawDifficultyMultiChoice(
@@ -150,7 +150,7 @@ internal partial class DRK
 
                 case CustomComboPreset.DRK_ST_Sp_ManaOvercap:
                     UserConfig.DrawSliderInt(0, 30, DRK_ST_BurstSoonThreshold,
-                        "爆发前多少秒保留（允许溢出）",
+                        "爆發前多少秒保留（允許溢位）",
                         itemWidth: little, sliderIncrement: SliderIncrements.Fives);
 
                     break;
@@ -475,18 +475,18 @@ internal partial class DRK
                 case CustomComboPreset.DRK_Retarget_TBN_TT:
                     ImGui.Indent(34f.Scale());
                     ImGuiEx.TextWrapped(ImGuiColors.DalamudGrey,
-                        "注意：如果你是副T，并且希望将该技能用于自己，建议通过一键减伤功能或你的循环中的减伤选项来实现。\n" +
-                        "否则，该技能会施放到主T身上。\n" +
-                        "如果你不使用这些功能来进行个人减伤，建议不要启用此选项。");
+                        "注意：如果你是副T，並且希望將該技能用於自己，建議透過一鍵減傷功能或你的循環中的減傷選項來實現。\n" +
+                        "否則，該技能會施放到主T身上。\n" +
+                        "如果你不使用這些功能來進行個人減傷，建議不要啟用此選項。");
                     ImGui.Unindent(34f.Scale());
                     break;
 
                 case CustomComboPreset.DRK_Retarget_Oblation_TT:
                     ImGui.Indent(34f.Scale());
                     ImGuiEx.TextWrapped(ImGuiColors.DalamudGrey,
-                        "注意：如果你是副T，并且希望将该技能用于自己，建议通过一键减伤功能或你的循环中的减伤选项来实现。\n" +
-                        "否则，该技能会施放到主T身上。\n" +
-                        "如果你不使用这些功能来进行个人减伤，建议不要启用此选项。");
+                        "注意：如果你是副T，並且希望將該技能用於自己，建議透過一鍵減傷功能或你的循環中的減傷選項來實現。\n" +
+                        "否則，該技能會施放到主T身上。\n" +
+                        "如果你不使用這些功能來進行個人減傷，建議不要啟用此選項。");
                     ImGui.Unindent(34f.Scale());
                     break;
 

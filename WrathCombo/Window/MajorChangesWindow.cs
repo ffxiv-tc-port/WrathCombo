@@ -52,20 +52,20 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
 
         #region MouseOver Options moved
 
-        ImGuiEx.TextUnderlined("Healer MouseOver Options are Moved!");
+        ImGuiEx.TextUnderlined("治療職業的滑鼠懸停選項已遷移！");
         if (WasUsingOldMouseOverConfigs)
             ImGuiEx.Text(ImGuiColors.DalamudYellow,
-                "You were using one of these options! Please Read!");
+                "你正在使用其中一個選項！請仔細閱讀！");
         ImGuiEx.Text(
-            "The option for each healer's healing combos to check MouseOver are gone,\n" +
-            "and now are replaced with a global mouseover option (and some new ones).\n\n" +
-            "You can find this new setting under:\n" +
-            "Settings > 'Target Options' > 'Heal Stack Customization Options'"
+            "各治療職業治療連擊檢查滑鼠懸停的選項已被移除，\n" +
+            "現已替換為一個全域滑鼠懸停選項（以及一些新選項）。\n\n" +
+            "你可以在以下位置找到這個新設定：\n" +
+            "設定 > 'Target Options' > 'Heal Stack Customization Options'"
         );
         ImGui.NewLine();
-        if (ImGui.Button("> Open the Settings Tab##majorSettings1"))
+        if (ImGui.Button("> 開啟設定頁面##majorSettings1"))
             P.OnOpenConfigUi();
-        if (ImGui.Button("> Enable the new UI MouseOver option for me"))
+        if (ImGui.Button("> 幫我啟用新的UI滑鼠懸停選項"))
         {
             Service.Configuration.UseUIMouseoverOverridesInDefaultHealStack = true;
             Service.Configuration.Save();
@@ -75,7 +75,7 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
             ImGui.SameLine();
             FontAwesome.Print(ImGuiColors.HealerGreen, FontAwesomeIcon.Check);
             ImGui.SameLine();
-            ImGuiEx.Text($"Enabled");
+            ImGuiEx.Text($"已啟用");
         }
 
         #endregion
@@ -86,31 +86,31 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
 
         #region Retargeting
 
-        ImGuiEx.TextUnderlined("New Feature: Action Retargeting!");
+        ImGuiEx.TextUnderlined("新功能：動作重定向！");
         ImGuiEx.Text(
-            "Action Retargeting allows us to pick actions' targets for you, based on\n" +
-            "The Balance's recommendations and your options, without you having to\n" +
-            "setup Redirect or Reaction.");
+            "動作重定向讓我們能夠根據The Balance的建議和你的選項，\n" +
+            "為你選擇動作的目標，而無需你自行\n" +
+            "設定轉移或反應技能。");
         ImGuiComponents.HelpMarker(
-            "Previously there were a few features (like AST's Earthly Star) that\n" +
-            "required Redirect or Reaction to work, and Single-Target Healing combos\n" +
-            "were checking HP of your MouseOver (optionally) > Soft Target > Hard Target,\n" +
-            "which may not have lined up with your targeting, and used the 'wrong' heals.\n\n" +
-            "Action Retargeting addresses that!"
+            "此前有一些功能（如占星術士的大地星）\n" +
+            "需要轉移或反應技能才能工作，單體治療連擊\n" +
+            "會（可選地）依次檢查滑鼠懸停 > 軟目標 > 硬目標的HP，\n" +
+            "這可能與你的實際指向不一致，從而使用了'錯誤'的治療技能。\n\n" +
+            "動作重定向解決了這個問題！"
         );
         ImGuiEx.Text(
-            "Additionally, we have added the ability to control the 'Stack' of targets\n" +
-            "that Healing combos will use to check HP and choose to cast different heals,\n" +
-            "and an option to also Retarget all Single-Target Healing actions to that same Stack.\n" +
-            "(This option, 'Retarget Healing Actions', is highly recommended!)");
+            "此外，我們還新增了控制治療連擊用於檢查HP並選擇\n" +
+            "不同治療技能的目標'堆疊'的能力，\n" +
+            "以及一個將所有單體治療動作也重定向到同一堆疊的選項。\n" +
+            "（強烈推薦啟用此'重定向治療動作'選項！）");
         ImGuiEx.Text(
-            "You can find these new settings under:\n" +
-            "Settings > 'Target Options' (and the collapsed 'Heal Stack Customization Options')"
+            "你可以在以下位置找到這些新設定：\n" +
+            "Settings > 'Target Options'（以及摺疊的 'Heal Stack Customization Options'）"
         );
         ImGui.NewLine();
-        if (ImGui.Button("> Open the Settings Tab##majorSettings2"))
+        if (ImGui.Button("> 開啟設定頁面##majorSettings2"))
             P.OnOpenConfigUi();
-        if (ImGui.Button("> Enable the Retarget Healing Actions option for me"))
+        if (ImGui.Button("> 幫我啟用重定向治療動作選項"))
         {
             Service.Configuration.RetargetHealingActionsToStack = true;
             Service.Configuration.Save();
@@ -120,13 +120,13 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
             ImGui.SameLine();
             FontAwesome.Print(ImGuiColors.HealerGreen, FontAwesomeIcon.Check);
             ImGui.SameLine();
-            ImGuiEx.Text($"Enabled");
+            ImGuiEx.Text($"已啟用");
         }
         ImGui.NewLine();
         ImGuiEx.Text(
-            "You will find new symbols indicating if a Feature's actions are Retargeted:"
+            "你會看到新的符號，用於指示某功能的動作是否被重定向："
         );
-        ImGuiEx.Text("Depending on settings, MAY be Retargeted:");
+        ImGuiEx.Text("視設定而定，可能會被重定向：");
         ImGui.SameLine();
         using (ImRaii.PushFont(UiBuilder.IconFont))
         {
@@ -134,7 +134,7 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
                 ImGui.Text(FontAwesomeIcon.Random.ToIconString());
         }
         ImGui.SameLine();
-        ImGuiEx.Text("WILL always be Retargeted:");
+        ImGuiEx.Text("總是會被重定向：");
         ImGui.SameLine();
         using (ImRaii.PushFont(UiBuilder.IconFont))
         {
@@ -143,17 +143,17 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
         }
         ImGui.NewLine();
         ImGuiEx.Text(ImGuiColors.DalamudYellow,
-            "If you previously had Redirect/Reaction configured for actions that are\n" +
-            "now Retargeted, or had Reaction's/Bossmod's Instant Ground Target options,\n" +
-            "you may likely want to disable those options.");
+            "如果你之前為現已被重定向的動作配置了轉移/反應技能，\n" +
+            "或者啟用了反應技能/Bossmod的瞬發地面目標選項，\n" +
+            "你可能會想要禁用這些選項。");
         ImGuiEx.Text(
-            "That incudes AST Cards, DNC Partner, and (if enabled:)\n" +
-            "Single-Target Healing Actions");
+            "這包括占星術士卡牌、舞者舞伴，以及（如果啟用：）\n" +
+            "單體治療動作");
         ImGuiComponents.HelpMarker(
-            "Healing actions is up to preference whether you choose to enable that\n" +
-            "in settings (highly recommended), but Dance Partner and Cards are now smarter\n" +
-            "than simple retargeting of actions (following The Balance's priorities,\n" +
-            "checking for damage downs, etc).");
+            "治療動作是否啟用取決於你的個人偏好\n" +
+            "（強烈推薦啟用），但舞伴和卡牌現在比簡單的動作重定向\n" +
+            "更加智慧（會遵循The Balance的優先順序，\n" +
+            "檢查損傷降低等狀態）。");
 
         #endregion
 
@@ -162,10 +162,10 @@ internal class MajorChangesWindow : Dalamud.Interface.Windowing.Window
         ImGuiEx.Spacing(new System.Numerics.Vector2(0, 20));
         ImGui.Separator();
         ImGuiHelpers.CenterCursorFor(
-            ImGuiHelpers.GetButtonSize("Close and Do Not Show again").X
+            ImGuiHelpers.GetButtonSize("關閉並不再顯示").X
             //+ ImGui.GetStyle().ItemSpacing.X * 2
         );
-        if (ImGui.Button("Close and Do Not Show again"))
+        if (ImGui.Button("關閉並不再顯示"))
         {
             Service.Configuration.HideMajorChangesForVersion = Version;
             Service.Configuration.Save();

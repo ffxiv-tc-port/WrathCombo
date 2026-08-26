@@ -130,356 +130,356 @@ internal partial class WAR
 
                 case CustomComboPreset.WAR_ST_StormsEye:
                     UserConfig.DrawSliderInt(0, 30, WAR_SurgingRefreshRange,
-                        $" 刷新{Buffs.SurgingTempest.StatusName()}增益前的剩余秒数：");
+                        $" 重新整理{Buffs.SurgingTempest.StatusName()}增益前的剩餘秒數：");
                     break;
 
                 case CustomComboPreset.WAR_ST_InnerRelease:
                     UserConfig.DrawSliderInt(0, 75, WAR_ST_IRStop,
-                        "目标血量低于设定值时停止使用。\n如需禁用此功能，请设为0");
+                        "目標血量低於設定值時停止使用。\n如需禁用此功能，請設為0");
                     break;
 
                 case CustomComboPreset.WAR_ST_Onslaught:
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Onslaught_Movement,
-                            "仅在站立时", "仅在站立时使用猛攻", 0);
+                            "僅在站立時", "僅在站立時使用猛攻", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Onslaught_Movement,
-                            "任意移动", "无论移动状态均可使用猛攻。\n注意：这可能导致你死亡", 1);
+                            "任意移動", "無論移動狀態均可使用猛攻。\n注意：這可能導致你死亡", 1);
                     ImGui.Spacing();
                     if (WAR_ST_Onslaught_Movement == 0)
                     {
                         ImGui.SetCursorPosX(48);
                         UserConfig.DrawSliderFloat(0, 3, WAR_ST_Onslaught_TimeStill,
-                            "站立检测延迟（秒）：", decimals: 1);
+                            "站立檢測延遲（秒）：", decimals: 1);
                     }
                     ImGui.SetCursorPosX(48);
                     UserConfig.DrawSliderInt(0, 2, WAR_ST_Onslaught_Charges,
-                        "保留多少层数？\n（0 = 全部使用）");
+                        " How many charges to keep ready?\n (0 = Use All)");
                     ImGui.SetCursorPosX(48);
                     UserConfig.DrawSliderFloat(1, 20, WAR_ST_Onslaught_Distance,
-                        "与目标距离小于等于此值时使用：", decimals: 1);
+                        "與目標距離小於等於此值時使用：", decimals: 1);
                     break;
 
                 case CustomComboPreset.WAR_ST_Infuriate:
                     UserConfig.DrawSliderInt(0, 2, WAR_ST_Infuriate_Charges,
-                        "保留多少层数？\n（0 = 全部使用）");
+                        " How many charges to keep ready?\n (0 = Use All)");
                     UserConfig.DrawSliderInt(0, 50, WAR_ST_Infuriate_Gauge,
-                        "兽魂低于等于此值时使用：");
+                        "獸魂低於等於此值時使用：");
                     break;
 
                 case CustomComboPreset.WAR_ST_FellCleave:
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_FellCleave_BurstPooling,
-                        "爆发池", "允许在爆发期间额外使用裂石飞环\n注意：爆发期间会无视下方的兽魂量条", 0);
+                        "Burst Pooling", "允許在爆發期間額外使用裂石飛環\n注意：爆發期間會無視下方的獸魂量條", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_FellCleave_BurstPooling,
-                        "无爆发池", "禁止在爆发期间额外使用裂石飞环\n注意：完全遵循下方兽魂量条设定", 1);
+                        "無爆發池", "禁止在爆發期間額外使用裂石飛環\n注意：完全遵循下方獸魂量條設定", 1);
                     ImGui.Spacing();
                     UserConfig.DrawSliderInt(50, 100, WAR_ST_FellCleave_Gauge,
-                        "消耗所需最低兽魂：");
+                        "消耗所需最低獸魂：");
                     break;
 
                 case CustomComboPreset.WAR_ST_PrimalRend:
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_PrimalRend_EarlyLate,
-                        "尽早", "尽快使用蛮荒崩裂", 0);
+                        "儘早", "儘快使用蠻荒崩裂", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_PrimalRend_EarlyLate,
-                        "延后", "在消耗完所有原初的解放层数后再使用蛮荒崩裂", 1);
+                        "Late", "在消耗完所有原初的解放層數後再使用蠻荒崩裂", 1);
                     ImGui.NewLine();
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_PrimalRend_Movement,
-                        "仅在站立时", "仅在站立时使用蛮荒崩裂", 0);
+                        "僅在站立時", "僅在站立時使用蠻荒崩裂", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_PrimalRend_Movement,
-                        "任意移动", "无论移动状态均可使用蛮荒崩裂。\n注意：这可能导致你死亡", 1);
+                        "任意移動", "無論移動狀態均可使用蠻荒崩裂。\n注意：這可能導致你死亡", 1);
                     ImGui.Spacing();
                     if (WAR_ST_PrimalRend_Movement == 0)
                     {
                         ImGui.SetCursorPosX(48);
                         UserConfig.DrawSliderFloat(0, 3, WAR_ST_PrimalRend_TimeStill,
-                            "站立检测延迟（秒）：", decimals: 1);
+                            "站立檢測延遲（秒）：", decimals: 1);
                     }
                     ImGui.SetCursorPosX(48);
                     UserConfig.DrawSliderFloat(1, 20, WAR_ST_PrimalRend_Distance,
-                        "与目标距离小于等于此值时使用：", decimals: 1);
+                        "與目標距離小於等於此值時使用：", decimals: 1);
                     break;
                 #endregion
 
                 #region AoE
                 case CustomComboPreset.WAR_AoE_Decimate:
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Decimate_BurstPooling,
-                        "爆发池", "允许在爆发期间额外使用地毁人亡\n注意：爆发期间会无视下方兽魂量条", 0);
+                        "Burst Pooling", "允許在爆發期間額外使用地毀人亡\n注意：爆發期間會無視下方獸魂量條", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Decimate_BurstPooling,
-                        "无爆发池", "禁止在爆发期间额外使用地毁人亡\n注意：完全遵循下方兽魂量条设定", 1);
+                        "無爆發池", "禁止在爆發期間額外使用地毀人亡\n注意：完全遵循下方獸魂量條設定", 1);
                     ImGui.Spacing();
                     UserConfig.DrawSliderInt(50, 100, WAR_AoE_Decimate_Gauge,
-                        "消耗所需最低兽魂：");
+                        "Minimum gauge required to spend:");
                     break;
 
                 case CustomComboPreset.WAR_AoE_InnerRelease:
                     UserConfig.DrawSliderInt(0, 75, WAR_AoE_IRStop,
-                        "目标血量低于设定值时停止使用。\n如需禁用此功能，请设为0");
+                        "目標血量低於設定值時停止使用。\n如需禁用此功能，請設為0");
                     break;
 
 
                 case CustomComboPreset.WAR_AoE_Infuriate:
                     UserConfig.DrawSliderInt(0, 2, WAR_AoE_Infuriate_Charges,
-                        "保留多少层数？\n（0 = 全部使用）");
+                        " How many charges to keep ready?\n (0 = Use All)");
                     UserConfig.DrawSliderInt(0, 50, WAR_AoE_Infuriate_Gauge,
-                        "魂量低于等于此值时使用");
+                        "Use when gauge is under or equal to");
                     break;
 
                 case CustomComboPreset.WAR_AoE_Onslaught:
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Onslaught_Movement,
-                            "仅在站立时", "仅在站立时使用猛攻", 0);
+                            "僅在站立時", "僅在站立時使用猛攻", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Onslaught_Movement,
-                            "任意移动", "无论移动状态均可使用猛攻。\n注意：这可能导致你死亡", 1);
+                            "任意移動", "無論移動狀態均可使用猛攻。\n注意：這可能導致你死亡", 1);
                     ImGui.Spacing();
                     if (WAR_AoE_Onslaught_Movement == 0) 
                     {
                         ImGui.SetCursorPosX(48);
                         UserConfig.DrawSliderFloat(0, 3, WAR_AoE_Onslaught_TimeStill,
-                            "站立检测延迟（秒）：", decimals: 1);
+                            "站立檢測延遲（秒）：", decimals: 1);
                     }
                     UserConfig.DrawSliderInt(0, 2, WAR_AoE_Onslaught_Charges,
-                        "保留多少层数？\n（0 = 全部使用）");
+                        " How many charges to keep ready?\n (0 = Use All)");
                     ImGui.SetCursorPosX(48);
                     UserConfig.DrawSliderFloat(1, 20, WAR_AoE_Onslaught_Distance,
-                        "与目标距离小于等于此值时使用：", decimals: 1);
+                        "與目標距離小於等於此值時使用：", decimals: 1);
                     break;
 
                 case CustomComboPreset.WAR_AoE_PrimalRend:
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_PrimalRend_EarlyLate,
-                        "尽早", "尽快使用蛮荒崩裂", 0);
+                        "儘早", "儘快使用蠻荒崩裂", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_PrimalRend_EarlyLate,
-                        "延后", "在消耗完所有蛮荒崩裂层数后再使用蛮荒崩裂", 1);
+                        "Late", "在消耗完所有蠻荒崩裂層數後再使用蠻荒崩裂", 1);
                     ImGui.NewLine();
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_PrimalRend_Movement,
-                        "仅在站立时", "仅在站立时使用蛮荒崩裂", 0);
+                        "僅在站立時", "僅在站立時使用蠻荒崩裂", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_PrimalRend_Movement,
-                        "任意移动", "无论移动状态均可使用蛮荒崩裂。\n注意：这可能导致你死亡", 1);
+                        "任意移動", "無論移動狀態均可使用蠻荒崩裂。\n注意：這可能導致你死亡", 1);
                     ImGui.Spacing();
                     if (WAR_AoE_PrimalRend_Movement == 0)
                     {
                         ImGui.SetCursorPosX(48);
                         UserConfig.DrawSliderFloat(0, 3, WAR_AoE_PrimalRend_TimeStill,
-                            "站立检测延迟（秒）：", decimals: 1);
+                            "站立檢測延遲（秒）：", decimals: 1);
                     }
                     ImGui.SetCursorPosX(48);
                     UserConfig.DrawSliderFloat(1, 20, WAR_AoE_PrimalRend_Distance,
-                        "与目标距离小于等于此值时使用：", decimals: 1);
+                        "與目標距離小於等於此值時使用：", decimals: 1);
                     break;
 
                 case CustomComboPreset.WAR_AoE_Orogeny:
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_OrogenyUpheaval,
-                        "包含动乱", "若山崩不可用则在AOE循环中启用动乱", 0);
+                        "包含動亂", "若山崩不可用則在AOE循環中啟用動亂", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_OrogenyUpheaval,
-                        "不包含动乱", "在AOE循环中禁用动乱", 1);
+                        "不包含動亂", "在AOE循環中禁用動亂", 1);
                     break;
                 #endregion
 
                 #region Mitigations
                 case CustomComboPreset.WAR_ST_Bloodwhetting:
                     UserConfig.DrawSliderInt(1, 100, WAR_ST_Bloodwhetting_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Bloodwhetting_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Bloodwhetting.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Bloodwhetting.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Bloodwhetting_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Bloodwhetting.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Bloodwhetting.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_AoE_Bloodwhetting:
                     UserConfig.DrawSliderInt(1, 100, WAR_AoE_Bloodwhetting_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Bloodwhetting_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Bloodwhetting.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Bloodwhetting.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Bloodwhetting_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Bloodwhetting.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Bloodwhetting.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_ST_Equilibrium:
                     UserConfig.DrawSliderInt(1, 100, WAR_ST_Equilibrium_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Equilibrium_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Equilibrium.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Equilibrium.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Equilibrium_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Equilibrium.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Equilibrium.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_AoE_Equilibrium:
                     UserConfig.DrawSliderInt(1, 100, WAR_AoE_Equilibrium_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Equilibrium_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Equilibrium.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Equilibrium.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Equilibrium_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Equilibrium.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Equilibrium.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_ST_Rampart:
                     UserConfig.DrawSliderInt(1, 100, WAR_ST_Rampart_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Rampart_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Role.Rampart.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Role.Rampart.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Rampart_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Role.Rampart.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Role.Rampart.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_AoE_Rampart:
                     UserConfig.DrawSliderInt(1, 100, WAR_AoE_Rampart_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Rampart_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Role.Rampart.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Role.Rampart.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Rampart_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Role.Rampart.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Role.Rampart.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_ST_Thrill:
                     UserConfig.DrawSliderInt(1, 100, WAR_ST_Thrill_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Thrill_SubOption,
-                        "所有敌人", $"无论目标类型均使用{ThrillOfBattle.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{ThrillOfBattle.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Thrill_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{ThrillOfBattle.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{ThrillOfBattle.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_AoE_Thrill:
                     UserConfig.DrawSliderInt(1, 100, WAR_AoE_Thrill_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Thrill_SubOption,
-                        "所有敌人", $"无论目标类型均使用{ThrillOfBattle.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{ThrillOfBattle.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Thrill_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{ThrillOfBattle.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{ThrillOfBattle.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_ST_Vengeance:
                     UserConfig.DrawSliderInt(1, 100, WAR_ST_Vengeance_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Vengeance_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Vengeance.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Vengeance.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Vengeance_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Vengeance.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Vengeance.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_AoE_Vengeance:
                     UserConfig.DrawSliderInt(1, 100, WAR_AoE_Vengeance_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Vengeance_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Vengeance.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Vengeance.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Vengeance_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Vengeance.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Vengeance.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_ST_Holmgang:
                     UserConfig.DrawSliderInt(1, 100, WAR_ST_Holmgang_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Holmgang_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Holmgang.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Holmgang.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Holmgang_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Holmgang.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Holmgang.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_AoE_Holmgang:
                     UserConfig.DrawSliderInt(1, 100, WAR_AoE_Holmgang_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Holmgang_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Holmgang.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Holmgang.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Holmgang_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Holmgang.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Holmgang.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_ST_Reprisal:
                     UserConfig.DrawSliderInt(1, 100, WAR_ST_Reprisal_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Reprisal_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Role.Reprisal.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Role.Reprisal.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_Reprisal_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Role.Reprisal.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Role.Reprisal.ActionName()}", 1);
                     break;
 
                 case CustomComboPreset.WAR_AoE_Reprisal:
                     UserConfig.DrawSliderInt(1, 100, WAR_AoE_Reprisal_Health,
-                        "玩家血量低于等于此值时使用：", 200);
+                        "Player HP% to be \nless than or equal to:", 200);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Reprisal_SubOption,
-                        "所有敌人", $"无论目标类型均使用{Role.Reprisal.ActionName()}", 0);
+                        "All Enemies", $"無論目標型別均使用{Role.Reprisal.ActionName()}", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_Reprisal_SubOption,
-                        "仅Boss", $"仅在目标为Boss时使用{Role.Reprisal.ActionName()}", 1);
+                        "Bosses Only", $"僅在目標為Boss時使用{Role.Reprisal.ActionName()}", 1);
                     break;
 
                 #region One-Button Mitigation
 
                 case CustomComboPreset.WAR_Mit_Holmgang_Max:
                     UserConfig.DrawDifficultyMultiChoice(WAR_Mit_Holmgang_Difficulty, WAR_Mit_Holmgang_DifficultyListSet,
-                        "选择要在哪些难度下使用死斗：");
+                        "Select what difficulties Holmgang should be used in:");
 
                     UserConfig.DrawSliderInt(1, 100, WAR_Mit_Holmgang_Health,
-                        "玩家血量低于等于此值时使用：", 200, SliderIncrements.Fives);
+                        "Player HP% to be \nless than or equal to:", 200, SliderIncrements.Fives);
                     break;
 
                 case CustomComboPreset.WAR_Mit_Bloodwhetting:
                     UserConfig.DrawSliderInt(1, 100, WAR_Mit_Bloodwhetting_Health,
-                        "血量低于等于此值时使用", sliderIncrement: SliderIncrements.Ones);
+                        "HP% to use at or below", sliderIncrement: SliderIncrements.Ones);
 
                     UserConfig.DrawPriorityInput(WAR_Mit_Priorities, NumMitigationOptions, 0,
-                        "原初的血气优先级：");
+                        "Bloodwhetting Priority:");
                     break;
 
                 case CustomComboPreset.WAR_Mit_Equilibrium:
                     UserConfig.DrawSliderInt(1, 100, WAR_Mit_Equilibrium_Health,
-                        "血量低于等于此值时使用", sliderIncrement: SliderIncrements.Ones);
+                        "HP% to use at or below", sliderIncrement: SliderIncrements.Ones);
 
                     UserConfig.DrawPriorityInput(WAR_Mit_Priorities, NumMitigationOptions, 1,
-                        "战栗优先级：");
+                        "Equilibrium Priority:");
                     break;
 
                 case CustomComboPreset.WAR_Mit_Reprisal:
                     UserConfig.DrawPriorityInput(WAR_Mit_Priorities, NumMitigationOptions, 2,
-                        "死斗优先级：");
+                        "Reprisal Priority:");
                     break;
 
                 case CustomComboPreset.WAR_Mit_ThrillOfBattle:
                     UserConfig.DrawSliderInt(1, 100, WAR_Mit_ThrillOfBattle_Health,
-                        "血量低于等于此值时使用（100=禁用检测）", sliderIncrement: SliderIncrements.Ones);
+                        "HP% to use at or below (100 = Disable check)", sliderIncrement: SliderIncrements.Ones);
 
                     UserConfig.DrawPriorityInput(WAR_Mit_Priorities, NumMitigationOptions, 3,
-                        "战栗优先级：");
+                        "Thrill Of Battle Priority:");
                     break;
 
                 case CustomComboPreset.WAR_Mit_Rampart:
                     UserConfig.DrawSliderInt(1, 100, WAR_Mit_Rampart_Health,
-                        "血量低于等于此值时使用（100=禁用检测）", sliderIncrement: SliderIncrements.Ones);
+                        "HP% to use at or below (100 = Disable check)", sliderIncrement: SliderIncrements.Ones);
 
                     UserConfig.DrawPriorityInput(WAR_Mit_Priorities, NumMitigationOptions, 4,
-                        "铁壁优先级：");
+                        "Rampart Priority:");
                     break;
 
                 case CustomComboPreset.WAR_Mit_ShakeItOff:
                     ImGui.Indent();
                     UserConfig.DrawHorizontalRadioButton(WAR_Mit_ShakeItOff_PartyRequirement,
-                        "需要队伍", "只有队伍成员数大于等于2时才会使用摆脱。",
+                        "Require party", "Will not use Shake It Off unless there are 2 or more party members.",
                         outputValue: (int)PartyRequirement.Yes);
                     UserConfig.DrawHorizontalRadioButton(WAR_Mit_ShakeItOff_PartyRequirement,
-                        "总是使用", "使用摆脱时不要求有队伍。",
+                        "Use Always", "Will not require a party for Shake It Off.",
                         outputValue: (int)PartyRequirement.No);
                     ImGui.Unindent();
 
                     ImGui.NewLine();
                     UserConfig.DrawPriorityInput(WAR_Mit_Priorities, NumMitigationOptions, 5,
-                        "摆脱优先级：");
+                        "Shake It Off Priority:");
                     break;
 
                 case CustomComboPreset.WAR_Mit_ArmsLength:
                     ImGui.Indent();
                     UserConfig.DrawHorizontalRadioButton(WAR_Mit_ArmsLength_Boss,
-                        "所有敌人", "无论敌人类型均会使用亲疏自行。",
+                        "All Enemies", "Will use Arm's Length regardless of the type of enemy.",
                         outputValue: (int)BossAvoidance.Off, itemWidth: 125f);
                     UserConfig.DrawHorizontalRadioButton(WAR_Mit_ArmsLength_Boss,
-                        "避免Boss", "Boss战时尽量不使用亲疏自行。",
+                        "Avoid Bosses", "Will try not to use Arm's Length when in a boss fight.",
                         outputValue: (int)BossAvoidance.On, itemWidth: 125f);
                     ImGui.Unindent();
                     ImGui.NewLine();
                     UserConfig.DrawSliderInt(0, 3, WAR_Mit_ArmsLength_EnemyCount,
-                        "附近需要多少敌人？（0=无要求）");
-                    UserConfig.DrawPriorityInput(WAR_Mit_Priorities, NumMitigationOptions, 6, "亲疏自行优先级：");
+                        "How many enemies should be nearby? (0 = No Requirement)");
+                    UserConfig.DrawPriorityInput(WAR_Mit_Priorities, NumMitigationOptions, 6, "Arm's Length Priority:");
                     break;
 
                 case CustomComboPreset.WAR_Mit_Vengeance:
                     UserConfig.DrawSliderInt(1, 100, WAR_Mit_Vengeance_Health,
-                        "血量低于等于此值时使用（100=禁用检测）",
+                        "HP% to use at or below (100 = Disable check)",
                         sliderIncrement: SliderIncrements.Ones);
-                    UserConfig.DrawPriorityInput(WAR_Mit_Priorities, NumMitigationOptions, 7, "复仇优先级：");
+                    UserConfig.DrawPriorityInput(WAR_Mit_Priorities, NumMitigationOptions, 7, "Vengeance Priority:");
                     break;
                 #endregion
 
@@ -488,95 +488,95 @@ internal partial class WAR
                 #region Other
                 case CustomComboPreset.WAR_FC_InnerRelease:
                     UserConfig.DrawSliderInt(0, 75, WAR_FC_IRStop,
-                        "目标血量低于设定值时停止使用。\n如需禁用此功能，请设为0");
+                        "目標血量低於設定值時停止使用。\n如需禁用此功能，請設為0");
                     break;
 
                 case CustomComboPreset.WAR_FC_Onslaught:
                     UserConfig.DrawHorizontalRadioButton(WAR_FC_Onslaught_Movement,
-                        "仅在站立时", "仅在站立时使用猛攻", 0);
+                        "僅在站立時", "僅在站立時使用猛攻", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_FC_Onslaught_Movement,
-                        "任意移动", "无论移动状态均可使用猛攻。\n注意：这可能导致你死亡", 1);
+                        "任意移動", "無論移動狀態均可使用猛攻。\n注意：這可能導致你死亡", 1);
                     ImGui.Spacing();
                     if (WAR_FC_Onslaught_Movement == 0)
                     {
                         ImGui.SetCursorPosX(48);
                         UserConfig.DrawSliderFloat(0, 3, WAR_FC_Onslaught_TimeStill,
-                            "站立检测延迟（秒）：", decimals: 1);
+                            "站立檢測延遲（秒）：", decimals: 1);
                     }
                     UserConfig.DrawSliderInt(0, 2, WAR_FC_Onslaught_Charges,
-                        "保留多少层数？\n（0 = 全部使用）");
+                        " How many charges to keep ready?\n (0 = Use All)");
                     ImGui.SetCursorPosX(48);
                     UserConfig.DrawSliderFloat(1, 20, WAR_FC_Onslaught_Distance,
-                        "与目标距离小于等于此值时使用：", decimals: 1);
+                        "與目標距離小於等於此值時使用：", decimals: 1);
                     break;
 
                 case CustomComboPreset.WAR_FC_Infuriate:
                     UserConfig.DrawSliderInt(0, 2, WAR_FC_Infuriate_Charges,
-                        "保留多少层数？\n（0 = 全部使用）");
+                        " How many charges to keep ready?\n (0 = Use All)");
                     UserConfig.DrawSliderInt(0, 50, WAR_FC_Infuriate_Gauge,
-                        "兽魂低于等于此值时使用：");
+                        "獸魂低於等於此值時使用：");
                     break;
 
                 case CustomComboPreset.WAR_FC_PrimalRend:
                     UserConfig.DrawHorizontalRadioButton(WAR_FC_PrimalRend_EarlyLate,
-                        "尽早", "尽快使用原初的解放", 0);
+                        "儘早", "儘快使用原初的解放", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_FC_PrimalRend_EarlyLate,
-                        "延后", "在消耗完所有原初的解放层数后再使用原初的解放", 1);
+                        "Late", "在消耗完所有原初的解放層數後再使用原初的解放", 1);
                     ImGui.NewLine();
                     UserConfig.DrawHorizontalRadioButton(WAR_FC_PrimalRend_Movement,
-                        "仅在站立时", "仅在站立时使用原初的解放", 0);
+                        "僅在站立時", "僅在站立時使用原初的解放", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_FC_PrimalRend_Movement,
-                        "任意移动", "无论移动状态均可使用原初的解放。\n注意：这可能导致你死亡", 1);
+                        "任意移動", "無論移動狀態均可使用原初的解放。\n注意：這可能導致你死亡", 1);
                     ImGui.Spacing();
                     if (WAR_FC_PrimalRend_Movement == 0)
                     {
                         ImGui.SetCursorPosX(48);
                         UserConfig.DrawSliderFloat(0, 3, WAR_FC_PrimalRend_TimeStill,
-                            "站立检测延迟（秒）：", decimals: 1);
+                            "站立檢測延遲（秒）：", decimals: 1);
                     }
                     ImGui.SetCursorPosX(48);
                     UserConfig.DrawSliderFloat(1, 20, WAR_FC_PrimalRend_Distance,
-                        "与目标距离小于等于此值时使用：", decimals: 1);
+                        "與目標距離小於等於此值時使用：", decimals: 1);
                     break;
 
                 case CustomComboPreset.WAR_ST_Simple:
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_MitsOptions,
-                        "包含减伤", "在简易模式下启用减伤技能。", 0);
+                        "包含減傷", "在簡易模式下啟用減傷技能。", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_ST_MitsOptions,
-                        "不包含减伤", "在简易模式下禁用减伤技能。", 1);
+                        "不包含減傷", "在簡易模式下禁用減傷技能。", 1);
                     break;
 
                 case CustomComboPreset.WAR_AoE_Simple:
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_MitsOptions,
-                        "包含减伤", "在简易模式下启用减伤技能。", 0);
+                        "包含減傷", "在簡易模式下啟用減傷技能。", 0);
                     UserConfig.DrawHorizontalRadioButton(WAR_AoE_MitsOptions,
-                        "不包含减伤", "在简易模式下禁用减伤技能。", 1);
+                        "不包含減傷", "在簡易模式下禁用減傷技能。", 1);
                     break;
 
                 case CustomComboPreset.WAR_InfuriateFellCleave:
                     UserConfig.DrawSliderInt(0, 2, WAR_Infuriate_Charges,
-                        "保留多少层数？\n（0 = 全部使用）");
+                        " How many charges to keep ready?\n (0 = Use All)");
                     UserConfig.DrawSliderInt(0, 50, WAR_Infuriate_Range,
-                        "兽魂低于等于此值时使用：");
+                        "獸魂低於等於此值時使用：");
                     break;
 
                 case CustomComboPreset.WAR_EyePath:
                     UserConfig.DrawSliderInt(0, 30, WAR_EyePath_Refresh,
-                        $" 刷新{Buffs.SurgingTempest.StatusName()}增益前的剩余秒数：");
+                        $" 重新整理{Buffs.SurgingTempest.StatusName()}增益前的剩餘秒數：");
                     break;
 
                 case CustomComboPreset.WAR_Variant_Cure:
                     UserConfig.DrawSliderInt(1, 100, WAR_VariantCure,
-                        "玩家血量低于等于此值时使用：", 200);
+                        " Player HP% to be less than or equal to:", 200);
                     break;
 
                 case CustomComboPreset.WAR_RawIntuition_Targeting_TT:
                     ImGui.Indent();
                     ImGuiEx.TextWrapped(ImGuiColors.DalamudGrey,
-                        "注意：如果你是副T，并且希望将原初的血气用于自己，建议通过一键减伤功能或你的循环中的减伤选项来实现。\n" +
-                        "你也可以在队伍中鼠标悬停自己来使用原初的血气或原初的直觉。\n" +
-                        "如果你不这样做，原初的勇猛会替换该连击，并施放到主T身上。\n" +
-                        "如果你不使用这些功能来进行个人减伤，建议不要启用此选项。");
+                        "注意：如果你是副T，並且希望將原初的血氣用於自己，建議透過一鍵減傷功能或你的循環中的減傷選項來實現。\n" +
+                        "你也可以在隊伍中滑鼠懸停自己來使用原初的血氣或原初的直覺。\n" +
+                        "如果你不這樣做，原初的勇猛會替換該連擊，並施放到主T身上。\n" +
+                        "如果你不使用這些功能來進行個人減傷，建議不要啟用此選項。");
                     ImGui.Unindent();
                     break;
                     #endregion

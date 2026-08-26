@@ -20,108 +20,108 @@ internal partial class VPR
 
                 case CustomComboPreset.VPR_ST_SerpentsIre:
                     DrawHorizontalRadioButton(VPR_ST_SerpentsIre_SubOption,
-                        "全部内容", $"无论内容如何均使用{SerpentsIre.ActionName()}。", 0);
+                        "All content", $"Uses {SerpentsIre.ActionName()} regardless of content.", 0);
 
                     DrawHorizontalRadioButton(VPR_ST_SerpentsIre_SubOption,
-                        "仅限Boss战", $"仅在Boss战中使用{SerpentsIre.ActionName()}。", 1);
+                        "Boss encounters Only", $"Only uses  {SerpentsIre.ActionName()} when in Boss encounters.", 1);
                     break;
 
                 case CustomComboPreset.VPR_ST_Reawaken:
                     DrawHorizontalRadioButton(VPR_ST_ReAwaken_SubOption,
-                        "全部内容", $"无论内容如何均使用{Reawaken.ActionName()}。", 0);
+                        "All content", $"Uses {Reawaken.ActionName()} regardless of content.", 0);
 
                     DrawHorizontalRadioButton(VPR_ST_ReAwaken_SubOption,
-                        "仅限Boss战", $"仅在Boss战中使用{Reawaken.ActionName()}。", 1);
+                        "Boss encounters Only", $"Only uses {Reawaken.ActionName()} when in Boss encounters.", 1);
 
                     DrawSliderInt(0, 5, VPR_ST_ReAwaken_Threshold,
-                        $"设置HP百分比阈值，在可用时使用{Reawaken.ActionName()}。（仅限Boss战）");
+                        $"設定HP百分比閾值，在可用時使用{Reawaken.ActionName()}。（僅限Boss戰）");
 
                     break;
 
                 case CustomComboPreset.VPR_ST_UncoiledFury:
                     DrawSliderInt(0, 3, VPR_ST_UncoiledFury_HoldCharges,
-                        $"预留多少层{UncoiledFury.ActionName()}？（0 = 全部使用）");
+                        $"預留多少層{UncoiledFury.ActionName()}？（0 = 全部使用）");
 
                     DrawSliderInt(0, 5, VPR_ST_UncoiledFury_Threshold,
-                        $"设置HP百分比阈值，低于该值时全部使用{UncoiledFury.ActionName()}。");
+                        $"設定HP百分比閾值，低於該值時全部使用{UncoiledFury.ActionName()}。");
                     break;
 
                 case CustomComboPreset.VPR_ST_RangedUptime:
                     DrawAdditionalBoolChoice(VPR_ST_RangedUptimeUncoiledFury,
-                        $"包含{UncoiledFury.ActionName()}", $"当你处于远程状态且拥有{RattlingCoil.ActionName()}层数时，将{UncoiledFury.ActionName()}加入循环。");
+                        $"包含{UncoiledFury.ActionName()}", "Adds Uncoiled Fury to the rotation when you are out of melee range and have Rattling Coil charges.");
                     break;
 
                 case CustomComboPreset.VPR_ST_Vicewinder:
                     DrawAdditionalBoolChoice(VPR_TrueNortVicewinder,
-                        $"{Role.TrueNorth.ActionName()}选项", "可用时加入真北。");
+                        $"{Role.TrueNorth.ActionName()} Option", "Adds True North when available.");
                     break;
 
                 case CustomComboPreset.VPR_ST_ComboHeals:
                     DrawSliderInt(0, 100, VPR_ST_SecondWind_Threshold,
-                        $"{Role.SecondWind.ActionName()}触发HP百分比阈值");
+                        $"{Role.SecondWind.ActionName()} HP percentage threshold");
 
                     DrawSliderInt(0, 100, VPR_ST_Bloodbath_Threshold,
-                        $"{Role.Bloodbath.ActionName()}触发HP百分比阈值");
+                        $"{Role.Bloodbath.ActionName()} HP percentage threshold");
 
                     break;
 
                 case CustomComboPreset.VPR_AoE_UncoiledFury:
                     DrawSliderInt(0, 3, VPR_AoE_UncoiledFury_HoldCharges,
-                        $"预留多少层{UncoiledFury.ActionName()}？（0 = 全部使用）");
+                        $"預留多少層{UncoiledFury.ActionName()}？（0 = 全部使用）");
 
                     DrawSliderInt(0, 5, VPR_AoE_UncoiledFury_Threshold,
-                        $"设置HP百分比阈值，低于该值时全部使用{UncoiledFury.ActionName()}。");
+                        $"設定HP百分比閾值，低於該值時全部使用{UncoiledFury.ActionName()}。");
 
                     break;
 
                 case CustomComboPreset.VPR_AoE_Reawaken:
                     DrawHorizontalRadioButton(VPR_AoE_Reawaken_SubOption,
-                        "在范围内", $"为{Reawaken.ActionName()}添加距离检测，仅在目标在范围内时使用。", 0);
+                        "在範圍內", $"為{Reawaken.ActionName()}新增距離檢測，僅在目標在範圍內時使用。", 0);
 
                     DrawHorizontalRadioButton(VPR_AoE_Reawaken_SubOption,
-                        "禁用距离检测", $"禁用{Reawaken.ActionName()}的距离检测，即使未选中目标也会使用。", 1);
+                        "禁用距離檢測", $"禁用{Reawaken.ActionName()}的距離檢測，即使未選中目標也會使用。", 1);
 
                     DrawSliderInt(0, 100, VPR_AoE_Reawaken_Usage,
-                        $"敌人HP高于该百分比时停止使用{Reawaken.ActionName()}。设为0则不检测。");
+                        $"Stop using {Reawaken.ActionName()} at Enemy HP %. Set to Zero to disable this check.");
                     break;
 
                 case CustomComboPreset.VPR_AoE_Vicepit:
                     DrawHorizontalRadioButton(VPR_AoE_Vicepit_SubOption,
-                        "在范围内", $"为{Vicepit.ActionName()}添加距离检测，仅在目标在范围内时使用。", 0);
+                        "在範圍內", $"為{Vicepit.ActionName()}新增距離檢測，僅在目標在範圍內時使用。", 0);
 
                     DrawHorizontalRadioButton(VPR_AoE_Vicepit_SubOption,
-                        "禁用距离检测", $"禁用{Vicepit.ActionName()}的距离检测，即使未选中目标也会使用。", 1);
+                        "禁用距離檢測", $"禁用{Vicepit.ActionName()}的距離檢測，即使未選中目標也會使用。", 1);
                     break;
 
                 case CustomComboPreset.VPR_AoE_VicepitCombo:
                     DrawHorizontalRadioButton(VPR_AoE_VicepitCombo_SubOption,
-                        "在范围内", $"为{HuntersDen.ActionName()}与{SwiftskinsDen.ActionName()}添加距离检测，仅在目标在范围内时使用。", 0);
+                        "在範圍內", $"為{HuntersDen.ActionName()}與{SwiftskinsDen.ActionName()}新增距離檢測，僅在目標在範圍內時使用。", 0);
 
                     DrawHorizontalRadioButton(VPR_AoE_VicepitCombo_SubOption,
-                        "禁用距离检测", $"禁用{HuntersDen.ActionName()}与{SwiftskinsDen.ActionName()}的距离检测，即使未选中目标也会使用。", 1);
+                        "禁用距離檢測", $"禁用{HuntersDen.ActionName()}與{SwiftskinsDen.ActionName()}的距離檢測，即使未選中目標也會使用。", 1);
                     break;
 
                 case CustomComboPreset.VPR_AoE_ComboHeals:
                     DrawSliderInt(0, 100, VPR_AoE_SecondWind_Threshold,
-                        $"{Role.SecondWind.ActionName()}触发HP百分比阈值");
+                        $"{Role.SecondWind.ActionName()} HP percentage threshold");
 
                     DrawSliderInt(0, 100, VPR_AoE_Bloodbath_Threshold,
-                        $"{Role.Bloodbath.ActionName()}触发HP百分比阈值");
+                        $"{Role.Bloodbath.ActionName()} HP percentage threshold");
 
                     break;
 
                 case CustomComboPreset.VPR_ReawakenLegacy:
                     DrawRadioButton(VPR_ReawakenLegacyButton,
-                        $"替换为{Reawaken.ActionName()}", $"将{Reawaken.ActionName()}替换为完整祖灵之牙-祖灵之蛇连击。", 0);
+                        $"Replaces {Reawaken.ActionName()}", $"Replaces {Reawaken.ActionName()} with Full Generation - Legacy combo.", 0);
 
                     DrawRadioButton(VPR_ReawakenLegacyButton,
-                        $"替换为{ReavingFangs.ActionName()}", $"将{ReavingFangs.ActionName()}替换为完整祖灵之牙-祖灵之蛇连击。", 1);
+                        $"Replaces {ReavingFangs.ActionName()}", $"將{ReavingFangs.ActionName()}替換為完整祖靈之牙-祖靈之蛇連擊。", 1);
 
                     break;
 
                 case CustomComboPreset.VPR_Variant_Cure:
                     DrawSliderInt(1, 100, VPR_VariantCure,
-                        "触发治疗的HP百分比阈值", 200);
+                        "HP% to be at or under", 200);
 
                     break;
             }

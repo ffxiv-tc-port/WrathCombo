@@ -50,12 +50,12 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Danger / Blasting Zone", $"{GNB.DangerZone.ActionName()}/{GNB.BlastingZone.ActionName()}"),
                 KeyValuePair.Create("Danger/Blasting Zone", $"{GNB.DangerZone.ActionName()}/{GNB.BlastingZone.ActionName()}"),
                 KeyValuePair.Create("Blasting Zone", GNB.BlastingZone.ActionName()),
-                KeyValuePair.Create("Reign Combo", $"{GNB.ReignOfBeasts.ActionName()}连击"),
-                KeyValuePair.Create("Reign combo", $"{GNB.ReignOfBeasts.ActionName()}连击"),
+                KeyValuePair.Create("Reign Combo", $"{GNB.ReignOfBeasts.ActionName()}連擊"),
+                KeyValuePair.Create("Reign combo", $"{GNB.ReignOfBeasts.ActionName()}連擊"),
                 KeyValuePair.Create("Reign", GNB.ReignOfBeasts.ActionName()),
                 KeyValuePair.Create("Danger/Blasting", $"{GNB.DangerZone.ActionName()}/{GNB.BlastingZone.ActionName()}"),
-                KeyValuePair.Create("Ammo Overcap", "弹药溢出"),
-                KeyValuePair.Create("Zone", "领域"),
+                KeyValuePair.Create("Ammo Overcap", "彈藥溢位"),
+                KeyValuePair.Create("Zone", "領域"),
 
                 // Defensive
                 KeyValuePair.Create("Camouflage", GNB.Camouflage.ActionName()),
