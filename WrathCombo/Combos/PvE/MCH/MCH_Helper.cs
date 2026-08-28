@@ -1,4 +1,7 @@
 ﻿using Dalamud.Game.ClientState.JobGauge.Types;
+using Dalamud.Game.ClientState.Objects.Types;
+using ECommons.DalamudServices;
+using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using System;
 using System.Collections.Generic;
@@ -8,6 +11,10 @@ using WrathCombo.CustomComboNS.Functions;
 using static WrathCombo.Combos.PvE.MCH.Config;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
 using static WrathCombo.Data.ActionWatching;
+using WrathCombo.Extensions;
+using WrathCombo.Services;
+using EZ = ECommons.Throttlers.EzThrottler;
+using ObjectKind = Dalamud.Game.ClientState.Objects.Enums.ObjectKind;
 namespace WrathCombo.Combos.PvE;
 
 internal partial class MCH
@@ -408,6 +415,94 @@ internal partial class MCH
     internal static byte Battery => Gauge.Battery;
 
     internal static bool MaxBattery => Battery >= 100;
+
+    #endregion
+
+    #region 濺射誤拉防護（跳彈射擊／將死／雙將）
+
+    /// <summary>
+    ///     跳彈射擊(2890)、將死(36980)、雙將(36979) 在 Action 表裡都是
+    ///     <c>CastType == 2</c>、<c>EffectRange == 5</c>——以「目標」為圓心的濺射，
+    ///     不是單體。圈內只要站著一隻還沒進戰鬥的敵人就會被一起打到、直接拉進來。
+    /// </summary>
+    /// <remarks>
+    ///     <para>
+    ///     半徑一律從 <see cref="ActionWatching.ActionSheet" /> 的 EffectRange 讀，不寫死；
+    ///     90 級以下的虹吸彈(2874) 是 <c>CastType == 1 / EffectRange == 0</c>，
+    ///     會在第一個判斷就回 false（＝安全），所以低等級時「擋跳彈、退回虹吸炮」仍然成立。
+    ///     </para>
+    ///     <para>
+    ///     🔴 92 級之後 <b>虹吸彈也會被換成雙將(36979)，而雙將同樣是 5y 濺射</b>，
+    ///     所以這個閘門必須同時套在 Gauss 與 Ricochet 兩條線上，只擋跳彈是擋不住的。
+    ///     </para>
+    ///     <para>
+    ///     🔴 只在當幀走訪 <c>Svc.Objects</c>，不保存任何 IGameObject／IBattleChara；
+    ///     最貴的 <c>IsHostile()</c>（原生 nameplate 呼叫）排在距離與交戰狀態之後。
+    ///     </para>
+    /// </remarks>
+    /// <param name="actionId">已經過 OriginalHook 解析的實際技能 ID。</param>
+    /// <returns>true = 這一發會掃到未交戰的敵人，不該放。</returns>
+    internal static unsafe bool SplashWouldPullIdleEnemy(uint actionId)
+    {
+        if (!MCH_GaussRico_NoIdlePull)
+            return false;
+
+        if (!ActionSheet.TryGetValue(actionId, out var sheet))
+            return false;
+
+        // CastType 1＝純單體；CanTargetSelf＝以自己為圓心（本家族沒有），兩者都不會誤拉目標周圍的怪
+        if (sheet.CastType != 2 || sheet.EffectRange <= 0 || sheet.CanTargetSelf)
+            return false;
+
+        if (CurrentTarget is not IBattleChara centre)
+            return false;
+
+        float radius = sheet.EffectRange;
+        int idle = 0;
+
+        foreach (var o in Svc.Objects)
+        {
+            if (o is not IBattleChara chara || o.ObjectKind != ObjectKind.BattleNpc)
+                continue;
+
+            // 距離用 hitbox 修正，與 CustomComboFunctions.NumberOfObjectsInRange<Circle> 同一套算法
+            float reach = radius + o.HitboxRadius;
+            if ((o.Position - centre.Position).LengthSquared() > reach * reach)
+                continue;
+
+            if (chara.IsDead || !o.IsTargetable)
+                continue;
+
+            // 已經在戰鬥中的怪不算「誤拉」
+            if (chara.Struct()->InCombat)
+                continue;
+
+            // 使用者自己標記要忽略的 NPC 不列入考慮
+            if (Service.Configuration.IgnoredNPCs.ContainsKey(o.BaseId))
+                continue;
+
+            if (!o.IsHostile())
+                continue;
+
+            idle++;
+        }
+
+        if (idle == 0)
+            return false;
+
+        // 使用者跑 LogLevel 2，診斷一律 Information；10 秒最多一次，避免洗版
+        if (EZ.Throttle($"MCH_IdleSplashBlocked_{actionId}", 10000))
+            Svc.Log.Information(
+                $"[MCH] {actionId.ActionName()} 被擋：以目標為圓心半徑 {radius}y 內有 {idle} 隻未交戰的敵人（避免誤拉）。");
+
+        return true;
+    }
+
+    /// <summary> 這一發虹吸彈／雙將不會掃到未交戰的敵人。 </summary>
+    internal static bool GaussSplashSafe => !SplashWouldPullIdleEnemy(OriginalHook(GaussRound));
+
+    /// <summary> 這一發跳彈射擊／將死不會掃到未交戰的敵人。 </summary>
+    internal static bool RicochetSplashSafe => !SplashWouldPullIdleEnemy(OriginalHook(Ricochet));
 
     #endregion
 

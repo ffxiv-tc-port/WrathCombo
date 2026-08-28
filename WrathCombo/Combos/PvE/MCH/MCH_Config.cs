@@ -70,6 +70,10 @@ internal partial class MCH
                 case CustomComboPreset.MCH_ST_Adv_GaussRicochet:
                     DrawSliderInt(0, 2, MCH_ST_GaussRicoPool,
                         "保留多少充能次數供手動使用");
+
+                    DrawAdditionalBoolChoice(MCH_GaussRico_NoIdlePull,
+                        "不打到未交戰的敵人",
+                        "跳彈射擊／將死（92 級後連虹吸彈／雙將也是）是以目標為圓心 5 碼的濺射，圈內只要有一隻還沒進戰鬥的怪就會被拉進來。勾選後，這種情況下不放這一發。");
                     break;
 
                 case CustomComboPreset.MCH_ST_Adv_Reassemble:
@@ -94,6 +98,12 @@ internal partial class MCH
                     break;
 
                 //AoE
+                case CustomComboPreset.MCH_AoE_Adv_GaussRicochet:
+                    DrawAdditionalBoolChoice(MCH_GaussRico_NoIdlePull,
+                        "不打到未交戰的敵人",
+                        "跳彈射擊／將死（92 級後連虹吸彈／雙將也是）是以目標為圓心 5 碼的濺射，圈內只要有一隻還沒進戰鬥的怪就會被拉進來。勾選後，這種情況下不放這一發。");
+                    break;
+
                 case CustomComboPreset.MCH_AoE_Adv_Reassemble:
                     DrawSliderInt(0, 2, MCH_AoE_ReassemblePool,
                         "Number of Charges to Save for Manual Use");
@@ -146,6 +156,11 @@ internal partial class MCH
             MCH_AoE_TurretUsage = new("MCH_AoE_TurretUsage", 100),
             MCH_AoE_SecondWindThreshold = new("MCH_AoE_SecondWindThreshold", 40),
             MCH_VariantCure = new("MCH_VariantCure", 50);
+
+        // 預設 true：UserBool 的建構式在鍵不存在時會把預設值寫進設定字典，
+        // 所以「既有使用者」與「全新安裝」都會拿到 true（與 EzConfig 的行為不同）。
+        public static UserBool
+            MCH_GaussRico_NoIdlePull = new("MCH_GaussRico_NoIdlePull", true);
 
         public static UserBoolArray
             MCH_ST_Reassembled = new("MCH_ST_Reassembled"),
