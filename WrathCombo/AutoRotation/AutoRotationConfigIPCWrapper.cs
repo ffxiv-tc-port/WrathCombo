@@ -1,6 +1,8 @@
 ﻿#region
 
 using System;
+using ECommons.GameHelpers;
+using WrathCombo.CustomComboNS.Functions;
 
 #endregion
 
@@ -139,14 +141,41 @@ public class DPSSettingsIPCWrapper(DPSSettings settings)
         }
     }
 
-    public int? DPSAoETargets
+    /// <summary>
+    ///     生效的「AoE 傷害功能所需目標數」。
+    ///     優先權：IPC 租約 &gt; 目前職業的覆寫 &gt; 全域值。
+    /// </summary>
+    public int? DPSAoETargets => ResolveAoETargets(settings).Value;
+
+    /// <summary>
+    ///     把 ClassJob RowId 正規化成「職業」id —— 沒轉職石時 <c>Player.JobId</c> 回的是
+    ///     職業階級 id(例如 劍術士 1 而不是 騎士 19)，兩者共用同一組功能設定，
+    ///     所以逐職業覆寫的 key 也必須共用，否則裝上轉職石的瞬間設定會靜默消失。
+    ///     這裡沿用 WrathCombo 本來就在用的那份對照(ActionReplacer 同一支)。
+    /// </summary>
+    internal static uint NormalizeJobId(uint jobId) =>
+        CustomComboFunctions.JobIDs.ClassToJob(jobId);
+
+    /// <summary>
+    ///     解析「AoE 傷害功能所需目標數」的生效值與來源。
+    ///     <para>
+    ///     🔴 逐職業覆寫刻意只在這裡解析，判定處與 UI 都走這支 —— 若在判定處直接讀
+    ///     <see cref="DPSSettings.DPSAoETargetsPerJob" />，IPC 租約的接管就會被職業覆寫
+    ///     繞過去，而且完全沒有徵兆。
+    ///     </para>
+    /// </summary>
+    internal static (int? Value, AoETargetsSource Source) ResolveAoETargets(
+        DPSSettings settings)
     {
-        get
-        {
-            var checkControlled =
-                P.UIHelper.AutoRotationConfigControlled("DPSAoETargets");
-            return checkControlled?.state ?? settings.DPSAoETargets;
-        }
+        var checkControlled =
+            P.UIHelper.AutoRotationConfigControlled("DPSAoETargets");
+        if (checkControlled is not null)
+            return (checkControlled.Value.state, AoETargetsSource.Lease);
+
+        if (settings.TryGetJobOverride(NormalizeJobId(Player.JobId), out var jobValue))
+            return (jobValue, AoETargetsSource.Job);
+
+        return (settings.DPSAoETargets, AoETargetsSource.Global);
     }
 
     #region Direct Pass-Throughs (no IPC check)

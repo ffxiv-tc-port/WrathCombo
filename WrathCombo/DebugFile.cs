@@ -269,6 +269,27 @@ public static class DebugFile
         AddLine("START AUTO ROTATION INFO");
         AddLine($"Auto Rotation Enabled: {P.IPC.GetAutoRotationState()}");
         PrintConfigProperties(config);
+
+        // 「AoE 所需目標數」現在有三個可能來源(租約／目前職業的覆寫／全域)。
+        // 使用者回報「AoE 就是不放」時最需要的就是這兩行：生效值是多少、它從哪來。
+        var aoe = DPSSettingsIPCWrapper.ResolveAoETargets(
+            Service.Configuration.RotationConfig.DPSSettings);
+        AddLine(
+            "DPSSettings.DPSAoETargets (effective): " +
+            (aoe.Value?.ToString() ?? "null (AoE disabled)") +
+            $" [source: {aoe.Source}] [job: {Player.JobId} -> " +
+            $"{DPSSettingsIPCWrapper.NormalizeJobId(Player.JobId)}]");
+
+        var perJob = Service.Configuration.RotationConfig.DPSSettings
+            .DPSAoETargetsPerJob;
+        AddLine(
+            "DPSSettings.DPSAoETargetsPerJob: " +
+            (perJob.Count == 0
+                ? "(none)"
+                : string.Join(", ", perJob.Select(x =>
+                    $"{x.Key}/{JobIDs.JobIDToShorthand(x.Key)}=" +
+                    (x.Value?.ToString() ?? "off")))));
+
         AddLine("END AUTO ROTATION INFO");
 
         AddLine();

@@ -14,7 +14,10 @@ using WrathCombo.Services;
 using WrathCombo.Services.IPC;
 using WrathCombo.Services.IPC_Subscriber;
 using System.Collections.Generic;
+using Dalamud.Interface.Colors;
+using ECommons.GameHelpers;
 using WrathCombo.AutoRotation;
+using WCJobIDs = WrathCombo.CustomComboNS.Functions.CustomComboFunctions.JobIDs;
 
 namespace WrathCombo.Window.Tabs
 {
@@ -79,6 +82,161 @@ namespace WrathCombo.Window.Tabs
             }
             return false;
         }
+
+        /// <summary>
+        ///     設定視窗用的戰鬥職業清單(職業 id ＋ 顯示名)。名字取自 <c>ClassJob</c> 表，
+        ///     台服會直接是繁體中文 —— 不要在這裡硬編英文職業名。
+        ///     <para>
+        ///     清單來源是 WrathCombo 自己的功能分組，所以只會列出真的有功能可設的戰鬥職業，
+        ///     且順序與 PvE 分頁一致(坦克→治療→近戰→遠程)。只建一次；每幀重建會在
+        ///     設定視窗開著時反覆配置。
+        ///     </para>
+        /// </summary>
+        private static (uint JobId, string Name)[]? _combatJobs;
+
+        private static (uint JobId, string Name)[] CombatJobs =>
+            _combatJobs ??= groupedPresets.Values
+                .Select(x => x.First().Info)
+                .Where(x => x.JobID > 0 && WCJobIDs.JobIDToRole(x.JobID) != 0)
+                .Select(x => (JobId: x.JobID, Name: WCJobIDs.JobIDToName(x.JobID)))
+                .Distinct()
+                .ToArray();
+
+        /// <summary>
+        ///     「AoE 傷害功能所需目標數」的逐職業覆寫區塊。
+        ///     <para>
+        ///     優先權：IPC 租約 &gt; 目前職業的覆寫 &gt; 全域值。解析只有一份，在
+        ///     <see cref="DPSSettingsIPCWrapper.ResolveAoETargets" />；這裡只是顯示它。
+        ///     </para>
+        ///     <para>
+        ///     ⚠️ 沒有覆寫的職業在列上直接寫「沿用全域」，不要畫成 0 ——
+        ///     0 是合法的設定值(等於任何時候都不放 AoE)，拿它表示「沒設定」會誤導。
+        ///     </para>
+        /// </summary>
+        private static void DrawPerJobAoETargets(DPSSettings dps, ref bool changed)
+        {
+            ImGui.Spacing();
+            ImGuiEx.TextUnderlined("Per-Job Targets Required for AoE Damage Features".Loc());
+            ImGuiComponents.HelpMarker(HelpPerJobAoETargets.Loc());
+
+            var resolved = DPSSettingsIPCWrapper.ResolveAoETargets(dps);
+            ImGuiEx.Text(ImGuiColors.DalamudGrey,
+                "In effect right now: ?? (from ??)".Loc(
+                    DescribeAoETargets(resolved.Value),
+                    DescribeAoETargetsSource(resolved.Source)));
+
+            var currentJob = Player.Available
+                ? DPSSettingsIPCWrapper.NormalizeJobId(Player.JobId)
+                : 0u;
+
+            // 🔴 目前職業的快捷列與底下的完整清單會出現同一個職業，
+            // 兩邊的 ImRaii.PushId(jobId) 在同一個視窗裡會撞 ID(點一邊影響另一邊)。
+            // 各自多包一層 scope 隔開。
+            using (ImRaii.PushId("WrathAoETargetsCurrentJob"))
+            {
+                if (currentJob == 0 || WCJobIDs.JobIDToRole(currentJob) == 0)
+                    ImGuiEx.Text(ImGuiColors.DalamudGrey,
+                        "Not on a combat job right now - the global value applies.".Loc());
+                else
+                    changed |= DrawAoETargetsJobRow(dps, currentJob,
+                        WCJobIDs.JobIDToName(currentJob));
+            }
+
+            if (ImGui.TreeNode("All jobs".Loc() + "###WrathAoETargetsAllJobs"))
+            {
+                using (ImRaii.PushId("WrathAoETargetsAllJobsList"))
+                {
+                    foreach (var (jobId, name) in CombatJobs)
+                        changed |= DrawAoETargetsJobRow(dps, jobId, name);
+                }
+
+                ImGui.TreePop();
+            }
+        }
+
+        /// <summary>
+        ///     一個職業的覆寫列：[有無覆寫] [值] 職業名 (狀態)。
+        ///     沒有覆寫時仍然把全域值畫在同一個欄位裡(唯讀)，列與列才對得齊；
+        ///     右邊的灰字才是「這是不是這個職業自己的值」的判準。
+        /// </summary>
+        private static bool DrawAoETargetsJobRow(DPSSettings dps, uint jobId, string name)
+        {
+            var changed = false;
+            var hasOverride = dps.DPSAoETargetsPerJob.TryGetValue(jobId, out var value);
+
+            using var jobIdScope = ImRaii.PushId((int)jobId);
+
+            var overrideOn = hasOverride;
+            if (ImGui.Checkbox("###WrathAoETargetsJobOverride", ref overrideOn))
+            {
+                if (overrideOn)
+                    // 以目前的全域值起頭，不憑空塞一個數字給使用者。
+                    dps.DPSAoETargetsPerJob[jobId] = dps.DPSAoETargets;
+                else
+                    dps.DPSAoETargetsPerJob.Remove(jobId);
+
+                hasOverride = overrideOn;
+                value = overrideOn ? dps.DPSAoETargets : null;
+                changed = true;
+            }
+
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip(
+                    "Give ?? its own requirement. Unticked means this job follows the global value above."
+                        .Loc(name));
+
+            ImGui.SameLine();
+            using (ImRaii.Disabled(!hasOverride))
+            {
+                var shown = hasOverride ? value : dps.DPSAoETargets;
+                if (ImGuiEx.InputInt(70f.Scale(), "###WrathAoETargetsJobValue", ref shown)
+                    && hasOverride)
+                {
+                    if (shown < 0)
+                        shown = 0;
+
+                    dps.DPSAoETargetsPerJob[jobId] = shown;
+                    value = shown;
+                    changed = true;
+                }
+            }
+
+            // 有覆寫的職業在列上要一眼看得出來 => 職業名用金色；沒覆寫的整列壓成灰字
+            // 並明寫「沿用全域」(⚠️ 不要只靠欄位裡的數字，那個數字是全域值不是它自己的)。
+            ImGui.SameLine();
+            if (!hasOverride)
+            {
+                ImGuiEx.Text(ImGuiColors.DalamudGrey, name);
+                ImGui.SameLine();
+                ImGuiEx.Text(ImGuiColors.DalamudGrey, "(follows global)".Loc());
+            }
+            else if (value is null)
+            {
+                ImGuiEx.Text(ImGuiColors.ParsedGold, name);
+                ImGui.SameLine();
+                ImGuiEx.Text(ImGuiColors.DalamudOrange, "(AoE off for this job)".Loc());
+            }
+            else
+            {
+                ImGuiEx.Text(ImGuiColors.ParsedGold, name);
+            }
+
+            return changed;
+        }
+
+        private static string DescribeAoETargets(int? value) =>
+            value is null ? "AoE disabled".Loc() : value.Value.ToString();
+
+        private static string DescribeAoETargetsSource(AoETargetsSource source) =>
+            source switch
+            {
+                AoETargetsSource.Lease => "another plugin's lease".Loc(),
+                AoETargetsSource.Job => "this job's own setting".Loc(),
+                _ => "the global setting".Loc(),
+            };
+
+        private const string HelpPerJobAoETargets =
+            "Overrides the global requirement above on a per-job basis. When you switch jobs, that job's own value applies automatically.\n\nJobs without an override follow the global value - they are NOT set to 0.\n\nIf another plugin has taken this setting over with a lease, the lease wins over both the per-job value and the global value.";
 
         internal static new void Draw()
         {
@@ -177,6 +335,8 @@ namespace WrathCombo.Window.Tabs
                         cfg.DPSSettings.DPSAoETargets = 0;
                 }
                 ImGuiComponents.HelpMarker("Disabling this will turn off AoE DPS features. Otherwise will require the amount of targets required to be in range of an AoE feature's attack to use. This applies to all 3 roles, and for any features that deal AoE damage.".Loc());
+
+                DrawPerJobAoETargets(cfg.DPSSettings, ref changed);
 
                 ImGuiEx.SetNextItemWidthScaled(100);
                 // SliderFloat 在拖曳過程中每一畫格都回傳 true，直接餵給 changed 會讓底下的

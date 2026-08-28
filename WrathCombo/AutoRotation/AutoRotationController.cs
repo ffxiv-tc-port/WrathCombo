@@ -571,7 +571,11 @@ namespace WrathCombo.AutoRotation
                     var numEnemies = NumberOfEnemiesInRange(OriginalHook(gameAct), target, true);
                     if (!_ninjaLockedAoE)
                     {
-                        if (cfg.DPSSettings.DPSAoETargets == null || numEnemies < cfg.DPSSettings.DPSAoETargets)
+                        // 生效值可能來自 IPC 租約／目前職業的覆寫／全域設定
+                        // (解析在 DPSSettingsIPCWrapper.ResolveAoETargets)。
+                        // 取一次存起來，同一格內不重複解析。
+                        var aoeTargets = cfg.DPSSettings.DPSAoETargets;
+                        if (aoeTargets == null || numEnemies < aoeTargets)
                         {
                             LockedAoE = false;
                             return false;
