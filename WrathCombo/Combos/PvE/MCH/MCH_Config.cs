@@ -99,6 +99,14 @@ internal partial class MCH
 
                 //AoE
                 case CustomComboPreset.MCH_AoE_Adv_GaussRicochet:
+                    DrawHorizontalMultiChoice(MCH_AoE_GaussOptions,
+                        $"在{Hypercharge.ActionName()}之外使用",
+                        $"在沒有{Hypercharge.ActionName()}的一般連擊空檔中插入虹吸彈／雙將與跳彈射擊／將死。兩個時機都不勾選時，這個進階選項完全不會出手。", 2, 0);
+
+                    DrawHorizontalMultiChoice(MCH_AoE_GaussOptions,
+                        $"在{Hypercharge.ActionName()}期間使用",
+                        $"在{Hypercharge.ActionName()}／{AutoCrossbow.ActionName()}的連射空檔中插入虹吸彈／雙將與跳彈射擊／將死。兩個時機都不勾選時，這個進階選項完全不會出手。", 2, 1);
+
                     DrawAdditionalBoolChoice(MCH_GaussRico_NoIdlePull,
                         "不打到未交戰的敵人",
                         "跳彈射擊／將死（92 級後連虹吸彈／雙將也是）是以目標為圓心 5 碼的濺射，圈內只要有一隻還沒進戰鬥的怪就會被拉進來。勾選後，這種情況下不放這一發。");
