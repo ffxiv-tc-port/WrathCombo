@@ -173,7 +173,7 @@ internal partial class MCH
         public static UserBoolArray
             MCH_ST_Reassembled = new("MCH_ST_Reassembled"),
             MCH_AoE_Reassembled = new("MCH_AoE_Reassembled"),
-            MCH_AoE_GaussOptions = new("MCH_AoE_GaussOptions");
+            MCH_AoE_GaussOptions = new("MCH_AoE_GaussOptions", [false, true]);
 
         #endregion
     }
