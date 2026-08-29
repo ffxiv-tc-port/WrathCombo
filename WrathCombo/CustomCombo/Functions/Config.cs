@@ -165,15 +165,12 @@ namespace WrathCombo.CustomComboNS.Functions
         {
             get
             {
-                if (index >= this.Count)
-                {
-                    var array = PluginConfiguration.GetCustomIntArrayValue(this.pName);
-                    Array.Resize(ref array, index + 1);
-                    array[index] = 0;
-                    PluginConfiguration.SetCustomIntArrayValue(this.pName, array);
-                    Service.Configuration.Save();
-                }
-                return PluginConfiguration.GetCustomIntArrayValue(this.pName)[index];
+                // 讀取路徑不得寫入設定:原本越界時會 Array.Resize + Save(),
+                // 等於在戰鬥迴圈裡「讀一次就寫一次磁碟」。
+                // 改成越界直接回預設值(0),不 resize、不 Save;陣列長度的維護
+                // 交給寫入路徑(UserConfig.DrawPriorityInput 會先呼叫 Clear(maxValues))。
+                var array = PluginConfiguration.GetCustomIntArrayValue(this.pName);
+                return index >= array.Length ? 0 : array[index];
             }
             set
             {
@@ -219,15 +216,14 @@ namespace WrathCombo.CustomComboNS.Functions
         {
             get
             {
-                if (index >= this.Count)
-                {
-                    var array = PluginConfiguration.GetCustomBoolArrayValue(this.pName);
-                    Array.Resize(ref array, index + 1);
-                    array[index] = false;
-                    PluginConfiguration.SetCustomBoolArrayValue(this.pName, array);
-                    Service.Configuration.Save();
-                }
-                return PluginConfiguration.GetCustomBoolArrayValue(this.pName)[index];
+                // 讀取路徑不得寫入設定:原本越界時會 Array.Resize + Save(),
+                // 等於在戰鬥迴圈裡「讀一次就寫一次磁碟」
+                // (ContentCheck.IsInConfiguredContent 每幀都會讀 [0]/[1]/[2])。
+                // 改成越界直接回預設值(false),不 resize、不 Save;陣列長度的維護交給
+                // 寫入路徑(UserConfig.DrawHorizontalMultiChoice / DrawPvPStatusMultiChoice
+                // 本來就會自己 resize + Save)。
+                var array = PluginConfiguration.GetCustomBoolArrayValue(this.pName);
+                return index >= array.Length ? false : array[index];
             }
         }
 
