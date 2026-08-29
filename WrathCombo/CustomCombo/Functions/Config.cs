@@ -174,10 +174,17 @@ namespace WrathCombo.CustomComboNS.Functions
             }
             set
             {
+                // index >= Count 時維持原本「靜默不寫」的語意:呼叫端
+                // UserConfig.DrawPriorityInput 會先 Clear(maxValues) 把長度備好。
                 if (index < this.Count)
                 {
                     var array = PluginConfiguration.GetCustomIntArrayValue(this.pName);
                     array[index] = value;
+                    // 原本只靠 GetCustomIntArrayValue 回傳字典裡的「活參考」,讓
+                    // array[index] = value 就地生效。這個相依關係沒有寫在任何地方,
+                    // getter 一旦改成回傳複本,寫入就會靜默消失。改成明確寫回字典,
+                    // 讓寫入路徑不依賴 getter 的實作細節(目前兩者是同一個參考,行為不變)。
+                    PluginConfiguration.SetCustomIntArrayValue(this.pName, array);
                     Service.Configuration.Save();
                 }
             }

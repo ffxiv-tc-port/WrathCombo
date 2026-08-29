@@ -471,6 +471,20 @@ namespace WrathCombo.Window.Functions
 
             if (descriptionColor == new Vector4()) descriptionColor = ImGuiColors.DalamudYellow;
             bool[]? values = PluginConfiguration.GetCustomBoolArrayValue(config);
+
+            // 設定陣列可能比 choice 要求的短(舊設定檔、或選項數變動過),
+            // 直接讀 values[choice] 會擲 IndexOutOfRangeException,把整個設定
+            // 視窗的 Draw() 打掉。做法與同檔的 DrawHorizontalMultiChoice /
+            // DrawPvPStatusMultiChoice 一致:不足就補長度並存檔。
+            // 這裡沒有 totalChoices 可用,所以只在「不夠長」時補到 choice + 1,
+            // 長度足夠時完全不動使用者資料。
+            if (values.Length <= choice)
+            {
+                Array.Resize(ref values, choice + 1);
+                PluginConfiguration.SetCustomBoolArrayValue(config, values);
+                Service.Configuration.Save();
+            }
+
             ImGui.PushItemWidth(itemWidth);
 
             using (ImRaii.PushColor(ImGuiCol.Text, descriptionColor))
