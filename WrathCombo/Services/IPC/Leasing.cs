@@ -252,6 +252,10 @@ public partial class Leasing
         // Save the lease
         Registrations.Add(lease.ID, lease);
 
+        // 又有租約了：下一次真的把它暫停掉時要重新印得出來。
+        // 純粹是記錄用的旗標，見 SuspendLeases。
+        _allLeasesSuspended = false;
+
         Logging.Log($"{pluginName}: Created Lease");
 
         // Provide the lease ID to the plugin
@@ -657,6 +661,13 @@ public partial class Leasing
         Registrations.ContainsKey(lease);
 
     /// <summary>
+    ///     是否已經處於「全部租約都被暫停」的狀態。
+    ///     只用來決定要不要印那一行 Warning，對暫停行為本身沒有作用。
+    ///     由 <see cref="CreateRegistration" /> 在有新租約時清掉。
+    /// </summary>
+    private bool _allLeasesSuspended;
+
+    /// <summary>
     ///     Suspend all leases. Called when IPC is disabled remotely.
     /// </summary>
     /// <param name="reason">
@@ -668,7 +679,19 @@ public partial class Leasing
     {
         var reasonToUse = reason ?? CancellationReasonEnum.AllServicesSuspended;
 
-        Logging.Warn("Suspending all leases.");
+        // 🔴 這一行原本每次呼叫都印。實機上 WrathCombo.UpdateCaches 每次換職業／
+        //    首次載入都會呼叫一次（WrathCombo.cs 的 CancellationReason.JobChanged），
+        //    使用者的 log 累積出 800 多筆 WRN，而其中絕大多數根本沒有任何租約可暫停。
+        //    只在「本來沒暫停 -> 現在暫停」那一次印，而且沒有租約時完全不印。
+        if (Registrations.Count > 0 && !_allLeasesSuspended)
+            Logging.Warn(
+                $"Suspending all leases ({Registrations.Count}), reason: {reasonToUse}.");
+        else
+            Logging.Verbose(
+                $"Suspend requested (reason: {reasonToUse}), " +
+                $"leases={Registrations.Count}, alreadySuspended={_allLeasesSuspended}.");
+
+        _allLeasesSuspended = true;
 
         // dispose every lease in _registrations
         foreach (var registration in Registrations.Values)
