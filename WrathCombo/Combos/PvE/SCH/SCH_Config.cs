@@ -310,7 +310,7 @@ internal partial class SCH
             SCH_ST_DPS_OpenerContent = new("SCH_ST_DPS_OpenerContent", 1),
             SCH_ST_DPS_ChainStratagemOption = new("SCH_ST_DPS_ChainStratagemOption", 10),
             SCH_AoE_DPS_ChainStratagemOption = new("SCH_AoE_DPS_ChainStratagemOption", 10),
-            SCH_DPS_BioOption = new("SCH_DPS_BioOption"),
+            SCH_DPS_BioOption = new("SCH_DPS_BioOption", 10),
             SCH_DPS_BioSubOption = new("SCH_DPS_BioSubOption", 0),
             SCH_ST_DPS_EnergyDrain = new("SCH_ST_DPS_EnergyDrain", 3),
             SCH_ST_DPS_ChainStratagemSubOption = new("SCH_ST_DPS_ChainStratagemSubOption", 1),
