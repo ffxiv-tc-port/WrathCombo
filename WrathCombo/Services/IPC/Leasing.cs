@@ -694,10 +694,30 @@ public partial class Leasing
         _allLeasesSuspended = true;
 
         // dispose every lease in _registrations
-        foreach (var registration in Registrations.Values)
-            RemoveRegistration(
-                registration.ID, reasonToUse
-            );
+        //
+        // 🔴 一定要對快照迭代，不能直接跑 Registrations.Values：
+        //    RemoveRegistration() 會就地 Registrations.Remove()，而它先呼叫的
+        //    Lease.Cancel() 是「同步」回呼承租外掛的（Callback.Invoke，或是
+        //    Helper.CallIPCCallback() 的 call gate）。對方只要在那個回呼裡
+        //    直接 RegisterForLease() 重新註冊，就會走到 Registrations.Add()，
+        //    列舉器立刻失效並擲出 InvalidOperationException——而且是從
+        //    Provider.Dispose()（外掛停用）這種不該擲例外的路徑上冒出來。
+        //    （net9 實測：單純 Remove 不會使列舉器失效，Add 才會。所以這是
+        //      只有承租端搶著重新註冊時才會爆的潛伏 bug，不是每次都爆。）
+        //    同檔的 CheckIfLeaseePluginsUnloaded() 早就是這個寫法，照抄它。
+        //
+        //    ContainsKey 這道閘門同樣必要：承租外掛也可能在回呼裡自己
+        //    ReleaseControl() 掉「另一把」租約，快照裡那個鍵就變成死鍵，
+        //    RemoveRegistration() 內的 Registrations[lease] 會擲
+        //    KeyNotFoundException。Provider.ReleaseControl() 本身也是先
+        //    CheckLeaseExists() 再呼叫，這裡沿用同一個慣例。
+        foreach (var leaseId in new List<Guid>(Registrations.Keys))
+        {
+            if (!Registrations.ContainsKey(leaseId))
+                continue;
+
+            RemoveRegistration(leaseId, reasonToUse);
+        }
     }
 
     #region Checking for plugin being unloaded
@@ -737,8 +757,13 @@ public partial class Leasing
             .Select(p => p.InternalName).ToList();
         var leasesCopy = new Dictionary<Guid, Lease>(Registrations);
 
+        // 這裡本來就是對快照迭代（Add 型再入不會炸），但仍要確認鍵還在：
+        // RemoveRegistration() 觸發的取消回呼可能讓承租端順手 ReleaseControl()
+        // 掉快照裡的另一把租約，那之後 Registrations[lease] 會擲
+        // KeyNotFoundException。與 SuspendLeases() 同一個閘門。
         foreach (var (lease, registration) in leasesCopy)
-            if (!plugins.Contains(registration.InternalPluginName))
+            if (!plugins.Contains(registration.InternalPluginName) &&
+                Registrations.ContainsKey(lease))
                 RemoveRegistration(
                     lease, CancellationReasonEnum.LeaseePluginDisabled
                 );
