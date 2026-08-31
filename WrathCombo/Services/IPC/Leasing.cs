@@ -146,10 +146,32 @@ public class Lease(
                 : "")
         );
 
-        if (Callback is not null)
-            Callback.Invoke((int)cancellationReason, additionalInfo);
-        else if (IPCPrefixForCallback is not null)
-            Helper.CallIPCCallback(IPCPrefixForCallback, cancellationReason, additionalInfo);
+        // 🔴 取消回呼是「別的外掛的碼」，在我們的堆疊上同步執行。
+        //    IPC 那一條路徑（Helper.CallIPCCallback）本來就包了 try/catch，
+        //    Action 這一條卻是裸呼叫：承租外掛的回呼一擲例外，例外就會往上冒到
+        //    RemoveRegistration()，讓它後面的 Registrations.Remove(lease)、
+        //    UI 快取失效、UpdateActiveJobPresets() 全部跳過
+        //    ——租約永遠留在 Registrations 裡，而且會從 Provider.Dispose()
+        //    （外掛停用）這種不該擲例外的路徑上冒出來。比照 IPC 路徑包起來。
+        //
+        //    ⚠️ 回呼內部可能再入呼叫 Leasing 的註冊／移除方法，所以 catch 之後
+        //    不要在這裡碰任何集合狀態；呼叫端（RemoveRegistration）用的
+        //    Dictionary.Remove() 對已消失的鍵本來就是安全的 no-op。
+        try
+        {
+            if (Callback is not null)
+                Callback.Invoke((int)cancellationReason, additionalInfo);
+            else if (IPCPrefixForCallback is not null)
+                Helper.CallIPCCallback(IPCPrefixForCallback, cancellationReason, additionalInfo);
+        }
+        catch (Exception e)
+        {
+            // 不吞成完全靜默：使用者跑 LogLevel 2，Error 收得到。
+            Logging.Error(
+                "Leasee '" + PluginName +
+                "' threw from its lease-cancellation callback (" +
+                cancellationReason + "): " + e);
+        }
     }
 }
 

@@ -363,9 +363,12 @@ public partial class Helper(ref Leasing leasing)
             LeaseeIPC.WrathComboCallback((int)reason, additionalInfo);
             LeaseeIPC.Dispose();
         }
-        catch
+        catch (Exception e)
         {
-            Logging.Error("Failed to call IPC callback with IPC prefix: " + prefix);
+            // 原本只印 prefix，看不出是「call gate 不存在」還是「承租外掛的回呼
+            // 自己擲例外」——這兩件事的處置完全不同，把例外一起印出來。
+            Logging.Error(
+                "Failed to call IPC callback with IPC prefix: " + prefix + "\n" + e);
         }
     }
 
