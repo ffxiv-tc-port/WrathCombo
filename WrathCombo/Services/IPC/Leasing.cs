@@ -149,14 +149,16 @@ public class Lease(
         // 🔴 取消回呼是「別的外掛的碼」，在我們的堆疊上同步執行。
         //    IPC 那一條路徑（Helper.CallIPCCallback）本來就包了 try/catch，
         //    Action 這一條卻是裸呼叫：承租外掛的回呼一擲例外，例外就會往上冒到
-        //    RemoveRegistration()，讓它後面的 Registrations.Remove(lease)、
-        //    UI 快取失效、UpdateActiveJobPresets() 全部跳過
-        //    ——租約永遠留在 Registrations 裡，而且會從 Provider.Dispose()
-        //    （外掛停用）這種不該擲例外的路徑上冒出來。比照 IPC 路徑包起來。
+        //    RemoveRegistration()，讓它後面的 UI 快取失效與
+        //    UpdateActiveJobPresets() 全部跳過——UI 會停在過期的狀態，而且會從
+        //    Provider.Dispose()（外掛停用）這種不該擲例外的路徑上冒出來。
+        //    比照 IPC 路徑包起來。
         //
         //    ⚠️ 回呼內部可能再入呼叫 Leasing 的註冊／移除方法，所以 catch 之後
-        //    不要在這裡碰任何集合狀態；呼叫端（RemoveRegistration）用的
-        //    Dictionary.Remove() 對已消失的鍵本來就是安全的 no-op。
+        //    不要在這裡碰任何集合狀態。租約本身已經由 RemoveRegistration() 在
+        //    呼叫本方法**之前**就從 Registrations 移除了（那個順序正是用來擋
+        //    「承租端在回呼裡 ReleaseControl() 同一把租約」的無限遞迴），
+        //    所以這裡不需要、也不應該再去動 Registrations。
         try
         {
             if (Callback is not null)
@@ -505,18 +507,36 @@ public partial class Leasing
     (Guid lease, CancellationReasonEnum cancellationReason,
         string additionalInfo = "")
     {
+        // 鍵不存在時照舊擲 KeyNotFoundException（呼叫端本來就先 CheckLeaseExists／
+        // ContainsKey 過一輪）。只是先把 Lease 物件抄下來，因為下面會先移除再取消。
+        var registration = Registrations[lease];
+
         if (cancellationReason == CancellationReasonEnum.WrathUserManuallyCancelled)
             _userRevokedTemporaryBlacklist.Add(
                 lease,
-                (Registrations[lease].InternalPluginName,
-                    Registrations[lease].ConfigurationsHash,
+                (registration.InternalPluginName,
+                    registration.ConfigurationsHash,
                     DateTime.Now)
             );
 
-        Registrations[lease].Cancel(cancellationReason, additionalInfo);
+        // 🔴 一定要「先移除，再取消」，順序反過來會無限遞迴。
+        //    Lease.Cancel() 是同步回呼承租外掛的碼（Callback.Invoke，或
+        //    Helper.CallIPCCallback() 的 call gate）。對方在那個回呼裡對**同一把**
+        //    租約呼叫 ReleaseControl() 是完全合理的寫法，而先 Cancel 的話此刻
+        //    Registrations 裡那把租約還在 —— Provider.ReleaseControl() 的
+        //    CheckLeaseExists() 會通過，於是再進 RemoveRegistration()、再 Cancel()、
+        //    再回呼……一路遞迴到 StackOverflowException（🔴 那是攔不下來的，
+        //    整個遊戲直接掛掉）。
+        //
+        //    先 Remove 之後，承租端在回呼裡查詢會看到租約已經不存在，
+        //    ReleaseControl() 就會走「租約無效」那條正常的分支而不是再入。
+        //    ⚠️ 這是知情核可的行為變更：回呼執行期間，這把租約對承租端而言
+        //    已經消失了。
         Registrations.Remove(lease);
+        registration.Cancel(cancellationReason, additionalInfo);
 
         // Bust the UI cache
+        // （Cancel() 內部把承租端的例外全部 catch 住了，所以下面這幾行一定跑得到。）
         AutoRotationStateUpdated = DateTime.Now;
         AutoRotationConfigsUpdated = DateTime.Now;
         JobsUpdated = DateTime.Now;
@@ -718,7 +738,7 @@ public partial class Leasing
         // dispose every lease in _registrations
         //
         // 🔴 一定要對快照迭代，不能直接跑 Registrations.Values：
-        //    RemoveRegistration() 會就地 Registrations.Remove()，而它先呼叫的
+        //    RemoveRegistration() 會就地 Registrations.Remove()，而它接著呼叫的
         //    Lease.Cancel() 是「同步」回呼承租外掛的（Callback.Invoke，或是
         //    Helper.CallIPCCallback() 的 call gate）。對方只要在那個回呼裡
         //    直接 RegisterForLease() 重新註冊，就會走到 Registrations.Add()，

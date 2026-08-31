@@ -7,9 +7,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using Dalamud.Networking.Http;
+using Dalamud.Plugin.Ipc.Exceptions;
 using ECommons;
+using ECommons.DalamudServices;
 using ECommons.ExcelServices;
-using ECommons.EzIpcManager;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using WrathCombo.Attributes;
@@ -345,28 +346,74 @@ public partial class Helper(ref Leasing leasing)
 
     #region IPC Callback
 
-    public static string? PrefixForIPC;
+    /// <summary>
+    ///     承租外掛註冊「租約被取消」回呼時用的 IPC 方法名。
+    ///     完整的 IPC tag 是 <c>{承租外掛自己的前綴}.WrathComboCallback</c>。
+    /// </summary>
+    private const string LeaseeCallbackName = "WrathComboCallback";
 
     /// <summary>
-    ///     Method to set up an IPC, call the Wrath Combo callback, and dispose
-    ///     of the IPC.
+    ///     Calls a leasee's lease-cancellation callback over IPC.
     /// </summary>
-    /// <param name="prefix">The leasee's </param>
-    /// <param name="reason"></param>
-    /// <param name="additionalInfo"></param>
+    /// <param name="prefix">The leasee's IPC prefix.</param>
+    /// <param name="reason">The reason the lease is being cancelled.</param>
+    /// <param name="additionalInfo">
+    ///     Any additional information to pass to the leasee.
+    /// </param>
+    /// <remarks>
+    ///     🔴 call gate <b>一定要每次呼叫都照 prefix 重新取得</b>，不可以存成靜態欄位。
+    ///     <para>
+    ///     舊版把它放在 <c>LeaseeIPC</c> 的靜態欄位初始化式裡
+    ///     （<c>EzIPC.Init(typeof(LeaseeIPC), Helper.PrefixForIPC, …)</c>），
+    ///     那段碼一輩子只跑一次 —— 也就是<b>第一個</b>承租外掛註冊的那次。
+    ///     之後不管把 <c>PrefixForIPC</c> 設成誰，委派都還是指向第一個外掛的 call gate，
+    ///     取消通知因此送錯對象（或送去一個已經卸載的外掛而靜默失效）。
+    ///     </para>
+    ///     <para>
+    ///     而且那個結構<b>沒辦法靠「再 Init 一次」修好</b>：EzIPC 是用
+    ///     <c>FieldInfo.SetValue</c> 賦值的，而 net9 對 <c>static readonly</c> 欄位
+    ///     只在型別初始化式執行期間允許反射賦值，之後一律擲
+    ///     <c>FieldAccessException: Cannot set initonly static field … after type is
+    ///     initialized</c>（本機 net9 實測）。EzIPC 的訂閱迴圈把那個例外 catch 起來
+    ///     只印一行 log，<b>舊的委派原封不動留著繼續被呼叫</b>
+    ///     —— 也就是「看起來重建成功了，其實還是打去第一個外掛」。
+    ///     </para>
+    ///     <para>
+    ///     所以這裡直接照 EzIPC 內部的做法自己組 call gate：Action 型的訂閱端是
+    ///     <c>GetIpcSubscriber&lt;…, object&gt;</c> ＋ <c>InvokeAction</c>
+    ///     （最後那個泛型參數是 <c>EzIPCAttribute.ActionLastGenericType</c> 的預設值
+    ///     <c>typeof(object)</c>），tag 則是 <c>{prefix}.{方法名}</c>。
+    ///     訂閱端不需要 dispose：EzIPC 的訂閱迴圈本來就<b>不會</b>產生任何
+    ///     disposal token（舊的 <c>LeaseeIPC.Dispose()</c> 其實一直在對空陣列迭代）。
+    ///     </para>
+    /// </remarks>
     internal static void CallIPCCallback(string prefix, CancellationReason reason,
         string additionalInfo = "")
     {
+        var ipcName = prefix + "." + LeaseeCallbackName;
+
         try
         {
-            PrefixForIPC = prefix;
-            LeaseeIPC.WrathComboCallback((int)reason, additionalInfo);
-            LeaseeIPC.Dispose();
+            Svc.PluginInterface
+                .GetIpcSubscriber<int, string, object>(ipcName)
+                .InvokeAction((int)reason, additionalInfo);
+        }
+        catch (IpcNotReadyError)
+        {
+            // 承租外掛沒註冊這個回呼，或是已經卸載了。這是預期得到的狀況，不是錯誤。
+            // 舊版走 EzIPC 的 SafeWrapper.IPCException，也是只把它交給
+            // EzIpcFailureLog 印一行 Information，這裡維持同樣的處置。
+            // 一律 Information：使用者跑 LogLevel 2，Debug/Verbose 收不到。
+            Logging.Information(
+                "Leasee has no lease-cancellation callback registered " +
+                "(IPC method '" + ipcName + "' is not registered); " +
+                "the cancellation could not be delivered to it.");
         }
         catch (Exception e)
         {
-            // 原本只印 prefix，看不出是「call gate 不存在」還是「承租外掛的回呼
-            // 自己擲例外」——這兩件事的處置完全不同，把例外一起印出來。
+            // 走到這裡幾乎都是「承租外掛的回呼自己擲例外」——它是在我們的堆疊上
+            // 同步執行的。原本只印 prefix，看不出是「call gate 不存在」還是
+            // 「對方的回呼炸了」，這兩件事的處置完全不同，所以把例外一起印出來。
             Logging.Error(
                 "Failed to call IPC callback with IPC prefix: " + prefix + "\n" + e);
         }
@@ -512,23 +559,4 @@ internal static class Logging
 
     public static void Error(string message) =>
         PluginLog.Error(Prefix + PrefixMethod + message + "\n" + (StackTrace));
-}
-
-internal static class LeaseeIPC
-{
-    private static EzIPCDisposalToken[]? _disposalTokens =
-        EzIPC.Init(typeof(LeaseeIPC), Helper.PrefixForIPC, SafeWrapper.IPCException);
-
-#pragma warning disable CS0649, CS8618 // Complaints of the method
-    [EzIPC] internal static readonly Action<int, string> WrathComboCallback;
-#pragma warning restore CS8618, CS0649
-
-    public static void Dispose()
-    {
-        if (_disposalTokens is null)
-            return;
-        foreach (var token in _disposalTokens)
-            token.Dispose();
-        _disposalTokens = null;
-    }
 }
