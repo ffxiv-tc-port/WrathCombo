@@ -169,12 +169,89 @@ public class Lease(
         catch (Exception e)
         {
             // 不吞成完全靜默：使用者跑 LogLevel 2，Error 收得到。
-            Logging.Error(
-                "Leasee '" + PluginName +
-                "' threw from its lease-cancellation callback (" +
-                cancellationReason + "): " + e);
+            LogCallbackFailure(PluginName, cancellationReason, e);
         }
     }
+
+    #region 取消回呼失敗的節流記錄
+
+    /// <summary>
+    ///     每個承租外掛最近一次「取消回呼擲例外」被記進 log 的時間，以及那之後
+    ///     被抑制掉的次數。
+    /// </summary>
+    /// <value>
+    ///     <b>Key:</b> 承租外掛的顯示名稱（<see cref="PluginName" />）。<br />
+    ///     <b>Item1:</b> 上次真的印出來的時間（<c>Environment.TickCount64</c>）。<br />
+    ///     <b>Item2:</b> 那之後被抑制掉的次數。
+    /// </value>
+    /// <remarks>
+    ///     ⚠️ 用外掛名當 key，不是用租約 <c>Guid</c>：租約每次重新註冊都是新的
+    ///     Guid，拿 Guid 當 key 等於完全沒節流。會反覆炸的是「那個外掛的回呼」。
+    /// </remarks>
+    private static readonly Dictionary<string, (long LoggedAt, int Suppressed)>
+        _callbackFailures = new();
+
+    /// <summary>
+    ///     同一個承租外掛的回呼失敗，最多每這麼多毫秒印一次完整例外。
+    /// </summary>
+    private const long CallbackFailureLogWindowMs = 60_000;
+
+    /// <summary>
+    ///     記錄承租外掛的取消回呼擲出的例外，同一個外掛節流到每分鐘一次。
+    /// </summary>
+    /// <remarks>
+    ///     用 <see cref="Logging.Error" />（≥ Information，使用者的 LogLevel 2 收得到）。
+    ///     訊息一定帶承租外掛名——不然使用者回報「我的租約被莫名取消」時，
+    ///     log 裡看不出是誰的回呼炸的。<br />
+    ///     ⚠️ 這裡刻意不用 <c>EzThrottler</c>：它的 key 是全域持久的，
+    ///     和別處共用一個命名空間；而且它只能回答「放不放行」，沒辦法順便把
+    ///     被抑制掉的次數帶出來。同檔 <c>ConflictingPluginsChecks</c> 也是同樣理由
+    ///     自己用 <c>TickCount64</c> 做。
+    /// </remarks>
+    private static void LogCallbackFailure(
+        string pluginName, CancellationReasonEnum cancellationReason, Exception e)
+    {
+        // 這裡是例外處理路徑，本身再擲例外就會把「取消」整條打斷 —— 而擋掉
+        // 那件事正是這整段程式碼存在的理由。所以全部包起來。
+        try
+        {
+            var key = string.IsNullOrEmpty(pluginName) ? "<unknown leasee>" : pluginName;
+            var now = Environment.TickCount64;
+
+            var seen = _callbackFailures.TryGetValue(key, out var state);
+
+            // ⚠️ 不要拿哨兵值（如 long.MinValue）當「還沒印過」：
+            // now - long.MinValue 會溢位成負數，比較就永遠不成立。
+            // 改用「字典裡有沒有這個 key」來表示，第一次必定印。
+            if (seen && now - state.LoggedAt < CallbackFailureLogWindowMs)
+            {
+                _callbackFailures[key] = (state.LoggedAt, state.Suppressed + 1);
+                return;
+            }
+
+            var suppressed = seen ? state.Suppressed : 0;
+            _callbackFailures[key] = (now, 0);
+
+            Logging.Error(
+                "Leasee '" + key +
+                "' threw from its lease-cancellation callback (" +
+                cancellationReason + "). " +
+                "The lease was still cancelled and removed; " +
+                "only the leasee's own notification failed." +
+                (suppressed > 0
+                    ? " (" + suppressed +
+                      " further failure(s) from this leasee were suppressed " +
+                      "in the last " + CallbackFailureLogWindowMs / 1000 + "s.)"
+                    : "") +
+                "\n" + e);
+        }
+        catch
+        {
+            // 連記 log 都失敗就放棄記錄。絕對不能讓它往上冒。
+        }
+    }
+
+    #endregion
 }
 
 public partial class Leasing
@@ -753,12 +830,37 @@ public partial class Leasing
         //    RemoveRegistration() 內的 Registrations[lease] 會擲
         //    KeyNotFoundException。Provider.ReleaseControl() 本身也是先
         //    CheckLeaseExists() 再呼叫，這裡沿用同一個慣例。
+        //
+        // 🔴 一把租約收不掉，不能連累其他租約收不掉。
+        //    Lease.Cancel() 內部已經把「承租端回呼擲例外」擋住了，但
+        //    RemoveRegistration() 裡還有別的東西會擲：結尾的
+        //    P.IPCSearch.UpdateActiveJobPresets() 會整份重算職業 preset
+        //    （最終走到設定與 Excel 表），以及 WrathUserManuallyCancelled 那條
+        //    路徑上的 _userRevokedTemporaryBlacklist.Add()（同鍵會擲
+        //    ArgumentException）。任何一個擲出來，這個 foreach 就地中斷，
+        //    剩下的租約既沒被通知也沒被移除 —— 而這條路徑正是
+        //    Provider.Dispose()（外掛停用）走的，剩下的承租外掛會一直以為
+        //    自己還握著 Wrath 的控制權。
+        //    每一把各自 try，收不掉的那把記一行就繼續。
         foreach (var leaseId in new List<Guid>(Registrations.Keys))
         {
             if (!Registrations.ContainsKey(leaseId))
                 continue;
 
-            RemoveRegistration(leaseId, reasonToUse);
+            // 名字要在移除前抄下來，之後那把租約就查不到了。
+            var leaseeName = Registrations[leaseId].PluginName;
+
+            try
+            {
+                RemoveRegistration(leaseId, reasonToUse);
+            }
+            catch (Exception e)
+            {
+                Logging.Error(
+                    "Failed to suspend the lease held by '" + leaseeName +
+                    "' (" + reasonToUse + "); continuing with the remaining " +
+                    "leases.\n" + e);
+            }
         }
     }
 
@@ -793,25 +895,52 @@ public partial class Leasing
 
         _checkingLeaseePluginsUnloaded = true;
 
-        var plugins = Svc.PluginInterface
-            .InstalledPlugins
-            .Where(p => p.IsLoaded)
-            .Select(p => p.InternalName).ToList();
-        var leasesCopy = new Dictionary<Guid, Lease>(Registrations);
+        // 🔴 這個方法掛在 Framework.Update 上，而 _checkingLeaseePluginsUnloaded
+        //    是「正在跑」的閘門。原本收尾那兩行只要被任何例外跳過，旗標就永遠
+        //    停在 true，之後每一幀都在開頭 return —— 「承租外掛被停用時自動收回
+        //    租約」這個功能會**靜默永久失效**，而且沒有任何徵兆。
+        //    改成 try/finally，保證旗標一定會被放掉。
+        try
+        {
+            var plugins = Svc.PluginInterface
+                .InstalledPlugins
+                .Where(p => p.IsLoaded)
+                .Select(p => p.InternalName).ToList();
+            var leasesCopy = new Dictionary<Guid, Lease>(Registrations);
 
-        // 這裡本來就是對快照迭代（Add 型再入不會炸），但仍要確認鍵還在：
-        // RemoveRegistration() 觸發的取消回呼可能讓承租端順手 ReleaseControl()
-        // 掉快照裡的另一把租約，那之後 Registrations[lease] 會擲
-        // KeyNotFoundException。與 SuspendLeases() 同一個閘門。
-        foreach (var (lease, registration) in leasesCopy)
-            if (!plugins.Contains(registration.InternalPluginName) &&
-                Registrations.ContainsKey(lease))
-                RemoveRegistration(
-                    lease, CancellationReasonEnum.LeaseePluginDisabled
-                );
-
-        _checkingLeaseePluginsUnloaded = false;
-        _framesSinceLastCheck = 0;
+            // 這裡本來就是對快照迭代（Add 型再入不會炸），但仍要確認鍵還在：
+            // RemoveRegistration() 觸發的取消回呼可能讓承租端順手 ReleaseControl()
+            // 掉快照裡的另一把租約，那之後 Registrations[lease] 會擲
+            // KeyNotFoundException。與 SuspendLeases() 同一個閘門。
+            foreach (var (lease, registration) in leasesCopy)
+                if (!plugins.Contains(registration.InternalPluginName) &&
+                    Registrations.ContainsKey(lease))
+                    // 與 SuspendLeases() 同理：一把收不掉不能連累其他把，
+                    // 更不能讓例外冒進 Framework.Update。
+                    try
+                    {
+                        RemoveRegistration(
+                            lease, CancellationReasonEnum.LeaseePluginDisabled
+                        );
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.Error(
+                            "Failed to remove the lease held by unloaded plugin '" +
+                            registration.PluginName +
+                            "'; continuing with the remaining leases.\n" + e);
+                    }
+        }
+        catch (Exception e)
+        {
+            Logging.Error(
+                "The leasee-unloaded check failed.\n" + e);
+        }
+        finally
+        {
+            _checkingLeaseePluginsUnloaded = false;
+            _framesSinceLastCheck = 0;
+        }
     }
 
     #endregion
