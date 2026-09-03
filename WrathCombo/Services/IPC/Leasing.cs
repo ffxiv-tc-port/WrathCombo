@@ -168,7 +168,7 @@ public class Lease(
         }
         catch (Exception e)
         {
-            // 不吞成完全靜默：使用者跑 LogLevel 2，Error 收得到。
+            // 不吞成完全靜默：使用者跑 LogLevel 1，Error 收得到。
             LogCallbackFailure(PluginName, cancellationReason, e);
         }
     }
@@ -200,7 +200,7 @@ public class Lease(
     ///     記錄承租外掛的取消回呼擲出的例外，同一個外掛節流到每分鐘一次。
     /// </summary>
     /// <remarks>
-    ///     用 <see cref="Logging.Error" />（≥ Information，使用者的 LogLevel 2 收得到）。
+    ///     用 <see cref="Logging.Error" />（≥ Information，使用者的 LogLevel 1 收得到）。
     ///     訊息一定帶承租外掛名——不然使用者回報「我的租約被莫名取消」時，
     ///     log 裡看不出是誰的回呼炸的。<br />
     ///     ⚠️ 這裡刻意不用 <c>EzThrottler</c>：它的 key 是全域持久的，

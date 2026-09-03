@@ -233,7 +233,7 @@ internal sealed class BossModIPC(
         }
         catch (Exception e)
         {
-            // 一律 Information：使用者的記錄等級會把 Debug/Verbose 濾掉，
+            // 一律 Information：使用者的記錄等級只會濾掉 Verbose、Debug 收得到但單檔數十萬行會淹沒，
             // 而這條正是「功能悄悄不動」時唯一查得到的線索。
             if (EZ.Throttle($"MechanicHintsFailure_{tag}", TS.FromMinutes(1)))
                 PluginLog.Information(

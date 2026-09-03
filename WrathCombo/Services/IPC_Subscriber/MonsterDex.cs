@@ -140,7 +140,7 @@ internal static class MonsterDexIPC
 
         _loggedUnavailable = true;
 
-        // 一律 Information：使用者的記錄等級會濾掉 Debug/Verbose。
+        // 一律 Information：使用者的記錄等級只會濾掉 Verbose、Debug 收得到但單檔數十萬行會淹沒。
         PluginLog.Information(
             $"[MonsterDex] `GetMobVulnerabilities` 目前不可用，" +
             $"接下來 {UnavailableBackoffMs / 1000} 秒內一律視同「無資料」（＝放行，" +

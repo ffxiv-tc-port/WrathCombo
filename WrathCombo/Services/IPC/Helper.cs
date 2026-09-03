@@ -403,7 +403,7 @@ public partial class Helper(ref Leasing leasing)
             // 承租外掛沒註冊這個回呼，或是已經卸載了。這是預期得到的狀況，不是錯誤。
             // 舊版走 EzIPC 的 SafeWrapper.IPCException，也是只把它交給
             // EzIpcFailureLog 印一行 Information，這裡維持同樣的處置。
-            // 一律 Information：使用者跑 LogLevel 2，Debug/Verbose 收不到。
+            // 一律 Information：使用者跑 LogLevel 1，盲區只有 Verbose,Debug 收得到但單檔數十萬行會淹沒。
             Logging.Information(
                 "Leasee has no lease-cancellation callback registered " +
                 "(IPC method '" + ipcName + "' is not registered); " +
@@ -544,7 +544,7 @@ internal static class Logging
     ///     要請使用者回報的診斷訊息用這個。
     /// </summary>
     /// <remarks>
-    ///     📌 使用者跑的是 LogLevel 2，<see cref="Log" />（Debug）與 <see cref="Verbose" />
+    ///     📌 使用者跑的是 LogLevel 1，<see cref="Log" />（Debug）與 <see cref="Verbose" />
     ///     都收不到，只有 Information 以上才會進實機 log。
     /// </remarks>
     public static void Information(string message) =>

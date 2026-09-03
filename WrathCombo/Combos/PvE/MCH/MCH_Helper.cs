@@ -490,7 +490,7 @@ internal partial class MCH
         if (idle == 0)
             return false;
 
-        // 使用者跑 LogLevel 2，診斷一律 Information；10 秒最多一次，避免洗版
+        // 使用者跑 LogLevel 1，診斷一律 Information；10 秒最多一次，避免洗版
         if (EZ.Throttle($"MCH_IdleSplashBlocked_{actionId}", 10000))
             Svc.Log.Information(
                 $"[MCH] {actionId.ActionName()} 被擋：以目標為圓心半徑 {radius}y 內有 {idle} 隻未交戰的敵人（避免誤拉）。");
