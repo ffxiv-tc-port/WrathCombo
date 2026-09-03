@@ -75,7 +75,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create($"Use {SCH.EmergencyTactics.ActionName()} before {SCH.Adloquium.ActionName()}", $"在{SCH.Adloquium.ActionName()}之前使用{SCH.EmergencyTactics.ActionName()}"),
                 KeyValuePair.Create("Start using when below HP %. Set to 100 to disable this check", "當生命值低於此百分比時開始使用。設定為100以禁用此檢查。"),
                 KeyValuePair.Create("Stop using when above HP %.", "當生命值高於此百分比時停止使用。"),
-                KeyValuePair.Create("Minimal Fairy Gauge to start using Aetherpact", "開始使用乙太契約所需的最低異想以太"),
+                KeyValuePair.Create("Minimal Fairy Gauge to start using Aetherpact", "開始使用乙太契約所需的最低異想乙太"),
                 KeyValuePair.Create("Show Aetherflow On Energy Drain Only", "僅在吸取能量上顯示乙太超流"),
                 KeyValuePair.Create("Show Aetherflow On All Aetherflow Skills", "在所有乙太超流技能上顯示乙太超流"),
                 KeyValuePair.Create("Only when out of Aetherflow Stacks", "僅在乙太超流層數用盡時"),

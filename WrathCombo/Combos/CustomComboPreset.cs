@@ -219,7 +219,7 @@ public enum CustomComboPreset
 
     [OccultCrescent]
     [ParentCombo(Phantom_Chemist)]
-    [CustomComboInfo("魔以太藥", "將魔以太藥加入循環。\n需要揹包中有魔治療劑。", OccultCrescent.JobID)]
+    [CustomComboInfo("魔乙太藥", "將魔乙太藥加入循環。\n需要揹包中有魔治療劑。", OccultCrescent.JobID)]
     Phantom_Chemist_OccultEther = 110035,
 
     [OccultCrescent]
@@ -385,7 +385,7 @@ public enum CustomComboPreset
 
     [OccultCrescent]
     [ParentCombo(Phantom_Geomancer_Weather)]
-    [CustomComboInfo("以太浴", "將以太浴加入循環。", OccultCrescent.JobID)]
+    [CustomComboInfo("乙太浴", "將乙太浴加入循環。", OccultCrescent.JobID)]
     Phantom_Geomancer_AetherialGain = 110072,
 
     //Last Value = 110075
