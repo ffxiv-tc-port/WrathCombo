@@ -418,13 +418,10 @@ public sealed partial class WrathCombo : IDalamudPlugin
         Debug.Dispose();
 
         // Try to force a config save if there are some pending
+        // 鎖內只做佇列操作、鎖外才寫檔：整併與存檔都在
+        // PluginConfiguration.FlushQueuedSavesOnDispose() 裡完成。
         if (PluginConfiguration.SaveQueue.Count > 0)
-            lock (PluginConfiguration.SaveQueue)
-            {
-                PluginConfiguration.SaveQueue.Clear();
-                Service.Configuration.Save();
-                PluginConfiguration.ProcessSaveQueue();
-            }
+            Service.Configuration.FlushQueuedSavesOnDispose();
 
         ws.RemoveAllWindows();
         Svc.DtrBar.Remove("Wrath Combo");

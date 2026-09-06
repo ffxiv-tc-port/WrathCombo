@@ -404,8 +404,20 @@ namespace WrathCombo.Core
 
             _isSaving = true;
             (PluginConfiguration config, string trace) dequeued;
+
+            // 鎖內只做佇列操作：序列化與寫檔（SavePluginConfig）一律在鎖外，
+            // 否則每一個排存檔的執行緒都得跟著在磁碟上排隊。
+            // 上面的 Count 檢查與這裡的取出不在同一段臨界區，所以用
+            // TryDequeue 而不是 Dequeue：佇列被別人先清空時不會擲例外。
             lock (SaveQueue)
-                dequeued = SaveQueue.Dequeue();
+            {
+                if (!SaveQueue.TryDequeue(out dequeued))
+                {
+                    _isSaving = false;
+                    return;
+                }
+            }
+
             var (config, trace) = dequeued;
 
             try
@@ -483,6 +495,41 @@ namespace WrathCombo.Core
                 SaveQueue.Enqueue(
                     (this, $"{caller} ({Path.GetFileName(callerFile)}:{callerLine})"));
             }
+        }
+
+        /// <summary>
+        ///     卸載時把佇列裡待存的項目收斂成「只存這一份設定一次」。
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///     鎖內只做佇列操作（清空佇列、排入這一份設定），真正的序列化與
+        ///     寫檔由鎖外的 <see cref="ProcessSaveQueue"/> 執行 —— 存檔留在
+        ///     鎖內會讓每一個排存檔的執行緒都跟著在磁碟上排隊。
+        ///     </para>
+        ///     <para>
+        ///     行為與舊版逐項對齊：Debug.DebugConfig 開著時一樣只清空佇列、
+        ///     不排入也不存檔（舊版是靠 <see cref="Save"/> 裡的同一個閘門
+        ///     達成的，清空之後佇列必為空，去重掃描不會命中）；出列後若存檔
+        ///     失敗，重試與錯誤訊息一樣走 <see cref="ProcessSaveQueue"/> 的
+        ///     既有路徑。
+        ///     </para>
+        /// </remarks>
+        /// <seealso cref="SaveQueue"/>
+        /// <seealso cref="Save"/>
+        internal void FlushQueuedSavesOnDispose
+            ([CallerMemberName] string caller = "",
+             [CallerFilePath] string callerFile = "",
+             [CallerLineNumber] int callerLine = 0)
+        {
+            lock (SaveQueue)
+            {
+                SaveQueue.Clear();
+                if (!Debug.DebugConfig)
+                    SaveQueue.Enqueue(
+                        (this, $"{caller} ({Path.GetFileName(callerFile)}:{callerLine})"));
+            }
+
+            ProcessSaveQueue();
         }
 
         #endregion
