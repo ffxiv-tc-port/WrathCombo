@@ -391,37 +391,23 @@ public partial class Leasing
     }
 
     /// <summary>
-    ///     這個 IPC 記錄鍵上次真的印出來的時間（<c>Environment.TickCount64</c>）。
+    ///     這個租約表自己的 IPC 記錄節流器（自帶鎖、自帶字典）。
     /// </summary>
     /// <remarks>
-    ///     🔴🔴 <b>為什麼不用 <c>ECommons</c> 的 <c>EzThrottler</c></b>：它是整個外掛
-    ///     共用的<b>靜態裸 <c>Dictionary</c></b>，零同步。用到它的這幾支是 IPC 端點的
-    ///     後端，跑在<b>承租外掛的執行緒</b>上，而 Wrath 自己的戰鬥碼每一幀都在
-    ///     framework 執行緒上打同一個 <c>EzThrottler</c>
-    ///     ⇒ 失敗形式不是「節流失準」，而是<b>那個字典本身壞掉</b>，
-    ///     還會連帶弄壞這個外掛<b>所有</b>模組的節流。<br />
+    ///     🔴🔴 <b>刻意不用 <c>ECommons</c> 的 <c>EzThrottler</c></b> —— 理由與
+    ///     注意事項寫在 <see cref="IpcThrottle" />。<br />
     ///     📌 同檔的 <c>Lease.LogCallbackFailure</c> 與
-    ///     <c>ConflictingPluginsChecks</c> 也是同樣理由自己用 <c>TickCount64</c> 做。
+    ///     <c>ConflictingPluginsChecks</c> 也是同樣理由自己用
+    ///     <c>TickCount64</c> 做。
     /// </remarks>
-    private readonly Dictionary<string, long> _ipcLogThrottle = [];
+    private readonly IpcThrottle _ipcLogThrottle = new();
 
     /// <summary>
     ///     同一個 <paramref name="key" /> 每 <paramref name="windowMs" /> 毫秒只放行
     ///     一次；第一次必定放行（與 <c>EzThrottler</c> 的行為一致）。
     /// </summary>
-    private bool ThrottleIpcLog(string key, long windowMs)
-    {
-        lock (_gate)
-        {
-            var now = Environment.TickCount64;
-            if (_ipcLogThrottle.TryGetValue(key, out var last) &&
-                now - last < windowMs)
-                return false;
-
-            _ipcLogThrottle[key] = now;
-            return true;
-        }
-    }
+    private bool ThrottleIpcLog(string key, long windowMs) =>
+        _ipcLogThrottle.Throttle(key, windowMs);
 
     #endregion
 
@@ -700,9 +686,22 @@ public partial class Leasing
     {
         // 鎖內只做判斷與字典寫入；Logging 會建一個 StackTrace，留到鎖外印。
         //
-        // ⚠️ 這裡的判斷式維持原樣（AutoRotationConfigsControlled.Count > 0 而不是
-        //    AutoRotationControlled.Count > 0）。看起來像筆誤，但改它會改變行為，
-        //    不在這次的範圍內 —— 已另外回報。
+        // 🔴 這個判斷式原本守的是 AutoRotationConfigsControlled（設定選項表），
+        //    索引的卻是 AutoRotationControlled（自動循環開關表）—— 守 A 索引 B。
+        //    承租外掛先呼叫 SetAutoRotationConfigState 再呼叫 SetAutoRotationState
+        //    時，A 已經有東西而 B 還是空的 ⇒ AutoRotationControlled[0] 會擲
+        //    KeyNotFoundException，而且 CheckForBailConditionsAtSetTime 攔不到它
+        //    （那一支只驗 IPC 開關、租約存在、黑名單三件事）。例外會沿著
+        //    [EzIPC] 端點丟回承租外掛的執行緒上。
+        //    同檔每一支對稱的實作都是「守自己、索引自己」——
+        //    CheckAutoRotationControlled() 與雙生的
+        //    AddRegistrationForAutoRotationConfig() 都是如此 ⇒ 判定為筆誤
+        //    （上游 5699d7bbe 引入），照對稱形狀修正，並改用 TryGetValue
+        //    讓它永遠不會擲 KeyNotFoundException。
+        //    ⚠️ 附帶的行為變更：承租外掛重複設定同一個值時，現在回 Duplicate
+        //    而不是 Okay，因此不再更新 LastUpdated。多個承租外掛同時控制自動
+        //    循環時，「重設同值」不再能把自己拱回優先權最高 —— 這與雙生的
+        //    AddRegistrationForAutoRotationConfig() 的既有行為一致。
         string pluginName;
         bool duplicate;
         lock (_gate)
@@ -710,8 +709,9 @@ public partial class Leasing
             var registration = _registrations[lease];
             pluginName = registration.PluginName;
 
-            duplicate = registration.AutoRotationConfigsControlled.Count > 0 &&
-                        registration.AutoRotationControlled[0] == newState;
+            duplicate =
+                registration.AutoRotationControlled.TryGetValue(0, out var current) &&
+                current == newState;
 
             if (!duplicate)
             {

@@ -13,7 +13,6 @@ using WrathCombo.Core;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Extensions;
 using WrathCombo.Window.Tabs;
-using EZ = ECommons.Throttlers.EzThrottler;
 using TS = System.TimeSpan;
 
 #endregion
@@ -29,6 +28,18 @@ public class Search(Leasing leasing)
         StringComparison.CurrentCultureIgnoreCase;
 
     private readonly Leasing _leasing = leasing;
+
+    /// <summary>
+    ///     這個 Search 自己的節流器（自帶鎖、自帶字典）。
+    /// </summary>
+    /// <remarks>
+    ///     🔴 <b>不要換回 <c>ECommons</c> 的 <c>EzThrottler</c></b>：
+    ///     <see cref="PresetStates" /> 會從 <c>[EzIPC]</c> 端點
+    ///     （<c>Provider.GetComboState</c>／<c>GetComboOptionState</c>，跑在
+    ///     <b>承租外掛的執行緒</b>上）與 UI 繪製路徑同時進來。
+    ///     理由與注意事項見 <see cref="IpcThrottle" />。
+    /// </remarks>
+    private readonly IpcThrottle _ipcThrottle = new();
 
     #region Aggregations of Leasing Configurations
 
@@ -308,7 +319,7 @@ public class Search(Leasing leasing)
             else
             {
                 if (field != null &&
-                    !EZ.Throttle("ipcPresetStateCheck", TS.FromSeconds(1)) &&
+                    !_ipcThrottle.Throttle("ipcPresetStateCheck", TS.FromSeconds(1)) &&
                     presetsUpdated <= _lastCacheUpdateForPresetStates)
                     return field;
             }

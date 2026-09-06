@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using ECommons.EzIpcManager;
 using arcOption = WrathCombo.Services.IPC.AutoRotationConfigOption;
-using EZ = ECommons.Throttlers.EzThrottler;
 
 #endregion
 
@@ -57,8 +56,8 @@ public partial class Provider
             // 不要回一個看起來合法的值把呼叫端騙過去。
             if (UnsupportedConfigOptions.Contains(option))
             {
-                // 這個端點可能被輪詢，節流以免洗版；EzThrottler 首次一定放行。
-                if (EZ.Throttle($"WrathIPCUnsupportedARConfigGet{option}", 60_000))
+                // 這個端點可能被輪詢，節流以免洗版；IpcThrottle 首次一定放行。
+                if (_ipcThrottle.Throttle($"WrathIPCUnsupportedARConfigGet{option}", 60_000))
                     Logging.Information(
                         $"自動循環設定選項 '{option}' 在本 fork 尚未實作，查詢一律回傳 null。");
                 return null;

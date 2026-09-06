@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WrathCombo.Combos;
 using ECommons.DalamudServices;
-using EZ = ECommons.Throttlers.EzThrottler;
 using TS = System.TimeSpan;
 
 // ReSharper disable UnusedMethodReturnValue.Global
@@ -52,6 +51,16 @@ public partial class Provider : IDisposable
     /// </summary>
     // ReSharper disable once MemberCanBePrivate.Global
     internal readonly Helper Helper;
+
+    /// <summary>
+    ///     這個 IPC 提供者自己的節流器（自帶鎖、自帶字典）。
+    /// </summary>
+    /// <remarks>
+    ///     🔴 <b>不要換回 <c>ECommons</c> 的 <c>EzThrottler</c></b>：這個類別裡
+    ///     帶 <c>[EzIPC]</c> 的方法是跑在<b>承租外掛的執行緒</b>上的。理由與
+    ///     注意事項見 <see cref="IpcThrottle" />。
+    /// </remarks>
+    private readonly IpcThrottle _ipcThrottle = new();
 
     /// <summary>
     ///     Whether the IPC (when initialized by <see cref="Init"/>) is ready.
@@ -375,7 +384,7 @@ public partial class Provider : IDisposable
     {
         if (File.GetLastWriteTime(P.IPCSearch.ConfigFilePath) <= _lastJobReadyCheck &&
             (Leasing.CombosUpdated ?? DateTime.MinValue) <= _lastJobReadyCheck &&
-            !EZ.Throttle("ipcJobReadyCheck", TS.FromSeconds(30)))
+            !_ipcThrottle.Throttle("ipcJobReadyCheck", TS.FromSeconds(30)))
             return _lastJobReady;
 
         // Check if the current job has a Single and Multi-Target combo configured on
@@ -388,7 +397,7 @@ public partial class Provider : IDisposable
                jobAutoOn.All(x => x.Value is not null);
 
         // Log if not ready
-        if (!allGood && EZ.Throttle("ipcJobReadyCheckLog", TS.FromSeconds(5)))
+        if (!allGood && _ipcThrottle.Throttle("ipcJobReadyCheckLog", TS.FromSeconds(5)))
             Logging.Log(
                 $"Current job is not fully ready for Auto-Rotation.\n" +
                 $"jobOn: {JsonConvert.SerializeObject(jobOn)}\n" +

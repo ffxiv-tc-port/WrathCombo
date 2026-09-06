@@ -17,7 +17,6 @@ using WrathCombo.Attributes;
 using WrathCombo.Combos;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Extensions;
-using EZ = ECommons.Throttlers.EzThrottler;
 using TS = System.TimeSpan;
 
 #endregion
@@ -450,6 +449,17 @@ public partial class Helper(ref Leasing leasing)
     private bool? _ipcEnabled;
 
     /// <summary>
+    ///     這個 Helper 自己的節流器（自帶鎖、自帶字典）。
+    /// </summary>
+    /// <remarks>
+    ///     🔴 <b>不要換回 <c>ECommons</c> 的 <c>EzThrottler</c></b>：
+    ///     <see cref="IPCEnabled" /> 會被 <c>Provider.BuildCaches</c> 的
+    ///     <c>Task.Run</c>（執行緒池）與每一個 <c>Set</c> 端點的前置檢查
+    ///     （承租外掛的執行緒）同時打。理由與注意事項見 <see cref="IpcThrottle" />。
+    /// </remarks>
+    private readonly IpcThrottle _ipcThrottle = new();
+
+    /// <summary>
     ///     The lightly-cached live IPC status.<br />
     ///     Backed by <see cref="_ipcEnabled" />.
     /// </summary>
@@ -461,9 +471,17 @@ public partial class Helper(ref Leasing leasing)
         {
             // If the IPC status was checked within the last 45 minutes:
             // return the cached value
-            if (_ipcEnabled is not null &&
-                !EZ.Throttle("ipcLastStatusChecked", TS.FromMinutes(45)))
-                return _ipcEnabled!.Value;
+            // ⚠️ 先把欄位抄進區域變數再判斷：這支 getter 會被執行緒池
+            //    （Provider.BuildCaches 的 Task.Run）與承租外掛的執行緒同時打，
+            //    「判斷 is not null」與「取 .Value」如果各讀一次欄位，中間是可以
+            //    被別條執行緒插進來改掉的。抄一份就沒有那個縫。
+            //    🔴 節流器換成自帶鎖的 IpcThrottle，語意與原本的 EzThrottler
+            //    逐字相同（首次必放行、放行時重新計時），所以 45 分鐘的快取
+            //    效期沒有改變；HTTP 查詢一樣在鎖外做。
+            var cached = _ipcEnabled;
+            if (cached is not null &&
+                !_ipcThrottle.Throttle("ipcLastStatusChecked", TS.FromMinutes(45)))
+                return cached.Value;
 
             // Otherwise, check the status and cache the result
             string data;
