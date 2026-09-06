@@ -967,7 +967,8 @@ internal class Debug : ConfigWindow, IDisposable
             if (_wrathLease is not null)
             {
                 CustomStyleText("Lease GUID", $"{_wrathLease}");
-                CustomStyleText("Configurations: ", $"{P.IPC.Leasing.Registrations[_wrathLease!.Value].SetsLeased}");
+                CustomStyleText("Configurations: ",
+                    $"{P.IPC.Leasing.TryGetSetsLeased(_wrathLease!.Value)?.ToString() ?? "?"}");
 
                 ImGuiEx.Spacing(new Vector2(20, 20));
 
@@ -1017,7 +1018,14 @@ internal class Debug : ConfigWindow, IDisposable
 
             CustomStyleText("All Leases:", "");
 
-            if (P.IPC.Leasing.Registrations.Count > 0)
+            // 🔴 一次拍完快照再畫，不要在繪製迴圈裡走訪活的租約表：
+            //    IPC 端點跑在承租外掛的執行緒上，隨時可能 Add ⇒ foreach 會擲
+            //    InvalidOperationException，而那是從 Draw() 冒出去的
+            //    （Dalamud 10 秒內兩次就把整個視窗永久關掉）。
+            //    也不可以改成「握著鎖畫」——鎖內呼叫 ImGui 是另一條紅線。
+            var leases = P.IPC.Leasing.SnapshotLeases();
+
+            if (leases.Length > 0)
             {
                 ImGui.SameLine();
                 if (ImGui.Button("Release All Leases".Loc()))
@@ -1025,35 +1033,29 @@ internal class Debug : ConfigWindow, IDisposable
                     P.IPC.Leasing.SuspendLeases();
                     _wrathLease = null;
                 }
-            }
 
-            if (P.IPC.Leasing.Registrations.Count > 0)
-            {
-                foreach (var registration in P.IPC.Leasing.Registrations)
+                foreach (var lease in leases)
                 {
-                    var jobs = registration.Value.JobsControlled.Count > 0
-                        ? string.Join(",", registration.Value.JobsControlled.Keys)
-                        : "0";
-                    var combos = registration.Value.CombosControlled.Count > 0
-                        ? registration.Value.CombosControlled.Count.ToString()
+                    var combos = lease.Combos > 0
+                        ? lease.Combos.ToString()
                         : "0";
 
                     CustomStyleText(
-                        $"{registration.Value.PluginName}",
-                        $"Configurations: {registration.Value.SetsLeased,3}; " +
-                        $"Auto-Rotation: {registration.Value.AutoRotationControlled.Count > 0}");
+                        $"{lease.PluginName}",
+                        $"Configurations: {lease.SetsLeased,3}; " +
+                        $"Auto-Rotation: {lease.AutoRotation}");
 
                     ImGui.NewLine();
                     ImGuiEx.Spacing(new Vector2(10, 0));
                     ImGui.SameLine();
                     if (ImGui.Button("Release".Loc()))
                     {
-                        P.IPC.ReleaseControl(registration.Key);
+                        P.IPC.ReleaseControl(lease.ID);
                     }
                     ImGui.SameLine();
 
-                    CustomStyleText("", $"Jobs: {jobs,-30} " + $"Combos: {combos,-6}");
-                    CustomStyleText("", $"Created: {" ",-24} {registration.Value.Created:yyyy-MM-ddTHH:mm:ss}");
+                    CustomStyleText("", $"Jobs: {lease.Jobs,-30} " + $"Combos: {combos,-6}");
+                    CustomStyleText("", $"Created: {" ",-24} {lease.Created:yyyy-MM-ddTHH:mm:ss}");
                 }
             }
             else

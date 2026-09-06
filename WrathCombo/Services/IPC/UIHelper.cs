@@ -48,16 +48,19 @@ public class UIHelper(Leasing leasing)
             return null;
 
         // Re-populate the cache with the current state, slowest
-        var controllers = _leasing.Registrations.Values
-            .Where(l => l.AutoRotationControlled.Count != 0)
-            .OrderByDescending(l => l.LastUpdated)
-            .ToList();
-        var controllingLeases = controllers
-            .Select(l => l.PluginName);
-        var controlledState = controllers
-            .First().AutoRotationControlled[0];
+        //
+        // 🔴 這裡跑在繪製執行緒上，而 IPC 端點在別條執行緒上改同一批字典
+        //    ⇒ 走訪一定要在 Leasing 的鎖內做，拿回來的是值不是活字典。
+        // ⚠️ 順手修掉一個既有的 .First()：上面的 CheckAutoRotationControlled()
+        //    與這一行之間鎖是放開的，租約可能剛好在這個空檔被收走，
+        //    原本的 .First() 會擲 InvalidOperationException（"Sequence contains
+        //    no elements"）。快照回 null 就照「沒人控制」處理。
+        var snapshot = _leasing.SnapshotAutoRotationControllers();
+        if (snapshot is null)
+            return null;
+
         AutoRotationControlled =
-            (string.Join(", ", controllingLeases), controlledState);
+            (string.Join(", ", snapshot.Value.Controllers), snapshot.Value.State);
         _autoRotationUpdated = _leasing.AutoRotationStateUpdated;
 
         return AutoRotationControlled;
@@ -271,12 +274,10 @@ public class UIHelper(Leasing leasing)
 
     #endregion
 
-    internal int ShowNumberOfLeasees() => _leasing.Registrations.Count;
+    internal int ShowNumberOfLeasees() => _leasing.RegistrationCount;
 
     internal (string pluginName, int configurationsCount)[] ShowLeasees() =>
-        _leasing.Registrations.Values
-            .Select(l => (l.PluginName, l.SetsLeased))
-            .ToArray();
+        _leasing.SnapshotLeaseeSummaries();
 
     // Method to display the controlled indicator, which lists the plugins
     private bool ShowIPCControlledIndicator
@@ -602,13 +603,26 @@ public class UIHelper(Leasing leasing)
     private void RevokeControl(string controllers)
     {
         var controllerNames = controllers.Split(", ");
-        var leases = _leasing.Registrations.Values
-            .Where(l => controllerNames.Contains(l.PluginName))
-            .Select(l => l.ID)
-            .ToList();
+
+        // 🔴 先在鎖內把 ID 抄出來，再在鎖外一把一把收：RemoveRegistration() 會
+        //    回呼承租外掛的碼，握著鎖跑它會死結。
+        // ⚠️ 抄出來到真的收之間，租約可能已經不在了（承租端自己 ReleaseControl()、
+        //    或它的外掛被停用）⇒ RemoveRegistration() 內的索引會擲
+        //    KeyNotFoundException。這裡跑在繪製執行緒上，讓它冒出去會被 Dalamud
+        //    當成 Draw() 失敗（10 秒內兩次就把視窗永久關掉），所以逐把攔。
+        var leases = _leasing.FindLeasesByPluginNames(controllerNames);
         foreach (var lease in leases)
-            _leasing.RemoveRegistration(
-                lease, CancellationReason.WrathUserManuallyCancelled);
+            try
+            {
+                _leasing.RemoveRegistration(
+                    lease, CancellationReason.WrathUserManuallyCancelled);
+            }
+            catch (Exception e)
+            {
+                Logging.Error(
+                    "Failed to revoke a lease the user asked to revoke; " +
+                    "it may already have been released.\n" + e);
+            }
     }
 
     #region Actual UI Method overloads

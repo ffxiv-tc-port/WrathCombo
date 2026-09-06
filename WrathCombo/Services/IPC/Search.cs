@@ -53,8 +53,11 @@ public class Search(Leasing leasing)
                 LastCacheUpdateForAutoRotationConfigs)
                 return field;
 
-            field = _leasing.Registrations.Values
-                .SelectMany(registration => registration
+            // 🔴 走訪租約與它身上的 ...Controlled 字典必須在 Leasing 的鎖內做
+            //    （ProjectLeases 負責），不然 IPC 端點在別條執行緒上 Add 時，
+            //    這裡的 LINQ 會擲 InvalidOperationException。
+            //    選出來的是<b>值</b>（匿名型別的四個欄位），沒有把字典漏到鎖外。
+            field = _leasing.ProjectLeases(registration => registration
                     .AutoRotationConfigsControlled
                     .Select(pair => new
                     {
@@ -95,8 +98,7 @@ public class Search(Leasing leasing)
                 _leasing.JobsUpdated == LastCacheUpdateForAllJobsControlled)
                 return field;
 
-            field = _leasing.Registrations.Values
-                .SelectMany(registration => registration.JobsControlled
+            field = _leasing.ProjectLeases(registration => registration.JobsControlled
                     .Select(pair => new
                     {
                         pair.Key,
@@ -145,8 +147,7 @@ public class Search(Leasing leasing)
                 presetsUpdated == LastCacheUpdateForAllPresetsControlled)
                 return field;
 
-            field = _leasing.Registrations.Values
-                .SelectMany(registration => registration.CombosControlled
+            field = _leasing.ProjectLeases(registration => registration.CombosControlled
                     .Select(pair => new
                     {
                         pair.Key,
@@ -163,8 +164,7 @@ public class Search(Leasing leasing)
                             x => (x.enabled, x.autoMode))
                 )
                 .Concat(
-                    _leasing.Registrations.Values
-                        .SelectMany(registration => registration.OptionsControlled
+                    _leasing.ProjectLeases(registration => registration.OptionsControlled
                             .Select(pair => new
                             {
                                 pair.Key,
