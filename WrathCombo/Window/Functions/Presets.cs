@@ -155,7 +155,7 @@ namespace WrathCombo.Window.Functions
             if (auto != null)
             {
                 if (!Service.Configuration.AutoActions.ContainsKey(preset))
-                    Service.Configuration.AutoActions[preset] = false;
+                    Service.Configuration.SetAutoAction(preset, false);
 
                 var label = "Auto-Mode".Loc();
                 var labelSize = ImGui.CalcTextSize(label);
@@ -166,7 +166,7 @@ namespace WrathCombo.Window.Functions
                 {
                     DebugFile.AddLog($"Set Auto-Mode for {preset} to {autoOn}");
                     P.IPCSearch.UpdateActiveJobPresets();
-                    Service.Configuration.AutoActions[preset] = autoOn;
+                    Service.Configuration.SetAutoAction(preset, autoOn);
                     Service.Configuration.Save();
                 }
                 ImGui.SameLine();
@@ -466,7 +466,7 @@ namespace WrathCombo.Window.Functions
                             {
                                 if (DateTime.UtcNow - LastPresetDeconflictTime > TimeSpan.FromSeconds(3))
                                 {
-                                    if (Service.Configuration.EnabledActions.Remove(childPreset))
+                                    if (Service.Configuration.DisableAction(childPreset))
                                     {
                                         PluginLog.Debug($"Removed {childPreset} due to conflict with {preset}");
                                         Service.Configuration.Save();

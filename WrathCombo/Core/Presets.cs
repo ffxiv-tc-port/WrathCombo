@@ -190,7 +190,7 @@ namespace WrathCombo.Core
             var conflicts = GetConflicts(preset);
             foreach (var conflict in conflicts)
             {
-                Service.Configuration.EnabledActions.Remove(conflict);
+                Service.Configuration.DisableAction(conflict);
             }
         }
 
@@ -218,7 +218,7 @@ namespace WrathCombo.Core
         {
             var ctrlText = GetControlledText(preset);
             EnableParentPresets(preset);
-            var ret = Service.Configuration.EnabledActions.Add(preset);
+            var ret = Service.Configuration.EnableAction(preset);
             DisableAllConflicts(preset);
 
             if (outputLog)
@@ -249,7 +249,7 @@ namespace WrathCombo.Core
 
         public static bool DisablePreset(CustomComboPreset preset, bool outputLog = false)
         {
-            if (Service.Configuration.EnabledActions.Remove(preset))
+            if (Service.Configuration.DisableAction(preset))
             {
                 var ctrlText = GetControlledText(preset);
 
@@ -273,7 +273,7 @@ namespace WrathCombo.Core
         public static bool TogglePreset(CustomComboPreset preset, bool outputLog = false)
         {
             var ctrlText = GetControlledText(preset);
-            if (!Service.Configuration.EnabledActions.Remove(preset))
+            if (!Service.Configuration.DisableAction(preset))
             {
                 var ret = EnablePreset(preset);
                 if (outputLog)

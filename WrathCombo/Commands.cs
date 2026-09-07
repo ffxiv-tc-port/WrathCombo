@@ -224,7 +224,7 @@ public partial class WrathCombo
         // Execute the method
         if (target == all)
         {
-            Service.Configuration.EnabledActions.Clear();
+            Service.Configuration.ClearEnabledActions();
             DuoLog.Information("All unset");
         }
         else
@@ -235,7 +235,7 @@ public partial class WrathCombo
             if (action == toggle)
                 action =
                     Service.Configuration.EnabledActions
-                        .TryGetValue(usablePreset, out _)
+                        .Contains(usablePreset)
                         ? set
                         : unset;
 

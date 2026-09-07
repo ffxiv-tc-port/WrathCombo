@@ -293,7 +293,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
 
             foreach (var conflict in conflictingCombos.ConflictingPresets)
                 if (PresetStorage.IsEnabled(conflict))
-                    if (Service.Configuration.EnabledActions.Remove(conflict))
+                    if (Service.Configuration.DisableAction(conflict))
                     {
                         PluginLog.Debug($"Removed {conflict} due to conflict with {preset}");
                         Service.Configuration.Save();
@@ -341,7 +341,7 @@ public sealed partial class WrathCombo : IDalamudPlugin
     {
         var redundantIDs = Service.Configuration.EnabledActions.Where(x => int.TryParse(x.ToString(), out _)).OrderBy(x => x).Cast<int>().ToList();
         foreach (var id in redundantIDs)
-            Service.Configuration.EnabledActions.RemoveWhere(x => (int)x == id);
+            Service.Configuration.RemoveEnabledActionsWhere(x => (int)x == id);
 
         Service.Configuration.Save();
     }

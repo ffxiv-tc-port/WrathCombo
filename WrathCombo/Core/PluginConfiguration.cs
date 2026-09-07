@@ -32,9 +32,94 @@ namespace WrathCombo.Core
 
         #region EnabledActions
 
-        /// <summary> Gets or sets the collection of enabled combos. </summary>
+        /// <summary>
+        ///     🔴 保護 <see cref="enabledActions" /> 與 <see cref="autoActions" /> 的鎖。
+        ///     <b>只在「換掉整份集合」時取</b>，讀取端完全不需要它。
+        /// </summary>
+        /// <remarks>
+        ///     這把鎖是葉節點：鎖內只做集合複製與參考指派就出來，不呼叫 ImGui、
+        ///     不做檔案 I/O、不呼叫別的外掛、不呼叫 IPC。
+        /// </remarks>
+        [JsonIgnore]
+        private readonly object collectionGate = new();
+
+        /// <summary>
+        ///     The backing store for <see cref="EnabledActions" />.
+        /// </summary>
+        /// <remarks>
+        ///     🔴🔴 <b>永遠不要就地增修這一份</b>（Add／Remove／Clear／RemoveWhere）——
+        ///     它被三種執行緒同時讀：繪製執行緒（設定視窗）、framework 執行緒
+        ///     （每一幀的戰鬥判斷式，<see cref="PresetStorage.IsEnabled" />），
+        ///     以及<b>承租外掛自己的執行緒</b>（<c>[EzIPC]</c> 端點 →
+        ///     <see cref="Services.IPC.Search.PresetStates" /> →
+        ///     <c>CustomComboFunctions.IsEnabled</c>）。裸 <see cref="HashSet{T}" />
+        ///     零同步，失敗形式不是「讀到舊值」而是<b>集合本身壞掉</b>。<br />
+        ///     🔑 所以走 <b>copy-on-write</b>：改動一律在鎖內複製一份新的、改完再
+        ///     「一次」把參考指派回來。參考指派是原子的 ⇒ 讀取端拿到的永遠是一份
+        ///     完整、而且從此不會再被改動的快照，讀取端因此<b>完全不必取鎖</b>。
+        /// </remarks>
         [JsonProperty("EnabledActionsV6")]
-        public HashSet<CustomComboPreset> EnabledActions { get; set; } = [];
+        private HashSet<CustomComboPreset> enabledActions = [];
+
+        /// <summary> Gets the collection of enabled combos. </summary>
+        /// <remarks>
+        ///     這是一份唯讀快照。要改請用 <see cref="EnableAction" />、
+        ///     <see cref="DisableAction" />、<see cref="ClearEnabledActions" />、
+        ///     <see cref="RemoveEnabledActionsWhere" />。
+        /// </remarks>
+        [JsonIgnore]
+        public IReadOnlySet<CustomComboPreset> EnabledActions => enabledActions;
+
+        /// <summary> 把一個 preset 加進已啟用清單。 </summary>
+        /// <returns>是不是真的加了（改動前 <c>HashSet.Add</c> 的回傳語意）。</returns>
+        public bool EnableAction(CustomComboPreset preset)
+        {
+            lock (collectionGate)
+            {
+                if (enabledActions.Contains(preset))
+                    return false;
+                var rebuilt = new HashSet<CustomComboPreset>(enabledActions)
+                    { preset };
+                enabledActions = rebuilt;
+                return true;
+            }
+        }
+
+        /// <summary> 把一個 preset 從已啟用清單移除。 </summary>
+        /// <returns>是不是真的移除了（改動前 <c>HashSet.Remove</c> 的回傳語意）。</returns>
+        public bool DisableAction(CustomComboPreset preset)
+        {
+            lock (collectionGate)
+            {
+                if (!enabledActions.Contains(preset))
+                    return false;
+                var rebuilt = new HashSet<CustomComboPreset>(enabledActions);
+                rebuilt.Remove(preset);
+                enabledActions = rebuilt;
+                return true;
+            }
+        }
+
+        /// <summary> 清空已啟用清單。 </summary>
+        public void ClearEnabledActions()
+        {
+            lock (collectionGate)
+                enabledActions = [];
+        }
+
+        /// <summary> 移除所有符合條件的 preset。 </summary>
+        /// <returns>移除了幾個（改動前 <c>HashSet.RemoveWhere</c> 的回傳語意）。</returns>
+        public int RemoveEnabledActionsWhere(Predicate<CustomComboPreset> match)
+        {
+            lock (collectionGate)
+            {
+                var rebuilt = new HashSet<CustomComboPreset>(enabledActions);
+                var removed = rebuilt.RemoveWhere(match);
+                if (removed > 0)
+                    enabledActions = rebuilt;
+                return removed;
+            }
+        }
 
         #endregion
 
@@ -171,7 +256,43 @@ namespace WrathCombo.Core
         #endregion
 
         #region AutoAction Settings
-        public Dictionary<CustomComboPreset, bool> AutoActions { get; set; } = [];
+
+        /// <summary>
+        ///     The backing store for <see cref="AutoActions" />.
+        /// </summary>
+        /// <remarks>
+        ///     🔴🔴 與 <see cref="enabledActions" /> 同理：<b>永遠不要就地增修</b>，
+        ///     一律走 <see cref="SetAutoAction" />（copy-on-write）。它同樣被
+        ///     <c>[EzIPC]</c> 端點的執行緒讀（<see cref="Services.IPC.Search.PresetStates" />
+        ///     裡的 <c>AutoActions.TryGetValue</c>）與繪製執行緒同時碰。<br />
+        ///     ⚠️ <b>型別必須維持 <see cref="Dictionary{TKey,TValue}" /></b>：使用者既有的
+        ///     設定檔裡這一份帶著 <c>$type</c> 標記（Dalamud 存檔用
+        ///     <c>TypeNameHandling.Objects</c>），換成別的具體型別會在載入時型別不合。
+        /// </remarks>
+        [JsonProperty("AutoActions")]
+        private Dictionary<CustomComboPreset, bool> autoActions = [];
+
+        /// <summary> Gets the Auto-Mode state of each preset. </summary>
+        /// <remarks>這是一份唯讀快照。要改請用 <see cref="SetAutoAction" />。</remarks>
+        [JsonIgnore]
+        public IReadOnlyDictionary<CustomComboPreset, bool> AutoActions => autoActions;
+
+        /// <summary> 設定一個 preset 的自動模式狀態。 </summary>
+        /// <returns>值有沒有真的改變。</returns>
+        public bool SetAutoAction(CustomComboPreset preset, bool state)
+        {
+            lock (collectionGate)
+            {
+                if (autoActions.TryGetValue(preset, out var current) &&
+                    current == state)
+                    return false;
+                var rebuilt =
+                    new Dictionary<CustomComboPreset, bool>(autoActions)
+                        { [preset] = state };
+                autoActions = rebuilt;
+                return true;
+            }
+        }
 
         public AutoRotationConfig RotationConfig { get; set; } = new();
 
@@ -343,7 +464,7 @@ namespace WrathCombo.Core
 
                         var info = preset.GetComboAttribute();
                         DuoLog.Error($"- {info.JobName}: {info.Name}");
-                        EnabledActions.Remove(preset);
+                        DisableAction(preset);
                     }
                 }
 

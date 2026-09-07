@@ -248,7 +248,7 @@ namespace WrathCombo.Window.Tabs
                     {
                         if (DateTime.UtcNow - LastPresetDeconflictTime > TimeSpan.FromSeconds(3))
                         {
-                            if (Service.Configuration.EnabledActions.Remove(preset))
+                            if (Service.Configuration.DisableAction(preset))
                             {
                                 PluginLog.Debug($"Removed {preset} due to conflict");
                                 Service.Configuration.Save();
