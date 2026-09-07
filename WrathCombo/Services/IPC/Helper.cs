@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Dalamud.Networking.Http;
 using Dalamud.Plugin.Ipc.Exceptions;
@@ -219,6 +220,82 @@ public partial class Helper(ref Leasing leasing)
             : null;
 
     #endregion
+
+
+    /// <summary>
+    ///     「這個端點只在 framework 執行緒上作答」的閘門。
+    /// </summary>
+    /// <param name="endpointName">端點名稱，只用於診斷訊息與節流的 key。</param>
+    /// <returns>
+    ///     <see langword="true" /> ＝ 現在就在 framework 執行緒上，可以照常讀遊戲狀態；<br />
+    ///     <see langword="false" /> ＝ 呼叫端應該直接回 fail-safe 值，不要碰任何遊戲狀態。
+    /// </returns>
+    /// <remarks>
+    ///     🔴🔴 給<b>那些沒辦法丟回 framework 執行緒的端點</b>用。
+    ///     <see cref="CurrentClassJobIdFromFramework" /> 那條路子適用於「答案幾毫秒內
+    ///     不會變」的查詢；但插入技視窗與動作可用性是<b>逐幀、甚至逐毫秒</b>在變的，
+    ///     等一幀再回答等於回一個已經過期的答案，比回 <see langword="false" /> 更糟。
+    ///     所以這幾支改成把契約講明：只在 framework 執行緒上作答。<br />
+    ///     🔑 fail-safe 一律是 <see langword="false" />（不能插入／動作不可用），
+    ///     呼叫端照著做只會少放一個技能，不會做出錯的動作。<br />
+    ///     節流用這個類別自己的 <see cref="StaticThrottle" />（自帶鎖、自帶字典），
+    ///     key 帶端點名而端點名是有限集合，字典不會被撐大。
+    /// </remarks>
+    internal static bool AnswerOnlyOnFrameworkThread(string endpointName)
+    {
+        if (Svc.Framework.IsInFrameworkUpdateThread)
+            return true;
+
+        if (StaticThrottle.Throttle("ipcOffFrameworkThread:" + endpointName,
+                TS.FromMinutes(1)))
+            Logging.Information(
+                $"'{endpointName}' was called from a non-framework thread, so it " +
+                "returned false without reading any game state. " +
+                $"Caller: {DescribeIpcCaller()}. " +
+                "Please call this from your framework/tick handler instead.");
+
+        return false;
+    }
+
+    /// <summary>
+    ///     盡量描述「是誰在呼叫」：呼叫端執行緒上第一個不屬於 Wrath／Dalamud／BCL
+    ///     的堆疊框，加上執行緒識別。
+    /// </summary>
+    /// <remarks>
+    ///     ⚠️ 只在節流放行的那一次才會走到 —— 建 <see cref="System.Diagnostics.StackTrace" />
+    ///     不便宜，不要搬到常走的路徑上。<br />
+    ///     📌 IPC 本身沒有帶呼叫端身分（這幾支不需要租約），堆疊是唯一拿得到的線索：
+    ///     CallGate 是同步呼叫，承租外掛的框還在同一條執行緒的堆疊上。
+    /// </remarks>
+    private static string DescribeIpcCaller()
+    {
+        var thread = Thread.CurrentThread;
+        var who = "unknown";
+
+        try
+        {
+            foreach (var frame in new StackTrace(false).GetFrames())
+            {
+                var method = frame.GetMethod();
+                var type = method?.DeclaringType;
+                var assembly = type?.Assembly.GetName().Name;
+
+                if (assembly is null or "WrathCombo" or "Dalamud" or "ECommons" ||
+                    assembly.StartsWith("System"))
+                    continue;
+
+                who = $"{assembly}!{type!.FullName}.{method!.Name}";
+                break;
+            }
+        }
+        catch (Exception e)
+        {
+            who = $"unknown ({e.GetType().Name})";
+        }
+
+        var name = string.IsNullOrEmpty(thread.Name) ? "" : $" '{thread.Name}'";
+        return $"{who} [thread {thread.ManagedThreadId}{name}]";
+    }
 
     #region Auto-Rotation Ready
 

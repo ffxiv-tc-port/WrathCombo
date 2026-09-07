@@ -14,6 +14,14 @@ namespace WrathCombo.Services.IPC;
 /// <remarks>
 ///     這些端點只是把 <see cref="CustomComboFunctions" /> 既有的判斷式原樣轉出去，
 ///     不改變 Wrath 自己的任何行為，因此不走 <see cref="Helper.CheckForBailConditionsAtSetTime" />。
+///     <br />
+///     🔴🔴 <b>但它們讀的全是原生狀態</b>（動作管理器、本地玩家、GCD 計時），
+///     而 <c>[EzIPC]</c> 端點跑在<b>承租外掛的執行緒</b>上 —— 原生狀態只能在
+///     framework 執行緒讀。這幾支的答案又是逐幀在變的，丟回 framework 執行緒等一幀
+///     再回答等於回一個已經過期的答案。<br />
+///     ⇒ 契約是：<b>只在 framework 執行緒上作答；從別的執行緒呼叫一律回
+///     <see langword="false" /></b>（見 <see cref="Helper.AnswerOnlyOnFrameworkThread" />）。
+///     請從你自己的 framework／tick 回呼裡呼叫這些端點。
 /// </remarks>
 public partial class Provider
 {
@@ -34,6 +42,9 @@ public partial class Provider
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public bool CanWeave(float? estimatedWeaveTime)
     {
+        if (!Helper.AnswerOnlyOnFrameworkThread(nameof(CanWeave)))
+            return false;
+
         estimatedWeaveTime ??= CustomComboFunctions.BaseAnimationLock;
         return CustomComboFunctions.CanWeave(estimatedWeaveTime.Value);
     }
@@ -56,6 +67,9 @@ public partial class Provider
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public bool CanDelayedWeave(float? weaveStart, float? weaveEnd)
     {
+        if (!Helper.AnswerOnlyOnFrameworkThread(nameof(CanDelayedWeave)))
+            return false;
+
         weaveStart ??= 1.25f;
         weaveEnd ??= CustomComboFunctions.BaseAnimationLock;
         return CustomComboFunctions.CanDelayedWeave(weaveStart.Value, weaveEnd.Value);
@@ -76,6 +90,9 @@ public partial class Provider
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public bool ActionReady(uint actionId, bool? recastCheck, bool? castCheck)
     {
+        if (!Helper.AnswerOnlyOnFrameworkThread(nameof(ActionReady)))
+            return false;
+
         recastCheck ??= false;
         castCheck ??= false;
         return CustomComboFunctions.ActionReady(actionId, recastCheck.Value, castCheck.Value);
