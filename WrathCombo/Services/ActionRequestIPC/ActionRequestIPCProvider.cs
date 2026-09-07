@@ -28,14 +28,39 @@ public static class ActionRequestIPCProvider
     private const string IPCPrefix = "WrathCombo.ActionRequest";
 
     /// <summary>
+    ///     保護 <see cref="ActionRequests" /> 與 <see cref="ActionBlacklist" /> 的鎖。
+    /// </summary>
+    /// <remarks>
+    ///     🔴🔴 這兩份清單被<b>兩種執行緒</b>同時增刪：<br />
+    ///     ① 承租外掛自己的執行緒 —— <c>[EzIPC]</c> 端點是拿
+    ///     <c>GetIpcProvider().RegisterFunc()</c> 直接註冊委派的，中間沒有任何
+    ///     framework 轉送，所以 <see cref="RequestActionUse" />／
+    ///     <see cref="RequestBlacklist" />／各支 Reset 都跑在呼叫端的執行緒上。<br />
+    ///     ② framework 執行緒 —— <c>CustomCombo.TryInvoke</c>（經
+    ///     <see cref="TryGetRequestedAction" />）、<c>CustomComboFunctions.ActionReady</c>
+    ///     與 <c>Data.CooldownData</c>（經 <see cref="GetArtificialCooldown" />）每一幀
+    ///     都在讀，而且會就地 <c>RemoveAt</c> 掉過期的項目。<br />
+    ///     裸 <see cref="List{T}" /> 零同步，失敗形式不是「讀到舊值」而是
+    ///     <b>清單本身壞掉</b>（<c>Add</c> 觸發重新配置時讀取端可能拿到舊陣列或
+    ///     越界索引）。<br />
+    ///     🔴 這把鎖是葉節點：鎖內只做清單運算與 <c>Environment.TickCount64</c> 比較，
+    ///     絕不呼叫 ImGui、不做檔案 I/O、不呼叫別的外掛，也不碰任何原生狀態
+    ///     （<c>CanWeave()</c>／<c>ActionReady()</c> 都在鎖外做，見
+    ///     <see cref="TryGetRequestedAction" />）。
+    /// </remarks>
+    private static readonly object Gate = new();
+
+    /// <summary>
     ///     其他外掛請求施放的動作。
     /// </summary>
-    public static List<ActionRequest> ActionRequests = [];
+    /// <remarks>🔴 一律在 <see cref="Gate" /> 內存取。</remarks>
+    private static readonly List<ActionRequest> ActionRequests = [];
 
     /// <summary>
     ///     其他外掛請求暫時封鎖（加上人工冷卻）的動作。
     /// </summary>
-    public static List<ActionRequest> ActionBlacklist = [];
+    /// <remarks>🔴 一律在 <see cref="Gate" /> 內存取。</remarks>
+    private static readonly List<ActionRequest> ActionBlacklist = [];
 
     private static EzIPCDisposalToken[]? _disposalTokens;
 
@@ -53,8 +78,11 @@ public static class ActionRequestIPCProvider
             token.Dispose();
 
         _disposalTokens = null;
-        ActionRequests.Clear();
-        ActionBlacklist.Clear();
+        lock (Gate)
+        {
+            ActionRequests.Clear();
+            ActionBlacklist.Clear();
+        }
     }
 
     /// <summary>
@@ -67,7 +95,9 @@ public static class ActionRequestIPCProvider
     public static void RequestBlacklist(ActionType actionType, uint actionID, int timeMs)
     {
         ActionDescriptor descriptor = new(actionType, actionID);
-        ActionBlacklist.Add(new ActionRequest(descriptor, Environment.TickCount64 + timeMs, default));
+        lock (Gate)
+            ActionBlacklist.Add(
+                new ActionRequest(descriptor, Environment.TickCount64 + timeMs, default));
     }
 
     /// <summary>
@@ -79,7 +109,8 @@ public static class ActionRequestIPCProvider
     public static void ResetBlacklist(ActionType actionType, uint actionID)
     {
         var descriptor = new ActionDescriptor(actionType, actionID);
-        ActionBlacklist.RemoveAll(item => item.Descriptor == descriptor);
+        lock (Gate)
+            ActionBlacklist.RemoveAll(item => item.Descriptor == descriptor);
     }
 
     /// <summary>
@@ -92,7 +123,8 @@ public static class ActionRequestIPCProvider
     [EzIPC]
     public static void ResetAllBlacklist()
     {
-        ActionBlacklist.Clear();
+        lock (Gate)
+            ActionBlacklist.Clear();
     }
 
     /// <summary>
@@ -104,26 +136,34 @@ public static class ActionRequestIPCProvider
     [EzIPC]
     public static float GetArtificialCooldown(ActionType actionType, uint actionID)
     {
-        if (ActionBlacklist.Count == 0)
-            return 0f;
-
         var d = new ActionDescriptor(actionType, actionID);
         var currentTick = Environment.TickCount64;
         var maxDeadline = 0L;
 
-        for (var idx = ActionBlacklist.Count - 1; idx >= 0; idx--)
+        // 🔴 這一支既是 [EzIPC] 端點（承租外掛的執行緒）又在每一幀的冷卻查詢路徑上
+        //    （framework 執行緒），而它會就地 RemoveAt ⇒ 掃描與移除必須在鎖內是同
+        //    一段。鎖內做的全部是清單索引、結構比較與整數比較，沒有任何 I/O，
+        //    所以維持「拍快照 → 出鎖處理 → 回鎖移除」反而更糟：索引在放鎖的空檔
+        //    會位移，移除得重新搜尋。
+        lock (Gate)
         {
-            var currentRequest = ActionBlacklist[idx];
-            if (currentRequest.Descriptor != d) continue;
+            if (ActionBlacklist.Count == 0)
+                return 0f;
 
-            if (!currentRequest.IsActive)
+            for (var idx = ActionBlacklist.Count - 1; idx >= 0; idx--)
             {
-                ActionBlacklist.RemoveAt(idx);
-            }
-            else
-            {
-                var currentDeadline = currentRequest.Deadline - currentTick;
-                if (currentDeadline > maxDeadline) maxDeadline = currentDeadline;
+                var currentRequest = ActionBlacklist[idx];
+                if (currentRequest.Descriptor != d) continue;
+
+                if (!currentRequest.IsActive)
+                {
+                    ActionBlacklist.RemoveAt(idx);
+                }
+                else
+                {
+                    var currentDeadline = currentRequest.Deadline - currentTick;
+                    if (currentDeadline > maxDeadline) maxDeadline = currentDeadline;
+                }
             }
         }
 
@@ -144,7 +184,9 @@ public static class ActionRequestIPCProvider
     public static void RequestActionUse(ActionType actionType, uint actionID, int timeMs, bool? isGcd)
     {
         ActionDescriptor descriptor = new(actionType, actionID);
-        ActionRequests.Add(new ActionRequest(descriptor, Environment.TickCount64 + timeMs, isGcd));
+        lock (Gate)
+            ActionRequests.Add(
+                new ActionRequest(descriptor, Environment.TickCount64 + timeMs, isGcd));
     }
 
     /// <summary>
@@ -156,7 +198,8 @@ public static class ActionRequestIPCProvider
     public static void ResetRequest(ActionType actionType, uint actionID)
     {
         var descriptor = new ActionDescriptor(actionType, actionID);
-        ActionRequests.RemoveAll(item => item.Descriptor == descriptor);
+        lock (Gate)
+            ActionRequests.RemoveAll(item => item.Descriptor == descriptor);
     }
 
     /// <summary>
@@ -165,28 +208,44 @@ public static class ActionRequestIPCProvider
     [EzIPC]
     public static void ResetAllRequests()
     {
-        ActionRequests.Clear();
+        lock (Gate)
+            ActionRequests.Clear();
     }
 
     /// <summary>
-    ///     列舉目前仍然有效的施放請求，順便清掉過期的。
+    ///     拍下目前仍然有效的施放請求，順便清掉過期的。
     /// </summary>
-    public static IEnumerable<ActionRequest> GetRequestedActions()
+    /// <returns>
+    ///     一份快照。順序與改動前的迭代器相同（由清單尾端往前，也就是最後送進來的
+    ///     請求最先被看到）。
+    /// </returns>
+    /// <remarks>
+    ///     🔴 改動前這一支是 <c>yield return</c> 迭代器，等於讓呼叫端一邊走訪活的
+    ///     清單、一邊 <c>RemoveAt</c>，而清單同時被承租外掛的執行緒 <c>Add</c>。
+    ///     改成鎖內一次拍完快照回傳，呼叫端在鎖外走訪一份不會再變的陣列。<br />
+    ///     ⚠️ 唯一的差異是<b>清理時機</b>：改動前是惰性的，呼叫端提早 break 就不會
+    ///     掃到後面的過期項；現在每次都整份掃完。過期項本來就永遠不會被選中
+    ///     （<see cref="TryGetRequestedAction" /> 只挑 <c>IsActive</c> 的），
+    ///     所以回傳值不受影響，只是清得早一點。
+    /// </remarks>
+    public static ActionRequest[] GetRequestedActions()
     {
-        if (ActionRequests.Count == 0)
-            yield break;
-
-        for (var idx = ActionRequests.Count - 1; idx >= 0; idx--)
+        lock (Gate)
         {
-            var currentRequest = ActionRequests[idx];
-            if (!currentRequest.IsActive)
+            if (ActionRequests.Count == 0)
+                return [];
+
+            var active = new List<ActionRequest>(ActionRequests.Count);
+            for (var idx = ActionRequests.Count - 1; idx >= 0; idx--)
             {
-                ActionRequests.RemoveAt(idx);
+                var currentRequest = ActionRequests[idx];
+                if (!currentRequest.IsActive)
+                    ActionRequests.RemoveAt(idx);
+                else
+                    active.Add(currentRequest);
             }
-            else
-            {
-                yield return currentRequest;
-            }
+
+            return active.ToArray();
         }
     }
 
@@ -199,10 +258,15 @@ public static class ActionRequestIPCProvider
     {
         actionId = default;
 
-        if (ActionRequests.Count == 0)
+        // 🔴 鎖內只拍快照；CanWeave()／ActionReady() 會摸原生狀態與遊戲設定，
+        //    絕不可以在鎖內做。
+        var requests = GetRequestedActions();
+        if (requests.Length == 0)
             return false;
 
-        foreach (var actionRequest in GetRequestedActions())
+        // 📌 刻意<b>不</b>在選中之後把那筆請求移除：改動前也沒有移除，請求是靠
+        //    自己的 Deadline 過期的。移除會讓每筆請求只生效一次，那是行為變更。
+        foreach (var actionRequest in requests)
         {
             if (actionRequest.IsGCD != null)
             {
