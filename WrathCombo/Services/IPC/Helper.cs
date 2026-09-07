@@ -562,8 +562,9 @@ internal static class Logging
     ///     要請使用者回報的診斷訊息用這個。
     /// </summary>
     /// <remarks>
-    ///     📌 使用者跑的是 LogLevel 1，<see cref="Log" />（Debug）與 <see cref="Verbose" />
-    ///     都收不到，只有 Information 以上才會進實機 log。
+    ///     📌 使用者跑的是 LogLevel 1（Serilog 的 Debug）：<see cref="Log" />（Debug）
+    ///     其實收得到，真正的盲區只有 <see cref="Verbose" />。但實機 log 的 Debug
+    ///     量太大（單檔數十萬行），要使用者回報的診斷仍然要寫 Information 才找得到。
     /// </remarks>
     public static void Information(string message) =>
         PluginLog.Information(Prefix + PrefixMethod + message);

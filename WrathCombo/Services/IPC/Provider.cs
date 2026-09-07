@@ -688,11 +688,29 @@ public partial class Provider : IDisposable
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public bool GetComboOptionState(string optionName)
     {
-        // Override if the combo option is controlled by a lease,
-        // otherwise return the saved state
-        return Leasing.CheckComboOptionControlled(optionName) ??
-               P.IPCSearch.PresetStates.GetValueOrDefault(optionName)[
-                   ComboStateKeys.Enabled];
+        // Override if the combo option is controlled by a lease
+        var leased = Leasing.CheckComboOptionControlled(optionName);
+        if (leased is not null)
+            return leased.Value;
+
+        // Otherwise the saved state
+        var state = P.IPCSearch.PresetStates.GetValueOrDefault(optionName);
+        if (state is not null)
+            return state[ComboStateKeys.Enabled];
+
+        // 🔴 改動前這裡是 GetValueOrDefault(名)[key]：查不到的名字會拿 null 去
+        //    做索引 ⇒ NullReferenceException。提供端的 EzIPC.Init 用的是
+        //    SafeWrapper.None（預設值），端點的委派沒有被包起來 ⇒ 那個例外會
+        //    原樣穿過 CallGate 丟回承租外掛的執行緒上，而承租端多半沒防它。
+        //    改成回 false（＝「這個選項沒有開著」），並留一筆 Information 讓
+        //    使用者回報得出來是哪個名字打錯了。
+        //    ⚠️ 這是刻意的行為變更：以前是擲例外，現在是回 false。
+        if (_ipcThrottle.Throttle("ipcUnknownComboOption", TS.FromMinutes(5)))
+            Logging.Information(
+                $"Unknown combo option name: '{optionName}'. Returning false. " +
+                "Valid names come from GetComboOptionNamesForJob().");
+
+        return false;
     }
 
     /// <summary>
