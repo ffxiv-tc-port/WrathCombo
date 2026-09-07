@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using ECommons.DalamudServices;
@@ -122,7 +123,36 @@ public class UIHelper(Leasing leasing)
 
     #region Presets
 
-    private DateTime? _presetsUpdated;
+    /// <summary>
+    ///     <see cref="PresetsControlled" /> 這份快取上次重建時的時間戳，
+    ///     以 <c>DateTime.Ticks + 1</c> 存；<c>0</c> 代表「還沒設定過」
+    ///     （等同改動前的 <see langword="null" />）。
+    /// </summary>
+    /// <remarks>
+    ///     🔴🔴 改動前這是 <c>DateTime?</c>，也就是 <c>bool</c> ＋ <c>DateTime</c>
+    ///     共 16 bytes 的結構 —— <b>寫入不是原子的</b>。而
+    ///     <see cref="PresetControlled" /> 被兩種執行緒同時呼叫：繪製執行緒（設定
+    ///     視窗每一格 preset）與<b>承租外掛自己的執行緒</b>（<c>[EzIPC]</c> 端點 →
+    ///     <c>Search.PresetStates</c> → <c>CustomComboFunctions.IsEnabled</c> →
+    ///     這一支）。撕裂讀的結果是「有值旗標是新的、時間值還是舊的」之類的組合，
+    ///     會讓快取有效性判斷得到錯的答案。<br />
+    ///     🔑 換成 <see cref="long" />：x64 上對齊的 64 位元讀寫本來就是原子的，
+    ///     配 <see cref="Volatile" /> 補上順序保證就夠了。<b>不用
+    ///     <c>Interlocked</c></b> —— 這裡沒有「讀出來算一算再寫回去」的複合操作，
+    ///     只有整份覆寫。<br />
+    ///     🔴 <b>刻意存 <c>Ticks + 1</c> 而不是 <c>Ticks</c></b>：
+    ///     <c>DateTime.MinValue.Ticks</c> 就是 <c>0</c>，而下面算出來的
+    ///     <c>presetsUpdated</c> 在還沒有任何租約時真的會是
+    ///     <see cref="DateTime.MinValue" /> ⇒ 直接存 Ticks 會和「還沒設定過」
+    ///     的哨兵值撞在一起，把「設過了、值是 MinValue」誤判成「沒設過」。<br />
+    ///     📌 同檔的 <c>_jobsUpdated</c> 與 <c>_autoRotationConfigsUpdated</c>
+    ///     沒有一起改：它們只在 <c>JobControlled</c>／
+    ///     <c>AutoRotationConfigControlled</c> 用到，而那兩支只有繪製執行緒到得了
+    ///     （呼叫點是 UIHelper 自己的 UI 方法與 Window/Tabs/PvEFeatures.cs，
+    ///     沒有任何 IPC 端點的路徑走到），連帶它們守的兩份裸
+    ///     <see cref="Dictionary{TKey,TValue}" /> 也是單一執行緒的。
+    /// </remarks>
+    private long _presetsUpdatedTicks;
 
     private ConcurrentDictionary<string, (string controllers, bool enabled, bool autoMode)>
         PresetsControlled { get; } = new();
@@ -138,13 +168,17 @@ public class UIHelper(Leasing leasing)
                 ? _leasing.CombosUpdated
                 : _leasing.OptionsUpdated ?? DateTime.MinValue);
 
-        if (_presetsUpdated != presetsUpdated &&
-            _presetsUpdated is not null)
+        // 🔴 只讀一次欄位：改動前這裡讀了兩次（判「不等」一次、判「不是 null」
+        //    一次），中間別條執行緒改掉的話兩個判斷會落在不同的值上。
+        var stamp = presetsUpdated.Ticks + 1;
+        var cachedStamp = Volatile.Read(ref _presetsUpdatedTicks);
+
+        if (cachedStamp != stamp && cachedStamp != 0)
             PresetsControlled.Clear();
 
         // Return the cached value if it is valid, fastest
-        if (_presetsUpdated is not null &&
-            _presetsUpdated == presetsUpdated &&
+        if (cachedStamp != 0 &&
+            cachedStamp == stamp &&
             PresetsControlled.TryGetValue(presetName, out var presetControlled))
         {
             if (string.IsNullOrEmpty(presetControlled.controllers))
@@ -163,7 +197,7 @@ public class UIHelper(Leasing leasing)
             {
                 PresetsControlled[presetName] =
                     (string.Empty, false, false);
-                _presetsUpdated = presetsUpdated;
+                Volatile.Write(ref _presetsUpdatedTicks, stamp);
             }
 
             return null;
@@ -180,7 +214,7 @@ public class UIHelper(Leasing leasing)
         if (!PresetsControlled.ContainsKey(presetName))
             PresetsControlled[presetName] =
                 (string.Empty, false, false);
-        _presetsUpdated = presetsUpdated;
+        Volatile.Write(ref _presetsUpdatedTicks, stamp);
 
         return PresetsControlled[presetName];
     }
