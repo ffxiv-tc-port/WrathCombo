@@ -276,37 +276,54 @@ public partial class Helper(ref Leasing leasing)
         comboStates[mode]
             .TryGetValue(ComboSimplicityLevelKeys.Simple, out var simpleResults);
         var simpleHigher = simpleResults?.FirstOrDefault();
-        var simple = simpleHigher?.Value;
 
         #region Override the Values with any IPC-control
+
+        // 🔴🔴 這裡原本是把 IPC 的值「寫回」comboStates 底下的內層字典，而那個
+        //    內層字典就是 Search.PresetStates 快照裡的<b>同一個物件</b>：
+        //    CurrentJobComboStatesCategorized → ComboStatesByJob →
+        //    presetStates[combo]，一路都是傳參考，中間沒有任何複製。
+        //    ① 那等於從承租外掛的執行緒就地改一份繪製執行緒同時在讀的字典，
+        //       破壞 93e9ba553 立的「快取整份替換、讀取端只讀不寫」紀律。
+        //    ② 而那些寫入其實一次都不必要：AutoActions／EnabledActions 兩支本來
+        //       就是從 PresetStates 推出來的 ⇒ 兩份是同一代時那是把值寫回自己
+        //       （沒有效果）；不同代時寫進去的是一份已經沒有別人在讀的舊快照。
+        //       CurrentJobComboStatesCategorized 的<b>值</b>只有這一支在讀
+        //       （Helper 另外兩處與 UIHelper 都只用它的 Key），所以拿掉寫回、
+        //       改成當場從最新的那一份算，結果只會更新不會更舊。
+        //    ⇒ 只在區域變數算出「這一趟要看的那個狀態」，完全不碰共用字典。
+        var autoActions = P.IPCSearch.AutoActions;
+        var enabledActions = P.IPCSearch.EnabledActions;
+
+        // 與改動前「把兩個 key 都覆寫成 IPC 的值、再讀 enabledStateToCheck」等價。
+        bool StateOf(CustomComboPreset preset) =>
+            enabledStateToCheck switch
+            {
+                ComboStateKeys.AutoMode => autoActions[preset],
+                ComboStateKeys.Enabled => enabledActions.Contains(preset),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(enabledStateToCheck), enabledStateToCheck, null),
+            };
 
         CustomComboPreset? simpleComboPreset = simpleHigher is null
             ? null
             : (CustomComboPreset)
             Enum.Parse(typeof(CustomComboPreset), simpleHigher.Value.Key, true);
-        if (simpleComboPreset is not null)
-        {
-            simple[ComboStateKeys.AutoMode] =
-                P.IPCSearch.AutoActions[(CustomComboPreset)simpleComboPreset];
-            simple[ComboStateKeys.Enabled] =
-                P.IPCSearch.EnabledActions.Contains(
-                    (CustomComboPreset)simpleComboPreset);
-        }
+        bool? simpleState = simpleComboPreset is null
+            ? null
+            : StateOf(simpleComboPreset.Value);
 
         #endregion
 
         // Get the Advanced Mode settings
-        var (advancedKey, advancedValue) =
-            comboStates[mode][ComboSimplicityLevelKeys.Advanced].First();
+        var advancedKey =
+            comboStates[mode][ComboSimplicityLevelKeys.Advanced].First().Key;
 
         #region Override the Values with any IPC-control
 
         var advancedComboPreset = (CustomComboPreset)
             Enum.Parse(typeof(CustomComboPreset), advancedKey, true);
-        advancedValue[ComboStateKeys.AutoMode] =
-            P.IPCSearch.AutoActions[advancedComboPreset];
-        advancedValue[ComboStateKeys.Enabled] =
-            P.IPCSearch.EnabledActions.Contains(advancedComboPreset);
+        var advancedState = StateOf(advancedComboPreset);
 
         #endregion
 
@@ -314,17 +331,17 @@ public partial class Helper(ref Leasing leasing)
         if (previousMatch is not null)
         {
             if (previousMatch == ComboSimplicityLevelKeys.Simple &&
-                simple is not null && simple[enabledStateToCheck])
+                simpleState == true)
                 return ComboSimplicityLevelKeys.Simple;
-            return advancedValue[enabledStateToCheck]
+            return advancedState
                 ? ComboSimplicityLevelKeys.Advanced
                 : null;
         }
 
         // Check for either Simple or Advanced being ready
-        return simple is not null && simple[enabledStateToCheck] ?
+        return simpleState == true ?
             ComboSimplicityLevelKeys.Simple :
-            advancedValue[enabledStateToCheck] ? ComboSimplicityLevelKeys.Advanced :
+            advancedState ? ComboSimplicityLevelKeys.Advanced :
                 null;
     }
 

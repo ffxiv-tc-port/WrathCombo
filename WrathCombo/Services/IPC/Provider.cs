@@ -628,7 +628,17 @@ public partial class Provider : IDisposable
         }
 
         // Otherwise just the saved state
-        return P.IPCSearch.PresetStates.GetValueOrDefault(comboInternalName);
+        // 🔴 PresetStates 的內層字典是快取本體的一部分（ComboStatesByJob 與
+        //    CurrentJobComboStatesCategorized 都直接持有同一個參考）。CallGate
+        //    在同一個行程內是把物件原樣交給對方的 ⇒ 直接回傳等於把快取的可變
+        //    內部交到承租外掛手上，對方改一下就污染了 Wrath 自己的判斷，而且
+        //    是在承租外掛的執行緒上改。回一份複本，內容與改動前完全相同。
+        var snapshotOfPresetState =
+            P.IPCSearch.PresetStates.GetValueOrDefault(comboInternalName);
+
+        return snapshotOfPresetState is null
+            ? null
+            : new Dictionary<ComboStateKeys, bool>(snapshotOfPresetState);
     }
 
     /// <summary>
