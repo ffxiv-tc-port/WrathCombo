@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using WrathCombo.Attributes;
@@ -386,8 +387,49 @@ public class Search(Leasing leasing)
 
     internal void UpdateActiveJobPresets()
     {
-        ActiveJobPresets = Window.Functions.Presets.GetJobAutorots.Count;
+        // 🔴 GetJobAutorots 讀的是原生狀態：Player.JobId／Player.Job 走
+        //    Svc.Objects.LocalPlayer（ObjectTable 每格重用、就地改寫 Address 的
+        //    共用包裝），CustomComboFunctions.InPvP() 走 GameMain 的原生靜態。
+        //    而這一支從 [EzIPC] 端點也到得了（Provider.GetComboState／
+        //    GetComboOptionState → PresetStates 重建的尾端），也就是承租外掛的
+        //    執行緒 ⇒ 必須丟回 framework 執行緒上做。
+        //    🔑 這裡刻意<b>不</b>同步等：ActiveJobPresets 只是 DTR 提示用的計數器，
+        //    沒有任何端點的回傳值依賴它，晚一幀更新不改變任何人看到的答案；
+        //    而同步等會把承租外掛的執行緒無謂地停在這裡。
+        //    📌 已經在 framework 執行緒上時 RunOnFrameworkThread 是就地執行，
+        //    所以 UI 與 framework 路徑的行為與改動前完全相同（同步、當場更新）。
+        Task task;
+        try
+        {
+            task = Svc.Framework.RunOnFrameworkThread(RefreshActiveJobPresets);
+        }
+        catch (Exception e)
+        {
+            Svc.Log.Error("Failed to refresh the active job presets: " + e);
+            return;
+        }
+
+        if (task.IsCompleted)
+        {
+            if (task.IsFaulted)
+                Svc.Log.Error(
+                    "Failed to refresh the active job presets: " + task.Exception);
+            return;
+        }
+
+        // 🔴 不要把這個 Task 丟著不管：它擲的例外會變成沒人觀察的
+        //    UnobservedTaskException。
+        task.ContinueWith(
+            t => Svc.Log.Error(
+                "Failed to refresh the active job presets: " + t.Exception),
+            TaskContinuationOptions.OnlyOnFaulted);
     }
+
+    /// <summary>
+    ///     <see cref="UpdateActiveJobPresets" /> 真正在 framework 執行緒上跑的那一段。
+    /// </summary>
+    private void RefreshActiveJobPresets() =>
+        ActiveJobPresets = Window.Functions.Presets.GetJobAutorots.Count;
 
     internal int ActiveJobPresets;
 

@@ -791,14 +791,20 @@ public partial class Leasing
 
         var pluginName = registration.PluginName;
 
-        if (CustomComboFunctions.LocalPlayer is null)
+        // 🔴 這一支從 [EzIPC] 端點 Provider.SetCurrentJobAutoRotationReady 進來時
+        //    是承租外掛的執行緒，原生狀態只能在 framework 執行緒讀，見
+        //    Helper.CurrentClassJobIdFromFramework()。
+        //    ⚠️ 它逾時時也回 null；那種情況下面的訊息會說「玩家物件不存在」，
+        //    但那一支自己會另外留一筆 Information 說明是逾時。
+        var classJobId = Helper.CurrentClassJobIdFromFramework();
+        if (classJobId is null)
         {
             Logging.Error(
                 "Failed to register current job: player object does not exist!");
             return SetResult.PlayerNotAvailable;
         }
 
-        var job = (Job)CustomComboFunctions.JobIDs.ClassToJob((uint)Player.Job);
+        var job = (Job)CustomComboFunctions.JobIDs.ClassToJob(classJobId.Value);
         if (jobOverride is not null)
             job = jobOverride.Value;
 

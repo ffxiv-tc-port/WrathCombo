@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Dalamud.Networking.Http;
 using Dalamud.Plugin.Ipc.Exceptions;
 using ECommons;
@@ -130,6 +131,95 @@ public partial class Helper(ref Leasing leasing)
         }
     }
 
+    #region 從 IPC 執行緒讀原生狀態
+
+    /// <summary>
+    ///     這個 helper 靜態路徑自己的節流器（自帶鎖、自帶字典）。
+    /// </summary>
+    /// <remarks>
+    ///     🔴 不要換回 ECommons 的 EzThrottler，理由見 <see cref="IpcThrottle" />。
+    /// </remarks>
+    private static readonly IpcThrottle StaticThrottle = new();
+
+    /// <summary>
+    ///     等 framework 執行緒回話的硬上限。
+    /// </summary>
+    /// <remarks>
+    ///     正常情況下一幀之內就回來了。設這個上限是為了讓「framework 執行緒因為
+    ///     別的原因卡住」不會連帶把承租外掛的執行緒無限期卡在這裡。
+    /// </remarks>
+    private static readonly TS FrameworkReadTimeout =
+        TS.FromMilliseconds(500);
+
+    /// <summary>
+    ///     在 framework 執行緒上讀一次本地玩家目前的職業／職業（class）列 ID。
+    /// </summary>
+    /// <returns>
+    ///     <c>LocalPlayer.ClassJob.RowId</c>；<see langword="null" /> 表示當下沒有
+    ///     本地玩家（與改動前的 <c>CustomComboFunctions.LocalPlayer is null</c>
+    ///     同義），或是 framework 執行緒在逾時內沒有回話。
+    /// </returns>
+    /// <remarks>
+    ///     🔴🔴 <b>原生狀態只能在 framework 執行緒讀。</b>
+    ///     <c>Svc.Objects.LocalPlayer</c> 回的是 <c>ObjectTable</c> 每一格預先配好、
+    ///     存取時就地改寫 <c>Address</c> 的<b>共用包裝</b> —— 從別條執行緒讀它可能
+    ///     讀到已經被改寫成別人的位址，或是懸空的位址。失敗形式是
+    ///     <c>AccessViolationException</c>，而那在 .NET Core 是 corrupted-state
+    ///     exception，<c>try/catch</c> 攔不到，整個遊戲直接關掉。<br />
+    ///     而帶 <c>[EzIPC]</c> 的端點是跑在<b>承租外掛的執行緒</b>上的。<br />
+    ///     🔑 <c>RunOnFrameworkThread</c> 在「已經在 framework 執行緒上」時是
+    ///     <b>就地執行</b>，所以承租外掛若是從自己的 framework 回呼裡打進來，
+    ///     這一支完全沒有等待，行為與改動前一致。<br />
+    ///     🔴 不要改用 <c>Svc.Framework.Run(...)</c>：那一支<b>一律</b> StartNew，
+    ///     在 framework 執行緒上同步等它會死結。<br />
+    ///     🔴 不要用 <c>task.Wait()</c>：它把例外包成 <c>AggregateException</c>，
+    ///     而且不帶逾時就是無限期等。
+    /// </remarks>
+    internal static uint? CurrentClassJobIdFromFramework()
+    {
+        Task<uint?> task;
+        try
+        {
+            task = Svc.Framework.RunOnFrameworkThread(ReadClassJobIdOnFramework);
+        }
+        catch (Exception e)
+        {
+            // 已在 framework 執行緒上時是就地執行，委派自己擲的例外會直接冒到這裡。
+            Logging.Error("Failed to read the current job: " + e);
+            return null;
+        }
+
+        if (!task.IsCompleted &&
+            Task.WaitAny([task], FrameworkReadTimeout) < 0)
+        {
+            if (StaticThrottle.Throttle("ipcFrameworkJobReadTimeout",
+                    TS.FromSeconds(30)))
+                Logging.Information(
+                    "Timed out waiting for the framework thread to report the " +
+                    "current job; treating it as 'no player available'.");
+            return null;
+        }
+
+        if (task.IsCompletedSuccessfully)
+            return task.Result;
+
+        if (task.IsFaulted)
+            Logging.Error("Failed to read the current job: " + task.Exception);
+
+        return null;
+    }
+
+    /// <summary>
+    ///     <see cref="CurrentClassJobIdFromFramework" /> 真正在 framework 執行緒上
+    ///     跑的那一段：兩次原生存取合併成一次，中間不會被「玩家消失」插進來。
+    /// </summary>
+    private static uint? ReadClassJobIdOnFramework() =>
+        CustomComboFunctions.LocalPlayer is { } player
+            ? player.ClassJob.RowId
+            : null;
+
+    #endregion
+
     #region Auto-Rotation Ready
 
     /// <summary>
@@ -161,11 +251,18 @@ public partial class Helper(ref Leasing leasing)
         ComboStateKeys enabledStateToCheck,
         ComboSimplicityLevelKeys? previousMatch = null)
     {
-        if (CustomComboFunctions.LocalPlayer is null)
+        // 🔴 這一支從三個 [EzIPC] 端點到得了（Provider.IsCurrentJobConfiguredOn／
+        //    IsCurrentJobAutoModeOn／IsCurrentJobAutoRotationReady），也就是承租
+        //    外掛的執行緒。原生狀態只能在 framework 執行緒讀，見
+        //    CurrentClassJobIdFromFramework()。
+        //    📌 (uint)Player.Job 就是 LocalPlayer.ClassJob.RowId，換過來之後
+        //    ClassToJob() 的輸入完全相同。
+        var classJobId = CurrentClassJobIdFromFramework();
+        if (classJobId is null)
             return null;
 
         // Convert current job/class to a job, if it is a class
-        var job = (Job)CustomComboFunctions.JobIDs.ClassToJob((uint)Player.Job);
+        var job = (Job)CustomComboFunctions.JobIDs.ClassToJob(classJobId.Value);
 
         // Get the user's settings for this job
         P.IPCSearch.CurrentJobComboStatesCategorized.TryGetValue(job,
