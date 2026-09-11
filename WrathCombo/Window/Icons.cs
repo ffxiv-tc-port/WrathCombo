@@ -23,6 +23,9 @@ namespace WrathCombo.Window
         // 把圖示載入移到背景執行緒時引入的，不是上游的問題。
         public static readonly ConcurrentDictionary<uint, IDalamudTextureWrap> CachedModdedIcons = new();
         private static readonly ConcurrentDictionary<uint, byte> LoadingModdedIcons = new();
+
+        // 卸載期只印一次通知用的旗標（Interlocked，不用鎖）。
+        private static int ModdedIconUnloadNoticeLogged;
         public static Dictionary<int, IDalamudTextureWrap?> OccultIcons = [];
         private static int OccultIdx = -1; // Instead of 0 to show Freelancer
         public static IDalamudTextureWrap? GetJobIcon(uint jobId)
@@ -92,6 +95,23 @@ namespace WrathCombo.Window
                         var data = tex.GetRgbaImageData();
                         Svc.Framework.RunOnFrameworkThread(() =>
                         {
+                            // 🔴 卸載期 RunOnFrameworkThread 不排隊，會就地
+                            // 在這條執行緒池執行緒上跑（本 pin
+                            // Dalamud/Game/Framework.cs）。CreateFromRaw 要碰
+                            // Dalamud 的貼圖管理員與 D3D 裝置，而那時候它們正在
+                            // 被拆掉；就算做出來，這個 wrap 也不會再有人畫到，
+                            // 只會變成一個沒人釋放的資源。
+                            if (Svc.Framework.IsFrameworkUnloading)
+                            {
+                                if (System.Threading.Interlocked.Exchange(
+                                        ref ModdedIconUnloadNoticeLogged, 1) == 0)
+                                    Svc.Log.Information(
+                                        "The framework is unloading, so a " +
+                                        "modded icon was not uploaded to the " +
+                                        "GPU.");
+                                return;
+                            }
+
                             var output = Svc.Texture.CreateFromRaw(spec, data);
                             if (output != null)
                                 CachedModdedIcons[iconId] = output;

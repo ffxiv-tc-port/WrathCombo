@@ -398,6 +398,27 @@ public class Search(Leasing leasing)
         //    而同步等會把承租外掛的執行緒無謂地停在這裡。
         //    📌 已經在 framework 執行緒上時 RunOnFrameworkThread 是就地執行，
         //    所以 UI 與 framework 路徑的行為與改動前完全相同（同步、當場更新）。
+        // 🔴🔴 卸載期旁路：RunOnFrameworkThread 在
+        //    IsFrameworkUnloading 為真時是「就地在呼叫端執行緒執行」而不是排隊
+        //    （本 pin Dalamud/Game/Framework.cs）⇒ 關遊戲那一瞬間承租外掛打進
+        //    GetComboState／GetComboOptionState 的話，RefreshActiveJobPresets
+        //    會在承租外掛的執行緒上讀 Player.JobId 等原生狀態。失敗形式是
+        //    AccessViolationException，try/catch 攔不到。
+        //    🔑 ActiveJobPresets 只是 DTR 提示用的計數器，沒有任何端點的
+        //    回傳值依賴它 ⇒ 卸載期跳過不更新（維持上一次的值）是安全的
+        //    fail-safe，而且反正這時候 DTR 也不會再畫了。
+        if (Svc.Framework.IsFrameworkUnloading &&
+            !Svc.Framework.IsInFrameworkUpdateThread)
+        {
+            if (_ipcThrottle.Throttle("ipcFrameworkUnloadingPresetRefresh",
+                    TS.FromSeconds(30)))
+                Svc.Log.Information(
+                    "The framework is unloading, so the active job preset " +
+                    "count was left at its previous value instead of being " +
+                    "refreshed from a non-framework thread.");
+            return;
+        }
+
         Task task;
         try
         {

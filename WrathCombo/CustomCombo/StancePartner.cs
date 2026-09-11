@@ -50,6 +50,27 @@ public static class StancePartner
         if (P.UIHelper.AutoRotationStateControlled() is not null)
         {
             PluginLog.Verbose("OnIPCInstanceChange: Is IPC-Controlled");
+
+            // 🔴🔴 這一整支是從 Task.Run 進來的（WrathCombo.cs 的
+            //    ClientState_TerritoryChanged），也就是執行緒池的執行緒，而且
+            //    上面剛剛才卡了最多 24 秒 —— 那段期間使用者很可能已經在關遊戲。
+            //    無延遲的 RunOnTick 在 IsFrameworkUnloading 為真時會退化成
+            //    「就地在呼叫端執行緒執行」（本 pin Dalamud/Game/Framework.cs：
+            //    RunOnTick 沒有 delay 時直接轉呼叫 RunOnFrameworkThread），
+            //    而 CheckStancePartner 會讀 LocalPlayer 與 ActionManager 等原生
+            //    狀態。失敗形式是 AccessViolationException，try/catch 攔不到。
+            //    🔑 卸載期就不要再放技能了：跳過等同於「這次的區域轉換沒做」，
+            //    那是上面兩個 return 本來就會產生的結果。
+            //    ⚠️ 帶延遲的那一個（本檔下面的重試排程）不需要這道閘門：
+            //    RunOnTick 有 delay 時在卸載期回的是已取消的 Task，委派不會跑。
+            if (Svc.Framework.IsFrameworkUnloading)
+            {
+                PluginLog.Information(
+                    "OnIPCInstanceChange: The framework is unloading, so the " +
+                    "Tank Stance / Dance Partner check was skipped.");
+                return;
+            }
+
             Svc.Framework.RunOnTick(CheckStancePartner!);
         }
         else

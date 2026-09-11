@@ -178,6 +178,29 @@ public partial class Helper(ref Leasing leasing)
     /// </remarks>
     internal static uint? CurrentClassJobIdFromFramework()
     {
+        // 🔴🔴 卸載期旁路：Dalamud 的 RunOnFrameworkThread 在
+        //    IsFrameworkUnloading 為真時是「就地在呼叫端執行緒執行」而不是排隊
+        //    （本 pin Dalamud/Game/Framework.cs 的 RunOnFrameworkThread<T>：
+        //     IsInFrameworkUpdateThread || IsFrameworkUnloading
+        //     ⇒ Task.FromResult(func())）
+        //    ⇒ 承租外掛在關遊戲／停用外掛那一瞬間打進來的話，上面整段保護會
+        //    整個失效，委派會直接在承租外掛的執行緒上讀 ObjectTable 的共用包裝。
+        //    失敗形式是 AccessViolationException，而那在 .NET Core 是
+        //    corrupted-state exception，try/catch 攔不到，整個遊戲直接關掉。
+        //    🔑 所以卸載期直接回 null —— 那正是這一支既有的失敗慣例值
+        //    （「沒有本地玩家」），兩個呼叫端本來就處理得了，回傳型別不變。
+        if (Svc.Framework.IsFrameworkUnloading &&
+            !Svc.Framework.IsInFrameworkUpdateThread)
+        {
+            if (StaticThrottle.Throttle("ipcFrameworkUnloadingJobRead",
+                    TS.FromSeconds(30)))
+                Logging.Information(
+                    "The framework is unloading, so the current job was not " +
+                    "read from a non-framework thread; treating it as " +
+                    "'no player available'.");
+            return null;
+        }
+
         Task<uint?> task;
         try
         {
