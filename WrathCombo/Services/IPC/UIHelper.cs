@@ -30,6 +30,28 @@ public class UIHelper(Leasing leasing)
 
     #region Auto-Rotation
 
+    /// <summary>
+    ///     <see cref="AutoRotationControlled" /> 這份快取上次重建時，
+    ///     <c>Leasing.AutoRotationStateUpdated</c> 的值。
+    /// </summary>
+    /// <remarks>
+    ///     📌 <b>這個欄位與 <see cref="AutoRotationControlled" /> 本身刻意維持原樣
+    ///     （沒有改成 <c>long</c> ＋ <see cref="Volatile" />）。</b>把
+    ///     <see cref="AutoRotationStateControlled" /> 的呼叫點全部枚舉過一次：
+    ///     <c>WrathCombo.UpdateDtrBar</c>、<c>Commands.ToggleAutoRotation</c>、
+    ///     <c>StancePartner.CheckIPCControl</c>（<c>RunOnTick</c>）、
+    ///     <c>DebugFile</c>、本檔的兩支 UI 方法，以及
+    ///     <c>AutoRotationConfigIPCWrapper.Enabled</c> →
+    ///     <c>AutoRotationController</c>／<c>GetPartyMembers</c> ——
+    ///     <b>全部都在遊戲主執行緒上</b>（框架更新、指令處理、ImGui 繪製都是同一條）。
+    ///     沒有任何 <c>[EzIPC]</c> 端點走得到這一支：<c>Provider.GetAutoRotationState</c>
+    ///     直接打 <c>Leasing.CheckAutoRotationControlled()</c>，那一支自己有鎖。<br />
+    ///     ⇒ 與 <c>PresetControlled</c> 不同（那一支真的被承租外掛的執行緒呼叫，
+    ///     所以才需要 <c>_presetsUpdatedTicks</c>）。<br />
+    ///     🔴 真正跨執行緒的是被比對的那一邊 —— <c>Leasing.AutoRotationStateUpdated</c>
+    ///     由承租外掛的執行緒寫、這裡不拿鎖讀 ⇒ 已在 <c>Leasing</c> 那側改成
+    ///     <c>long</c> ticks ＋ <see cref="Volatile" />。
+    /// </remarks>
     private DateTime? _autoRotationUpdated;
 
     private (string controllers, bool state)
@@ -37,10 +59,15 @@ public class UIHelper(Leasing leasing)
 
     internal (string controllers, bool state)? AutoRotationStateControlled()
     {
+        // 🔴 只讀一次時間戳：改動前這裡讀了兩次（判快取有效一次、寫回快取一次），
+        //    中間承租外掛的執行緒改掉的話，會用「新的時間戳」把「舊的快照」存起來
+        //    ⇒ 那份快取之後永遠不會再失效。同 PresetControlled 的處理。
+        var leasingStamp = _leasing.AutoRotationStateUpdated;
+
         // Return the cached value if it is valid, fastest
         if (string.IsNullOrEmpty(AutoRotationControlled.controllers) &&
             _autoRotationUpdated is not null &&
-            _autoRotationUpdated == _leasing.AutoRotationStateUpdated)
+            _autoRotationUpdated == leasingStamp)
             return AutoRotationControlled;
 
         // Bail if the state is not controlled, fast
@@ -62,7 +89,7 @@ public class UIHelper(Leasing leasing)
 
         AutoRotationControlled =
             (string.Join(", ", snapshot.Value.Controllers), snapshot.Value.State);
-        _autoRotationUpdated = _leasing.AutoRotationStateUpdated;
+        _autoRotationUpdated = leasingStamp;
 
         return AutoRotationControlled;
     }

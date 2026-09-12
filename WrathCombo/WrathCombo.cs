@@ -275,7 +275,12 @@ public sealed partial class WrathCombo : IDalamudPlugin
     {
         UpdateCaches(false, true, false);
 
-        Task.Run(StancePartner.CheckForIPCControl);
+        // ClientState_TerritoryChanged 本來就跑在框架執行緒上，而
+        // CheckForIPCControl 現在只做兩件受管理的事（把重試計數歸零、排一個
+        // 帶延遲的 RunOnTick），裡面已經沒有任何阻塞等待 ⇒ 不需要為它再繞一次
+        // 執行緒池。少一條執行緒池執行緒，_stancePartnerRunTries 也連帶變成
+        // 只有框架執行緒會碰。
+        StancePartner.CheckForIPCControl();
     }
 
     public const string OptionControlledByIPC =

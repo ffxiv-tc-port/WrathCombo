@@ -527,11 +527,50 @@ public partial class Leasing
     #region Cache Bust dates
 
     /// <summary>
+    ///     <see cref="AutoRotationStateUpdated" /> 真正的存放處，以
+    ///     <c>DateTime.Ticks + 1</c> 存；<c>0</c> 代表「還沒更新過」
+    ///     （等同改動前的 <see langword="null" />）。
+    /// </summary>
+    /// <remarks>
+    ///     🔴🔴 改動前這是一個裸 <c>DateTime?</c> 欄位，也就是 <c>bool</c> ＋
+    ///     <c>DateTime</c> 共 16 bytes 的結構 —— <b>寫入不是原子的</b>。<br />
+    ///     寫的人是<b>承租外掛自己的執行緒</b>（<c>[EzIPC]</c> 端點 →
+    ///     <see cref="AddRegistrationForAutoRotation" />）與 thread-pool
+    ///     （<c>SuspendLeases</c>），兩者都在 <c>_gate</c> 內；但<b>讀的人不拿鎖</b>
+    ///     —— <c>UIHelper.AutoRotationStateControlled</c> 在框架／繪製執行緒上
+    ///     直接讀這個欄位。撕裂讀的結果是「有值旗標是新的、時間值還是舊的」之類的
+    ///     組合，讓快取有效性判斷得到錯的答案。<br />
+    ///     ⚠️ 失敗形式<b>不是例外</b>，是 UI 與 <c>StancePartner</c> 一直拿到過期的
+    ///     控制者資訊，直到下一次租約異動才對回來 —— 所以它可以長期存在沒被發現。<br />
+    ///     🔑 換成 <see cref="long" />：x64 上對齊的 64 位元讀寫本來就是原子的，
+    ///     配 <see cref="Volatile" /> 補上順序保證就夠了。<b>不用
+    ///     <c>Interlocked</c></b> —— 這裡沒有「讀出來算一算再寫回去」的複合操作，
+    ///     只有整份覆寫。同檔 <c>UIHelper._presetsUpdatedTicks</c> 是同一個作法。<br />
+    ///     📌 <b>刻意存 <c>Ticks + 1</c></b>：<c>DateTime.MinValue.Ticks</c> 就是
+    ///     <c>0</c>，直接存 Ticks 會和「還沒設定過」的哨兵值撞在一起。<br />
+    ///     📌 同區的 <c>AutoRotationConfigsUpdated</c>／<c>JobsUpdated</c>／
+    ///     <c>CombosUpdated</c>／<c>OptionsUpdated</c> 是一模一樣的形狀，這次<b>刻意
+    ///     沒有一起改</b>：本次施工的範圍只有自動循環開關這一條，其餘留待點名。
+    /// </remarks>
+    private long _autoRotationStateUpdatedTicks;
+
+    /// <summary>
     ///     When the Auto-Rotation state was last updated.<br />
     ///     Used to bust the UI cache.<br />
     ///     <c>null</c> if never updated.
     /// </summary>
-    internal DateTime? AutoRotationStateUpdated;
+    internal DateTime? AutoRotationStateUpdated
+    {
+        get
+        {
+            var ticks = Volatile.Read(ref _autoRotationStateUpdatedTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => Volatile.Write(ref _autoRotationStateUpdatedTicks,
+            value is null ? 0L : value.Value.Ticks + 1);
+    }
 
     /// <summary>
     ///     When the Auto-Rotation configurations were last updated.<br />

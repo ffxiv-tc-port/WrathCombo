@@ -34,7 +34,7 @@ public static class StancePartner
         // Wait (a limited amount of time) for the screen to be ready
         PluginLog.Verbose("OnIPCInstanceChange: Waiting for screen ...");
 
-        // 🔴🔴 這一支是從 Task.Run 進來的（WrathCombo.cs 的
+        // 🔴🔴 這一支以前是從 Task.Run 進來的（WrathCombo.cs 的
         //    ClientState_TerritoryChanged），也就是執行緒池的執行緒，而原本的
         //    等待迴圈就在那條執行緒上每 400 毫秒呼叫一次
         //    GenericHelpers.IsScreenReady() —— 那支會走 RaptureAtkUnitManager
@@ -50,6 +50,10 @@ public static class StancePartner
         //    （Dalamud/Game/Framework.cs:227-236）在 IsFrameworkUnloading 為真
         //    且帶延遲時回的是 Task.FromCanceled，委派一次都不會跑 ⇒ 整條鏈
         //    自然停住。沒有延遲的那一個才會退化成就地執行。
+        //    ⚠️ 2026-09-12：連 Task.Run 都拿掉了。上面那條等待鏈整個排在
+        //    框架執行緒上之後，這一支本體只剩「歸零計數器 + 排一個 RunOnTick」，
+        //    而呼叫端 ClientState_TerritoryChanged 本來就在框架執行緒上
+        //    ⇒ 直接呼叫即可，繞執行緒池沒有任何好處。
         Svc.Framework.RunOnTick(() => WaitForScreenThenCheckIPC(0),
             delayTicks: 1);
     };
