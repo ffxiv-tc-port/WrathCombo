@@ -107,12 +107,18 @@ public class UIHelper(Leasing leasing)
     {
         var jobName = CustomComboFunctions.JobIDs.JobIDToShorthand(job);
 
-        if (_jobsUpdated != _leasing.JobsUpdated)
+        // 🔴 只讀一次 Leasing 那一邊的時間戳：它由承租外掛的執行緒寫（在 Leasing
+        //    的鎖內），這裡不拿鎖讀。原本這一支讀了四次，中途被改掉的話「判要不要
+        //    清快取」「判快取有效」「寫回快取世代」會落在不同的值上 ⇒ 會用新的世代
+        //    存下舊的快照，那份快取之後永遠不會再失效。同 PresetControlled 的處理。
+        var leasingStamp = _leasing.JobsUpdated;
+
+        if (_jobsUpdated != leasingStamp)
             JobsControlled.Clear();
 
         // Return the cached value if it is valid, fastest
         if (_jobsUpdated is not null &&
-            _jobsUpdated == _leasing.JobsUpdated &&
+            _jobsUpdated == leasingStamp &&
             JobsControlled.TryGetValue(jobName, out var jobControlled))
         {
             if (string.IsNullOrEmpty(jobControlled.controllers))
@@ -128,7 +134,7 @@ public class UIHelper(Leasing leasing)
             if (string.IsNullOrEmpty(jobNotControlled.controllers))
             {
                 JobsControlled[jobName] = (string.Empty, false);
-                _jobsUpdated = _leasing.JobsUpdated;
+                _jobsUpdated = leasingStamp;
             }
 
             return null;
@@ -141,7 +147,7 @@ public class UIHelper(Leasing leasing)
         foreach (var controlledJob in _search.AllJobsControlled)
             JobsControlled[controlledJob.Key.ToString()] =
                 (string.Join(", ", controlledJob.Value.Keys), true);
-        _jobsUpdated = _leasing.JobsUpdated;
+        _jobsUpdated = leasingStamp;
 
         return JobsControlled[jobName];
     }
@@ -189,11 +195,15 @@ public class UIHelper(Leasing leasing)
     {
         var presetName = preset.ToString();
 
+        // 🔴 三元式原本把 Leasing.CombosUpdated 與 OptionsUpdated 各讀了兩次
+        //    （判大小一次、取值一次）。那兩個欄位由承租外掛的執行緒寫，中途被改掉
+        //    的話兩次讀會落在不同的世代上。各自只讀一次。
+        var combosUpdated = _leasing.CombosUpdated;
+        var optionsUpdated = _leasing.OptionsUpdated;
         var presetsUpdated = (DateTime)
-            (_leasing.CombosUpdated > _leasing
-                .OptionsUpdated
-                ? _leasing.CombosUpdated
-                : _leasing.OptionsUpdated ?? DateTime.MinValue);
+            (combosUpdated > optionsUpdated
+                ? combosUpdated
+                : optionsUpdated ?? DateTime.MinValue);
 
         // 🔴 只讀一次欄位：改動前這裡讀了兩次（判「不等」一次、判「不是 null」
         //    一次），中間別條執行緒改掉的話兩個判斷會落在不同的值上。
@@ -260,12 +270,18 @@ public class UIHelper(Leasing leasing)
     {
         var configOption = Enum.Parse<AutoRotationConfigOption>(configName);
 
-        if (_autoRotationConfigsUpdated != _leasing.AutoRotationConfigsUpdated)
+        // 🔴 只讀一次 Leasing 那一邊的時間戳，理由同 JobControlled。
+        //    ⚠️ 下面「慢路徑」尾端寫回的仍然是
+        //    _search.LastCacheUpdateForAutoRotationConfigs（不是這個區域變數）——
+        //    那是改動前就有的寫法，刻意逐字保留，不在這次的範圍內。
+        var leasingStamp = _leasing.AutoRotationConfigsUpdated;
+
+        if (_autoRotationConfigsUpdated != leasingStamp)
             AutoRotationConfigsControlled.Clear();
 
         // Return the cached value if it is valid, fastest
         if (_autoRotationConfigsUpdated is not null &&
-            _autoRotationConfigsUpdated == _leasing.AutoRotationConfigsUpdated &&
+            _autoRotationConfigsUpdated == leasingStamp &&
             AutoRotationConfigsControlled.TryGetValue(configName,
                 out var configControlled))
         {
@@ -283,7 +299,7 @@ public class UIHelper(Leasing leasing)
             if (string.IsNullOrEmpty(configNotControlled.controllers))
             {
                 AutoRotationConfigsControlled[configName] = (string.Empty, 0);
-                _autoRotationConfigsUpdated = _leasing.AutoRotationConfigsUpdated;
+                _autoRotationConfigsUpdated = leasingStamp;
             }
 
             return null;

@@ -549,8 +549,9 @@ public partial class Leasing
     ///     📌 <b>刻意存 <c>Ticks + 1</c></b>：<c>DateTime.MinValue.Ticks</c> 就是
     ///     <c>0</c>，直接存 Ticks 會和「還沒設定過」的哨兵值撞在一起。<br />
     ///     📌 同區的 <c>AutoRotationConfigsUpdated</c>／<c>JobsUpdated</c>／
-    ///     <c>CombosUpdated</c>／<c>OptionsUpdated</c> 是一模一樣的形狀，這次<b>刻意
-    ///     沒有一起改</b>：本次施工的範圍只有自動循環開關這一條，其餘留待點名。
+    ///     <c>CombosUpdated</c>／<c>OptionsUpdated</c> 是一模一樣的形狀，
+    ///     <b>現在全部都是同一個作法</b>（各自有一個 <c>...Ticks</c> 存放處）。
+    ///     這段 remarks 是那五個欄位共用的說明，其餘四個只留一行指回這裡。
     /// </remarks>
     private long _autoRotationStateUpdatedTicks;
 
@@ -573,32 +574,130 @@ public partial class Leasing
     }
 
     /// <summary>
+    ///     <see cref="AutoRotationConfigsUpdated" /> 真正的存放處。
+    ///     形狀與理由見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </summary>
+    private long _autoRotationConfigsUpdatedTicks;
+
+    /// <summary>
     ///     When the Auto-Rotation configurations were last updated.<br />
     ///     Used to bust the UI cache.<br />
     ///     <c>null</c> if never updated.
     /// </summary>
-    internal DateTime? AutoRotationConfigsUpdated;
+    /// <remarks>
+    ///     🔴 寫的人是承租外掛自己的執行緒（<c>[EzIPC]</c> 端點 →
+    ///     <see cref="AddRegistrationForAutoRotationConfig" />）與 thread-pool
+    ///     （<c>SuspendLeases</c> → <see cref="RemoveRegistration" />），都在
+    ///     <c>_gate</c> 內；讀的人是<b>框架／繪製執行緒而且不拿鎖</b>
+    ///     （<c>Search.AllAutoRotationConfigsControlled</c> 與
+    ///     <c>UIHelper.AutoRotationConfigControlled</c>）。
+    ///     完整說明見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </remarks>
+    internal DateTime? AutoRotationConfigsUpdated
+    {
+        get
+        {
+            var ticks = Volatile.Read(ref _autoRotationConfigsUpdatedTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => Volatile.Write(ref _autoRotationConfigsUpdatedTicks,
+            value is null ? 0L : value.Value.Ticks + 1);
+    }
+
+    /// <summary>
+    ///     <see cref="JobsUpdated" /> 真正的存放處。
+    ///     形狀與理由見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </summary>
+    private long _jobsUpdatedTicks;
 
     /// <summary>
     ///     When Jobs-controlled were last updated.<br />
     ///     Used to bust the UI cache.<br />
     ///     <c>null</c> if never updated.
     /// </summary>
-    internal DateTime? JobsUpdated;
+    /// <remarks>
+    ///     🔴 寫的人是承租外掛自己的執行緒（<c>[EzIPC]</c> 端點 →
+    ///     <see cref="AddRegistrationForCurrentJob" />）與 thread-pool
+    ///     （<c>SuspendLeases</c> → <see cref="RemoveRegistration" />），都在
+    ///     <c>_gate</c> 內；讀的人是<b>框架／繪製執行緒而且不拿鎖</b>
+    ///     （<c>Search.AllJobsControlled</c> 與 <c>UIHelper.JobControlled</c>）。
+    ///     完整說明見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </remarks>
+    internal DateTime? JobsUpdated
+    {
+        get
+        {
+            var ticks = Volatile.Read(ref _jobsUpdatedTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => Volatile.Write(ref _jobsUpdatedTicks,
+            value is null ? 0L : value.Value.Ticks + 1);
+    }
+
+    /// <summary>
+    ///     <see cref="CombosUpdated" /> 真正的存放處。
+    ///     形狀與理由見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </summary>
+    private long _combosUpdatedTicks;
 
     /// <summary>
     ///     When Combos-controlled were last updated.<br />
     ///     Used to bust the UI cache.<br />
     ///     <c>null</c> if never updated.
     /// </summary>
-    internal DateTime? CombosUpdated;
+    /// <remarks>
+    ///     🔴🔴 這一個的讀取端<b>包含 <c>[EzIPC]</c> 端點本身</b>，也就是承租外掛的
+    ///     執行緒：<c>Provider.IsCurrentJobAutoRotationReady</c> 直接讀它，
+    ///     <c>Search.PresetStates</c>（<c>Provider.GetComboState</c>／
+    ///     <c>GetComboOptionState</c> 走得到）也讀它 —— 所以這裡是讀寫<b>兩端</b>
+    ///     都可能在承租外掛的執行緒上，不只是「寫在別條執行緒」。
+    ///     完整說明見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </remarks>
+    internal DateTime? CombosUpdated
+    {
+        get
+        {
+            var ticks = Volatile.Read(ref _combosUpdatedTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => Volatile.Write(ref _combosUpdatedTicks,
+            value is null ? 0L : value.Value.Ticks + 1);
+    }
+
+    /// <summary>
+    ///     <see cref="OptionsUpdated" /> 真正的存放處。
+    ///     形狀與理由見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </summary>
+    private long _optionsUpdatedTicks;
 
     /// <summary>
     ///     When Options-controlled were last updated.<br />
     ///     Used to bust the UI cache.<br />
     ///     <c>null</c> if never updated.
     /// </summary>
-    internal DateTime? OptionsUpdated;
+    /// <remarks>
+    ///     🔴🔴 與 <see cref="CombosUpdated" /> 成對使用（兩者取較新的那一個當
+    ///     「preset 快取的世代」），讀取端同樣含 <c>[EzIPC]</c> 端點的執行緒。
+    ///     完整說明見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </remarks>
+    internal DateTime? OptionsUpdated
+    {
+        get
+        {
+            var ticks = Volatile.Read(ref _optionsUpdatedTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => Volatile.Write(ref _optionsUpdatedTicks,
+            value is null ? 0L : value.Value.Ticks + 1);
+    }
 
     #endregion
 

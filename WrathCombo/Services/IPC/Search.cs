@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
@@ -65,10 +66,15 @@ public class Search(Leasing leasing)
             //    完整說明見 <see cref="PresetStates" />。
             var cached = field;
 
+            // 🔴 跨執行緒的那一邊只讀一次：Leasing.AutoRotationConfigsUpdated 由
+            //    承租外掛的執行緒寫（在 Leasing 的鎖內），這裡不拿鎖讀。讀兩次的話
+            //    「判快取有效」與「寫回快取世代」會落在不同的值上 ⇒ 用新的世代存下
+            //    舊的快照，那份快取之後永遠不會再失效。
+            var leasingStamp = _leasing.AutoRotationConfigsUpdated;
+
             if (cached is not null &&
                 LastCacheUpdateForAutoRotationConfigs is not null &&
-                _leasing.AutoRotationConfigsUpdated ==
-                LastCacheUpdateForAutoRotationConfigs)
+                leasingStamp == LastCacheUpdateForAutoRotationConfigs)
                 return cached;
 
             // 🔴 走訪租約與它身上的 ...Controlled 字典必須在 Leasing 的鎖內做
@@ -92,8 +98,7 @@ public class Search(Leasing leasing)
                 );
             field = rebuilt;
 
-            LastCacheUpdateForAutoRotationConfigs =
-                _leasing.AutoRotationConfigsUpdated;
+            LastCacheUpdateForAutoRotationConfigs = leasingStamp;
             return rebuilt;
         }
     }
@@ -114,9 +119,13 @@ public class Search(Leasing leasing)
         {
             var cached = field;
 
+            // 🔴 跨執行緒的那一邊只讀一次，理由同
+            //    AllAutoRotationConfigsControlled。
+            var leasingStamp = _leasing.JobsUpdated;
+
             if (cached is not null &&
                 LastCacheUpdateForAllJobsControlled is not null &&
-                _leasing.JobsUpdated == LastCacheUpdateForAllJobsControlled)
+                leasingStamp == LastCacheUpdateForAllJobsControlled)
                 return cached;
 
             var rebuilt = _leasing.ProjectLeases(registration => registration.JobsControlled
@@ -135,17 +144,50 @@ public class Search(Leasing leasing)
                 );
             field = rebuilt;
 
-            LastCacheUpdateForAllJobsControlled = _leasing.JobsUpdated;
+            LastCacheUpdateForAllJobsControlled = leasingStamp;
             return rebuilt;
         }
     }
+
+    /// <summary>
+    ///     <see cref="LastCacheUpdateForAllPresetsControlled" /> 真正的存放處，以
+    ///     <c>DateTime.Ticks + 1</c> 存；<c>0</c> 代表「還沒設定過」。
+    /// </summary>
+    /// <remarks>
+    ///     🔴🔴 改動前這是一個裸 <c>DateTime?</c>（<c>bool</c> ＋ <c>DateTime</c>
+    ///     共 16 bytes，<b>寫入不是原子的</b>），而
+    ///     <see cref="AllPresetsControlled" /> 的唯一呼叫點是
+    ///     <c>UIHelper.PresetControlled</c> —— 那一支<b>承租外掛自己的執行緒到得了</b>
+    ///     （<c>[EzIPC]</c> 端點 → <see cref="PresetStates" /> →
+    ///     <c>CustomComboFunctions.IsEnabled</c> → 它），而且繪製執行緒每一格 preset
+    ///     也會問一次 ⇒ 這個欄位是<b>讀寫兩端都跨執行緒</b>，而且整段沒有鎖
+    ///     （刻意的：快取重建會走訪租約，鎖在 <c>Leasing.ProjectLeases</c> 裡面）。<br />
+    ///     🔑 作法與理由完全照 <c>Leasing.AutoRotationStateUpdated</c>：
+    ///     換成 <see cref="long" />（x64 上對齊的 64 位元讀寫本來就是原子的）
+    ///     配 <see cref="Volatile" />，存 <c>Ticks + 1</c> 讓 <c>0</c> 這個
+    ///     「還沒設定過」的哨兵值專用。
+    /// </remarks>
+    private long _lastCacheUpdateForAllPresetsControlledTicks;
 
     /// <summary>
     ///     When <see cref="AllPresetsControlled" /> was last cached.
     /// </summary>
     /// <seealso cref="Leasing.CombosUpdated" />
     /// <seealso cref="Leasing.OptionsUpdated" />
-    internal DateTime? LastCacheUpdateForAllPresetsControlled;
+    internal DateTime? LastCacheUpdateForAllPresetsControlled
+    {
+        get
+        {
+            var ticks =
+                Volatile.Read(ref _lastCacheUpdateForAllPresetsControlledTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => Volatile.Write(
+            ref _lastCacheUpdateForAllPresetsControlledTicks,
+            value is null ? 0L : value.Value.Ticks + 1);
+    }
 
     /// <summary>
     ///     Lists all presets controlled under leases.<br />
@@ -158,17 +200,23 @@ public class Search(Leasing leasing)
     {
         get
         {
+            // 🔴 三元式原本把 Leasing.CombosUpdated 與 OptionsUpdated 各讀了兩次
+            //    （判大小一次、取值一次）。那兩個欄位由承租外掛的執行緒寫，
+            //    中途被改掉的話「判大小」與「取值」會落在不同的世代上，算出來的
+            //    presetsUpdated 可能比兩邊都舊或都新。各自只讀一次。
+            var combosUpdated = _leasing.CombosUpdated;
+            var optionsUpdated = _leasing.OptionsUpdated;
             var presetsUpdated = (DateTime)
-                (_leasing.CombosUpdated > _leasing
-                    .OptionsUpdated
-                    ? _leasing.CombosUpdated
-                    : _leasing.OptionsUpdated ?? DateTime.MinValue);
+                (combosUpdated > optionsUpdated
+                    ? combosUpdated
+                    : optionsUpdated ?? DateTime.MinValue);
 
             var cached = field;
+            var cachedStamp = LastCacheUpdateForAllPresetsControlled;
 
             if (cached is not null &&
-                LastCacheUpdateForAllPresetsControlled is not null &&
-                presetsUpdated == LastCacheUpdateForAllPresetsControlled)
+                cachedStamp is not null &&
+                presetsUpdated == cachedStamp)
                 return cached;
 
             var rebuilt = _leasing.ProjectLeases(registration => registration.CombosControlled
@@ -319,11 +367,13 @@ public class Search(Leasing leasing)
     {
         get
         {
+            // 🔴 各自只讀一次，理由同 AllPresetsControlled。
+            var combosUpdated = _leasing.CombosUpdated;
+            var optionsUpdated = _leasing.OptionsUpdated;
             var presetsUpdated = (DateTime)
-                (_leasing.CombosUpdated > _leasing
-                    .OptionsUpdated
-                    ? _leasing.CombosUpdated
-                    : _leasing.OptionsUpdated ?? DateTime.MinValue);
+                (combosUpdated > optionsUpdated
+                    ? combosUpdated
+                    : optionsUpdated ?? DateTime.MinValue);
 
             // 🔴🔴 這一支是 [EzIPC] 端點（Provider.GetComboState／
             //    GetComboOptionState，跑在承租外掛的執行緒上）與繪製執行緒同時
