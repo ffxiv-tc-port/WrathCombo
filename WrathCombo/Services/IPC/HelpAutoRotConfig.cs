@@ -23,12 +23,15 @@ public partial class Leasing
     internal int? CheckAutoRotationConfigControlled
         (AutoRotationConfigOption option)
     {
-        var lease = Registrations.Values
-            .Where(l => l.AutoRotationConfigsControlled.ContainsKey(option))
-            .OrderByDescending(l => l.LastUpdated)
-            .FirstOrDefault();
+        lock (_gate)
+        {
+            var lease = _registrations.Values
+                .Where(l => l.AutoRotationConfigsControlled.ContainsKey(option))
+                .OrderByDescending(l => l.LastUpdated)
+                .FirstOrDefault();
 
-        return lease?.AutoRotationConfigsControlled[option];
+            return lease?.AutoRotationConfigsControlled[option];
+        }
     }
 
     /// <summary>
@@ -43,18 +46,25 @@ public partial class Leasing
     internal SetResult AddRegistrationForAutoRotationConfig
         (Guid lease, AutoRotationConfigOption option, int value)
     {
-        var registration = Registrations[lease];
+        string pluginName;
+        lock (_gate)
+        {
+            var registration = _registrations[lease];
+            pluginName = registration.PluginName;
 
-        if (registration.AutoRotationConfigsControlled.ContainsKey(option) &&
-            registration.AutoRotationConfigsControlled[option] == value)
-            return SetResult.Duplicate;
+            if (registration.AutoRotationConfigsControlled
+                    .TryGetValue(option, out var existing) &&
+                existing == value)
+                return SetResult.Duplicate;
 
-        registration.AutoRotationConfigsControlled[option] = value;
+            registration.AutoRotationConfigsControlled[option] = value;
 
-        registration.LastUpdated = DateTime.Now;
-        AutoRotationConfigsUpdated = DateTime.Now;
+            registration.LastUpdated = DateTime.Now;
+            AutoRotationConfigsUpdated = DateTime.Now;
+        }
 
-        Logging.Log($"{registration.PluginName}: Registered Auto-Rotation Config ({option} to {value})");
+        // 記錄留到鎖外印：Logging 會建一個 StackTrace，不該握著鎖跑。
+        Logging.Log($"{pluginName}: Registered Auto-Rotation Config ({option} to {value})");
         return SetResult.Okay;
     }
 }

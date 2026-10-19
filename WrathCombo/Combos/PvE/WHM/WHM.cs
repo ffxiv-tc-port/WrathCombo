@@ -429,10 +429,13 @@ internal partial class WHM : Healer
 
             if (IsEnabled(Preset.WHM_STHeals_Esuna) &&
                 ActionReady(Role.Esuna) &&
-                GetTargetHPPercent(
-                    healTarget, Config.WHM_STHeals_IncludeShields) >=
-                Config.WHM_STHeals_Esuna &&
-                HasCleansableDebuff(healTarget))
+                HasCleansableDebuff(healTarget) &&
+                EsunaAllowed(healTarget,
+                    GetTargetHPPercent(
+                        healTarget, Config.WHM_STHeals_IncludeShields) >=
+                    Config.WHM_STHeals_Esuna,
+                    Config.WHM_STHeals_EsunaCriticalHP,
+                    Config.WHM_STHeals_IncludeShields))
                 return Role.Esuna
                     .RetargetIfEnabled(OptionalTarget, Cure);
 

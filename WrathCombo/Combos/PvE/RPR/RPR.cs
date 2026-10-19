@@ -809,12 +809,20 @@ internal partial class RPR : Melee
             bool[] soulSowOptions = RPR_SoulsowOptions;
             bool soulsowReady = ActionReady(Soulsow) && !HasStatusEffect(Buffs.Soulsow);
 
+            // 設定陣列的長度來自使用者的設定檔,可能比這裡要求的 5 格短
+            // (例如舊版設定檔的選項數較少),而 Length > 0 這個守衛擋不住
+            // 索引 [1]~[4],長度 1~4 時會擲 IndexOutOfRangeException。
+            // 越界一律當成「沒勾選」——與設定畫面補齊長度時填進去的值相同,
+            // 所以長度足夠的情況下行為完全不變。
+            bool SoulsowOption(int index) =>
+                index < soulSowOptions.Length && soulSowOptions[index];
+
             return soulSowOptions.Length > 0 &&
-                   (actionID is Harpe && soulSowOptions[0] ||
-                    actionID is Slice && soulSowOptions[1] ||
-                    actionID is SpinningScythe && soulSowOptions[2] ||
-                    actionID is ShadowOfDeath && soulSowOptions[3] ||
-                    actionID is BloodStalk && soulSowOptions[4]) && soulsowReady && !InCombat() ||
+                   (actionID is Harpe && SoulsowOption(0) ||
+                    actionID is Slice && SoulsowOption(1) ||
+                    actionID is SpinningScythe && SoulsowOption(2) ||
+                    actionID is ShadowOfDeath && SoulsowOption(3) ||
+                    actionID is BloodStalk && SoulsowOption(4)) && soulsowReady && !InCombat() ||
                    IsEnabled(CustomComboPreset.RPR_Soulsow_Combat) && actionID is Harpe && !HasBattleTarget()
                 ? Soulsow
                 : actionID;

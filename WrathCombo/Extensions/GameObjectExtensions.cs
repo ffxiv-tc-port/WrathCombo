@@ -9,6 +9,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
+using WrathCombo.Data;
 
 namespace WrathCombo.Extensions;
 
@@ -19,9 +20,33 @@ public static class GameObjectExtensions
     /// </summary>
     /// <param name="ptr">The GameObject pointer to convert.</param>
     /// <returns>An IGameObject if found in the object table; otherwise, null.</returns>
-    public static unsafe IGameObject? GetObjectFrom(GameObject* ptr) =>
-        ptr == null ? null : Svc.Objects
-            .FirstOrDefault(x => x.Address == (IntPtr)ptr);
+    public static unsafe IGameObject? GetObjectFrom(GameObject* ptr)
+    {
+        if (ptr == null)
+            return null;
+
+        var address = (IntPtr)ptr;
+        foreach (var obj in Svc.Objects)
+            if (obj.Address == address)
+                return obj;
+
+        return null;
+    }
+
+    /// <summary>
+    ///     物件表裡第一個 <c>GameObjectId</c> 等於 <paramref name="gameObjectId" /> 的物件；找不到回 <see langword="null" />。
+    /// </summary>
+    /// <remarks>
+    ///     走訪順序與物件表的列舉相同。回的是物件表的共用包裝：只在這一幀用，不要存。
+    /// </remarks>
+    internal static IGameObject? FindObjectById(ulong gameObjectId)
+    {
+        foreach (var obj in Svc.Objects)
+            if (obj.GameObjectId == gameObjectId)
+                return obj;
+
+        return null;
+    }
 
     #region Target Classification
 
@@ -95,7 +120,7 @@ public static class GameObjectExtensions
     /// </summary>
     public static IGameObject? IfMissingHP (this IGameObject? obj) =>
         obj is IBattleChara battle &&
-        battle.CurrentHp / battle.MaxHp * 100 < 99
+        CustomComboFunctions.GetTargetHPPercent(battle) < 99
             ? obj
             : null;
 
@@ -247,6 +272,12 @@ public static class GameObjectExtensions
         obj != null && IsDeadEnoughToRaise(obj);
 
     /// <summary>
+    ///     同 <see cref="IsDead" />，但「無法復活」的死者也算（挑活著的隊友、判「還有沒有人活著」用）。
+    /// </summary>
+    internal static bool IsDeadEvenIfUnraisable(this IGameObject? obj) =>
+        obj != null && IsDeadEnoughToRaise(obj, true);
+
+    /// <summary>
     ///     Can be chained onto a <see cref="IGameObject" /> to make it a quick
     ///     boolean check for if the object is a player.
     /// </summary>
@@ -276,12 +307,13 @@ public static class GameObjectExtensions
     ///     Checks for them being dead but targetable, not having Transcendence or
     ///     a Raise, and having been dead for more than 2 seconds.
     /// </summary>
-    private static bool IsDeadEnoughToRaise(this IGameObject? obj)
+    private static bool IsDeadEnoughToRaise(this IGameObject? obj, bool includeUnraisable = false)
     {
         return obj.IsDead &&
                obj.IsAPlayer() &&
-               !CustomComboFunctions.HasStatusEffect(2648, obj, true) &&
-               !CustomComboFunctions.HasStatusEffect(148, obj, true) &&
+               !RaiseStatuses.HasAny(obj, RaiseStatuses.Transcendent) &&
+               !RaiseStatuses.HasAny(obj, RaiseStatuses.Raised) &&
+               (includeUnraisable || !RaiseStatuses.HasAny(obj, RaiseStatuses.Unraisable)) &&
                obj.IsTargetable &&
                (CustomComboFunctions.TimeSpentDead(obj.GameObjectId)
                    .TotalSeconds > 2 || !obj.IsInParty());

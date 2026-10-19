@@ -11,11 +11,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using WrathCombo.Combos;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Extensions;
-using EZ = ECommons.Throttlers.EzThrottler;
-using TS = System.TimeSpan;
+// 🔴🔴 這個檔<b>刻意不引用</b> ECommons.Throttlers.EzThrottler。
+//    它是整個外掛共用的靜態裸 Dictionary、零同步，而這裡每一支都是 IPC 端點的
+//    後端，跑在承租外掛的執行緒上 ⇒ 打它的失敗形式不是「節流失準」，而是
+//    那個字典本身壞掉，還會連帶弄壞這個外掛所有模組的節流。
+//    要節流請用本檔的 Leasing.ThrottleIpcLog()（自帶鎖、自帶字典）。
 using CancellationReasonEnum = WrathCombo.Services.IPC.CancellationReason;
 
 // ReSharper disable UseSymbolAlias
@@ -146,11 +150,103 @@ public class Lease(
                 : "")
         );
 
-        if (Callback is not null)
-            Callback.Invoke((int)cancellationReason, additionalInfo);
-        else if (IPCPrefixForCallback is not null)
-            Helper.CallIPCCallback(IPCPrefixForCallback, cancellationReason, additionalInfo);
+        // 🔴 取消回呼是「別的外掛的碼」，在我們的堆疊上同步執行。
+
+        // ⚠️ 回呼內部可能再入呼叫 Leasing 的註冊／移除方法，所以 catch 之後
+        //    不要在這裡碰任何集合狀態。租約本身已經由 RemoveRegistration() 在
+        //    呼叫本方法**之前**就從 Registrations 移除了（那個順序正是用來擋
+        //    「承租端在回呼裡 ReleaseControl() 同一把租約」的無限遞迴），
+        //    所以這裡不需要、也不應該再去動 Registrations。
+        try
+        {
+            if (Callback is not null)
+                Callback.Invoke((int)cancellationReason, additionalInfo);
+            else if (IPCPrefixForCallback is not null)
+                Helper.CallIPCCallback(IPCPrefixForCallback, cancellationReason, additionalInfo);
+        }
+        catch (Exception e)
+        {
+            // 不吞成完全靜默：記一行 Error。
+            LogCallbackFailure(PluginName, cancellationReason, e);
+        }
     }
+
+    #region 取消回呼失敗的節流記錄
+
+    /// <summary>
+    ///     每個承租外掛最近一次「取消回呼擲例外」被記進 log 的時間，以及那之後
+    ///     被抑制掉的次數。
+    /// </summary>
+    /// <remarks>
+    ///     ⚠️ 用外掛名當 key，不是用租約 <c>Guid</c>：租約每次重新註冊都是新的
+    ///     Guid，拿 Guid 當 key 等於完全沒節流。會反覆炸的是「那個外掛的回呼」。
+    /// </remarks>
+    private static readonly Dictionary<string, (long LoggedAt, int Suppressed)>
+        _callbackFailures = new();
+
+    /// <summary>
+    ///     守住 <see cref="_callbackFailures" /> 的鎖。
+    /// </summary>
+    private static readonly object _callbackFailuresGate = new();
+
+    /// <summary>
+    ///     同一個承租外掛的回呼失敗，最多每這麼多毫秒印一次完整例外。
+    /// </summary>
+    private const long CallbackFailureLogWindowMs = 60_000;
+
+    /// <summary>
+    ///     記錄承租外掛的取消回呼擲出的例外，同一個外掛節流到每分鐘一次。
+    /// </summary>
+    private static void LogCallbackFailure(
+        string pluginName, CancellationReasonEnum cancellationReason, Exception e)
+    {
+        // 這裡是例外處理路徑，本身再擲例外就會把「取消」整條打斷 —— 而擋掉
+        // 那件事正是這整段程式碼存在的理由。所以全部包起來。
+        try
+        {
+            var key = string.IsNullOrEmpty(pluginName) ? "<unknown leasee>" : pluginName;
+            var now = Environment.TickCount64;
+            int suppressed;
+
+            // 鎖內只做字典運算就出來：Logging 會建一個 StackTrace，不便宜，
+            // 而且沒有理由讓別條執行緒等它。
+            lock (_callbackFailuresGate)
+            {
+                var seen = _callbackFailures.TryGetValue(key, out var state);
+
+                // ⚠️ 不要拿哨兵值（如 long.MinValue）當「還沒印過」：
+                // now - long.MinValue 會溢位成負數，比較就永遠不成立。
+                // 改用「字典裡有沒有這個 key」來表示，第一次必定印。
+                if (seen && now - state.LoggedAt < CallbackFailureLogWindowMs)
+                {
+                    _callbackFailures[key] = (state.LoggedAt, state.Suppressed + 1);
+                    return;
+                }
+
+                suppressed = seen ? state.Suppressed : 0;
+                _callbackFailures[key] = (now, 0);
+            }
+
+            Logging.Error(
+                "Leasee '" + key +
+                "' threw from its lease-cancellation callback (" +
+                cancellationReason + "). " +
+                "The lease was still cancelled and removed; " +
+                "only the leasee's own notification failed." +
+                (suppressed > 0
+                    ? " (" + suppressed +
+                      " further failure(s) from this leasee were suppressed " +
+                      "in the last " + CallbackFailureLogWindowMs / 1000 + "s.)"
+                    : "") +
+                "\n" + e);
+        }
+        catch
+        {
+            // 連記 log 都失敗就放棄記錄。絕對不能讓它往上冒。
+        }
+    }
+
+    #endregion
 }
 
 public partial class Leasing
@@ -158,44 +254,365 @@ public partial class Leasing
     /// <summary>
     ///     Active leases.
     /// </summary>
-    internal Dictionary<Guid, Lease> Registrations = new();
+    /// <remarks>
+    ///     🔴 <b>刻意是 private 的。</b>不要改回 <c>internal</c>，也不要把它（或是
+    ///     <see cref="Lease" /> 身上那幾個 <c>...Controlled</c> 字典）交到這個類別外面。
+    /// </remarks>
+    private readonly Dictionary<Guid, Lease> _registrations = new();
+
+    #region 執行緒安全
+
+    /// <summary>
+    ///     守住 <see cref="_registrations" />、每一把 <see cref="Lease" /> 身上那幾個
+    ///     <c>...Controlled</c> 字典，以及 <see cref="_userRevokedTemporaryBlacklist" />
+    ///     的鎖。
+    /// </summary>
+    /// <remarks>
+    ///     🔴🔴 <b>為什麼一定要有。</b>這些字典被<b>三種執行緒</b>碰。<br />
+    ///     🔑 <b>鎖內三不</b>：不呼叫 ImGui、不做檔案／網路 I/O、不呼叫承租外掛的碼。
+    ///     取值／拍快照就出來。
+    /// </remarks>
+    private readonly object _gate = new();
+
+    /// <summary>
+    ///     還沒送出去的「租約已取消」通知。
+    /// </summary>
+    /// <remarks>
+    ///     🔴🔴 <see cref="Lease.Cancel" /> 會<b>同步執行承租外掛的碼</b>
+    ///     （<c>Callback.Invoke</c>，或 <c>Helper.CallIPCCallback</c> 的 call gate）。
+    ///     🔑 所以移除在鎖內做完，通知排進這張表，等鎖真的放掉之後才送。
+    /// </remarks>
+    private readonly List<(Lease Lease, CancellationReasonEnum Reason, string Info)>
+        _pendingCancellations = [];
+
+    /// <summary>
+    ///     送出 <see cref="_pendingCancellations" /> 裡累積的取消通知。<b>一定要在鎖外
+    ///     呼叫</b>（放在 <c>finally</c> 裡，讓鎖內擲例外時也送得出去）。
+    /// </summary>
+    private void FlushPendingCancellations()
+    {
+        if (Monitor.IsEntered(_gate))
+            return;
+
+        while (true)
+        {
+            (Lease Lease, CancellationReasonEnum Reason, string Info) pending;
+            lock (_gate)
+            {
+                if (_pendingCancellations.Count == 0)
+                    return;
+                pending = _pendingCancellations[0];
+                _pendingCancellations.RemoveAt(0);
+            }
+
+            // 🔴 一把通知不出去，不能連累其他把。Lease.Cancel() 內部已經擋掉承租端
+            //    回呼擲的例外，這裡再包一層是為了擋它自己的記錄路徑。
+            try
+            {
+                pending.Lease.Cancel(pending.Reason, pending.Info);
+            }
+            catch (Exception e)
+            {
+                Logging.Error(
+                    "Failed to notify '" + pending.Lease.PluginName +
+                    "' that its lease was cancelled (" + pending.Reason +
+                    "); the lease was still removed.\n" + e);
+            }
+
+            // 在鎖外做：它會整份重算職業 preset（最終走到設定與 Excel 表），不該握著鎖跑。
+            try
+            {
+                P.IPCSearch.UpdateActiveJobPresets();
+            }
+            catch (Exception e)
+            {
+                Logging.Error(
+                    "Failed to refresh the active job presets after a lease was " +
+                    "cancelled; the lease was still removed.\n" + e);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     這個租約表自己的 IPC 記錄節流器（自帶鎖、自帶字典）。
+    /// </summary>
+    /// <remarks>
+    ///     🔴🔴 <b>刻意不用 <c>ECommons</c> 的 <c>EzThrottler</c></b> —— 理由與
+    ///     注意事項寫在 <see cref="IpcThrottle" />。
+    /// </remarks>
+    private readonly IpcThrottle _ipcLogThrottle = new();
+
+    /// <summary>
+    ///     同一個 <paramref name="key" /> 每 <paramref name="windowMs" /> 毫秒只放行
+    ///     一次；第一次必定放行（與 <c>EzThrottler</c> 的行為一致）。
+    /// </summary>
+    private bool ThrottleIpcLog(string key, long windowMs) =>
+        _ipcLogThrottle.Throttle(key, windowMs);
+
+    #endregion
+
+    #region 給類別外部的唯讀存取器
+
+    /// <summary>
+    ///     目前有幾把租約。
+    /// </summary>
+    internal int RegistrationCount
+    {
+        get
+        {
+            lock (_gate)
+                return _registrations.Count;
+        }
+    }
+
+    /// <summary>
+    ///     在鎖內對每一把租約套用 <paramref name="selector" />，把結果<b>整份實體化</b>
+    ///     之後回傳。
+    /// </summary>
+    /// <remarks>
+    ///     🔴 <paramref name="selector" /> 是<b>在鎖內</b>執行的 ⇒ 只能做純運算：
+    ///     不可以呼叫 ImGui、不可以做 I/O、不可以呼叫別的外掛。
+    /// </remarks>
+    internal List<TResult> ProjectLeases<TResult>
+        (Func<Lease, IEnumerable<TResult>> selector)
+    {
+        lock (_gate)
+            return _registrations.Values.SelectMany(selector).ToList();
+    }
+
+    /// <summary>
+    ///     目前每一把租約的顯示用快照。給 UI 用：<b>在鎖內拍完，鎖外才畫</b>。
+    /// </summary>
+    internal (Guid ID, string PluginName, int SetsLeased, string Jobs, int Combos,
+        bool AutoRotation, DateTime Created)[] SnapshotLeases()
+    {
+        lock (_gate)
+            return _registrations.Values
+                .Select(l => (
+                    l.ID,
+                    l.PluginName,
+                    l.SetsLeased,
+                    l.JobsControlled.Count > 0
+                        ? string.Join(",", l.JobsControlled.Keys)
+                        : "0",
+                    l.CombosControlled.Count,
+                    l.AutoRotationControlled.Count > 0,
+                    l.Created))
+                .ToArray();
+    }
+
+    /// <summary>
+    ///     每一把租約的「外掛名 + 押了幾組設定」。
+    /// </summary>
+    internal (string pluginName, int configurationsCount)[] SnapshotLeaseeSummaries()
+    {
+        lock (_gate)
+            return _registrations.Values
+                .Select(l => (l.PluginName, l.SetsLeased))
+                .ToArray();
+    }
+
+    /// <summary>
+    ///     某一把租約押了幾組設定；租約不存在時回 <c>null</c>。
+    /// </summary>
+    internal int? TryGetSetsLeased(Guid lease)
+    {
+        lock (_gate)
+            return _registrations.TryGetValue(lease, out var registration)
+                ? registration.SetsLeased
+                : null;
+    }
+
+    /// <summary>
+    ///     目前正在控制自動循環<b>開關</b>的外掛名（最近更新的排前面），以及它被控制到
+    ///     的狀態。沒有人在控制時回 <c>null</c>。
+    /// </summary>
+    internal (string[] Controllers, bool State)? SnapshotAutoRotationControllers()
+    {
+        lock (_gate)
+        {
+            var controllers = _registrations.Values
+                .Where(l => l.AutoRotationControlled.Count != 0)
+                .OrderByDescending(l => l.LastUpdated)
+                .ToList();
+
+            if (controllers.Count == 0)
+                return null;
+
+            return (controllers.Select(l => l.PluginName).ToArray(),
+                controllers[0].AutoRotationControlled[0]);
+        }
+    }
+
+    /// <summary>
+    ///     找出這些外掛名目前握著的租約 ID。
+    /// </summary>
+    /// <remarks>
+    ///     ⚠️ 回傳之後鎖就放掉了 ⇒ 拿去 <see cref="RemoveRegistration" /> 之前那把租約
+    ///     可能已經不在了。呼叫端要自己擋 <c>KeyNotFoundException</c>。
+    /// </remarks>
+    internal Guid[] FindLeasesByPluginNames(ICollection<string> pluginNames)
+    {
+        lock (_gate)
+            return _registrations.Values
+                .Where(l => pluginNames.Contains(l.PluginName))
+                .Select(l => l.ID)
+                .ToArray();
+    }
+
+    #endregion
 
     #region Cache Bust dates
+
+    /// <summary>
+    ///     下面五個時間戳任何一個被寫入就 +1。多把租約的排序看 <c>Lease.LastUpdated</c>，而它每次改動
+    ///     都伴隨其中一個被寫入 ⇒ 以它當鍵的快取不會漏掉「改別類設定造成的重新排序」。
+    /// </summary>
+    private long _stampsGeneration;
+
+    internal long StampsGeneration => Volatile.Read(ref _stampsGeneration);
+
+    private void WriteStamp(ref long ticks, DateTime? value)
+    {
+        Volatile.Write(ref ticks, value is null ? 0L : value.Value.Ticks + 1);
+        Interlocked.Increment(ref _stampsGeneration);
+    }
+
+    /// <summary>
+    ///     <see cref="AutoRotationStateUpdated" /> 真正的存放處，以
+    ///     <c>DateTime.Ticks + 1</c> 存；<c>0</c> 代表「還沒更新過」
+    ///     （對外讀成 <see langword="null" />）。
+    /// </summary>
+    /// <remarks>
+    ///     寫的人是<b>承租外掛自己的執行緒</b>（<c>[EzIPC]</c> 端點 →
+    ///     <see cref="AddRegistrationForAutoRotation" />）與 thread-pool
+    ///     （<c>SuspendLeases</c>），兩者都在 <c>_gate</c> 內；但<b>讀的人不拿鎖</b>
+    ///     —— <c>UIHelper.AutoRotationStateControlled</c> 在框架／繪製執行緒上
+    ///     直接讀這個欄位。撕裂讀的結果是「有值旗標是新的、時間值還是舊的」之類的
+    ///     組合，讓快取有效性判斷得到錯的答案。
+    /// </remarks>
+    private long _autoRotationStateUpdatedTicks;
 
     /// <summary>
     ///     When the Auto-Rotation state was last updated.<br />
     ///     Used to bust the UI cache.<br />
     ///     <c>null</c> if never updated.
     /// </summary>
-    internal DateTime? AutoRotationStateUpdated;
+    internal DateTime? AutoRotationStateUpdated
+    {
+        get
+        {
+            var ticks = Volatile.Read(ref _autoRotationStateUpdatedTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => WriteStamp(ref _autoRotationStateUpdatedTicks, value);
+    }
+
+    /// <summary>
+    ///     <see cref="AutoRotationConfigsUpdated" /> 真正的存放處。
+    ///     形狀與理由見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </summary>
+    private long _autoRotationConfigsUpdatedTicks;
 
     /// <summary>
     ///     When the Auto-Rotation configurations were last updated.<br />
     ///     Used to bust the UI cache.<br />
     ///     <c>null</c> if never updated.
     /// </summary>
-    internal DateTime? AutoRotationConfigsUpdated;
+    /// <remarks>
+    ///     完整說明見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </remarks>
+    internal DateTime? AutoRotationConfigsUpdated
+    {
+        get
+        {
+            var ticks = Volatile.Read(ref _autoRotationConfigsUpdatedTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => WriteStamp(ref _autoRotationConfigsUpdatedTicks, value);
+    }
+
+    /// <summary>
+    ///     <see cref="JobsUpdated" /> 真正的存放處。
+    ///     形狀與理由見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </summary>
+    private long _jobsUpdatedTicks;
 
     /// <summary>
     ///     When Jobs-controlled were last updated.<br />
     ///     Used to bust the UI cache.<br />
     ///     <c>null</c> if never updated.
     /// </summary>
-    internal DateTime? JobsUpdated;
+    /// <remarks>
+    ///     完整說明見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </remarks>
+    internal DateTime? JobsUpdated
+    {
+        get
+        {
+            var ticks = Volatile.Read(ref _jobsUpdatedTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => WriteStamp(ref _jobsUpdatedTicks, value);
+    }
+
+    /// <summary>
+    ///     <see cref="CombosUpdated" /> 真正的存放處。
+    ///     形狀與理由見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </summary>
+    private long _combosUpdatedTicks;
 
     /// <summary>
     ///     When Combos-controlled were last updated.<br />
     ///     Used to bust the UI cache.<br />
     ///     <c>null</c> if never updated.
     /// </summary>
-    internal DateTime? CombosUpdated;
+    /// <remarks>
+    ///     完整說明見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </remarks>
+    internal DateTime? CombosUpdated
+    {
+        get
+        {
+            var ticks = Volatile.Read(ref _combosUpdatedTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => WriteStamp(ref _combosUpdatedTicks, value);
+    }
+
+    /// <summary>
+    ///     <see cref="OptionsUpdated" /> 真正的存放處。
+    ///     形狀與理由見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </summary>
+    private long _optionsUpdatedTicks;
 
     /// <summary>
     ///     When Options-controlled were last updated.<br />
     ///     Used to bust the UI cache.<br />
     ///     <c>null</c> if never updated.
     /// </summary>
-    internal DateTime? OptionsUpdated;
+    /// <remarks>
+    ///     完整說明見 <see cref="_autoRotationStateUpdatedTicks" />。
+    /// </remarks>
+    internal DateTime? OptionsUpdated
+    {
+        get
+        {
+            var ticks = Volatile.Read(ref _optionsUpdatedTicks);
+            return ticks == 0
+                ? null
+                : new DateTime(ticks - 1, DateTimeKind.Local);
+        }
+        set => WriteStamp(ref _optionsUpdatedTicks, value);
+    }
 
     #endregion
 
@@ -203,7 +620,7 @@ public partial class Leasing
 
     /// <summary>
     ///     Creates a new <see cref="Lease" /> and saves it to
-    ///     <see cref="Registrations" />, ensuring the lease ID is unique.
+    ///     <see cref="_registrations" />, ensuring the lease ID is unique.
     /// </summary>
     /// <param name="internalPluginName">
     ///     The internal name of the registering plugin.
@@ -240,17 +657,73 @@ public partial class Leasing
 
         // Make sure the lease ID is unique
         // (unnecessary, but could save a big headache)
+        //
+        // 🔴 產生與寫入必須在<b>同一次</b>持鎖內完成：分成「先查再寫」兩次持鎖的話，
+        //    兩條執行緒可能同時查到「這個 ID 沒人用」然後雙雙 Add ⇒ 後者擲
+        //    ArgumentException。Guid 撞號的機率當然可以忽略，但這裡免費。
         Lease lease;
-        do
+        int replaced;
+        lock (_gate)
         {
-            // Create a new lease
-            lease = new Lease
-            (internalPluginName, pluginName,
-                callback, ipcPrefixForCallback);
-        } while (CheckLeaseExists(lease.ID) || CheckBlacklist(lease.ID));
+            // 內部名與顯示名都相同＝同一個承租者重新註冊，舊租約它已經不用了（重載、或自己丟了 ID）。
+            // 不收掉的話，Search 以顯示名為鍵的彙總會對同名兩份租約擲例外，覆蓋被吞成靜默失效。
+            // 只比內部名不行：同一個外掛可以用不同顯示名同時握多把（BOCCHI 自動打怪＋技能清單）。
+            // 刻意不呼叫舊租約的取消回呼：它只會回到正在註冊的承租者自己，在回呼裡再註冊就會無限遞迴。
+            var stale = _registrations.Values
+                .Where(l => l.InternalPluginName == internalPluginName &&
+                            l.PluginName == pluginName)
+                .Select(l => l.ID)
+                .ToList();
+            foreach (var id in stale)
+                _registrations.Remove(id);
+            replaced = stale.Count;
 
-        // Save the lease
-        Registrations.Add(lease.ID, lease);
+            if (replaced > 0)
+            {
+                // Bust the UI cache
+                AutoRotationStateUpdated = DateTime.Now;
+                AutoRotationConfigsUpdated = DateTime.Now;
+                JobsUpdated = DateTime.Now;
+                CombosUpdated = DateTime.Now;
+                OptionsUpdated = DateTime.Now;
+            }
+
+            do
+            {
+                // Create a new lease
+                lease = new Lease
+                (internalPluginName, pluginName,
+                    callback, ipcPrefixForCallback);
+            } while (_registrations.ContainsKey(lease.ID) ||
+                     _userRevokedTemporaryBlacklist.ContainsKey(lease.ID));
+
+            // Save the lease
+            _registrations.Add(lease.ID, lease);
+
+            // 又有租約了：下一次真的把它暫停掉時要重新印得出來。
+            // 純粹是記錄用的旗標，見 SuspendLeases。
+            _allLeasesSuspended = false;
+        }
+
+        if (replaced > 0)
+        {
+            Logging.Information(
+                $"{pluginName}: registered again while {replaced} earlier " +
+                "lease(s) under the same name were still active; released them " +
+                "so that only the new lease is in effect.");
+
+            // 與 RemoveRegistration 收掉租約後相同；例外不可往上冒，否則新租約的 ID 送不出去。
+            try
+            {
+                P.IPCSearch.UpdateActiveJobPresets();
+            }
+            catch (Exception e)
+            {
+                Logging.Error(
+                    "Failed to refresh the active job presets after a lease was " +
+                    "replaced; the new lease was still created.\n" + e);
+            }
+        }
 
         Logging.Log($"{pluginName}: Created Lease");
 
@@ -259,9 +732,9 @@ public partial class Leasing
     }
 
     /// <summary>
-    ///     When <see cref="CheckAutoRotationControlled"/> was last cached.
+    ///     <see cref="CheckAutoRotationControlled"/> 上次重建時的 <see cref="StampsGeneration" /> + 1；<c>0</c>＝還沒建過；只在鎖內讀寫。
     /// </summary>
-    private DateTime? _lastAutoRotationStateCheck;
+    private long _autoRotationStateCheckGeneration;
 
     /// <summary>
     ///     Cached value of <see cref="CheckAutoRotationControlled"/>
@@ -277,22 +750,28 @@ public partial class Leasing
     /// <seealso cref="Provider.GetAutoRotationState" />
     internal bool? CheckAutoRotationControlled()
     {
-        if (AutoRotationStateUpdated is null ||
-            Registrations.Count == 0)
-            return null;
+        lock (_gate)
+        {
+            if (AutoRotationStateUpdated is null ||
+                _registrations.Count == 0)
+                return null;
 
-        if (_lastAutoRotationStateCheck >= AutoRotationStateUpdated)
+            // 鍵是全部時間戳的世代而不只 AutoRotationStateUpdated：承租外掛改別類設定也會推進
+            // LastUpdated、換掉排第一的那把，也就換掉 IPC GetAutoRotationState 回報的開關。
+            var generation = StampsGeneration + 1;
+            if (_autoRotationStateCheckGeneration == generation)
+                return _autoRotationStateUpdated;
+
+            var lease = _registrations.Values
+                .Where(l => l.AutoRotationControlled.Count != 0)
+                .OrderByDescending(l => l.LastUpdated)
+                .FirstOrDefault();
+
+            _autoRotationStateCheckGeneration = generation;
+            _autoRotationStateUpdated = lease?.AutoRotationControlled[0];
+
             return _autoRotationStateUpdated;
-
-        var lease = Registrations.Values
-            .Where(l => l.AutoRotationControlled.Count != 0)
-            .OrderByDescending(l => l.LastUpdated)
-            .FirstOrDefault();
-
-        _lastAutoRotationStateCheck = DateTime.Now;
-        _autoRotationStateUpdated = lease?.AutoRotationControlled[0];
-
-        return _autoRotationStateUpdated;
+        }
     }
 
     /// <summary>
@@ -305,25 +784,41 @@ public partial class Leasing
     /// <seealso cref="Provider.SetAutoRotationState" />
     internal SetResult AddRegistrationForAutoRotation(Guid lease, bool newState)
     {
-        var registration = Registrations[lease];
+        // 鎖內只做判斷與字典寫入；Logging 會建一個 StackTrace，留到鎖外印。
 
-        if (registration.AutoRotationConfigsControlled.Count > 0 &&
-            registration.AutoRotationControlled[0] == newState)
+        // 承租外掛重複設定同一個值時回 Duplicate 而不是 Okay，不更新 LastUpdated：多個承租外掛同時控制自動循環時，
+        // 「重設同值」不能把自己拱回優先權最高（與 AddRegistrationForAutoRotationConfig() 一致）。
+        string pluginName;
+        bool duplicate;
+        lock (_gate)
         {
-            if (EZ.Throttle("ipcAutoRotSetLog", TS.FromSeconds(15)))
+            var registration = _registrations[lease];
+            pluginName = registration.PluginName;
+
+            duplicate =
+                registration.AutoRotationControlled.TryGetValue(0, out var current) &&
+                current == newState;
+
+            if (!duplicate)
+            {
+                // Always [0], not an actual add
+                registration.AutoRotationControlled[0] = newState;
+
+                registration.LastUpdated = DateTime.Now;
+                AutoRotationStateUpdated = DateTime.Now;
+            }
+        }
+
+        if (duplicate)
+        {
+            if (ThrottleIpcLog("ipcAutoRotSetLog", 15_000))
                 Logging.Log(
-                    $"{registration.PluginName}: You are already controlling Auto-Rotation");
+                    $"{pluginName}: You are already controlling Auto-Rotation");
 
             return SetResult.Duplicate;
         }
 
-        // Always [0], not an actual add
-        registration.AutoRotationControlled[0] = newState;
-
-        registration.LastUpdated = DateTime.Now;
-        AutoRotationStateUpdated = DateTime.Now;
-
-        Logging.Log($"{registration.PluginName}: Auto-Rotation state updated");
+        Logging.Log($"{pluginName}: Auto-Rotation state updated");
         return SetResult.Okay;
     }
 
@@ -344,12 +839,15 @@ public partial class Leasing
         var currentJob = (Job)CustomComboFunctions.LocalPlayer.ClassJob.RowId;
         var resolvedJob = job is null ? currentJob : (Job)job;
 
-        var lease = Registrations.Values
-            .Where(l => l.JobsControlled.ContainsKey(resolvedJob))
-            .OrderByDescending(l => l.LastUpdated)
-            .FirstOrDefault();
+        lock (_gate)
+        {
+            var lease = _registrations.Values
+                .Where(l => l.JobsControlled.ContainsKey(resolvedJob))
+                .OrderByDescending(l => l.LastUpdated)
+                .FirstOrDefault();
 
-        return lease?.JobsControlled[resolvedJob];
+            return lease?.JobsControlled[resolvedJob];
+        }
     }
 
     /// <summary>
@@ -362,30 +860,51 @@ public partial class Leasing
     /// <seealso cref="Provider.SetCurrentJobAutoRotationReady" />
     internal SetResult AddRegistrationForCurrentJob(Guid lease, Job? jobOverride = null)
     {
-        var registration = Registrations[lease];
+        // 🔑 這一支<b>刻意不把整個方法包進鎖裡</b>：它中途會呼叫
+        //    P.IPC.IsCurrentJobAutoRotationReady()、P.IPCSearch.EnabledActions、
+        //    CustomComboFunctions.IsEnabled()（讀使用者設定）這些外部子系統。
 
-        if (CustomComboFunctions.LocalPlayer is null)
+        // Lease 物件只查一次就沿用同一個參考（下面每次持鎖都用它）。
+        // 每次重查 _registrations[lease] 的話，租約若在放鎖的空檔被收走就會擲 KeyNotFoundException；
+        // 沿用參考時那個 Lease 物件還活著，只是不在表裡了。
+        Lease registration;
+        lock (_gate)
+            registration = _registrations[lease];
+
+        var pluginName = registration.PluginName;
+
+        // 🔴 這一支從 [EzIPC] 端點 Provider.SetCurrentJobAutoRotationReady 進來時
+        //    是承租外掛的執行緒，原生狀態只能在 framework 執行緒讀，見
+        //    Helper.CurrentClassJobIdFromFramework()。
+        //    ⚠️ 它逾時時也回 null；那種情況下面的訊息會說「玩家物件不存在」，
+        //    但那一支自己會另外留一筆 Information 說明是逾時。
+        var classJobId = Helper.CurrentClassJobIdFromFramework();
+        if (classJobId is null)
         {
             Logging.Error(
                 "Failed to register current job: player object does not exist!");
             return SetResult.PlayerNotAvailable;
         }
 
-        var job = (Job)CustomComboFunctions.JobIDs.ClassToJob((uint)Player.Job);
+        var job = (Job)CustomComboFunctions.JobIDs.ClassToJob(classJobId.Value);
         if (jobOverride is not null)
             job = jobOverride.Value;
 
-        if (!registration.JobsControlled.TryAdd(job, true))
+        bool added;
+        lock (_gate)
+            added = registration.JobsControlled.TryAdd(job, true);
+
+        if (!added)
         {
-            if (EZ.Throttle("ipcJobSetLog", TS.FromSeconds(15)))
+            if (ThrottleIpcLog("ipcJobSetLog", 15_000))
                 Logging.Log(
-                    $"{registration.PluginName}: You are already controlling the current job ({job})");
+                    $"{pluginName}: You are already controlling the current job ({job})");
 
             return SetResult.Duplicate;
         }
 
         Logging.Log(
-            $"{registration.PluginName}: Registering Current Job ({job}) ...");
+            $"{pluginName}: Registering Current Job ({job}) ...");
 
 
         bool locking;
@@ -415,9 +934,13 @@ public partial class Leasing
         else
         {
             locking = false;
+            string[] alreadyControlled;
+            lock (_gate)
+                alreadyControlled = registration.CombosControlled.Keys
+                    .Select(k => k.ToString()).ToArray();
+
             stringKeys = combos.Select(k => k.ToString())
-                .Concat(registration.CombosControlled.Keys
-                    .Select(k => k.ToString()).ToArray())
+                .Concat(alreadyControlled)
                 .ToArray();
         }
 
@@ -443,16 +966,19 @@ public partial class Leasing
         }
 
         var logText =
-            $"{registration.PluginName}: Registered Current Job ({job})";
+            $"{pluginName}: Registered Current Job ({job})";
         if (locking)
             logText += " (was already ready: locked it)";
 
         Logging.Log(logText);
 
-        registration.LastUpdated = DateTime.Now;
-        JobsUpdated = DateTime.Now;
-        CombosUpdated = DateTime.Now;
-        OptionsUpdated = DateTime.Now;
+        lock (_gate)
+        {
+            registration.LastUpdated = DateTime.Now;
+            JobsUpdated = DateTime.Now;
+            CombosUpdated = DateTime.Now;
+            OptionsUpdated = DateTime.Now;
+        }
 
         P.IPCSearch.UpdateActiveJobPresets();
 
@@ -479,25 +1005,47 @@ public partial class Leasing
     (Guid lease, CancellationReasonEnum cancellationReason,
         string additionalInfo = "")
     {
-        if (cancellationReason == CancellationReasonEnum.WrathUserManuallyCancelled)
-            _userRevokedTemporaryBlacklist.Add(
-                lease,
-                (Registrations[lease].InternalPluginName,
-                    Registrations[lease].ConfigurationsHash,
-                    DateTime.Now)
-            );
+        try
+        {
+            lock (_gate)
+            {
+                // 鍵不存在時照舊擲 KeyNotFoundException（呼叫端本來就先
+                // CheckLeaseExists／ContainsKey 過一輪）。只是先把 Lease 物件抄下來，
+                // 因為下面會先移除再取消。
+                var registration = _registrations[lease];
 
-        Registrations[lease].Cancel(cancellationReason, additionalInfo);
-        Registrations.Remove(lease);
+                if (cancellationReason ==
+                    CancellationReasonEnum.WrathUserManuallyCancelled)
+                    _userRevokedTemporaryBlacklist.Add(
+                        lease,
+                        (registration.InternalPluginName,
+                            registration.ConfigurationsHash,
+                            DateTime.Now)
+                    );
 
-        // Bust the UI cache
-        AutoRotationStateUpdated = DateTime.Now;
-        AutoRotationConfigsUpdated = DateTime.Now;
-        JobsUpdated = DateTime.Now;
-        CombosUpdated = DateTime.Now;
-        OptionsUpdated = DateTime.Now;
+        // 🔴 一定要「先移除，再取消」，順序反過來會無限遞迴。
+        //    先 Remove 之後，承租端在回呼裡查詢會看到租約已經不存在，
+        //    ReleaseControl() 就會走「租約無效」那條正常的分支而不是再入。
+        // 回呼執行期間，這把租約對承租端而言已經消失了。
+                _registrations.Remove(lease);
+                _pendingCancellations.Add(
+                    (registration, cancellationReason, additionalInfo));
 
-        P.IPCSearch.UpdateActiveJobPresets();
+                // Bust the UI cache
+                AutoRotationStateUpdated = DateTime.Now;
+                AutoRotationConfigsUpdated = DateTime.Now;
+                JobsUpdated = DateTime.Now;
+                CombosUpdated = DateTime.Now;
+                OptionsUpdated = DateTime.Now;
+            }
+        }
+        finally
+        {
+            // 🔴 放 finally：上面 _userRevokedTemporaryBlacklist.Add() 對同一個鍵會擲
+            //    ArgumentException，那時候佇列裡可能還積著<b>別人</b>排進來的通知。
+            //    不送出去的話，那些承租外掛會一直以為自己還握著控制權。
+            FlushPendingCancellations();
+        }
     }
 
     #endregion
@@ -526,12 +1074,15 @@ public partial class Leasing
             return null;
         }
 
-        var lease = Registrations.Values
-            .Where(l => l.CombosControlled.ContainsKey(customComboPreset))
-            .OrderByDescending(l => l.LastUpdated)
-            .FirstOrDefault();
+        lock (_gate)
+        {
+            var lease = _registrations.Values
+                .Where(l => l.CombosControlled.ContainsKey(customComboPreset))
+                .OrderByDescending(l => l.LastUpdated)
+                .FirstOrDefault();
 
-        return lease?.CombosControlled[customComboPreset];
+            return lease?.CombosControlled[customComboPreset];
+        }
     }
 
     /// <summary>
@@ -547,23 +1098,38 @@ public partial class Leasing
     internal SetResult AddRegistrationForCombo
         (Guid lease, string combo, bool newState, bool newAutoState)
     {
-        var registration = Registrations[lease];
         var preset = (CustomComboPreset)
             Enum.Parse(typeof(CustomComboPreset), combo, true);
 
         // Disable the combo of the opposite type mode, if one exists
         var oppositeModeCombo = Helper.GetOppositeModeCombo(preset);
-        if (oppositeModeCombo is not null)
-            registration.CombosControlled[(CustomComboPreset)oppositeModeCombo] =
-                (false, false);
         var oppositeText = oppositeModeCombo is not null
             ? $" (Disabled opposite combo: {oppositeModeCombo})"
             : "";
 
-        registration.CombosControlled[preset] = (newState, newAutoState);
+        Lease registration;
+        byte[] configurationsHash;
+        int setsLeased;
+        lock (_gate)
+        {
+            registration = _registrations[lease];
 
-        if (CheckBlacklist(Registrations[lease].ConfigurationsHash) &&
-            Registrations[lease].SetsLeased > 4)
+            if (oppositeModeCombo is not null)
+                registration.CombosControlled[(CustomComboPreset)oppositeModeCombo] =
+                    (false, false);
+
+            registration.CombosControlled[preset] = (newState, newAutoState);
+
+            // ConfigurationsHash 與 SetsLeased 都會走訪內層字典 ⇒ 必須在鎖內算完，
+            // 不能留到鎖外才取。
+            configurationsHash = registration.ConfigurationsHash;
+            setsLeased = registration.SetsLeased;
+        }
+
+        // 🔴 RemoveRegistration() 會排出承租端的回呼，一定要在鎖外呼叫。
+        //    ⚠️ 兩個判斷式的順序照原樣：CheckBlacklist() 有副作用
+        //    （CleanOutdatedBlacklistEntries），對調會改變黑名單的過期時機。
+        if (CheckBlacklist(configurationsHash) && setsLeased > 4)
         {
             RemoveRegistration(lease,
                 CancellationReasonEnum.WrathUserManuallyCancelled,
@@ -571,8 +1137,11 @@ public partial class Leasing
             return SetResult.BlacklistedLease;
         }
 
-        registration.LastUpdated = DateTime.Now;
-        CombosUpdated = DateTime.Now;
+        lock (_gate)
+        {
+            registration.LastUpdated = DateTime.Now;
+            CombosUpdated = DateTime.Now;
+        }
 
         Logging.Log(
             $"{registration.PluginName}: Registered Combo ({combo}){oppositeText}");
@@ -600,12 +1169,15 @@ public partial class Leasing
             return null;
         }
 
-        var lease = Registrations.Values
-            .Where(l => l.OptionsControlled.ContainsKey(customComboPreset))
-            .OrderByDescending(l => l.LastUpdated)
-            .FirstOrDefault();
+        lock (_gate)
+        {
+            var lease = _registrations.Values
+                .Where(l => l.OptionsControlled.ContainsKey(customComboPreset))
+                .OrderByDescending(l => l.LastUpdated)
+                .FirstOrDefault();
 
-        return lease?.OptionsControlled[customComboPreset];
+            return lease?.OptionsControlled[customComboPreset];
+        }
     }
 
     /// <summary>
@@ -620,14 +1192,25 @@ public partial class Leasing
     internal SetResult AddRegistrationForOption
         (Guid lease, string option, bool newState)
     {
-        var registration = Registrations[lease];
         var preset = (CustomComboPreset)
             Enum.Parse(typeof(CustomComboPreset), option, true);
 
-        registration.OptionsControlled[preset] = newState;
+        Lease registration;
+        byte[] configurationsHash;
+        int setsLeased;
+        lock (_gate)
+        {
+            registration = _registrations[lease];
 
-        if (CheckBlacklist(Registrations[lease].ConfigurationsHash) &&
-            Registrations[lease].SetsLeased > 4)
+            registration.OptionsControlled[preset] = newState;
+
+            configurationsHash = registration.ConfigurationsHash;
+            setsLeased = registration.SetsLeased;
+        }
+
+        // 🔴 與 AddRegistrationForCombo 同理：RemoveRegistration() 要在鎖外呼叫，
+        //    兩個判斷式的順序照原樣。
+        if (CheckBlacklist(configurationsHash) && setsLeased > 4)
         {
             RemoveRegistration(lease,
                 CancellationReasonEnum.WrathUserManuallyCancelled,
@@ -635,8 +1218,11 @@ public partial class Leasing
             return SetResult.BlacklistedLease;
         }
 
-        registration.LastUpdated = DateTime.Now;
-        OptionsUpdated = DateTime.Now;
+        lock (_gate)
+        {
+            registration.LastUpdated = DateTime.Now;
+            OptionsUpdated = DateTime.Now;
+        }
 
         Logging.Log($"{registration.PluginName}: Registered Option ({option})");
         return SetResult.Okay;
@@ -653,28 +1239,94 @@ public partial class Leasing
     ///     Your lease ID from <see cref="Provider.RegisterForLease(string,string)" />
     /// </param>
     /// <returns>Whether the lease exists.</returns>
-    internal bool CheckLeaseExists(Guid lease) =>
-        Registrations.ContainsKey(lease);
+    internal bool CheckLeaseExists(Guid lease)
+    {
+        lock (_gate)
+            return _registrations.ContainsKey(lease);
+    }
 
     /// <summary>
-    ///     Suspend all leases. Called when IPC is disabled remotely.
+    ///     是否已經處於「全部租約都被暫停」的狀態。
+    ///     只用來決定要不要印那一行 Warning，對暫停行為本身沒有作用。
+    ///     由 <see cref="CreateRegistration" /> 在有新租約時清掉。
+    /// </summary>
+    private bool _allLeasesSuspended;
+
+    /// <summary>
+    ///     Suspend all leases.
     /// </summary>
     /// <param name="reason">
     ///     The <see cref="CancellationReasonEnum">reason</see> for suspending leases.
     /// </param>
-    /// <seealso cref="Helper.IPCEnabled" />
     /// <seealso cref="RemoveRegistration" />
     internal void SuspendLeases(CancellationReasonEnum? reason = null)
     {
         var reasonToUse = reason ?? CancellationReasonEnum.AllServicesSuspended;
 
-        Logging.Warn("Suspending all leases.");
+        // 🔑 快照與旗標一起在鎖內拍，鎖外才印、才收：印 log 會建 StackTrace，
+        //    收租約會呼叫承租外掛的碼，兩件都不該在鎖內做。
+        List<Guid> leaseIds;
+        int leaseCount;
+        bool wasSuspended;
+        lock (_gate)
+        {
+            leaseIds = [.. _registrations.Keys];
+            leaseCount = leaseIds.Count;
+            wasSuspended = _allLeasesSuspended;
+            _allLeasesSuspended = true;
+        }
+
+        if (leaseCount > 0 && !wasSuspended)
+            Logging.Warn(
+                $"Suspending all leases ({leaseCount}), reason: {reasonToUse}.");
+        else
+            Logging.Verbose(
+                $"Suspend requested (reason: {reasonToUse}), " +
+                $"leases={leaseCount}, alreadySuspended={wasSuspended}.");
 
         // dispose every lease in _registrations
-        foreach (var registration in Registrations.Values)
-            RemoveRegistration(
-                registration.ID, reasonToUse
-            );
+
+        // 🔴 一定要對快照迭代，不能直接跑 _registrations.Values：
+        //    RemoveRegistration() 會就地 _registrations.Remove()，而承租外掛在取消
+        //    回呼裡直接 RegisterForLease() 重新註冊是完全合理的寫法，那會走到
+        //    _registrations.Add()，列舉器立刻失效並擲出 InvalidOperationException
+        //    ——而且是從 Provider.Dispose()（外掛停用）這種不該擲例外的路徑冒出來。
+
+        // 🔴🔴 而且<b>迴圈本身不可以握著 _gate</b>：RemoveRegistration() 排出去的
+        //    取消通知要在鎖外送，握著鎖跑整個迴圈會把「等 framework 執行緒的承租端
+        //    回呼」變成死結。每一次 RemoveRegistration() 自己進出鎖就好。
+
+        // TryGetValue 這道閘門同樣必要：承租外掛可能在回呼裡自己 ReleaseControl()
+        //    掉「另一把」租約，快照裡那個鍵就變成死鍵，RemoveRegistration() 內的
+        //    _registrations[lease] 會擲 KeyNotFoundException。
+        //    Provider.ReleaseControl() 本身也是先 CheckLeaseExists() 再呼叫，
+        //    這裡沿用同一個慣例。
+
+        // 🔴 一把租約收不掉，不能連累其他租約收不掉。
+        //    每一把各自 try，收不掉的那把記一行就繼續。
+        foreach (var leaseId in leaseIds)
+        {
+            // 名字要在移除前抄下來，之後那把租約就查不到了。
+            string leaseeName;
+            lock (_gate)
+            {
+                if (!_registrations.TryGetValue(leaseId, out var registration))
+                    continue;
+                leaseeName = registration.PluginName;
+            }
+
+            try
+            {
+                RemoveRegistration(leaseId, reasonToUse);
+            }
+            catch (Exception e)
+            {
+                Logging.Error(
+                    "Failed to suspend the lease held by '" + leaseeName +
+                    "' (" + reasonToUse + "); continuing with the remaining " +
+                    "leases.\n" + e);
+            }
+        }
     }
 
     #region Checking for plugin being unloaded
@@ -708,20 +1360,63 @@ public partial class Leasing
 
         _checkingLeaseePluginsUnloaded = true;
 
-        var plugins = Svc.PluginInterface
-            .InstalledPlugins
-            .Where(p => p.IsLoaded)
-            .Select(p => p.InternalName).ToList();
-        var leasesCopy = new Dictionary<Guid, Lease>(Registrations);
+        // 這個方法掛在 Framework.Update 上，而 _checkingLeaseePluginsUnloaded 是「正在跑」的閘門：收尾若被例外跳過，
+        // 旗標就永遠停在 true，之後每一幀都在開頭 return，「承租外掛被停用時自動收回租約」會靜默永久失效。
+        // 所以用 try/finally，保證旗標一定會被放掉。
+        try
+        {
+            // 沒有租約時下面的迴圈一次都不會跑；先判掉，免得每次都把已載入插件名單抄一份。
+            lock (_gate)
+                if (_registrations.Count == 0)
+                    return;
 
-        foreach (var (lease, registration) in leasesCopy)
-            if (!plugins.Contains(registration.InternalPluginName))
-                RemoveRegistration(
-                    lease, CancellationReasonEnum.LeaseePluginDisabled
-                );
+            var plugins = Svc.PluginInterface
+                .InstalledPlugins
+                .Where(p => p.IsLoaded)
+                .Select(p => p.InternalName).ToList();
 
-        _checkingLeaseePluginsUnloaded = false;
-        _framesSinceLastCheck = 0;
+            // 快照要在鎖內拍：外面若正好有 IPC 端點在 Add，複製建構子走訪到一半
+            // 會擲 InvalidOperationException。名字也一併抄走，之後不再碰 Lease。
+            List<(Guid Lease, string InternalPluginName, string PluginName)>
+                leasesCopy;
+            lock (_gate)
+                leasesCopy = _registrations.Values
+                    .Select(l => (l.ID, l.InternalPluginName, l.PluginName))
+                    .ToList();
+
+            // 這裡本來就是對快照迭代（Add 型再入不會炸），但仍要確認鍵還在：
+            // RemoveRegistration() 觸發的取消回呼可能讓承租端順手 ReleaseControl()
+            // 掉快照裡的另一把租約，那之後 _registrations[lease] 會擲
+            // KeyNotFoundException。與 SuspendLeases() 同一個閘門。
+            foreach (var (lease, internalPluginName, pluginName) in leasesCopy)
+                if (!plugins.Contains(internalPluginName) &&
+                    CheckLeaseExists(lease))
+                    // 與 SuspendLeases() 同理：一把收不掉不能連累其他把，
+                    // 更不能讓例外冒進 Framework.Update。
+                    try
+                    {
+                        RemoveRegistration(
+                            lease, CancellationReasonEnum.LeaseePluginDisabled
+                        );
+                    }
+                    catch (Exception e)
+                    {
+                        Logging.Error(
+                            "Failed to remove the lease held by unloaded plugin '" +
+                            pluginName +
+                            "'; continuing with the remaining leases.\n" + e);
+                    }
+        }
+        catch (Exception e)
+        {
+            Logging.Error(
+                "The leasee-unloaded check failed.\n" + e);
+        }
+        finally
+        {
+            _checkingLeaseePluginsUnloaded = false;
+            _framesSinceLastCheck = 0;
+        }
     }
 
     #endregion
@@ -763,11 +1458,14 @@ public partial class Leasing
         durationForBan = TimeSpan.FromSeconds(15);
 #endif
 
-        Dictionary<Guid, (string, byte[], DateTime)> blacklistCopy =
-            new(_userRevokedTemporaryBlacklist);
-        foreach (var (lease, (_, _, time)) in blacklistCopy)
-            if (now - time > durationForBan)
-                _userRevokedTemporaryBlacklist.Remove(lease);
+        lock (_gate)
+        {
+            Dictionary<Guid, (string, byte[], DateTime)> blacklistCopy =
+                new(_userRevokedTemporaryBlacklist);
+            foreach (var (lease, (_, _, time)) in blacklistCopy)
+                if (now - time > durationForBan)
+                    _userRevokedTemporaryBlacklist.Remove(lease);
+        }
     }
 
     /// <summary>
@@ -781,7 +1479,8 @@ public partial class Leasing
     {
         CleanOutdatedBlacklistEntries();
 
-        return _userRevokedTemporaryBlacklist.ContainsKey(lease);
+        lock (_gate)
+            return _userRevokedTemporaryBlacklist.ContainsKey(lease);
     }
 
     /// <summary>
@@ -795,8 +1494,9 @@ public partial class Leasing
     {
         CleanOutdatedBlacklistEntries();
 
-        return _userRevokedTemporaryBlacklist.Values
-            .Any(entry => entry.Item1 == internalPluginName);
+        lock (_gate)
+            return _userRevokedTemporaryBlacklist.Values
+                .Any(entry => entry.Item1 == internalPluginName);
     }
 
     /// <summary>
@@ -812,8 +1512,9 @@ public partial class Leasing
     {
         CleanOutdatedBlacklistEntries();
 
-        return _userRevokedTemporaryBlacklist.Values
-            .Any(entry => entry.Item2.SequenceEqual(hash));
+        lock (_gate)
+            return _userRevokedTemporaryBlacklist.Values
+                .Any(entry => entry.Item2.SequenceEqual(hash));
     }
 
     #endregion

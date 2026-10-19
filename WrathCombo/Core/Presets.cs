@@ -41,43 +41,56 @@ namespace WrathCombo.Core
 
         public static void Init()
         {
-            PvPCombos = Enum.GetValues<CustomComboPreset>()
-                .Where(preset => preset.GetAttribute<PvPCustomComboAttribute>() != null)
-                .ToHashSet();
+            // 每個 preset 的屬性只讀一次再分給各張表：每讀一次都會重新建構該欄位上的全部屬性（含翻譯說明文字）。
+            var presets = Enum.GetValues<CustomComboPreset>();
+            var attributes = new object[presets.Length][];
+            for (var i = 0; i < presets.Length; i++)
+                attributes[i] = ReadAttributes(presets[i]);
 
-            VariantCombos = Enum.GetValues<CustomComboPreset>()
-                .Where(preset => preset.GetAttribute<VariantAttribute>() != null)
-                .ToHashSet();
+            PvPCombos = PresetsWith<PvPCustomComboAttribute>(presets, attributes);
+            VariantCombos = PresetsWith<VariantAttribute>(presets, attributes);
+            BozjaCombos = PresetsWith<BozjaAttribute>(presets, attributes);
+            OccultCrescentCombos = PresetsWith<OccultCrescentAttribute>(presets, attributes);
+            EurekaCombos = PresetsWith<EurekaAttribute>(presets, attributes);
 
-            BozjaCombos = Enum.GetValues<CustomComboPreset>()
-                .Where(preset => preset.GetAttribute<BozjaAttribute>() != null)
-                .ToHashSet();
+            ConflictingCombos = new Dictionary<CustomComboPreset, CustomComboPreset[]>(presets.Length);
+            for (var i = 0; i < presets.Length; i++)
+                ConflictingCombos.Add(presets[i], Pick<ConflictingCombosAttribute>(attributes[i])?.ConflictingPresets ?? []);
 
-            OccultCrescentCombos = Enum.GetValues<CustomComboPreset>()
-                .Where(preset => preset.GetAttribute<OccultCrescentAttribute>() != null)
-                .ToHashSet();
+            ParentCombos = new Dictionary<CustomComboPreset, CustomComboPreset?>(presets.Length);
+            for (var i = 0; i < presets.Length; i++)
+                ParentCombos.Add(presets[i], Pick<ParentComboAttribute>(attributes[i])?.ParentPreset);
 
-            EurekaCombos = Enum.GetValues<CustomComboPreset>()
-                .Where(preset => preset.GetAttribute<EurekaAttribute>() != null)
-                .ToHashSet();
+            AllPresets = presets.ToHashSet();
 
-            ConflictingCombos = Enum.GetValues<CustomComboPreset>()
-                .ToDictionary(
-                    preset => preset,
-                    preset => preset.GetAttribute<ConflictingCombosAttribute>()?.ConflictingPresets ?? []);
-
-            ParentCombos = Enum.GetValues<CustomComboPreset>()
-                .ToDictionary(
-                    preset => preset,
-                    preset => preset.GetAttribute<ParentComboAttribute>()?.ParentPreset);
-
-            AllPresets = Enum.GetValues<CustomComboPreset>().ToHashSet();
-
-            foreach (var preset in Enum.GetValues<CustomComboPreset>())
+            for (var i = 0; i < presets.Length; i++)
             {
-                Presets.Attributes.Add(preset, new Presets.PresetAttributes(preset));
+                Presets.Attributes.Add(presets[i], new Presets.PresetAttributes(presets[i], attributes[i]));
             }
             PluginLog.Information($"Cached {Presets.Attributes.Count} preset attributes."); 
+        }
+
+        /// <summary> 與 Dalamud <c>EnumExtensions.GetAttribute</c> 同一條讀法；每次呼叫都重新建構該欄位上的全部屬性。 </summary>
+        internal static object[] ReadAttributes(CustomComboPreset preset)
+        {
+            var name = Enum.GetName(preset);
+            if (string.IsNullOrEmpty(name))
+                return [];
+            return typeof(CustomComboPreset).GetField(name)?.GetCustomAttributes(false) ?? [];
+        }
+
+        /// <summary> 等同 <c>GetAttribute&lt;T&gt;()</c>：同型別出現兩個照樣擲。 </summary>
+        internal static T? Pick<T>(object[] attributes) where T : Attribute =>
+            attributes.OfType<T>().SingleOrDefault();
+
+        private static HashSet<CustomComboPreset> PresetsWith<T>(CustomComboPreset[] presets, object[][] attributes)
+            where T : Attribute
+        {
+            var result = new HashSet<CustomComboPreset>();
+            for (var i = 0; i < presets.Length; i++)
+                if (Pick<T>(attributes[i]) != null)
+                    result.Add(presets[i]);
+            return result;
         }
 
 
@@ -151,6 +164,9 @@ namespace WrathCombo.Core
         /// <summary> Gets the full list of conflicted combos. </summary>
         public static List<CustomComboPreset> GetAllConflicts() => ConflictingCombos.Keys.ToList();
 
+        /// <summary> 等同 <c>GetAllConflicts().Contains(preset)</c>，但不複製整份清單（設定視窗每幀每個 preset 都問）。 </summary>
+        public static bool HasConflictEntry(CustomComboPreset preset) => ConflictingCombos.ContainsKey(preset);
+
         /// <summary> Get all the info from conflicted combos. </summary>
         public static List<CustomComboPreset[]> GetAllConflictOriginals() => ConflictingCombos.Values.ToList();
 
@@ -190,7 +206,7 @@ namespace WrathCombo.Core
             var conflicts = GetConflicts(preset);
             foreach (var conflict in conflicts)
             {
-                Service.Configuration.EnabledActions.Remove(conflict);
+                Service.Configuration.DisableAction(conflict);
             }
         }
 
@@ -218,7 +234,7 @@ namespace WrathCombo.Core
         {
             var ctrlText = GetControlledText(preset);
             EnableParentPresets(preset);
-            var ret = Service.Configuration.EnabledActions.Add(preset);
+            var ret = Service.Configuration.EnableAction(preset);
             DisableAllConflicts(preset);
 
             if (outputLog)
@@ -249,7 +265,7 @@ namespace WrathCombo.Core
 
         public static bool DisablePreset(CustomComboPreset preset, bool outputLog = false)
         {
-            if (Service.Configuration.EnabledActions.Remove(preset))
+            if (Service.Configuration.DisableAction(preset))
             {
                 var ctrlText = GetControlledText(preset);
 
@@ -273,7 +289,7 @@ namespace WrathCombo.Core
         public static bool TogglePreset(CustomComboPreset preset, bool outputLog = false)
         {
             var ctrlText = GetControlledText(preset);
-            if (!Service.Configuration.EnabledActions.Remove(preset))
+            if (!Service.Configuration.DisableAction(preset))
             {
                 var ret = EnablePreset(preset);
                 if (outputLog)
@@ -306,17 +322,21 @@ namespace WrathCombo.Core
             return false;
         }
         
-        internal static ComboType GetComboType(CustomComboPreset preset)
+        internal static ComboType GetComboType(CustomComboPreset preset) =>
+            GetComboType(ReadAttributes(preset));
+
+        /// <param name="attributes"> <see cref="ReadAttributes" /> 對同一個 preset 讀出來的屬性。 </param>
+        internal static ComboType GetComboType(object[] attributes)
         {
-            var simple = preset.GetAttribute<SimpleCombo>();
-            var advanced = preset.GetAttribute<AdvancedCombo>();
-            var basic = preset.GetAttribute<BasicCombo>();
-            var healing = preset.GetAttribute<HealingCombo>();
-            var mitigation = preset.GetAttribute<MitigationCombo>();
-            var parent = (object?)preset.GetAttribute<ParentComboAttribute>() ??
-                         (object?)preset.GetAttribute<BozjaParentAttribute>() ??
-                         (object?)preset.GetAttribute<EurekaParentAttribute>() ??
-                         preset.GetAttribute<VariantParentAttribute>();
+            var simple = Pick<SimpleCombo>(attributes);
+            var advanced = Pick<AdvancedCombo>(attributes);
+            var basic = Pick<BasicCombo>(attributes);
+            var healing = Pick<HealingCombo>(attributes);
+            var mitigation = Pick<MitigationCombo>(attributes);
+            var parent = (object?)Pick<ParentComboAttribute>(attributes) ??
+                         (object?)Pick<BozjaParentAttribute>(attributes) ??
+                         (object?)Pick<EurekaParentAttribute>(attributes) ??
+                         Pick<VariantParentAttribute>(attributes);
             
             if (simple != null)
                 return ComboType.Simple;

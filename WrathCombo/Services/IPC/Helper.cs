@@ -4,19 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using Dalamud.Networking.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Plugin.Ipc.Exceptions;
 using ECommons;
+using ECommons.DalamudServices;
 using ECommons.ExcelServices;
-using ECommons.EzIpcManager;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using WrathCombo.Attributes;
 using WrathCombo.Combos;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Extensions;
-using EZ = ECommons.Throttlers.EzThrottler;
 using TS = System.TimeSpan;
 
 #endregion
@@ -40,13 +40,7 @@ public partial class Helper(ref Leasing leasing)
     internal bool CheckForBailConditionsAtSetTime
         (out SetResult result, Guid? lease = null)
     {
-        // Bail if IPC is disabled
-        if (!IPCEnabled)
-        {
-            Logging.Warn(BailMessages.LiveDisabled);
-            result = SetResult.IPCDisabled;
-            return true;
-        }
+        // 刻意不查上游的遠端 IPC 開關：開關檔放在第三方網域，IPC 一律視為啟用。
 
         // Bail if the lease is not valid
         if (lease is not null &&
@@ -87,9 +81,9 @@ public partial class Helper(ref Leasing leasing)
 
         // Detect the target type
         var targetType =
-            attr.CustomComboInfo.Name.Contains("single target", lower)
+            attr.CustomComboInfo.InternalName.Contains("single target", lower)
                 ? ComboTargetTypeKeys.SingleTarget
-                : (attr.CustomComboInfo.Name.Contains("- aoe", lower))
+                : (attr.CustomComboInfo.InternalName.Contains("- aoe", lower))
                     ? ComboTargetTypeKeys.MultiTarget
                     : ComboTargetTypeKeys.Other;
 
@@ -130,6 +124,182 @@ public partial class Helper(ref Leasing leasing)
         }
     }
 
+    #region 從 IPC 執行緒讀原生狀態
+
+    /// <summary>
+    ///     這個 helper 靜態路徑自己的節流器（自帶鎖、自帶字典）。
+    /// </summary>
+    /// <remarks>
+    ///     🔴 不要換回 ECommons 的 EzThrottler，理由見 <see cref="IpcThrottle" />。
+    /// </remarks>
+    private static readonly IpcThrottle StaticThrottle = new();
+
+    /// <summary>
+    ///     等 framework 執行緒回話的硬上限。
+    /// </summary>
+    /// <remarks>
+    ///     正常情況下一幀之內就回來了。設這個上限是為了讓「framework 執行緒因為
+    ///     別的原因卡住」不會連帶把承租外掛的執行緒無限期卡在這裡。
+    /// </remarks>
+    private static readonly TS FrameworkReadTimeout =
+        TS.FromMilliseconds(500);
+
+    /// <summary>
+    ///     在 framework 執行緒上讀一次本地玩家目前的職業／職業（class）列 ID。
+    /// </summary>
+    /// <returns>
+    ///     <c>LocalPlayer.ClassJob.RowId</c>；<see langword="null" /> 表示當下沒有
+    ///     本地玩家，或是 framework 執行緒在逾時內沒有回話。
+    /// </returns>
+    /// <remarks>
+    ///     🔴🔴 <b>原生狀態只能在 framework 執行緒讀。</b>
+    ///     而帶 <c>[EzIPC]</c> 的端點是跑在<b>承租外掛的執行緒</b>上的。<br />
+    ///     🔴 不要改用 <c>Svc.Framework.Run(...)</c>：那一支<b>一律</b> StartNew，
+    ///     在 framework 執行緒上同步等它會死結。<br />
+    ///     🔴 不要用 <c>task.Wait()</c>：它把例外包成 <c>AggregateException</c>，
+    ///     而且不帶逾時就是無限期等。
+    /// </remarks>
+    internal static uint? CurrentClassJobIdFromFramework()
+    {
+        // 卸載期旁路：Dalamud 的 RunOnFrameworkThread 在 IsFrameworkUnloading 為真時是「就地在呼叫端執行緒執行」而不是排隊，
+        // 承租外掛在關遊戲／停用外掛那一瞬間打進來的話，委派會直接在承租外掛的執行緒上讀 ObjectTable 的共用包裝。
+        // 所以卸載期直接回 null：那正是這一支既有的失敗慣例值（「沒有本地玩家」），兩個呼叫端本來就處理得了。
+        if (Svc.Framework.IsFrameworkUnloading &&
+            !Svc.Framework.IsInFrameworkUpdateThread)
+        {
+            if (StaticThrottle.Throttle("ipcFrameworkUnloadingJobRead",
+                    TS.FromSeconds(30)))
+                Logging.Information(
+                    "The framework is unloading, so the current job was not " +
+                    "read from a non-framework thread; treating it as " +
+                    "'no player available'.");
+            return null;
+        }
+
+        Task<uint?> task;
+        try
+        {
+            task = Svc.Framework.RunOnFrameworkThread(ReadClassJobIdOnFramework);
+        }
+        catch (Exception e)
+        {
+            // 已在 framework 執行緒上時是就地執行，委派自己擲的例外會直接冒到這裡。
+            Logging.Error("Failed to read the current job: " + e);
+            return null;
+        }
+
+        if (!task.IsCompleted &&
+            Task.WaitAny([task], FrameworkReadTimeout) < 0)
+        {
+            if (StaticThrottle.Throttle("ipcFrameworkJobReadTimeout",
+                    TS.FromSeconds(30)))
+                Logging.Information(
+                    "Timed out waiting for the framework thread to report the " +
+                    "current job; treating it as 'no player available'.");
+            return null;
+        }
+
+        if (task.IsCompletedSuccessfully)
+            return task.Result;
+
+        if (task.IsFaulted)
+            Logging.Error("Failed to read the current job: " + task.Exception);
+
+        return null;
+    }
+
+    /// <summary>
+    ///     <see cref="CurrentClassJobIdFromFramework" /> 真正在 framework 執行緒上
+    ///     跑的那一段：兩次原生存取合併成一次，中間不會被「玩家消失」插進來。
+    /// </summary>
+    private static uint? ReadClassJobIdOnFramework() =>
+        CustomComboFunctions.LocalPlayer is { } player
+            ? player.ClassJob.RowId
+            : null;
+
+    /// <summary>
+    ///     框架執行緒每幀發佈的目前職業（class）列 ID；<c>-1</c>＝沒有本地玩家。
+    ///     任何執行緒都可以讀，不碰原生；只用來判快取鍵，答案仍以 <see cref="CurrentClassJobIdFromFramework" /> 為準。
+    /// </summary>
+    private static long _classJobSnapshot = -1;
+
+    internal static long ClassJobSnapshot => Volatile.Read(ref _classJobSnapshot);
+
+    /// <summary> 只在框架執行緒呼叫，每幀一次。 </summary>
+    internal static void PublishClassJobSnapshot(IPlayerCharacter? player) =>
+        Volatile.Write(ref _classJobSnapshot,
+            player is null ? -1 : player.ClassJob.RowId);
+
+    #endregion
+
+
+    /// <summary>
+    ///     「這個端點只在 framework 執行緒上作答」的閘門。
+    /// </summary>
+    /// <param name="endpointName">端點名稱，只用於診斷訊息與節流的 key。</param>
+    /// <returns>
+    ///     <see langword="true" /> ＝ 現在就在 framework 執行緒上，可以照常讀遊戲狀態；<br />
+    ///     <see langword="false" /> ＝ 呼叫端應該直接回 fail-safe 值，不要碰任何遊戲狀態。
+    /// </returns>
+    /// <remarks>
+    ///     🔴🔴 給<b>那些沒辦法丟回 framework 執行緒的端點</b>用。
+    ///     🔑 fail-safe 一律是 <see langword="false" />（不能插入／動作不可用），
+    ///     呼叫端照著做只會少放一個技能，不會做出錯的動作。
+    /// </remarks>
+    internal static bool AnswerOnlyOnFrameworkThread(string endpointName)
+    {
+        if (Svc.Framework.IsInFrameworkUpdateThread)
+            return true;
+
+        if (StaticThrottle.Throttle("ipcOffFrameworkThread:" + endpointName,
+                TS.FromMinutes(1)))
+            Logging.Information(
+                $"'{endpointName}' was called from a non-framework thread, so it " +
+                "returned false without reading any game state. " +
+                $"Caller: {DescribeIpcCaller()}. " +
+                "Please call this from your framework/tick handler instead.");
+
+        return false;
+    }
+
+    /// <summary>
+    ///     盡量描述「是誰在呼叫」：呼叫端執行緒上第一個不屬於 Wrath／Dalamud／BCL
+    ///     的堆疊框，加上執行緒識別。
+    /// </summary>
+    /// <remarks>
+    ///     ⚠️ 只在節流放行的那一次才會走到 —— 建 <see cref="System.Diagnostics.StackTrace" />
+    ///     不便宜，不要搬到常走的路徑上。
+    /// </remarks>
+    private static string DescribeIpcCaller()
+    {
+        var thread = Thread.CurrentThread;
+        var who = "unknown";
+
+        try
+        {
+            foreach (var frame in new StackTrace(false).GetFrames())
+            {
+                var method = frame.GetMethod();
+                var type = method?.DeclaringType;
+                var assembly = type?.Assembly.GetName().Name;
+
+                if (assembly is null or "WrathCombo" or "Dalamud" or "ECommons" ||
+                    assembly.StartsWith("System"))
+                    continue;
+
+                who = $"{assembly}!{type!.FullName}.{method!.Name}";
+                break;
+            }
+        }
+        catch (Exception e)
+        {
+            who = $"unknown ({e.GetType().Name})";
+        }
+
+        var name = string.IsNullOrEmpty(thread.Name) ? "" : $" '{thread.Name}'";
+        return $"{who} [thread {thread.ManagedThreadId}{name}]";
+    }
+
     #region Auto-Rotation Ready
 
     /// <summary>
@@ -161,11 +331,30 @@ public partial class Helper(ref Leasing leasing)
         ComboStateKeys enabledStateToCheck,
         ComboSimplicityLevelKeys? previousMatch = null)
     {
-        if (CustomComboFunctions.LocalPlayer is null)
+        // 🔴 這一支從 [EzIPC] 端點到得了（Provider.IsCurrentJobConfiguredOn／
+        //    IsCurrentJobAutoModeOn），也就是承租
+        //    外掛的執行緒。原生狀態只能在 framework 執行緒讀，見
+        //    CurrentClassJobIdFromFramework()。
+        var classJobId = CurrentClassJobIdFromFramework();
+        if (classJobId is null)
             return null;
 
+        return CheckJobModeIsEnabled(
+            classJobId.Value, mode, enabledStateToCheck, previousMatch);
+    }
+
+    /// <summary>
+    ///     同 <see cref="CheckCurrentJobModeIsEnabled" />，但職業（class）列 ID 由呼叫端給，
+    ///     必須是已在框架執行緒讀好的值。
+    /// </summary>
+    internal ComboSimplicityLevelKeys? CheckJobModeIsEnabled
+    (uint classJobId,
+        ComboTargetTypeKeys mode,
+        ComboStateKeys enabledStateToCheck,
+        ComboSimplicityLevelKeys? previousMatch = null)
+    {
         // Convert current job/class to a job, if it is a class
-        var job = (Job)CustomComboFunctions.JobIDs.ClassToJob((uint)Player.Job);
+        var job = (Job)CustomComboFunctions.JobIDs.ClassToJob(classJobId);
 
         // Get the user's settings for this job
         P.IPCSearch.CurrentJobComboStatesCategorized.TryGetValue(job,
@@ -179,37 +368,42 @@ public partial class Helper(ref Leasing leasing)
         comboStates[mode]
             .TryGetValue(ComboSimplicityLevelKeys.Simple, out var simpleResults);
         var simpleHigher = simpleResults?.FirstOrDefault();
-        var simple = simpleHigher?.Value;
 
         #region Override the Values with any IPC-control
+
+        // 只在區域變數算出「這一趟要看的那個狀態」，完全不碰共用字典。
+        var autoActions = P.IPCSearch.AutoActions;
+        var enabledActions = P.IPCSearch.EnabledActions;
+
+        // P.IPCSearch 的這兩份已經把租約的值疊在使用者設定上。
+        bool StateOf(CustomComboPreset preset) =>
+            enabledStateToCheck switch
+            {
+                ComboStateKeys.AutoMode => autoActions[preset],
+                ComboStateKeys.Enabled => enabledActions.Contains(preset),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(enabledStateToCheck), enabledStateToCheck, null),
+            };
 
         CustomComboPreset? simpleComboPreset = simpleHigher is null
             ? null
             : (CustomComboPreset)
             Enum.Parse(typeof(CustomComboPreset), simpleHigher.Value.Key, true);
-        if (simpleComboPreset is not null)
-        {
-            simple[ComboStateKeys.AutoMode] =
-                P.IPCSearch.AutoActions[(CustomComboPreset)simpleComboPreset];
-            simple[ComboStateKeys.Enabled] =
-                P.IPCSearch.EnabledActions.Contains(
-                    (CustomComboPreset)simpleComboPreset);
-        }
+        bool? simpleState = simpleComboPreset is null
+            ? null
+            : StateOf(simpleComboPreset.Value);
 
         #endregion
 
         // Get the Advanced Mode settings
-        var (advancedKey, advancedValue) =
-            comboStates[mode][ComboSimplicityLevelKeys.Advanced].First();
+        var advancedKey =
+            comboStates[mode][ComboSimplicityLevelKeys.Advanced].First().Key;
 
         #region Override the Values with any IPC-control
 
         var advancedComboPreset = (CustomComboPreset)
             Enum.Parse(typeof(CustomComboPreset), advancedKey, true);
-        advancedValue[ComboStateKeys.AutoMode] =
-            P.IPCSearch.AutoActions[advancedComboPreset];
-        advancedValue[ComboStateKeys.Enabled] =
-            P.IPCSearch.EnabledActions.Contains(advancedComboPreset);
+        var advancedState = StateOf(advancedComboPreset);
 
         #endregion
 
@@ -217,17 +411,17 @@ public partial class Helper(ref Leasing leasing)
         if (previousMatch is not null)
         {
             if (previousMatch == ComboSimplicityLevelKeys.Simple &&
-                simple is not null && simple[enabledStateToCheck])
+                simpleState == true)
                 return ComboSimplicityLevelKeys.Simple;
-            return advancedValue[enabledStateToCheck]
+            return advancedState
                 ? ComboSimplicityLevelKeys.Advanced
                 : null;
         }
 
         // Check for either Simple or Advanced being ready
-        return simple is not null && simple[enabledStateToCheck] ?
+        return simpleState == true ?
             ComboSimplicityLevelKeys.Simple :
-            advancedValue[enabledStateToCheck] ? ComboSimplicityLevelKeys.Advanced :
+            advancedState ? ComboSimplicityLevelKeys.Advanced :
                 null;
     }
 
@@ -345,106 +539,49 @@ public partial class Helper(ref Leasing leasing)
 
     #region IPC Callback
 
-    public static string? PrefixForIPC;
+    /// <summary>
+    ///     承租外掛註冊「租約被取消」回呼時用的 IPC 方法名。
+    ///     完整的 IPC tag 是 <c>{承租外掛自己的前綴}.WrathComboCallback</c>。
+    /// </summary>
+    private const string LeaseeCallbackName = "WrathComboCallback";
 
     /// <summary>
-    ///     Method to set up an IPC, call the Wrath Combo callback, and dispose
-    ///     of the IPC.
+    ///     Calls a leasee's lease-cancellation callback over IPC.
     /// </summary>
-    /// <param name="prefix">The leasee's </param>
-    /// <param name="reason"></param>
-    /// <param name="additionalInfo"></param>
+    /// <param name="prefix">The leasee's IPC prefix.</param>
+    /// <param name="reason">The reason the lease is being cancelled.</param>
+    /// <param name="additionalInfo">
+    ///     Any additional information to pass to the leasee.
+    /// </param>
+    /// <remarks>
+    ///     🔴 call gate <b>一定要每次呼叫都照 prefix 重新取得</b>，不可以存成靜態欄位。
+    /// </remarks>
     internal static void CallIPCCallback(string prefix, CancellationReason reason,
         string additionalInfo = "")
     {
+        var ipcName = prefix + "." + LeaseeCallbackName;
+
         try
         {
-            PrefixForIPC = prefix;
-            LeaseeIPC.WrathComboCallback((int)reason, additionalInfo);
-            LeaseeIPC.Dispose();
+            Svc.PluginInterface
+                .GetIpcSubscriber<int, string, object>(ipcName)
+                .InvokeAction((int)reason, additionalInfo);
         }
-        catch
+        catch (IpcNotReadyError)
         {
-            Logging.Error("Failed to call IPC callback with IPC prefix: " + prefix);
+            // 承租外掛沒註冊這個回呼，或是已經卸載了。這是預期得到的狀況，不是錯誤。
+            // 要使用者回報的診斷。
+            Logging.Information(
+                "Leasee has no lease-cancellation callback registered " +
+                "(IPC method '" + ipcName + "' is not registered); " +
+                "the cancellation could not be delivered to it.");
         }
-    }
-
-    #endregion
-
-    #region Checking the repo for live IPC status
-
-    /// Dalamud's happy eyeballs handler, which handles IPv6, among other things.
-    // ReSharper disable once InconsistentNaming
-    private static readonly SocketsHttpHandler _httpHandler = new()
-    {
-        AutomaticDecompression = DecompressionMethods.All,
-        ConnectCallback = new HappyEyeballsCallback().ConnectCallback,
-    };
-
-    /// The HTTP client, setup with a short timeout and Dalamud's happy handler.
-    private readonly HttpClient _httpClient = new(_httpHandler)
-        { Timeout = TS.FromSeconds(5) };
-
-    /// <summary>
-    ///     The endpoint for checking the IPC status straight from the repo,
-    ///     so it can be disabled without a plugin update if for some reason
-    ///     necessary.
-    /// </summary>
-    private const string IPCStatusEndpoint =
-        "https://static.meowrs.com/Plugins/WrathCombo/res/ipc_status.txt";
-
-    /// <summary>
-    ///     The cached backing field for the IPC status.
-    /// </summary>
-    /// <seealso cref="IPCEnabled" />
-    private bool? _ipcEnabled;
-
-    /// <summary>
-    ///     The lightly-cached live IPC status.<br />
-    ///     Backed by <see cref="_ipcEnabled" />.
-    /// </summary>
-    /// <seealso cref="IPCStatusEndpoint" />
-    /// <seealso cref="_ipcEnabled" />
-    public bool IPCEnabled
-    {
-        get
+        catch (Exception e)
         {
-            // If the IPC status was checked within the last 45 minutes:
-            // return the cached value
-            if (_ipcEnabled is not null &&
-                !EZ.Throttle("ipcLastStatusChecked", TS.FromMinutes(45)))
-                return _ipcEnabled!.Value;
-
-            // Otherwise, check the status and cache the result
-            string data;
-            // Check the status
-            try
-            {
-                using var ipcStatusQuery =
-                    _httpClient.GetAsync(IPCStatusEndpoint).Result;
-                ipcStatusQuery.EnsureSuccessStatusCode();
-                data = ipcStatusQuery.Content.ReadAsStringAsync()
-                    .Result.Trim().ToLower();
-            }
-            catch (Exception e)
-            {
-                data = "enabled";
-                Logging.Error(
-                    "Failed to check IPC status. Assuming it is enabled.\n" +
-                    e.Message
-                );
-            }
-
-            // Read the status
-            var ipcStatus = data.StartsWith("enabled");
-            // Cache the status
-            _ipcEnabled = ipcStatus;
-
-            // Handle suspended status
-            if (!ipcStatus)
-                _leasing.SuspendLeases();
-
-            return ipcStatus;
+            // 走到這裡幾乎都是「承租外掛的回呼自己擲例外」——它是在我們的堆疊上同步執行的。
+            // 例外要一起印：「call gate 不存在」與「對方的回呼炸了」處置完全不同，只印 prefix 分不出來。
+            Logging.Error(
+                "Failed to call IPC callback with IPC prefix: " + prefix + "\n" + e);
         }
     }
 
@@ -490,6 +627,12 @@ internal static class Logging
     public static void Log(string message) =>
         PluginLog.Debug(Prefix + PrefixMethod + message);
 
+    /// <summary>
+    ///     要請使用者回報的診斷訊息用這個。
+    /// </summary>
+    public static void Information(string message) =>
+        PluginLog.Information(Prefix + PrefixMethod + message);
+
     public static void Warn(string message) =>
         PluginLog.Warning(Prefix + PrefixMethod + message
 #if DEBUG
@@ -499,23 +642,4 @@ internal static class Logging
 
     public static void Error(string message) =>
         PluginLog.Error(Prefix + PrefixMethod + message + "\n" + (StackTrace));
-}
-
-internal static class LeaseeIPC
-{
-    private static EzIPCDisposalToken[]? _disposalTokens =
-        EzIPC.Init(typeof(LeaseeIPC), Helper.PrefixForIPC, SafeWrapper.IPCException);
-
-#pragma warning disable CS0649, CS8618 // Complaints of the method
-    [EzIPC] internal static readonly Action<int, string> WrathComboCallback;
-#pragma warning restore CS8618, CS0649
-
-    public static void Dispose()
-    {
-        if (_disposalTokens is null)
-            return;
-        foreach (var token in _disposalTokens)
-            token.Dispose();
-        _disposalTokens = null;
-    }
 }

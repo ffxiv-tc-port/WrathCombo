@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -45,8 +45,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Unmend", DRK.Unmend.ActionName()),
                 
                 // Defensive
-                KeyValuePair.Create("Grit", DRK.Grit.ActionName()),
                 KeyValuePair.Create("Release Grit", DRK.ReleaseGrit.ActionName()),
+                KeyValuePair.Create("Grit", DRK.Grit.ActionName()),
                 KeyValuePair.Create("Shadow Wall", DRK.ShadowWall.ActionName()),
                 KeyValuePair.Create("Dark Mind", DRK.DarkMind.ActionName()),
                 KeyValuePair.Create("Living Dead", DRK.LivingDead.ActionName()),
@@ -55,9 +55,9 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Oblation", DRK.Oblation.ActionName()),
                 KeyValuePair.Create("Shadowed Vigil", DRK.ShadowedVigil.ActionName()),
                 KeyValuePair.Create("Vigil", DRK.ShadowedVigil.ActionName()),
-                KeyValuePair.Create("Walking Dead", "行尸走肉"),
-                KeyValuePair.Create("Blackest Night Shield", "至黑之夜护盾"),
-                KeyValuePair.Create("Blackest Night", "至黑之夜护盾"),
+                KeyValuePair.Create("Walking Dead", "行屍走肉"),
+                KeyValuePair.Create("Blackest Night Shield", "至黑之夜護盾"),
+                KeyValuePair.Create("Blackest Night", "至黑之夜護盾"),
 
                 // Buffs
                 KeyValuePair.Create("Darkside", DRK.Buffs.Darkside.StatusName()),

@@ -248,8 +248,13 @@ internal partial class NIN : Melee
             if (IsEnabled(CustomComboPreset.NIN_ST_AdvancedMode_Raiju) && HasStatusEffect(Buffs.RaijuReady))
             {
                 if (IsEnabled(CustomComboPreset.NIN_ST_AdvancedMode_Raiju_Forked) && !InMeleeRange())
-                    return OriginalHook(ForkedRaiju);
-                return OriginalHook(FleetingRaiju);
+                {
+                    // 不能衝時不退回月影雷獸牙（近戰外一樣放不出），交給後面的循環選下一招。
+                    if (DashAllowed(OriginalHook(ForkedRaiju)))
+                        return OriginalHook(ForkedRaiju);
+                }
+                else
+                    return OriginalHook(FleetingRaiju);
             }
 
             if (IsEnabled(CustomComboPreset.NIN_ST_AdvancedMode_Kassatsu_HyoshoRaynryu) &&

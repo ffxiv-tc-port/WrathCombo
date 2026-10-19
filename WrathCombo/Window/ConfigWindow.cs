@@ -5,9 +5,10 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
+using ECommons.LanguageHelpers;
 using ECommons.Logging;
 using ECommons.Throttlers;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using PunishLib;
 using PunishLib.ImGuiMethods;
 using System;
@@ -95,13 +96,32 @@ namespace WrathCombo.Window
                 MinimumSize = new Vector2(700, 100).Scale(),
             };
 
+        private int _framesSinceOpen;
+
+        public override void OnOpen()
+        {
+            base.OnOpen();
+            _framesSinceOpen = 0;
+        }
+
+        /// <summary> 給 <see cref="DrawHitchDiag" /> 的上下文；只在卡頓超過門檻的那一幀呼叫。 </summary>
+        internal string DescribeForHitch() =>
+            !IsOpen
+                ? "設定視窗關著"
+                : $"設定視窗開著（分頁 {OpenWindow}" +
+                  (OpenWindow == OpenWindow.PvE ? $"、職業頁「{PvEFeatures.OpenJob}」" : "") +
+                  $"、開啟後第 {_framesSinceOpen} 幀）";
+
         public override void Draw()
         {
+            if (_framesSinceOpen < int.MaxValue)
+                _framesSinceOpen++;
             var region = ImGui.GetContentRegionAvail();
             var topLeftSideHeight = region.Y;
             var columns = 2;
             var tableName = "###MainTable";
-            if (Service.Configuration.UILeftColumnCollapsed)
+            var sidebarCollapsed = Service.Configuration.UILeftColumnCollapsed;
+            if (sidebarCollapsed)
             {
                 columns = 1;
                 tableName = "###NoSidebarMainTable";
@@ -112,18 +132,29 @@ namespace WrathCombo.Window
             {
                 if (!table) return;
 
-                if (!Service.Configuration.UILeftColumnCollapsed)
+                // 每一欄都要在第一個 TableNextColumn 之前宣告；之後才宣告＝ImGui 斷言（Release 照跑，但表格狀態是錯的）。
+                if (!sidebarCollapsed)
+                    SetupSidebarColumn();
+                ImGui.TableSetupColumn("##RightColumn", ImGuiTableColumnFlags.WidthStretch);
+
+                if (!sidebarCollapsed)
+                {
+                    var sidebarStart = DrawHitchDiag.Begin();
                     DrawSidebar(topLeftSideHeight);
+                    DrawHitchDiag.End(DrawHitchDiag.Section.ConfigSidebar, sidebarStart);
+                }
                 else
                     ImGui.Indent(45f.Scale());
 
+                var bodyStart = DrawHitchDiag.Begin();
                 DrawBody();
+                DrawHitchDiag.End(DrawHitchDiag.Section.ConfigBody, bodyStart);
             }
 
             DrawCollapseButton();
         }
 
-        private void DrawSidebar(float topLeftSideHeight)
+        private static void SetupSidebarColumn()
         {
             var imageSize = new Vector2(125).Scale();
             var leftColumnFlags = ImGuiTableColumnFlags.WidthFixed;
@@ -131,6 +162,11 @@ namespace WrathCombo.Window
                 leftColumnFlags |= ImGuiTableColumnFlags.NoResize;
 
             ImGui.TableSetupColumn("##LeftColumn", leftColumnFlags, imageSize.X + 10f.Scale());
+        }
+
+        private void DrawSidebar(float topLeftSideHeight)
+        {
+            var imageSize = new Vector2(125).Scale();
             ImGui.TableNextColumn();
 
             var regionSize = ImGui.GetContentRegionAvail();
@@ -158,7 +194,7 @@ namespace WrathCombo.Window
             catch (Exception)
             {
                 // Fallback to the remote icon if there are any issues
-                imagePath = PunishLibMain.PluginManifest.IconUrl ?? "";
+                imagePath = Svc.PluginInterface.Manifest.IconUrl ?? "";
                 if (EzThrottler.Throttle("logTypeOfWrathIconUsed", 45000))
                     PluginLog.Verbose(
                         "Using Remote WrathCombo Icon\n             " +
@@ -168,32 +204,32 @@ namespace WrathCombo.Window
 
             if (ThreadLoadImageHandler.TryGetTextureWrap(imagePath, out var logo))
                 ImGuiEx.LineCentered("###WrathLogo", () =>
-                    ImGui.Image(logo.ImGuiHandle, imageSize));
+                    ImGui.Image(logo.Handle, imageSize));
 
             ImGui.Spacing();
             ImGui.Separator();
 
             ImGui.Spacing();
-            if (ImGui.Selectable("PvE功能", OpenWindow == OpenWindow.PvE))
+            if (ImGui.Selectable("PvE Features".Loc(), OpenWindow == OpenWindow.PvE))
                 OpenWindow = OpenWindow.PvE;
 
             ImGui.Spacing();
-            if (ImGui.Selectable("PvP功能", OpenWindow == OpenWindow.PvP))
+            if (ImGui.Selectable("PvP Features".Loc(), OpenWindow == OpenWindow.PvP))
                 OpenWindow = OpenWindow.PvP;
 
             ImGui.Spacing();
-            if (ImGui.Selectable("自动循环", OpenWindow == OpenWindow.AutoRotation))
+            if (ImGui.Selectable("Auto-Rotation".Loc(), OpenWindow == OpenWindow.AutoRotation))
                 OpenWindow = OpenWindow.AutoRotation;
 
             ImGui.Spacing();
             ImGui.Spacing();
 
             ImGui.Spacing();
-            if (ImGui.Selectable("插件设置", OpenWindow == OpenWindow.Settings))
+            if (ImGui.Selectable("Settings".Loc(), OpenWindow == OpenWindow.Settings))
                 OpenWindow = OpenWindow.Settings;
 
             ImGui.Spacing();
-            if (ImGui.Selectable("关于", OpenWindow == OpenWindow.About))
+            if (ImGui.Selectable("About".Loc(), OpenWindow == OpenWindow.About))
                 OpenWindow = OpenWindow.About;
 
 #if DEBUG
@@ -201,18 +237,35 @@ namespace WrathCombo.Window
             ImGui.Spacing();
 
             ImGui.Spacing();
-            if (ImGui.Selectable("调试", OpenWindow == OpenWindow.Debug))
+            if (ImGui.Selectable("DEBUG", OpenWindow == OpenWindow.Debug))
                 OpenWindow = OpenWindow.Debug;
 
             ImGui.Spacing();
 #endif
 
             ConflictingPlugins.Draw();
+            DrawLostGameFunctions();
+        }
+
+        /// <summary> 載入時有遊戲函式解不到（遊戲改版）就在側欄留一行；停用了什麼放 tooltip。 </summary>
+        private static void DrawLostGameFunctions()
+        {
+            var lost = GameFunctionGuard.Lost;
+            if (lost.Length == 0) return;
+
+            const string text = "部分功能停用";
+            ImGui.Spacing();
+            ImGui.Spacing();
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() +
+                                Math.Max(0f, (ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize(text).X) / 2));
+            ImGui.TextColored(ImGuiColors.DalamudRed, text);
+            if (ImGui.IsItemHovered())
+                ImGui.SetTooltip("遊戲改版後有遊戲函式解不到，下列功能已停用（等插件更新）：\n- " +
+                                 string.Join("\n- ", lost));
         }
 
         private void DrawBody()
         {
-            ImGui.TableSetupColumn("##RightColumn", ImGuiTableColumnFlags.WidthStretch);
             ImGui.TableNextColumn();
 
             using var rightChild = ImRaii.Child("###WrathRightSide", Vector2.Zero, false);
@@ -273,12 +326,12 @@ namespace WrathCombo.Window
 
             // Set up how the button should display
             var icon = FontAwesomeIcon.CaretLeft;
-            var hoverText = "收起侧边栏";
+            var hoverText = "Collapse Sidebar".Loc();
             ImGui.SetWindowFontScale(1.5f.Scale());
             if (collapsed)
             {
                 icon = FontAwesomeIcon.CaretRight;
-                hoverText = "展开侧边栏";
+                hoverText = "Expand Sidebar".Loc();
             }
 
             // Draw the button

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -23,7 +23,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Sentinel", PLD.Sentinel.ActionName()),
                 KeyValuePair.Create("Rage of Halone", PLD.RageOfHalone.ActionName()),
                 KeyValuePair.Create("Bulwark", PLD.Bulwark.ActionName()),
-                KeyValuePair.Create("Circle of Scorn", PLD.CircleOfScorn.ActionName()),
                 KeyValuePair.Create("Shield Lob", PLD.ShieldLob.ActionName()),
                 KeyValuePair.Create("Iron Will", PLD.IronWill.ActionName()),
                 KeyValuePair.Create("Spirits Within", PLD.SpiritsWithin.ActionName()),

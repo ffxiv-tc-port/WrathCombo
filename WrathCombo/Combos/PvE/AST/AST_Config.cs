@@ -1,5 +1,6 @@
 ﻿using Dalamud.Interface.Colors;
-using ImGuiNET;
+using ECommons.LanguageHelpers;
+using Dalamud.Bindings.ImGui;
 using WrathCombo.CustomComboNS.Functions;
 using static WrathCombo.Extensions.UIntExtensions;
 using static WrathCombo.Window.Functions.SliderIncrements;
@@ -24,6 +25,7 @@ internal partial class AST
             AST_ST_SimpleHeals_EssentialDignity = new("AST_ST_SimpleHeals_EssentialDignity", 50),
             AST_ST_SimpleHeals_Exaltation = new("AST_ST_SimpleHeals_Exaltation", 50),
             AST_ST_SimpleHeals_Esuna = new("AST_ST_SimpleHeals_Esuna", 100),
+            AST_ST_SimpleHeals_EsunaCriticalHP = new("AST_ST_SimpleHeals_EsunaCriticalHP", 50),
             AST_ST_SimpleHeals_AspectedBeneficHigh = new("AST_ST_SimpleHeals_AspectedBeneficHigh", 90),
             AST_ST_SimpleHeals_AspectedBeneficLow = new("AST_ST_SimpleHeals_AspectedBeneficLow", 40),
             AST_ST_SimpleHeals_AspectedBeneficRefresh = new("AST_ST_SimpleHeals_AspectedBeneficRefresh", 3),
@@ -108,25 +110,25 @@ internal partial class AST
                     break;
 
                 case CustomComboPreset.AST_DPS_Lucid:
-                    DrawSliderInt(4000, 9500, AST_ST_DPS_LucidDreaming, "设置MP阈值，当MP达到或低于此值时启用此功能", 150, Hundreds);
+                    DrawSliderInt(4000, 9500, AST_ST_DPS_LucidDreaming, "Set value for your MP to be at or under for this feature to work", 150, Hundreds);
                     break;
 
                 case CustomComboPreset.AST_ST_DPS_CombustUptime:
                     DrawSliderInt(0, 50, AST_ST_DPS_CombustOption, "Stop using at Enemy HP %. Set to Zero to disable this check.");
                     ImGui.Indent();
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
                     DrawHorizontalRadioButton(AST_ST_DPS_CombustSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.\nAllows you to only stop DoTing early when it's not a boss.", 0);
                     DrawHorizontalRadioButton(AST_ST_DPS_CombustSubOption,
                         "All Enemies", "Applies the HP check above to all enemies.", 1);
-                    DrawRoundedSliderFloat(0, 4, AST_ST_DPS_CombustUptime_Threshold, "剩余多少秒应用DoT。设置为零禁用此检测。", digits: 1);
+                    DrawRoundedSliderFloat(0, 4, AST_ST_DPS_CombustUptime_Threshold, "Seconds remaining before reapplying the DoT. Set to Zero to disable this check.", digits: 1);
                     ImGui.Unindent();
                     break;
 
                 case CustomComboPreset.AST_DPS_Divination:
                     DrawSliderInt(0, 100, AST_ST_DPS_DivinationOption, "Stop using at Enemy HP %. Set to Zero to disable this check.");
                     ImGui.Indent();
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
                     DrawHorizontalRadioButton(AST_ST_DPS_DivinationSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.", 0);
                     DrawHorizontalRadioButton(AST_ST_DPS_DivinationSubOption,
@@ -154,13 +156,13 @@ internal partial class AST
                     break;
                 
                 case CustomComboPreset.AST_AOE_Lucid:
-                    DrawSliderInt(4000, 9500, AST_AOE_LucidDreaming, "设置MP阈值，当MP达到或低于此值时启用此功能", 150, Hundreds);
+                    DrawSliderInt(4000, 9500, AST_AOE_LucidDreaming, "Set value for your MP to be at or under for this feature to work", 150, Hundreds);
                     break;
 
                 case CustomComboPreset.AST_AOE_Divination:
                     DrawSliderInt(0, 100, AST_AOE_DivinationOption, "Stop using at Enemy HP %. Set to Zero to disable this check.");
                     ImGui.Indent();
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
                     DrawHorizontalRadioButton(AST_AOE_DivinationSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.", 0);
                     DrawHorizontalRadioButton(AST_AOE_DivinationSubOption,
@@ -197,7 +199,7 @@ internal partial class AST
                     ImGui.Indent();
                     DrawRoundedSliderFloat(0, 5, AST_AOE_DPS_DoT_Reapply,  "Seconds remaining before reapplying (0 = Do not reapply early)", digits: 1);
                     ImGui.Unindent();
-                    DrawSliderInt(0, 10, AST_AOE_DPS_DoT_MaxTargets, "Maximum number of targets to employ multi-dotting ");
+                    DrawSliderInt(0, 10, AST_AOE_DPS_DoT_MaxTargets, "Maximum number of targets to employ multi-dotting ".Loc());
                     break;
 
                 #endregion
@@ -216,6 +218,8 @@ internal partial class AST
                 
                 case CustomComboPreset.AST_ST_Heals_Esuna:
                     DrawSliderInt(0, 100, AST_ST_SimpleHeals_Esuna, "Stop using when below HP %. Set to Zero to disable this check");
+                    DrawSliderInt(0, 100, AST_ST_SimpleHeals_EsunaCriticalHP,
+                        "Heal first: hold ?? while any party member within 30 yalms (including the target) is below this HP %. Deadly debuffs that only cleansing can fix (e.g. Doom) are still cleansed first. Set to Zero to disable this check".Loc(RoleActions.Healer.Esuna.ActionName()));
                     break;
                 
                 case CustomComboPreset.AST_ST_Heals_CelestialIntersection:
@@ -261,9 +265,9 @@ internal partial class AST
                     break;
                 
                 case CustomComboPreset.AST_ST_Heals_AspectedBenefic:
-                    DrawSliderInt(0, 100, AST_ST_SimpleHeals_AspectedBeneficHigh, "低于该HP百分比时开始使用（设为100则不检查）");
-                    DrawSliderInt(0, 100, AST_ST_SimpleHeals_AspectedBeneficLow, "低于该百分比时停止使用");
-                    DrawSliderInt(0, 15, AST_ST_SimpleHeals_AspectedBeneficRefresh, "剩余多少秒重新应用（0=不提前重新应用）");
+                    DrawSliderInt(0, 100, AST_ST_SimpleHeals_AspectedBeneficHigh, "Start using when below HP %. Set to 100 to disable this check");
+                    DrawSliderInt(0, 100, AST_ST_SimpleHeals_AspectedBeneficLow, "Stop using when below set percentage");
+                    DrawSliderInt(0, 15, AST_ST_SimpleHeals_AspectedBeneficRefresh, "Seconds remaining before reapplying (0 = Do not reapply early)");
                     DrawPriorityInput(AST_ST_SimpleHeals_Priority, 11, 7, $"{AspectedBenefic.ActionName()} Priority: ");
                     break;
                 
@@ -356,18 +360,18 @@ internal partial class AST
                 #region Standalone
                 case CustomComboPreset.AST_Cards_QuickTargetCards:
                     DrawAdditionalBoolChoice(AST_QuickTarget_Manuals,
-                        "同时重定向手动使用的卡牌",
-                        "会自动为你手动使用的卡牌（即非输出循环中的卡牌）选择目标。",
+                        "Also Retarget manually-used Cards",
+                        "Will also automatically target Cards that you manually use, as in, those outside of your damage rotations.",
                         indentDescription: true);
 
                     ImGui.Indent();
-                    ImGui.TextWrapped("目标覆盖方式：（将鼠标悬停以查看更多信息）");
+                    ImGui.TextWrapped("目標覆蓋方式：（將滑鼠懸停以檢視更多資訊）");
                     ImGui.Unindent();
                     ImGui.NewLine();
-                    DrawRadioButton(AST_QuickTarget_Override, "不覆盖", "不会用任何手动输入覆盖自动队伍目标检测。\n卡牌会根据The Balance的优先级和状态检测自动选择目标（如不会重复发卡、不会发给有伤害降低或复活虚弱的目标等）。", 0, descriptionAsTooltip: true);
-                    DrawRadioButton(AST_QuickTarget_Override, "强制目标覆盖", "如果你有一个在范围内且没有伤害降低或复活虚弱的强制目标，将用该目标覆盖选择。", 1, descriptionAsTooltip: true);
-                    DrawRadioButton(AST_QuickTarget_Override, "UI鼠标悬停覆盖", "如果你有一个在范围内且没有伤害降低或复活虚弱的UI鼠标悬停目标，将用该目标覆盖选择。", 2, descriptionAsTooltip: true);
-                    DrawRadioButton(AST_QuickTarget_Override, "任意鼠标悬停覆盖", "如果你有一个在范围内且没有伤害降低或复活虚弱的UI、姓名板或模型鼠标悬停目标（按此顺序），将用该目标覆盖选择。", 3, descriptionAsTooltip: true);
+                    DrawRadioButton(AST_QuickTarget_Override, "No Override", "不會用任何手動輸入覆蓋自動隊伍目標檢測。\n卡牌會根據The Balance的優先順序和狀態檢測自動選擇目標（如不會重複髮卡、不會發給有傷害降低或復活虛弱的目標等）。", 0, descriptionAsTooltip: true);
+                    DrawRadioButton(AST_QuickTarget_Override, "Hard Target Override", "Overrides selection with hard target, if you have one that is in range and does not have damage down or rez sickness.", 1, descriptionAsTooltip: true);
+                    DrawRadioButton(AST_QuickTarget_Override, "UI MouseOver Override", "Overrides selection with UI MouseOver target, if you have one that is in range and does not have damage down or rez sickness.", 2, descriptionAsTooltip: true);
+                    DrawRadioButton(AST_QuickTarget_Override, "Any MouseOver Override", "Overrides selection with UI or Nameplate or Model MouseOver target (in that order), if you have one that is in range and does not have damage down or rez sickness.", 3, descriptionAsTooltip: true);
                     break;
                 #endregion
             }

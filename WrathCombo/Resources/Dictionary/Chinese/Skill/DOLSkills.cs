@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using WrathCombo.Combos.PvE;
@@ -20,11 +20,11 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 #region BTN & MIN
                 KeyValuePair.Create("Wise to the World", DOL.MinWiseToTheWorld.ActionName()),
                 KeyValuePair.Create("Prospect", DOL.Prospect.ActionName()),
-                KeyValuePair.Create("Lay of the Land", DOL.LayOfTheLand.ActionName()),
                 KeyValuePair.Create("Lay of the Land 2", DOL.LayOfTheLand2.ActionName()),
+                KeyValuePair.Create("Lay of the Land", DOL.LayOfTheLand.ActionName()),
                 KeyValuePair.Create("Truth of Mountains", DOL.TruthOfMountains.ActionName()),
-                KeyValuePair.Create("Arbor Call", DOL.ArborCall.ActionName()),
                 KeyValuePair.Create("Arbor Call 2", DOL.ArborCall2.ActionName()),
+                KeyValuePair.Create("Arbor Call", DOL.ArborCall.ActionName()),
                 KeyValuePair.Create("Truth of Forests", DOL.TruthOfForests.ActionName()),
                 #endregion
 

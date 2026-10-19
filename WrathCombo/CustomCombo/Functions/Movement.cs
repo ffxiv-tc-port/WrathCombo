@@ -45,7 +45,11 @@ namespace WrathCombo.CustomComboNS.Functions
             return isMoving && TimeMoving.TotalSeconds >= Service.Configuration.MovementLeeway;
         }
 
-        public unsafe static bool IsDashing() => MovementHook.Instance != null && MovementHook.Instance->Dashing == 1;
+        /// <summary>
+        /// Last dash state sampled inside the RMIWalk detour (see <see cref="MovementHook"/>).
+        /// False whenever the hook is not running - never a stale native pointer read.
+        /// </summary>
+        public static bool IsDashing() => MovementHook.Dashing;
 
         public static TimeSpan TimeMoving => movementStarted is null ? TimeSpan.Zero : (DateTime.Now - movementStarted.Value);
 
@@ -54,28 +58,64 @@ namespace WrathCombo.CustomComboNS.Functions
 
     internal unsafe class MovementHook : IDisposable
     {
-        public static MoveControllerSubMemberForMine* Instance = null!;
+        // 只在 detour 裡解參考 self（那一刻保證有效），跨幀留下的只有一個 bool：不保存 MoveControllerSubMemberForMine*。
+        // 跨幀持有的原生指標在換區或重新載入插件後會失效，解參考是 try/catch 攔不到的 AccessViolationException；
+        // RMIWalk 的 self 沒有 ClientStructs 對應型別、也沒有 Instance() 可以每次重取，所以存值不存指標。
+        private static bool dashing;
+
+        /// <summary>Dash state as of the last RMIWalk call. False while the hook is not running.</summary>
+        public static bool Dashing => dashing;
 
         private delegate void RMIWalkDelegate(MoveControllerSubMemberForMine* self, float* sumLeft, float* sumForward, float* sumTurnLeft, byte* haveBackwardOrStrafe, byte* a6, byte bAdditiveUnk);
-        [Signature("E8 ?? ?? ?? ?? 80 7B 3E 00 48 8D 3D", DetourName = nameof(RMIWalkDetour))]
-        private readonly Hook<RMIWalkDelegate> _rmiWalkHook = null!;
+        // 刻意設成 Fallible：MovementHook 在插件建構子裡建，特徵碼對不上時不可以擲 SignatureException 讓整個插件載不起來；
+        // 對不上時只退化成 IsDashing() 恆為 false。
+        [Signature("E8 ?? ?? ?? ?? 80 7B 3E 00 48 8D 3D", DetourName = nameof(RMIWalkDetour), Fallibility = Fallibility.Fallible)]
+        private readonly Hook<RMIWalkDelegate>? _rmiWalkHook;
+
+        // fail-closed：detour 是原生碼直接呼叫的受管函式，逸出的受管例外會穿過沒有處理常式的原生堆疊。
+        // Original() 之外加的東西都包在 try 裡；失敗時只是不更新自己的狀態，遊戲自己的移動處理照常。
+        // 這擋不住 AccessViolationException：那一種靠的是根本不保存指標（見 dashing 的說明）。
+        private static long detourErrors;
+        private static DateTime lastDetourErrorLog = DateTime.MinValue;
+
+        private static void OnDetourError(Exception ex)
+        {
+            ++detourErrors;
+            // 每幀都會走到：一律節流。要使用者回報的診斷。
+            var now = DateTime.UtcNow;
+            if (now - lastDetourErrorLog < TimeSpan.FromSeconds(30))
+                return;
+            lastDetourErrorLog = now;
+            Svc.Log.Information($"MovementHook: RMIWalk detour threw, dash state not updated this frame (total {detourErrors}): {ex}");
+        }
 
         private void RMIWalkDetour(MoveControllerSubMemberForMine* self, float* sumLeft, float* sumForward, float* sumTurnLeft, byte* haveBackwardOrStrafe, byte* a6, byte bAdditiveUnk)
         {
-            _rmiWalkHook.Original(self, sumLeft, sumForward, sumTurnLeft, haveBackwardOrStrafe, a6, bAdditiveUnk);
+            _rmiWalkHook!.OriginalDisposeSafe(self, sumLeft, sumForward, sumTurnLeft, haveBackwardOrStrafe, a6, bAdditiveUnk);
 
-            Instance = self;
+            try
+            {
+                dashing = self != null && self->Dashing == 1;
+            }
+            catch (Exception ex)
+            {
+                OnDetourError(ex);
+            }
         }
 
         public void Dispose()
         {
             _rmiWalkHook?.Dispose();
+            dashing = false;
         }
 
         internal MovementHook()
         {
             Svc.Hook.InitializeFromAttributes(this);
-            _rmiWalkHook.Enable();
+            if (_rmiWalkHook != null)
+                _rmiWalkHook.Enable();
+            else
+                Svc.Log.Warning("RMIWalk signature not found - IsDashing() will always report false");
         }
     }
 

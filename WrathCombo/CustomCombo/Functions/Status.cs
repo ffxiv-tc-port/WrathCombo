@@ -142,9 +142,7 @@ namespace WrathCombo.CustomComboNS.Functions
             if (target is not IBattleChara tar)
                 return false;
 
-            // Turn Target's status to uint hashset
-            var targetStatuses = tar.StatusList.Select(s => s.StatusId).ToHashSet();
-            uint targetID = tar.DataId;
+            uint targetID = tar.BaseId;
 
             switch (Svc.ClientState.TerritoryType)
             {
@@ -220,24 +218,23 @@ namespace WrathCombo.CustomComboNS.Functions
                     //Savage/Ultimate? Not sure which omega fight uses 3499 and 3500.
                     //Also, SE, why use a new Omega-M status and reuse the old Omega-F? -_-'
                     //Wonder if targetIDs are the same......
-                    if ((tar.StatusList.Any(x => x.StatusId == 3454) && HasStatusEffect(3499)) ||
-                        (tar.StatusList.Any(x => x.StatusId == 1675) && HasStatusEffect(3500)))
+                    if ((StatusCache.HasStatusId(tar, 3454) && HasStatusEffect(3499)) ||
+                        (StatusCache.HasStatusId(tar, 1675) && HasStatusEffect(3500)))
                         return true;
 
                     //Check for any ol invincibility
-                    if (StatusCache.CompareLists(StatusCache.InvincibleStatuses, targetStatuses)) return true;
+                    if (StatusCache.HasStatusInCacheList(StatusCache.InvincibleStatuses, tar)) return true;
 
                     return false;
                 case 952:  //ToZ final boss (technically not invincible)
-                    if (targetID is (13298 or 13299) && Svc.Objects.Any(y => y.DataId is 13297 && !y.IsDead))
+                    if (targetID is (13298 or 13299) && Svc.Objects.Any(y => y.BaseId is 13297 && !y.IsDead))
                         return true;
 
                     return false;
             }
 
             // General invincibility check
-            // Due to large size of InvincibleStatuses, best to check process this way
-            if (StatusCache.CompareLists(StatusCache.InvincibleStatuses, targetStatuses)) return true;
+            if (StatusCache.HasStatusInCacheList(StatusCache.InvincibleStatuses, tar)) return true;
             return false;
         }
 
@@ -251,7 +248,7 @@ namespace WrathCombo.CustomComboNS.Functions
         {
             target ??= LocalPlayer;
             if (target is IBattleChara bc)
-                return bc.StatusList.Count(x => x.StatusId != 0) == bc.Struct()->StatusManager.NumValidStatuses;
+                return StatusCache.CountStatuses(bc) == bc.Struct()->StatusManager.NumValidStatuses;
 
             return false;
         }

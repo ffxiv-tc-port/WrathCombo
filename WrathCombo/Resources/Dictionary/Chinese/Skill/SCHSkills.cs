@@ -36,6 +36,9 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Bio II", SCH.Bio2.ActionName()),
                 KeyValuePair.Create("Bio", SCH.Bio.ActionName()),
                 KeyValuePair.Create("Broil II", SCH.Broil2.ActionName()),
+                // 複數形（"Replaces Ruin I / Broils with options below."、"On Ruin/Broils"）
+                // 加上詞界比對後需要自己的條目，否則會退回英文。
+                KeyValuePair.Create("Broils", SCH.Broil.ActionName()),
                 KeyValuePair.Create("Broil", SCH.Broil.ActionName()),
                 KeyValuePair.Create("Art of War II", SCH.ArtOfWarII.ActionName()),
                 KeyValuePair.Create("Art of War", SCH.ArtOfWar.ActionName()),

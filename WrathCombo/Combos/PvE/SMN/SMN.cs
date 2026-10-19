@@ -325,7 +325,8 @@ internal partial class SMN : Caster
                 if (GemshineReady && (!IsMoving() || HasStatusEffect(Role.Buffs.Swiftcast)))
                     return OriginalHook(Gemshine);
 
-                if (HasStatusEffect(Buffs.IfritsFavor) || HasStatusEffect(Buffs.CrimsonStrike) && InMeleeRange())
+                if (HasStatusEffect(Buffs.IfritsFavor) && (InMeleeRange() || Config.SMN_ST_Simple_Combo_Gapclose > 0) && DashAllowed(OriginalHook(AstralFlow))
+                    || HasStatusEffect(Buffs.CrimsonStrike) && InMeleeRange())
                     return OriginalHook(AstralFlow);
 
                 if (ActionReady(Ruin4) && !HasStatusEffect(Role.Buffs.Swiftcast) && GemshineReady)
@@ -506,7 +507,8 @@ internal partial class SMN : Caster
                 if (GemshineReady && (!IsMoving() || HasStatusEffect(Role.Buffs.Swiftcast)))
                     return OriginalHook(PreciousBrilliance);
 
-                if (HasStatusEffect(Buffs.IfritsFavor) || HasStatusEffect(Buffs.CrimsonStrike) && InMeleeRange())
+                if (HasStatusEffect(Buffs.IfritsFavor) && (InMeleeRange() || Config.SMN_AoE_Simple_Combo_Gapclose > 0) && DashAllowed(OriginalHook(AstralFlow))
+                    || HasStatusEffect(Buffs.CrimsonStrike) && InMeleeRange())
                     return OriginalHook(AstralFlow);
 
                 if (ActionReady(Ruin4) && !HasStatusEffect(Role.Buffs.Swiftcast) && GemshineReady)
@@ -729,7 +731,8 @@ internal partial class SMN : Caster
                     return OriginalHook(Gemshine);
 
                 if (IfritAstralFlowCyclone && HasStatusEffect(Buffs.IfritsFavor) &&
-                    GetTargetDistance() <= Config.SMN_ST_CrimsonCycloneMeleeDistance  //Melee Check
+                    GetTargetDistance() <= Config.SMN_ST_CrimsonCycloneMeleeDistance && //Melee Check
+                    DashAllowed(OriginalHook(AstralFlow))
                    || IfritAstralFlowStrike && HasStatusEffect(Buffs.CrimsonStrike) && InMeleeRange()) //After Strike
                     return OriginalHook(AstralFlow);
 
@@ -943,7 +946,8 @@ internal partial class SMN : Caster
                     return OriginalHook(PreciousBrilliance);
 
                 if (IfritAstralFlowCyclone && HasStatusEffect(Buffs.IfritsFavor) &&
-                   GetTargetDistance() <= Config.SMN_AoE_CrimsonCycloneMeleeDistance //Melee Check
+                   GetTargetDistance() <= Config.SMN_AoE_CrimsonCycloneMeleeDistance && //Melee Check
+                   DashAllowed(OriginalHook(AstralFlow))
                    || IfritAstralFlowStrike && HasStatusEffect(Buffs.CrimsonStrike) && InMeleeRange()) //After Strike
                     return OriginalHook(AstralFlow);
 

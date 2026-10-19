@@ -15,6 +15,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using WrathCombo.AutoRotation;
 using WrathCombo.Combos.PvE;
+using WrathCombo.Data;
+using WrathCombo.Extensions;
 using WrathCombo.Services;
 
 namespace WrathCombo.CustomComboNS.Functions
@@ -34,21 +36,36 @@ namespace WrathCombo.CustomComboNS.Functions
             if (allowCache && !EzThrottler.Throttle("PartyUpdateThrottle", 2000))
                 return _partyList;
 
+            return RefreshPartyMembers();
+        }
+
+        // 被 lambda 捕獲的 existingIds 會讓閉包類別在方法入口就配置；
+        // 拆出來，走快取的呼叫才不配置。
+        private static unsafe List<WrathPartyMember> RefreshPartyMembers()
+        {
             var existingIds = _partyList.Select(x => x.GameObjectId).ToHashSet();
 
+            // InfoProxyPartyMember 走 InfoModule 鏈:UIModule 與 InfoModule 皆可能為 null,proxy 未註冊時 GetInfoProxyById 也回 null。
+            // CharDataSpan 是手寫屬性 `new(CharData, EntryCount)`:擁有者為 null 時光是讀 CharData(位移 0xB0) 就是解參考位址 0xB0,try/catch 攔不到。
+            // 同一次呼叫內取一次即可,不跨幀保存。取不到就跳過 NPC 職業的補寫:這是輪詢路徑,安靜退化、不記 log。
+            var partyMemberInfo = InfoProxyPartyMember.Instance();
+
+            Span<ulong> inSlots = stackalloc ulong[8];
+            var inSlotCount = 0;
             for (int i = 1; i <= 8; i++)
             {
                 var member = SimpleTarget.GetPartyMemberInSlotSlot(i);
                 if (member is IBattleChara chara)
                 {
+                    inSlots[inSlotCount++] = chara.GameObjectId;
                     var existingMember = _partyList.FirstOrDefault(x => x.GameObjectId == chara.GameObjectId);
                     if (existingMember != null)
                     {
                         // Update existing member's properties as needed
                         existingMember.CurrentHP = chara.CurrentHp;
-                        if (member is IBattleNpc)
+                        if (member is IBattleNpc && partyMemberInfo != null)
                         {
-                            foreach (var p in InfoProxyPartyMember.Instance()->CharDataSpan)
+                            foreach (var p in partyMemberInfo->CharDataSpan)
                             {
                                 if (p.Sort == i - 1)
                                     existingMember.NPCClassJob = p.Job;
@@ -62,9 +79,9 @@ namespace WrathCombo.CustomComboNS.Functions
                             GameObjectId = chara.GameObjectId,
                             CurrentHP = chara.CurrentHp
                         };
-                        if (member is IBattleNpc)
+                        if (member is IBattleNpc && partyMemberInfo != null)
                         {
-                            foreach (var p in InfoProxyPartyMember.Instance()->CharDataSpan)
+                            foreach (var p in partyMemberInfo->CharDataSpan)
                             {
                                 if (p.Sort == i - 1)
                                     wmember.NPCClassJob = p.Job;
@@ -73,6 +90,20 @@ namespace WrathCombo.CustomComboNS.Functions
                         _partyList.Add(wmember);
                         existingIds.Add(chara.GameObjectId);
                     }
+                }
+            }
+
+            // 離隊但仍在附近的角色不會從物件表消失，不清掉就會一直被當成隊友（含「隊伍在戰鬥中」的判定）。
+            // 代名詞模組還沒就緒時欄位一律查不到，那時不清，免得剛換區就把真隊友清光。
+            if (PronounService.FullyReady)
+            {
+                for (var i = _partyList.Count - 1; i >= 0; i--)
+                {
+                    var id = _partyList[i].GameObjectId;
+                    if (_partyList[i].IsOutOfPartyNPC || inSlots[..inSlotCount].Contains(id))
+                        continue;
+                    _partyList.RemoveAt(i);
+                    existingIds.Remove(id);
                 }
             }
 
@@ -115,9 +146,9 @@ namespace WrathCombo.CustomComboNS.Functions
                 field ??= new();
                 foreach (var pc in Svc.Objects)
                 {
-                    if (pc is IPlayerCharacter member && member.IsDead && !member.StatusList.Any(x => x.StatusId == All.Buffs.Raised))
+                    if (pc is IPlayerCharacter member && member.IsDead && !RaiseStatuses.HasAny(member, RaiseStatuses.Raised))
                     {
-                        if (!field.Any(x => x.GameObjectId == pc.GameObjectId))
+                        if (!ContainsMember(field, pc.GameObjectId))
                             field.Add(new WrathPartyMember
                             {
                                 GameObjectId = pc.GameObjectId,
@@ -126,9 +157,19 @@ namespace WrathCombo.CustomComboNS.Functions
                             });
                     }
                 }
-                field.RemoveAll(x => x.BattleChara is null || !x.BattleChara.IsDead);
+                field.RemoveAll(x => x.BattleChara is not { IsDead: true });
                 return field;
             }
+        }
+
+        // 寫成 lambda 會捕獲迴圈變數，物件表裡每個物件每幀各配置一個閉包。
+        private static bool ContainsMember(List<WrathPartyMember> members, ulong gameObjectId)
+        {
+            foreach (var member in members)
+                if (member.GameObjectId == gameObjectId)
+                    return true;
+
+            return false;
         }
 
         public static float GetPartyAvgHPPercent()
@@ -188,8 +229,8 @@ namespace WrathCombo.CustomComboNS.Functions
             ? realJob
             : BattleChara?.ClassJob.Value ?? CustomComboFunctions.JobIDs.ClassJobs[0];
 
-        public IBattleChara? BattleChara => Svc.Objects.FirstOrDefault(x => x.GameObjectId == GameObjectId) as IBattleChara;
-        public IGameObject? GameObject => Svc.Objects.FirstOrDefault(x => x.GameObjectId == GameObjectId);
+        public IBattleChara? BattleChara => GameObjectExtensions.FindObjectById(GameObjectId) as IBattleChara;
+        public IGameObject? GameObject => GameObjectExtensions.FindObjectById(GameObjectId);
         public Dictionary<ushort, long> BuffsGainedAt = new();
 
         private uint _currentHP;

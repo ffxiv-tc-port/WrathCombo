@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -18,16 +18,16 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Generation Time: 2025-03-13 18:45:21  
                 #region DNC
                 // Single Target
+                KeyValuePair.Create("Reverse Cascade", DNC.ReverseCascade.ActionName()),
                 KeyValuePair.Create("Cascade", DNC.Cascade.ActionName()),
                 KeyValuePair.Create("Fountain", DNC.Fountain.ActionName()),
-                KeyValuePair.Create("Reverse Cascade", DNC.ReverseCascade.ActionName()),
                 KeyValuePair.Create("Fountainfall", DNC.Fountainfall.ActionName()),
                 KeyValuePair.Create("Starfall Dance", DNC.StarfallDance.ActionName()),
 
                 // AoE
+                KeyValuePair.Create("Rising Windmill", DNC.RisingWindmill.ActionName()),
                 KeyValuePair.Create("Windmill", DNC.Windmill.ActionName()),
                 KeyValuePair.Create("Bladeshower", DNC.Bladeshower.ActionName()),
-                KeyValuePair.Create("Rising Windmill", DNC.RisingWindmill.ActionName()),
                 KeyValuePair.Create("Bloodshower", DNC.Bloodshower.ActionName()),
                 KeyValuePair.Create("Tillana", DNC.Tillana.ActionName()),
 

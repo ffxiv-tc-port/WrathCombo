@@ -1,5 +1,6 @@
 ﻿using Dalamud.Interface.Colors;
-using ImGuiNET;
+using ECommons.LanguageHelpers;
+using Dalamud.Bindings.ImGui;
 using WrathCombo.CustomComboNS.Functions;
 using static WrathCombo.Extensions.UIntExtensions;
 using static WrathCombo.Window.Functions.SliderIncrements;
@@ -37,7 +38,7 @@ internal partial class SGE
                         "Stop using at Enemy HP %. Set to Zero to disable this check.");
 
                     ImGui.Indent();
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, "选择HP检查可应用于哪种类型的敌人：");
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "選擇HP檢查可應用於哪種型別的敵人：");
 
                     DrawHorizontalRadioButton(SGE_ST_DPS_EDosisSubOption,
                         "Non-Bosses", "Only applies the HP check above to non-bosses.\nAllows you to only stop DoTing early when it's not a boss.", 0);
@@ -46,7 +47,7 @@ internal partial class SGE
                         "All Enemies", "Applies the HP check above to all enemies.", 1);
 
                     DrawRoundedSliderFloat(0, 5, SGE_ST_DPS_EDosisRefresh,
-                        "剩余多少秒应用DoT。设置为零禁用此检测。", digits: 1);
+                        "Seconds remaining before reapplying the DoT. Set to Zero to disable this check.", digits: 1);
                     ImGui.Unindent();
                     break;
 
@@ -64,11 +65,11 @@ internal partial class SGE
                     if (!SGE_ST_DPS_Phlegma_Burst)
                     {
                         DrawSliderInt(0, 1, SGE_ST_DPS_Phlegma,
-                            "保留的发炎充能数\n爆发时会无视此设置消耗所有充能。");
+                            "保留的發炎充能數\n爆發時會無視此設定消耗所有充能。");
                     }
 
                     DrawAdditionalBoolChoice(SGE_ST_DPS_Phlegma_Burst,
-                        "爆发模式", "为爆发阶段保留发炎充能。");
+                        "Burst option", "Save Phlegma charges for burst.");
                     break;
 
                 case CustomComboPreset.SGE_ST_DPS_AddersgallProtect:
@@ -135,6 +136,8 @@ internal partial class SGE
                 case CustomComboPreset.SGE_ST_Heal_Esuna:
                     DrawSliderInt(0, 100, SGE_ST_Heal_Esuna,
                         "Stop using when below HP %. Set to Zero to disable this check");
+                    DrawSliderInt(0, 100, SGE_ST_Heal_EsunaCriticalHP,
+                        "Heal first: hold ?? while any party member within 30 yalms (including the target) is below this HP %. Deadly debuffs that only cleansing can fix (e.g. Doom) are still cleansed first. Set to Zero to disable this check".Loc(RoleActions.Healer.Esuna.ActionName()));
                     break;
 
                 case CustomComboPreset.SGE_ST_Heal_Lucid:
@@ -205,7 +208,7 @@ internal partial class SGE
                         "Sage Shield Check", "Enable to not override an existing Sage's shield.", 2, 0);
 
                     DrawHorizontalMultiChoice(SGE_ST_Heal_EDiagnosisOpts,
-                        "学者护盾检查", "Enable to not override an existing Scholar's shield.", 2, 1);
+                        "Scholar Shield Check", "Enable to not override an existing Scholar's shield.", 2, 1);
 
                     DrawPriorityInput(SGE_ST_Heals_Priority,
                         12, 7, $"{EukrasianDiagnosis.ActionName()} Priority: ");
@@ -265,7 +268,7 @@ internal partial class SGE
                         "Start using when below party average HP %. Set to 100 to disable this check");
 
                     DrawAdditionalBoolChoice(SGE_AoE_Heal_KeracholeTrait,
-                        "检查强化坚角清汁特性（持续治疗）", $"启用后，当{Kerachole.ActionName()}的持续治疗特性不可用时，将不会使用该技能。");
+                        "Check for Enhanced Kerachole Trait (Heal over Time)", "Enabling this will prevent ?? from being used when the Heal over Time trait is unavailable.".Loc(Kerachole.ActionName()));
 
                     DrawPriorityInput(SGE_AoE_Heals_Priority,
                         9, 0, $"{Kerachole.ActionName()} Priority: ");
@@ -300,7 +303,7 @@ internal partial class SGE
                         "Start using when below party average HP %. Set to 100 to disable this check");
 
                     DrawHorizontalMultiChoice(SGE_ST_Heal_PanhaimaOpts,
-                        "Any Panhaima check", "Enable to not override an existing Panhaima.", 1, 0);
+                        "Any Panhaima check", "Enable to not override an existing ??.".Loc(Panhaima.ActionName()), 1, 0);
 
                     DrawPriorityInput(SGE_AoE_Heals_Priority,
                         9, 4, $"{Panhaima.ActionName()} Priority: ");
@@ -357,7 +360,7 @@ internal partial class SGE
 
                 case CustomComboPreset.SGE_Hidden_Holos:
                     DrawSliderInt(0, 100, SGE_Hidden_HolosOption,
-                        "Start using when below party average HP % to not waste the heal portion if desired. Set to 100 to disable this check");
+                        "Start using when below party average HP % to not waste the heal portion if desired. Set to 100 to disable this check".Loc());
                     break;
 
                 #endregion
@@ -425,6 +428,7 @@ internal partial class SGE
             SGE_ST_Heal_PanhaimaHP = new("SGE_ST_Heal_PanhaimaHP", 70),
             SGE_ST_Heal_HolosHP = new("SGE_ST_Heal_HolosHP", 70),
             SGE_ST_Heal_Esuna = new("SGE_ST_Heal_Esuna", 50),
+            SGE_ST_Heal_EsunaCriticalHP = new("SGE_ST_Heal_EsunaCriticalHP", 50),
             SGE_AoE_Heal_LucidOption = new("SGE_AoE_Heal_LucidOption", 6500),
             SGE_AoE_Heal_ZoeOption = new("SGE_AoE_Heal_PneumaOption", 50),
             SGE_AoE_Heal_PhysisOption = new("SGE_AoE_Heal_PhysisOption", 60),

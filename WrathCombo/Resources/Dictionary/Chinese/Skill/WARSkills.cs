@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -42,8 +42,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Primal Wrath", WAR.PrimalWrath.ActionName()),
 
                 // Defensive
-                KeyValuePair.Create("Defiance", WAR.Defiance.ActionName()),
                 KeyValuePair.Create("Release Defiance", WAR.ReleaseDefiance.ActionName()),
+                KeyValuePair.Create("Defiance", WAR.Defiance.ActionName()),
                 KeyValuePair.Create("Thrill of Battle", WAR.ThrillOfBattle.ActionName()),
                 KeyValuePair.Create("Thrill Of Battle", WAR.ThrillOfBattle.ActionName()),
                 KeyValuePair.Create("Vengeance", WAR.Vengeance.ActionName()),

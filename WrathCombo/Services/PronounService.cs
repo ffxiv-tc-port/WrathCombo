@@ -22,16 +22,40 @@ public static unsafe class PronounService
     // They/Them, personally
 
     public static bool FullyReady => PronounsReady && MethodsReady;
-    public static bool PronounsReady => PronounModule.Value != IntPtr.Zero;
+    public static bool PronounsReady => PronounModulePointer != IntPtr.Zero;
     public static bool MethodsReady => GetGameObjectPointerFromPronounID != null;
 
-    public static PronounModule* Module => (PronounModule*)PronounModule.Value;
+    public static PronounModule* Module => (PronounModule*)PronounModulePointer;
 
-    private static readonly Lazy<IntPtr> PronounModule = new(() =>
+    /// <summary>
+    ///     取得 PronounModule 的位址,取不到就回 <see cref="IntPtr.Zero"/>(fail-closed)。
+    /// </summary>
+    /// <remarks>
+    ///     裸解參考 null 原生指標是 <c>try/catch</c> 攔不到的 AccessViolationException ⇒ 每一層都必須事前判空。
+    ///     每次呼叫重新解析(逐層判空 ＋ try 把「擲出」轉成「回 Zero」),不跨幀保存原生指標。
+    ///     成本是三次指標讀取,可忽略;解析失敗在登入前是常態,所以不寫 log。
+    /// </remarks>
+    private static IntPtr PronounModulePointer
     {
-        var ptr = Framework.Instance()->GetUIModule()->GetPronounModule();
-        return ptr != null ? (IntPtr)ptr : IntPtr.Zero;
-    });
+        get
+        {
+            try
+            {
+                var framework = Framework.Instance();
+                if (framework == null) return IntPtr.Zero;
+
+                var uiModule = framework->GetUIModule();
+                if (uiModule == null) return IntPtr.Zero;
+
+                var ptr = uiModule->GetPronounModule();
+                return ptr != null ? (IntPtr)ptr : IntPtr.Zero;
+            }
+            catch
+            {
+                return IntPtr.Zero;
+            }
+        }
+    }
 
     // Signature for PronounModule::GetGameObjectByPronounId.
     private static readonly delegate* unmanaged<IntPtr, uint, GameObject*>
@@ -66,8 +90,13 @@ public static unsafe class PronounService
         try
         {
             var uID = (uint)id;
+            // FullyReady 已經解析過一次,這裡重新取一次是為了避免拿到過期值;
+            // 兩次都在同一個框架執行緒的呼叫堆疊內,不會被切走。
+            var modulePtr = PronounModulePointer;
+            if (modulePtr == IntPtr.Zero) return null;
+
             return GameObjectExtensions.GetObjectFrom(
-                GetGameObjectPointerFromPronounID(PronounModule.Value, uID));
+                GetGameObjectPointerFromPronounID(modulePtr, uID));
         }
         catch (Exception ex)
         {

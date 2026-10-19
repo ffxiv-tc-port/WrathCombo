@@ -11,6 +11,7 @@ using System.Linq;
 using WrathCombo.Core;
 using WrathCombo.Data;
 using WrathCombo.Services;
+using WrathCombo.Services.ActionRequestIPC;
 using static WrathCombo.Data.ActionWatching;
 
 namespace WrathCombo.CustomComboNS.Functions;
@@ -117,11 +118,24 @@ internal abstract partial class CustomComboFunctions
     /// <param name="actionId"> The action ID. </param>
     public static unsafe bool ActionReady(uint actionId, bool recastCheck = false, bool castCheck = false)
     {
+        // 其他外掛透過 WrathCombo.ActionRequest.RequestBlacklist 封鎖的動作一律視為不可用。
+        // ⚠️ 比對的是「呼叫端傳進來的原始 ID」而不是 OriginalHook 之後的 ID，與上游一致：
+        //    封鎖的一方看到的是遊戲介面上的那個動作 ID。
+        if (ActionRequestIPCProvider.GetArtificialCooldown(ActionType.Action, actionId) > 0)
+            return false;
+
         uint hookedId = OriginalHook(actionId);
 
         return (HasCharges(hookedId) || (GetAttackType(hookedId) != ActionAttackType.Ability && GetCooldownRemainingTime(hookedId) <= RemainingGCD + BaseActionQueue)) &&
             ActionManager.Instance()->GetActionStatus(ActionType.Action, hookedId, checkRecastActive: recastCheck, checkCastingActive: castCheck) is 0 or 582 or 580;
     }
+
+    /// <summary>
+    ///     位移技現在能不能放：只有自動循環正在跑這個預設、而 BossMod(Reborn) 判落點危險時為 <see langword="false" />。
+    /// </summary>
+    /// <param name="actionId"> 實際會送出的技能 ID（替換後的）；目標一律是目前目標。 </param>
+    /// <remarks> 放在呼叫條件的最後一項，讓不能放時連段自然改選下一招。 </remarks>
+    public static bool DashAllowed(uint actionId) => DashSafety.Allowed(actionId);
 
     /// <summary> Checks if all passed actions are ready to be used. </summary>
     /// <param name="actionIds"> The action IDs. </param>
@@ -249,7 +263,7 @@ internal abstract partial class CustomComboFunctions
         var animationLock = ActionManager.Instance()->AnimationLock;
 
         return WeaveActions.Count < weaveLimit &&                                    // Multi-weave Check
-               animationLock <= BaseActionQueue &&                                   // Animation Threshold
+               animationLock <= BaseAnimationLock &&                                 // Animation Threshold
                remainingCast <= BaseActionQueue &&                                   // Casting Threshold
                RemainingGCD > (remainingCast + estimatedWeaveTime + animationLock);  // Window End Threshold
     }
@@ -317,12 +331,23 @@ internal abstract partial class CustomComboFunctions
                ActionReady(actionId);                              // Action Ready
     }
 
-    private static bool _raidwideInc;
+    // 快取與參數無關的掃描結果：不同 timeRemaining 的呼叫者共用同一個節流鍵，
+    // 快取單一 bool 時後到者會拿到別人參數算出的答案。
+    private static bool _raidwideAny;
+    private static float _raidwideMinRemaining = float.PositiveInfinity;
     public static unsafe bool RaidWideCasting(float timeRemaining = 0f)
     {
-        if (!EzThrottler.Throttle("RaidWideCheck", 100))
-            return _raidwideInc;
+        if (EzThrottler.Throttle("RaidWideCheck", 100))
+            (_raidwideAny, _raidwideMinRemaining) = ScanRaidwideCasts();
 
+        return _raidwideAny &&
+               (timeRemaining == 0f || _raidwideMinRemaining <= timeRemaining);
+    }
+
+    private static (bool Any, float MinRemaining) ScanRaidwideCasts()
+    {
+        var any = false;
+        var minRemaining = float.PositiveInfinity;
         foreach (var obj in Svc.Objects)
         {
             if (obj is not IBattleChara caster || !caster.IsHostile() || !caster.IsCasting)
@@ -330,18 +355,17 @@ internal abstract partial class CustomComboFunctions
 
             if (ActionSheet.TryGetValue(caster.CastActionId, out var spellSheet))
             {
-                if (spellSheet.CastType is 2 or 5 && spellSheet.EffectRange >= 30)
+                if (NonResolvingCasts.IsRaidwideCast(caster.CastActionId, spellSheet.CastType, spellSheet.EffectRange))
                 {
-                    if (timeRemaining == 0f)
-                        return _raidwideInc = true;
-                   
-                    if ((caster.TotalCastTime - caster.CurrentCastTime) <= timeRemaining)
-                        return _raidwideInc = true;
+                    any = true;
+                    var remaining = caster.TotalCastTime - caster.CurrentCastTime;
+                    if (remaining < minRemaining)
+                        minRemaining = remaining;
                 }
             }
         }
 
-        return _raidwideInc = false;
+        return (any, minRemaining);
     }
 
     private static bool _beingTargetedHostile;

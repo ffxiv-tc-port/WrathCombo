@@ -11,7 +11,7 @@ namespace WrathCombo.Combos.PvE;
 internal partial class OccultCrescent
 {
     public const byte JobID = 100;
-    public static string ContentName => Svc.Data.GetExcelSheet<BannerBg>().GetRow(312).Name.ToString();
+    public static string ContentName => Svc.Data.GetExcelSheet<ContentType>().GetRow(38).Name.ToString();
 
     /// In Occult Crescent, in the field or a field raid.
     public static bool IsInOccult => ContentHelper.Content.TerritoryIntendedUse == IntendedUse.Occult_Crescent && (ContentCheck.IsInFieldOperations || ContentCheck.IsInFieldRaids);
@@ -231,7 +231,7 @@ internal partial class OccultCrescent
                     return OccultChakra; //heal
 
                 if (IsEnabledAndUsable(CustomComboPreset.Phantom_Monk_PhantomKick, PhantomKick) &&
-                    !isMoving && targetDistance <= 15f)
+                    !isMoving && targetDistance <= 15f && DashAllowed(PhantomKick))
                     return PhantomKick; //damage buff + dash
 
                 if (IsEnabledAndUsable(CustomComboPreset.Phantom_Monk_OccultCounter, OccultCounter) &&

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -50,7 +50,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Riddles and Replies
                 KeyValuePair.Create("Riddle of Earth", MNK.RiddleOfEarth.ActionName()),
                 KeyValuePair.Create("Earth's Reply", MNK.EarthsReply.ActionName()),
-                KeyValuePair.Create("Riddle of Fire", MNK.RiddleOfFire.ActionName()),
                 KeyValuePair.Create("Brotherhood", MNK.Brotherhood.ActionName()),
                 KeyValuePair.Create("Riddle of Wind", MNK.RiddleOfWind.ActionName()),
 
@@ -75,7 +74,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
 
                 // Other Special Abilities
                 KeyValuePair.Create("Elixir Burst", MNK.ElixirBurst.ActionName()),
-                KeyValuePair.Create("Fire's Reply", MNK.FiresReply.ActionName()),
                 #endregion
                 
                 #region MNKPvP

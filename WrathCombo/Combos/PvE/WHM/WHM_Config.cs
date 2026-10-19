@@ -1,7 +1,8 @@
 ﻿#region
+using ECommons.LanguageHelpers;
 
 using Dalamud.Interface.Colors;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Data;
 using WrathCombo.Window.Functions;
@@ -31,11 +32,11 @@ internal partial class WHM
                 #region Single Target DPS
 
                 case Preset.WHM_ST_MainCombo:
-                    DrawHorizontalRadioButton(WHM_ST_MainCombo_Actions, "飞石/闪耀", "应用于所有飞石和闪耀。", 0,
+                    DrawHorizontalRadioButton(WHM_ST_MainCombo_Actions, "On Stones/Glares", "Apply options to all Stones and Glares.", 0,
                         descriptionColor:ImGuiColors.DalamudWhite);
-                    DrawHorizontalRadioButton(WHM_ST_MainCombo_Actions, "疾风/天辉", "应用于所有疾风和天辉。", 1,
+                    DrawHorizontalRadioButton(WHM_ST_MainCombo_Actions, "On Aeros/Dia", "Apply options to all Aeros And Dia.", 1,
                         descriptionColor:ImGuiColors.DalamudWhite);
-                    DrawHorizontalRadioButton(WHM_ST_MainCombo_Actions, "坚石", "应用于坚石。", 2,
+                    DrawHorizontalRadioButton(WHM_ST_MainCombo_Actions, "On Stone II", "Apply options to Stone II.", 2,
                         descriptionColor:ImGuiColors.DalamudWhite);
                     break;
 
@@ -54,24 +55,24 @@ internal partial class WHM
                         itemWidth: medium);
       
                     ImGui.Indent();
-                    ImGui.TextUnformatted("选择HP检查应用于哪类非Boss敌人：");
+                    ImGui.TextUnformatted("選擇HP檢查應用於哪類非Boss敵人：");
                     ImGui.NewLine();
                     ImGui.Indent();
                     DrawHorizontalRadioButton(
-                        WHM_ST_DPS_AeroOptionSubOption, "全部内容",
-                        "将非Boss敌人的HP%应用于所有内容。",
+                        WHM_ST_DPS_AeroOptionSubOption, "All Content",
+                        "Apply the HP% for Non-Bosses to all content.",
                         outputValue: (int)EnemyRestriction.AllEnemies,
                         descriptionColor: ImGuiColors.DalamudWhite
                     );
                     DrawHorizontalRadioButton(
-                        WHM_ST_DPS_AeroOptionSubOption, "仅Boss副本",
-                        "仅在Boss副本中（对小怪）应用非Boss敌人的HP%。\n在非Boss副本中始终以任意HP施加DoT。",
+                        WHM_ST_DPS_AeroOptionSubOption, "Boss Only Content",
+                        "僅在Boss副本中（對小怪）應用非Boss敵人的HP%。\n在非Boss副本中始終以任意HP施加DoT。",
                         outputValue: (int)EnemyRestriction.OnlyBosses,
                         descriptionColor: ImGuiColors.DalamudWhite
                     );
                     DrawHorizontalRadioButton(
-                        WHM_ST_DPS_AeroOptionSubOption, "仅非Boss副本",
-                        "仅在非Boss副本中应用非Boss敌人的HP%。\n在Boss副本中对小怪始终以任意HP施加DoT。",
+                        WHM_ST_DPS_AeroOptionSubOption, "Non-Boss Only Content",
+                        "僅在非Boss副本中應用非Boss敵人的HP%。\n在Boss副本中對小怪始終以任意HP施加DoT。",
                         outputValue: (int)EnemyRestriction.NonBosses,
                         descriptionColor: ImGuiColors.DalamudWhite
                     );
@@ -110,7 +111,7 @@ internal partial class WHM
                         itemWidth: little, digits: 1);
                     ImGui.Unindent();
                     DrawSliderInt(0, 10, WHM_AoE_MainCombo_DoT_MaxTargets,
-                        "Maximum number of targets to employ multi-dotting ");
+                        "Maximum number of targets to employ multi-dotting ".Loc());
                     break;
 
                 #endregion
@@ -119,7 +120,7 @@ internal partial class WHM
 
                 case Preset.WHM_STHeals:
                     DrawAdditionalBoolChoice(WHM_STHeals_IncludeShields,
-                        "HP百分比滑块包含护盾",
+                        "Include Shields in HP Percent Sliders",
                         "");
                     break;
                 
@@ -188,7 +189,7 @@ internal partial class WHM
                     DrawHorizontalMultiChoice(WHM_STHeals_TemperanceOptions,"Only Weave", weaveDescription, 2, 0);
                     DrawHorizontalMultiChoice(WHM_STHeals_TemperanceOptions,"Not On Bosses", nonBossesDescription, 2, 1);
                     DrawPriorityInput(WHM_ST_Heals_Priority, 9, 6,
-                        $"{Temperance.ActionName()} 优先级：");
+                        $"{Temperance.ActionName()} Priority: ");
                     break;
                 
                 case Preset.WHM_STHeals_Asylum:
@@ -223,6 +224,8 @@ internal partial class WHM
                 case Preset.WHM_STHeals_Esuna:
                     DrawSliderInt(0, 100, WHM_STHeals_Esuna,
                         targetStopUsingAtDescription);
+                    DrawSliderInt(0, 100, WHM_STHeals_EsunaCriticalHP,
+                        "Heal first: hold ?? while any party member within 30 yalms (including the target) is below this HP %. Deadly debuffs that only cleansing can fix (e.g. Doom) are still cleansed first. Set to Zero to disable this check".Loc(RoleActions.Healer.Esuna.ActionName()));
                     break;
 
                 #endregion
@@ -238,19 +241,19 @@ internal partial class WHM
                         itemWidth: little);
                     ImGui.Unindent();
                     DrawPriorityInput(WHM_AoE_Heals_Priority, 9, 0,
-                        $"{Medica2.ActionName()} 优先级：");
+                        $"{Medica2.ActionName()} Priority: ");
                     break;
                 
                 case Preset.WHM_AoEHeals_Cure3:
                     DrawSliderInt(1, 100, WHM_AoEHeals_Cure3HP,
                         partyStartUsingAtDescription);
                     DrawSliderInt(2, 8, WHM_AoEHeals_Cure3Allies,
-                        "愈疗目标范围内的最少队友数量");
+                        "Minimum Number of allies in range of Cure 3 target");
                     DrawSliderInt(1500, 8500, WHM_AoEHeals_Cure3MP,
-                        "魔力值高于该值时使用",
+                        "MP to be over",
                         sliderIncrement: 500);
                     DrawPriorityInput(WHM_AoE_Heals_Priority, 9, 1,
-                        $"{Cure3.ActionName()} 优先级：");
+                        $"{Cure3.ActionName()} Priority: ");
                     break;
                 
                 case Preset.WHM_AoEHeals_Plenary:
@@ -260,7 +263,7 @@ internal partial class WHM
                         weaveDescription,
                         "");
                     DrawPriorityInput(WHM_AoE_Heals_Priority, 9, 2,
-                        $"{PlenaryIndulgence.ActionName()} 优先级：");
+                        $"{PlenaryIndulgence.ActionName()} Priority: ");
                     break;
                 
                 case Preset.WHM_AoEHeals_Temperance:
@@ -271,9 +274,9 @@ internal partial class WHM
                         "");
                     DrawDifficultyMultiChoice(WHM_AoEHeals_TemperanceDifficulty,
                         WHM_AoEHeals_TemperanceDifficultyListSet,
-                        "选择在哪些副本难度下使用神速咏唱：");
+                        "選擇在哪些副本難度下使用神速詠唱：");
                     DrawPriorityInput(WHM_AoE_Heals_Priority, 9, 3,
-                        $"{Temperance.ActionName()} 优先级：");
+                        $"{Temperance.ActionName()} Priority: ");
                     break;
                 
                 case Preset.WHM_AoEHeals_Asylum:
@@ -284,9 +287,9 @@ internal partial class WHM
                         "");
                     DrawDifficultyMultiChoice(WHM_AoEHeals_AsylumDifficulty,
                         WHM_AoEHeals_AsylumDifficultyListSet,
-                        "选择在哪些副本难度下使用庇护所：");
+                        "選擇在哪些副本難度下使用庇護所：");
                     DrawPriorityInput(WHM_AoE_Heals_Priority, 9, 4,
-                        $"{Asylum.ActionName()} 优先级：");
+                        $"{Asylum.ActionName()} Priority: ");
                     break;
                 
                 case Preset.WHM_AoEHeals_LiturgyOfTheBell:
@@ -297,16 +300,16 @@ internal partial class WHM
                         "");
                     DrawDifficultyMultiChoice(WHM_AoEHeals_LiturgyDifficulty,
                         WHM_AoEHeals_LiturgyDifficultyListSet,
-                        "选择在哪些副本难度下使用礼仪之铃：");
+                        "選擇在哪些副本難度下使用禮儀之鈴：");
                     DrawPriorityInput(WHM_AoE_Heals_Priority, 9, 5,
-                        $"{LiturgyOfTheBell.ActionName()} 优先级：");
+                        $"{LiturgyOfTheBell.ActionName()} Priority: ");
                     break;
                 
                 case Preset.WHM_AoEHeals_Rapture:
                     DrawSliderInt(1, 100, WHM_AoEHeals_RaptureHP,
                         partyStartUsingAtDescription);
                     DrawPriorityInput(WHM_AoE_Heals_Priority, 9, 6,
-                        $"{AfflatusRapture.ActionName()} 优先级：");
+                        $"{AfflatusRapture.ActionName()} Priority: ");
                     break;
                 
                 case Preset.WHM_AoEHeals_Assize:
@@ -315,7 +318,7 @@ internal partial class WHM
                     DrawAdditionalBoolChoice(WHM_AoEHeals_AssizeWeave,
                         weaveDescription, "");
                     DrawPriorityInput(WHM_AoE_Heals_Priority, 9, 7,
-                        $"{Assize.ActionName()} 优先级：");
+                        $"{Assize.ActionName()} Priority: ");
                     break;
                 
                 case Preset.WHM_AoEHeals_DivineCaress:
@@ -324,7 +327,7 @@ internal partial class WHM
                     DrawAdditionalBoolChoice(WHM_AoEHeals_DivineCaressWeave,
                         weaveDescription, "");
                     DrawPriorityInput(WHM_AoE_Heals_Priority, 9, 8,
-                        $"{DivineCaress.ActionName()} 优先级：");
+                        $"{DivineCaress.ActionName()} Priority: ");
                     break;
 
                 case Preset.WHM_AoEHeals_ThinAir:
@@ -344,15 +347,15 @@ internal partial class WHM
 
                 case Preset.WHM_Mit_ST:
                     DrawHorizontalMultiChoice(WHM_AquaveilOptions,
-                        "包含神祝祷", "将添加神祝祷以获得更多减伤。", 2, 0);
+                        "Include Divine Benison", "Will add Divine Benison for more mitigation.", 2, 0);
                     ImGui.NewLine();
                     DrawHorizontalMultiChoice(WHM_AquaveilOptions,
-                        "包含神名", "将添加神名以补充目标血量。", 2, 1);
+                        "Include Tetragrammaton", "Will add Tetragrammaton to top off targets health.", 2, 1);
                     if (WHM_AquaveilOptions[1])
                     {
                         ImGui.Indent();
                         DrawSliderInt(0, 100, WHM_Aquaveil_TetraThreshold,
-                            "目标HP%小于等于该值时使用神名（100=禁用检测）");
+                            "Target HP% to use Tetra at or below (100 = Disable check)");
                         ImGui.Unindent();
                     }
                     break;
@@ -363,22 +366,22 @@ internal partial class WHM
                 
                 case Preset.WHM_Re_Asylum:
                     ImGui.Indent();
-                    ImGui.TextColored(ImGuiColors.DalamudGrey, "尝试将庇护所重定向到自身前的选项：");
+                    ImGui.TextColored(ImGuiColors.DalamudGrey, "嘗試將庇護所重定向到自身前的選項：");
                     ImGui.Unindent();
                     DrawHorizontalMultiChoice(WHM_AsylumOptions,
-                        "敌方硬选中", "若为敌方则放置在硬选中目标", 3, 0);
+                        "Enemy Hard Target", "Will place at hard target if enemy", 3, 0);
                     DrawHorizontalMultiChoice(WHM_AsylumOptions,
-                        "友方硬选中", "若为友方则放置在硬选中目标", 3, 1);
+                        "Ally Hard Target", "Will place at hard target if ally", 3, 1);
                     break;
                 
                 case Preset.WHM_Re_LiturgyOfTheBell:
                     ImGui.Indent();
-                    ImGui.TextColored(ImGuiColors.DalamudGrey, "尝试将礼仪之铃重定向到自身前的选项：");
+                    ImGui.TextColored(ImGuiColors.DalamudGrey, "嘗試將禮儀之鈴重定向到自身前的選項：");
                     ImGui.Unindent();
                     DrawHorizontalMultiChoice(WHM_LiturgyOfTheBellOptions,
-                        "敌方硬选中", "若为敌方则放置在硬选中目标", 2, 0);
+                        "Enemy Hard Target", "Will place at hard target if enemy", 2, 0);
                     DrawHorizontalMultiChoice(WHM_LiturgyOfTheBellOptions,
-                        "友方硬选中", "若为友方则放置在硬选中目标", 2, 1);
+                        "Ally Hard Target", "Will place at hard target if ally", 2, 1);
                     break;
                     
                 
@@ -396,35 +399,35 @@ internal partial class WHM
 
         /// Bar Description for target HP% to start using plus disable text
         private const string targetStartUsingAtDescription =
-            "目标血量百分比小于等于该值时使用（100=禁用检测）";
+            "Target HP% to use at or below (100 = Disable check)";
         
         /// Bar Description for Party HP%  Average to start using plus disable text
         private const string partyStartUsingAtDescription =
-            "队伍平均血量百分比低于该值时开始使用（100=禁用检测）";
+            "隊伍平均血量百分比低於該值時開始使用（100=禁用檢測）";
 
         /// 非Boss目标停止使用的HP%描述
         private const string targetStopUsingAtDescription =
-            "目标血量百分比高于该值时停止使用（0=总是使用，100=从不使用）";
+            "目標血量百分比高於該值時停止使用（0=總是使用，100=從不使用）";
 
         /// Boss目标停止使用的HP%描述
         private const string targetStopUsingOnBossAtDescription =
-            " Boss目标HP百分比高于该值时停止使用（0=总是使用，100=从不使用）";
+            " Boss目標HP百分比高於該值時停止使用（0=總是使用，100=從不使用）";
 
         /// Description for MP threshold
         private const string mpThresholdDescription =
-            "魔力值达到或低于此值时";
+            "魔力值達到或低於此值時";
 
         /// Description for reapplication of Buff/DoT time remaining
         private const string reapplyTimeRemainingDescription =
-            "重新应用前剩余秒数 (0 = 不提前重新应用)";
+            "重新應用前剩餘秒數 (0 = 不提前重新應用)";
 
         /// Description for charges to keep
         private const string chargesToKeepDescription =
-            "保留充能数（0=全部使用）";
+            "# charges to keep (0 = Use All)";
 
         /// Description for only weaving
         private const string weaveDescription =
-            "仅插入";
+            "Only Weave";
 
         private const string nonBossesDescription =
             "Will not use on ST in Boss encounters.";
@@ -857,6 +860,18 @@ internal partial class WHM
         /// <seealso cref="CustomComboPreset.WHM_STHeals_Esuna" />
         internal static UserInt WHM_STHeals_Esuna =
             new("WHM_Cure2_Esuna", 40);
+
+        /// <summary>
+        ///     Any party member within 30y below this HP % delays Esuna (lethal debuffs excepted).
+        /// </summary>
+        /// <value>
+        ///     <b>Default</b>: 40 (same as Benediction) <br />
+        ///     <b>Range</b>: 0 - 100 (0 = off) <br />
+        ///     <b>Step</b>: <see cref="SliderIncrements.Ones" />
+        /// </value>
+        /// <seealso cref="CustomComboPreset.WHM_STHeals_Esuna" />
+        internal static UserInt WHM_STHeals_EsunaCriticalHP =
+            new("WHM_STHeals_EsunaCriticalHP", 40);
 
         #endregion
 

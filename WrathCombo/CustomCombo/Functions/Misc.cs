@@ -53,7 +53,7 @@ internal abstract partial class CustomComboFunctions
             // Special Cases
             switch (jobId)
             {
-                case 0:     return "通用/多职业";
+                case 0:     return "通用/多職業";
                 case 99:    return "Global";
                 case 100:   return OccultCrescent.ContentName;
             }

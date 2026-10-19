@@ -68,10 +68,13 @@ public static class ActionWatching
     /// <summary> Handles logic when an action causes an effect. </summary>
     private unsafe static void ReceiveActionEffectDetour(uint casterEntityId, Character* casterPtr, Vector3* targetPos, Header* header, TargetEffects* effects, GameObjectId* targetEntityIds)
     {
-        ReceiveActionEffectHook!.Original(casterEntityId, casterPtr, targetPos, header, effects, targetEntityIds);
+        ReceiveActionEffectHook!.OriginalDisposeSafe(casterEntityId, casterPtr, targetPos, header, effects, targetEntityIds);
 
         try
         {
+            if (!FrameworkThreadGate.Check("ReceiveActionEffect"))
+                return;
+
             // Cache Data
             var dateNow = DateTime.Now;
             var actionId = header->ActionId;
@@ -268,14 +271,15 @@ public static class ActionWatching
                 $"Params: [{a5}, {a6}, {a7}, {a8}, {a9}]"
             );
 #endif
-
-            SendActionHook!.Original(targetObjectId, actionType, actionId, sequence, a5, a6, a7, a8, a9);
         }
         catch (Exception ex)
         {
             Svc.Log.Error(ex, "SendActionDetour");
-            SendActionHook!.Original(targetObjectId, actionType, actionId, sequence, a5, a6, a7, a8, a9);
         }
+
+        // fail-closed：Original 刻意放在 try 外面、只出現一次：寫在 try 裡又在 catch 重複的話，
+        // Original 自己（或 catch 裡的 log）擲例外時動作會被送第二次。我們自己的記帳失敗絕不可以改變遊戲做的事。
+        SendActionHook!.OriginalDisposeSafe(targetObjectId, actionType, actionId, sequence, a5, a6, a7, a8, a9);
     }
 
     /// <summary> Checks if at least two abilities were used between GCDs. </summary>
@@ -320,19 +324,33 @@ public static class ActionWatching
         UseActionHook?.Dispose();
     }
 
+    // 型別初始化不可以擲（擲了之後每次碰到這個型別都是 TypeInitializationException）：
+    // 三個 hook 各自解不到就留 null、只停掉該項。detour 只在自己的 hook 建立並啟用後才會被呼叫。
     static unsafe ActionWatching()
     {
-        ReceiveActionEffectHook ??= Svc.Hook.HookFromAddress<ReceiveActionEffectDelegate>(Addresses.Receive.Value, ReceiveActionEffectDetour);
-        SendActionHook ??= Svc.Hook.HookFromSignature<SendActionDelegate>("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B E9 41 0F B7 D9", SendActionDetour);
-        UseActionHook ??= Svc.Hook.HookFromAddress<UseActionDelegate>(ActionManager.Addresses.UseAction.Value, UseActionDetour);
+        ReceiveActionEffectHook ??= GameFunctionGuard.HookFromAddress<ReceiveActionEffectDelegate>((nint)Addresses.Receive.Value, ReceiveActionEffectDetour,
+            "ActionEffectHandler.Receive", "技能命中的追蹤（上一個技能、連段與插入計數、隊員血量預估）；循環判斷會失準");
+        SendActionHook ??= GameFunctionGuard.HookFromSignature<SendActionDelegate>("48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 48 8B E9 41 0F B7 D9", SendActionDetour,
+            "SendAction", "技能送出的追蹤（技能使用時間、開場循環進度、忍者結印狀態）；循環判斷會失準");
+        UseActionHook ??= GameFunctionGuard.HookFromAddress<UseActionDelegate>((nint)ActionManager.Addresses.UseAction.Value, UseActionDetour,
+            "ActionManager.UseAction", "效能模式的技能替換與技能目標重導");
     }
 
     /// <summary> Handles logic when an action is used. </summary>
+    // fail-closed：Original 只呼叫一次，而且在所有 try 之外。
+    // Original 之後才擲的例外（最可能是落地目標那一行的 ActionManager.Instance()：特徵碼對不上時擲 InvalidOperationException）
+    // 不可以讓 catch 把動作再送一次；Original 之前會擲的是 ActionSheet[replacedWith]（字典索引子，不認得的技能擲 KeyNotFoundException）。
+    // 失敗時退回遊戲原本要求的技能與目標＝不替換連段、不重定向。
     private unsafe static bool UseActionDetour(ActionManager* actionManager, ActionType actionType, uint actionId, ulong targetId, uint extraParam, ActionManager.UseActionMode mode, uint comboRouteId, bool* outOptAreaTargeted)
     {
-        try
+        var requestedActionId = actionId; //What the game asked for, used to roll back if our logic throws
+        var requestedTargetId = targetId;
+        var changed = false;
+
+        if (actionType is ActionType.Action or ActionType.Ability &&
+            FrameworkThreadGate.Check("UseAction"))
         {
-            if (actionType is ActionType.Action or ActionType.Ability)
+            try
             {
                 var original = actionId; //Save the original action, do not modify
                 var originalTargetId = targetId; //Save the original target, do not modify
@@ -350,7 +368,7 @@ public static class ActionWatching
                     }
                 }
 
-                var changed = CheckForChangedTarget(original, ref targetId,
+                changed = CheckForChangedTarget(original, ref targetId,
                     out var replacedWith); //Passes the original action to the retargeting framework, outputs a targetId and a replaced action
 
                 var areaTargeted = ActionSheet[replacedWith].TargetArea;
@@ -361,27 +379,35 @@ public static class ActionWatching
                             .FirstOrDefault(x => x.GameObjectId == targetId)
                             .Struct()))
                         targetId = originalTargetId;
-
-                //Important to pass actionId here and not replaced. Performance mode = result from earlier, which could be modified. Non-performance mode = original action, which gets modified by the hook. Same result.
-                var hookResult = UseActionHook.Original(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
-
-                // If the target was changed, support changing the target for ground actions, too
-                if (changed)
-                    ActionManager.Instance()->AreaTargetingExecuteAtObject =
-                        targetId;
-
-                return hookResult;
             }
-            else
+            catch (Exception ex)
             {
-                return UseActionHook.Original(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
+                Svc.Log.Error(ex, "UseActionDetour");
+                actionId = requestedActionId;
+                targetId = requestedTargetId;
+                changed = false;
             }
         }
-        catch (Exception ex)
+
+        //Important to pass actionId here and not replaced. Performance mode = result from earlier, which could be modified. Non-performance mode = original action, which gets modified by the hook. Same result.
+        var hookResult = UseActionHook.OriginalDisposeSafe(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
+
+        // If the target was changed, support changing the target for ground actions, too
+        if (changed)
         {
-            Svc.Log.Error(ex, "UseActionDetour");
-            return UseActionHook.Original(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
+            try
+            {
+                ActionManager.Instance()->AreaTargetingExecuteAtObject =
+                    targetId;
+            }
+            catch (Exception ex)
+            {
+                // The action has already been sent at this point; all we lose is the ground-target fixup.
+                Svc.Log.Error(ex, "UseActionDetour (ground target)");
+            }
         }
+
+        return hookResult;
     }
 
     private static bool CheckForChangedTarget(uint actionId, ref ulong targetObjectId, out uint replacedWith)
@@ -426,7 +452,7 @@ public static class ActionWatching
 
     public static void Disable()
     {
-        ReceiveActionEffectHook.Disable();
+        ReceiveActionEffectHook?.Disable();
         SendActionHook?.Disable();
         UseActionHook?.Disable();
         Svc.Condition.ConditionChange -= ResetActions;

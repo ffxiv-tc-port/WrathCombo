@@ -118,7 +118,7 @@ internal partial class DNC
                 : (simpleMode
                     ? Options.DNC_AoE_SimpleMode
                     : Options.DNC_AoE_AdvancedMode)
-            ).ToString()
+            ).EnumName()
         )!.Values.Last();
 
     /// <summary>

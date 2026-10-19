@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -17,6 +17,11 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:45:21  
                 #region RDM
+                // "Balance Standard Opener" / "GapClosing Adjusted Standard Opener" moved to
+                // GenesisDescriptions.cs: BRDDescriptions.cs's bare "Standard Opener" fragment
+                // (processed earlier, Description layer) was shadowing these full-sentence
+                // keys here in the Skill layer, making them dead code.
+                KeyValuePair.Create("Shifts the melee a little bit to put a gapcloser in", "些微調整近戰段落以插入位移技能"),
                 KeyValuePair.Create("Veraero III", RDM.Veraero3.ActionName()),
                 KeyValuePair.Create("Veraero II", RDM.Veraero2.ActionName()),
                 KeyValuePair.Create("Veraero", RDM.Veraero.ActionName()),
@@ -35,6 +40,8 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Vercure", RDM.Vercure.ActionName()),
                 KeyValuePair.Create("Jolt III", RDM.Jolt3.ActionName()),
                 KeyValuePair.Create("Jolt II", RDM.Jolt2.ActionName()),
+                // 複數形（"Replaces Jolts."）加上詞界比對後需要自己的條目。
+                KeyValuePair.Create("Jolts", RDM.Jolt.ActionName()),
                 KeyValuePair.Create("Jolt", RDM.Jolt.ActionName()),
                 KeyValuePair.Create("Verholy", RDM.Verholy.ActionName()),
                 KeyValuePair.Create("Verflare", RDM.Verflare.ActionName()),
@@ -44,10 +51,10 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Verraise", RDM.Verraise.ActionName()),
                 KeyValuePair.Create("Scorch", RDM.Scorch.ActionName()),
                 KeyValuePair.Create("Resolution", RDM.Resolution.ActionName()),
-                KeyValuePair.Create("Moulinet", RDM.Moulinet.ActionName()),
-                KeyValuePair.Create("Enchanted Moulinet", RDM.EnchantedMoulinet.ActionName()),
-                KeyValuePair.Create("Enchanted Moulinet Deux", RDM.EnchantedMoulinetDeux.ActionName()),
                 KeyValuePair.Create("Enchanted Moulinet Trois", RDM.EnchantedMoulinetTrois.ActionName()),
+                KeyValuePair.Create("Enchanted Moulinet Deux", RDM.EnchantedMoulinetDeux.ActionName()),
+                KeyValuePair.Create("Enchanted Moulinet", RDM.EnchantedMoulinet.ActionName()),
+                KeyValuePair.Create("Moulinet", RDM.Moulinet.ActionName()),
                 KeyValuePair.Create("Corps-a-corps", RDM.Corpsacorps.ActionName()),
                 KeyValuePair.Create("Corps a Corps", RDM.Corpsacorps.ActionName()),
                 KeyValuePair.Create("Displacement", RDM.Displacement.ActionName()),

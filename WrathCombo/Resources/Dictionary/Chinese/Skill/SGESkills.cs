@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -35,12 +35,12 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Egeiro", SGE.Egeiro.ActionName()),
 
                 // DPS
-                KeyValuePair.Create("Dosis III", SGE.Dosis3.ActionName()),
-                KeyValuePair.Create("Dosis II", SGE.Dosis2.ActionName()),
-                KeyValuePair.Create("Dosis", SGE.Dosis.ActionName()),
                 KeyValuePair.Create("Eukrasian Dosis III", SGE.EukrasianDosis3.ActionName()),
+                KeyValuePair.Create("Dosis III", SGE.Dosis3.ActionName()),
                 KeyValuePair.Create("Eukrasian Dosis II", SGE.EukrasianDosis2.ActionName()),
+                KeyValuePair.Create("Dosis II", SGE.Dosis2.ActionName()),
                 KeyValuePair.Create("Eukrasian Dosis", SGE.EukrasianDosis.ActionName()),
+                KeyValuePair.Create("Dosis", SGE.Dosis.ActionName()),
                 KeyValuePair.Create("Eukrasian Dyskrasia", SGE.EukrasianDyskrasia.ActionName()),
                 KeyValuePair.Create("Phlegma III", SGE.Phlegma3.ActionName()),
                 KeyValuePair.Create("Phlegma II", SGE.Phlegma2.ActionName()),
@@ -48,7 +48,12 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Dyskrasia II", SGE.Dyskrasia2.ActionName()),
                 KeyValuePair.Create("Dyskrasia", SGE.Dyskrasia.ActionName()),
                 KeyValuePair.Create("Toxikon II", SGE.Toxikon2.ActionName()),
+                // Full-sentence entries placed BEFORE the bare "Toxikon"/"Pneuma" fragments
+                // below -- otherwise those fire first (same array) and the exact-string
+                // matches here become unreachable dead code.
+                KeyValuePair.Create("Uses Toxikon opener", $"使用{SGE.Toxikon.ActionName()}起手式"),
                 KeyValuePair.Create("Toxikon", SGE.Toxikon.ActionName()),
+                KeyValuePair.Create("Uses Pneuma opener", $"使用{SGE.Pneuma.ActionName()}起手式"),
                 KeyValuePair.Create("Pneuma", SGE.Pneuma.ActionName()),
                 KeyValuePair.Create("Psyche", SGE.Psyche.ActionName()),
 

@@ -109,11 +109,11 @@ internal partial class MCH : PhysicalRanged
                         JustUsed(Drill, 2f) ||
                         JustUsed(Excavator, 2f))
                     {
-                        if (ActionReady(GaussRound) &&
+                        if (ActionReady(GaussRound) && GaussSplashSafe &&
                             !JustUsed(OriginalHook(GaussRound), 2f))
                             return OriginalHook(GaussRound);
 
-                        if (ActionReady(Ricochet) &&
+                        if (ActionReady(Ricochet) && RicochetSplashSafe &&
                             !JustUsed(OriginalHook(Ricochet), 2f))
                             return OriginalHook(Ricochet);
                     }
@@ -127,11 +127,11 @@ internal partial class MCH : PhysicalRanged
                 // Gauss Round and Ricochet during HC
                 if (JustUsed(OriginalHook(Heatblast), 1f) && HasNotWeaved)
                 {
-                    if (ActionReady(GaussRound) &&
+                    if (ActionReady(GaussRound) && GaussSplashSafe &&
                         (UseGaussRound || !LevelChecked(Ricochet)))
                         return OriginalHook(GaussRound);
 
-                    if (ActionReady(Ricochet) && UseRicochet)
+                    if (ActionReady(Ricochet) && RicochetSplashSafe && UseRicochet)
                         return OriginalHook(Ricochet);
                 }
             }
@@ -268,12 +268,12 @@ internal partial class MCH : PhysicalRanged
                          JustUsed(Drill, 2f) ||
                          JustUsed(Excavator, 2f)))
                     {
-                        if (ActionReady(GaussRound) &&
+                        if (ActionReady(GaussRound) && GaussSplashSafe &&
                             GetRemainingCharges(OriginalHook(GaussRound)) > MCH_ST_GaussRicoPool &&
                             !JustUsed(OriginalHook(GaussRound), 2f))
                             return OriginalHook(GaussRound);
 
-                        if (ActionReady(Ricochet) &&
+                        if (ActionReady(Ricochet) && RicochetSplashSafe &&
                             GetRemainingCharges(OriginalHook(Ricochet)) > MCH_ST_GaussRicoPool &&
                             !JustUsed(OriginalHook(Ricochet), 2f))
                             return OriginalHook(Ricochet);
@@ -290,12 +290,12 @@ internal partial class MCH : PhysicalRanged
                 if (IsEnabled(CustomComboPreset.MCH_ST_Adv_GaussRicochet) &&
                     JustUsed(OriginalHook(Heatblast), 1f) && HasNotWeaved)
                 {
-                    if (ActionReady(GaussRound) &&
+                    if (ActionReady(GaussRound) && GaussSplashSafe &&
                         GetRemainingCharges(OriginalHook(GaussRound)) > MCH_ST_GaussRicoPool &&
                         (UseGaussRound || !LevelChecked(Ricochet)))
                         return OriginalHook(GaussRound);
 
-                    if (ActionReady(Ricochet) &&
+                    if (ActionReady(Ricochet) && RicochetSplashSafe &&
                         GetRemainingCharges(OriginalHook(Ricochet)) > MCH_ST_GaussRicoPool &&
                         UseRicochet)
                         return OriginalHook(Ricochet);
@@ -404,11 +404,11 @@ internal partial class MCH : PhysicalRanged
                 if ((JustUsed(OriginalHook(AutoCrossbow), 1f) ||
                      JustUsed(OriginalHook(Heatblast), 1f)) && HasNotWeaved)
                 {
-                    if (ActionReady(GaussRound) &&
+                    if (ActionReady(GaussRound) && GaussSplashSafe &&
                         (UseGaussRound || !LevelChecked(Ricochet)))
                         return OriginalHook(GaussRound);
 
-                    if (ActionReady(Ricochet) && UseRicochet)
+                    if (ActionReady(Ricochet) && RicochetSplashSafe && UseRicochet)
                         return OriginalHook(Ricochet);
                 }
             }
@@ -541,11 +541,11 @@ internal partial class MCH : PhysicalRanged
                     if (IsEnabled(CustomComboPreset.MCH_AoE_Adv_GaussRicochet) &&
                         Config.MCH_AoE_GaussOptions[0])
                     {
-                        if (ActionReady(GaussRound) &&
+                        if (ActionReady(GaussRound) && GaussSplashSafe &&
                             !JustUsed(OriginalHook(GaussRound), 2.5f))
                             return OriginalHook(GaussRound);
 
-                        if (ActionReady(Ricochet) &&
+                        if (ActionReady(Ricochet) && RicochetSplashSafe &&
                             !JustUsed(OriginalHook(Ricochet), 2.5f))
                             return OriginalHook(Ricochet);
                     }
@@ -561,11 +561,11 @@ internal partial class MCH : PhysicalRanged
                     (JustUsed(OriginalHook(AutoCrossbow), 1f) ||
                      JustUsed(OriginalHook(Heatblast), 1f)) && HasNotWeaved)
                 {
-                    if (ActionReady(GaussRound) &&
+                    if (ActionReady(GaussRound) && GaussSplashSafe &&
                         (UseGaussRound || !LevelChecked(Ricochet)))
                         return OriginalHook(GaussRound);
 
-                    if (ActionReady(Ricochet) && UseRicochet)
+                    if (ActionReady(Ricochet) && RicochetSplashSafe && UseRicochet)
                         return OriginalHook(Ricochet);
                 }
             }

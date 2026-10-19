@@ -165,22 +165,21 @@ namespace WrathCombo.CustomComboNS.Functions
         {
             get
             {
-                if (index >= this.Count)
-                {
-                    var array = PluginConfiguration.GetCustomIntArrayValue(this.pName);
-                    Array.Resize(ref array, index + 1);
-                    array[index] = 0;
-                    PluginConfiguration.SetCustomIntArrayValue(this.pName, array);
-                    Service.Configuration.Save();
-                }
-                return PluginConfiguration.GetCustomIntArrayValue(this.pName)[index];
+                // 讀取路徑不得寫入設定（戰鬥迴圈裡讀一次就寫一次磁碟）:越界直接回預設值(0),不 resize、不 Save;
+                // 陣列長度的維護交給寫入路徑(UserConfig.DrawPriorityInput 會先呼叫 Clear(maxValues))。
+                var array = PluginConfiguration.GetCustomIntArrayValue(this.pName);
+                return index >= array.Length ? 0 : array[index];
             }
             set
             {
+                // index >= Count 時靜默不寫:呼叫端 UserConfig.DrawPriorityInput 會先 Clear(maxValues) 把長度備好。
                 if (index < this.Count)
                 {
                     var array = PluginConfiguration.GetCustomIntArrayValue(this.pName);
                     array[index] = value;
+                    // 明確寫回字典:不依賴「GetCustomIntArrayValue 回傳的是字典裡的活參考」這個實作細節,
+                    // getter 一旦改成回傳複本,就地改 array[index] 的寫入會靜默消失。
+                    PluginConfiguration.SetCustomIntArrayValue(this.pName, array);
                     Service.Configuration.Save();
                 }
             }
@@ -219,15 +218,10 @@ namespace WrathCombo.CustomComboNS.Functions
         {
             get
             {
-                if (index >= this.Count)
-                {
-                    var array = PluginConfiguration.GetCustomBoolArrayValue(this.pName);
-                    Array.Resize(ref array, index + 1);
-                    array[index] = false;
-                    PluginConfiguration.SetCustomBoolArrayValue(this.pName, array);
-                    Service.Configuration.Save();
-                }
-                return PluginConfiguration.GetCustomBoolArrayValue(this.pName)[index];
+                // 讀取路徑不得寫入設定（ContentCheck.IsInConfiguredContent 每幀都會讀 [0]/[1]/[2]）:越界直接回預設值(false),不 resize、不 Save;
+                // 陣列長度的維護交給寫入路徑(UserConfig.DrawHorizontalMultiChoice / DrawPvPStatusMultiChoice 會自己 resize + Save)。
+                var array = PluginConfiguration.GetCustomBoolArrayValue(this.pName);
+                return index >= array.Length ? false : array[index];
             }
         }
 

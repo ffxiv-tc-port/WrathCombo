@@ -94,7 +94,7 @@ public static class DebugFile
                 throw new InvalidOperationException();
             }
 
-            job = Svc.ClientState.LocalPlayer.ClassJob.Value;
+            job = Svc.Objects.LocalPlayer.ClassJob.Value;
         }
 
         using (_file = new StreamWriter(GetDebugFilePath(), append: false))
@@ -183,14 +183,15 @@ public static class DebugFile
 
     private static void AddPlayerInfo()
     {
-        var player = Svc.ClientState.LocalPlayer;
+        var player = Svc.Objects.LocalPlayer;
         var job = player.ClassJob.Value;
         var currentZone = "Unknown";
         try
         {
+            // GetRowOrDefault 是 O(1);不要用 FirstOrDefault 全表線性走訪找主鍵。
             currentZone = Svc.Data.GetExcelSheet<TerritoryType>()
-                .FirstOrDefault(x => x.RowId == Svc.ClientState.TerritoryType)
-                .PlaceName.Value.Name.ToString();
+                .GetRowOrDefault(Svc.ClientState.TerritoryType)
+                ?.PlaceName.Value.Name.ToString() ?? "";
         }
         catch
         {
@@ -215,7 +216,7 @@ public static class DebugFile
 
     private static void AddTargetInfo()
     {
-        var target = Svc.ClientState.LocalPlayer.TargetObject;
+        var target = Svc.Objects.LocalPlayer.TargetObject;
 
         AddLine($"Target: {target?.GameObjectId.ToString() ?? "None"}");
 
@@ -268,6 +269,27 @@ public static class DebugFile
         AddLine("START AUTO ROTATION INFO");
         AddLine($"Auto Rotation Enabled: {P.IPC.GetAutoRotationState()}");
         PrintConfigProperties(config);
+
+        // 「AoE 所需目標數」有三個可能來源(租約／目前職業的覆寫／全域)。
+        // 使用者回報「AoE 就是不放」時最需要的就是這兩行：生效值是多少、它從哪來。
+        var aoe = DPSSettingsIPCWrapper.ResolveAoETargets(
+            Service.Configuration.RotationConfig.DPSSettings);
+        AddLine(
+            "DPSSettings.DPSAoETargets (effective): " +
+            (aoe.Value?.ToString() ?? "null (AoE disabled)") +
+            $" [source: {aoe.Source}] [job: {Player.JobId} -> " +
+            $"{DPSSettingsIPCWrapper.NormalizeJobId(Player.JobId)}]");
+
+        var perJob = Service.Configuration.RotationConfig.DPSSettings
+            .DPSAoETargetsPerJob;
+        AddLine(
+            "DPSSettings.DPSAoETargetsPerJob: " +
+            (perJob.Count == 0
+                ? "(none)"
+                : string.Join(", ", perJob.Select(x =>
+                    $"{x.Key}/{JobIDs.JobIDToShorthand(x.Key)}=" +
+                    (x.Value?.ToString() ?? "off")))));
+
         AddLine("END AUTO ROTATION INFO");
 
         AddLine();
@@ -506,8 +528,8 @@ public static class DebugFile
 
     private static void AddStatusEffects()
     {
-        var playerID = Svc.ClientState.LocalPlayer.GameObjectId;
-        var statusEffects = Svc.ClientState.LocalPlayer.StatusList;
+        var playerID = Svc.Objects.LocalPlayer.GameObjectId;
+        var statusEffects = Svc.Objects.LocalPlayer.StatusList;
 
         var statusEffectsCount = 0;
         foreach (var _ in statusEffects)

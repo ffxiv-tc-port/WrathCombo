@@ -3,7 +3,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using ECommons.ImGuiMethods;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +19,7 @@ using WrathCombo.Data;
 using WrathCombo.Services;
 using static FFXIVClientStructs.FFXIV.Client.UI.RaptureAtkHistory.Delegates;
 using WrathCombo.Resources.Dictionary.Chinese;
+using ECommons.LanguageHelpers;
 
 
 namespace WrathCombo.Window.Functions
@@ -120,8 +121,12 @@ namespace WrathCombo.Window.Functions
 
                         DebugFile.AddLog($"Set Config {config} to {output}");
                         PluginConfiguration.SetCustomIntValue(config, output);
-                        Service.Configuration.Save();
                     }
+
+                    // 拖曳期間 SliderInt 每一幀都回傳 true：放開滑桿（編輯結束）時才存檔，
+                    // 否則每幀完整序列化設定並寫檔一次。
+                    if (ImGui.IsItemDeactivatedAfterEdit())
+                        Service.Configuration.Save();
 
                     return inputChanged;
                 }
@@ -142,7 +147,7 @@ namespace WrathCombo.Window.Functions
             using var contextMenu = ImRaii.Popup($"##ResetConfig{config}{occurrence}");
             if (!contextMenu) return;
 
-            if (ImGui.MenuItem("重置为默认值"))
+            if (ImGui.MenuItem("Reset to Default".Loc()))
             {
                 ResetToDefault(config);
             }
@@ -235,8 +240,11 @@ namespace WrathCombo.Window.Functions
                     {
                         DebugFile.AddLog($"Set Config {config} to {output}");
                         PluginConfiguration.SetCustomFloatValue(config, output);
-                        Service.Configuration.Save();
                     }
+
+                    // 同 DrawSliderInt：拖曳中每幀都會回傳 true，存檔改到編輯結束時做。
+                    if (ImGui.IsItemDeactivatedAfterEdit())
+                        Service.Configuration.Save();
                 }
             };
 
@@ -333,8 +341,11 @@ namespace WrathCombo.Window.Functions
                     {
                         DebugFile.AddLog($"Set Config {config} to {output}");
                         PluginConfiguration.SetCustomFloatValue(config, output);
-                        Service.Configuration.Save();
                     }
+
+                    // 同 DrawSliderInt：拖曳中每幀都會回傳 true，存檔改到編輯結束時做。
+                    if (ImGui.IsItemDeactivatedAfterEdit())
+                        Service.Configuration.Save();
                 }
             };
 
@@ -460,6 +471,17 @@ namespace WrathCombo.Window.Functions
 
             if (descriptionColor == new Vector4()) descriptionColor = ImGuiColors.DalamudYellow;
             bool[]? values = PluginConfiguration.GetCustomBoolArrayValue(config);
+
+            // 設定陣列可能比 choice 要求的短(舊設定檔、或選項數變動過),直接讀 values[choice] 會擲 IndexOutOfRangeException,
+            // 把整個設定視窗的 Draw() 打掉。做法與同檔的 DrawHorizontalMultiChoice / DrawPvPStatusMultiChoice 一致:不足就補長度並存檔。
+            // 這裡沒有 totalChoices 可用,所以只在「不夠長」時補到 choice + 1,長度足夠時完全不動使用者資料。
+            if (values.Length <= choice)
+            {
+                Array.Resize(ref values, choice + 1);
+                PluginConfiguration.SetCustomBoolArrayValue(config, values);
+                Service.Configuration.Save();
+            }
+
             ImGui.PushItemWidth(itemWidth);
 
             using (ImRaii.PushColor(ImGuiCol.Text, descriptionColor))
@@ -697,7 +719,7 @@ namespace WrathCombo.Window.Functions
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
             ImGui.Indent();
             ImGui.TextUnformatted(overrideText.IsNullOrEmpty()
-                ? "选择上述设置应适用的难度："
+                ? "Select what difficulty the above should apply to:".Loc()
                 : overrideText);
             ImGui.PopStyleColor();
             ImGui.Unindent();
@@ -741,7 +763,7 @@ namespace WrathCombo.Window.Functions
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
             ImGui.Indent();
             ImGui.TextUnformatted(overrideText.IsNullOrEmpty()
-                ? "选择上述设置应适用的难度："
+                ? "Select what difficulty the above should apply to:".Loc()
                 : overrideText);
             ImGui.PopStyleColor();
             ImGui.Unindent();
@@ -788,7 +810,7 @@ namespace WrathCombo.Window.Functions
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
             ImGui.Indent();
             ImGui.TextUnformatted(overrideText.IsNullOrEmpty()
-                ? "选择上述设置应适用的难度："
+                ? "Select what difficulty the above should apply to:".Loc()
                 : overrideText);
             ImGui.PopStyleColor();
             ImGui.Unindent();
@@ -837,7 +859,7 @@ namespace WrathCombo.Window.Functions
             using (ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudYellow))
             {
                 ImGui.Text(overrideText.IsNullOrEmpty()
-                    ? "选择此选项适用的内容类型："
+                    ? "Select what kind of content this option applies to:".Loc()
                     : overrideText);
             }
 
@@ -882,7 +904,7 @@ namespace WrathCombo.Window.Functions
             {
 
                 ImGui.TextUnformatted(overrideText.IsNullOrEmpty()
-                    ? "选择此选项适用的内容类型："
+                    ? "Select what kind of content this option applies to:".Loc()
                     : overrideText);
             }
 
@@ -933,7 +955,7 @@ namespace WrathCombo.Window.Functions
                 {
                     if (customLabel.IsNullOrEmpty())
                     {
-                        ImGui.TextUnformatted($"优先级：");
+                        ImGui.TextUnformatted("Priority: ".Loc());
                     }
                     else
                     {
@@ -965,7 +987,7 @@ namespace WrathCombo.Window.Functions
             if (ImGui.IsItemHovered())
             {
                 ImGui.BeginTooltip();
-                ImGui.Text("更小的数字代表更高的优先级");
+                ImGui.Text("Smaller Number = Higher Priority".Loc());
                 ImGui.EndTooltip();
             }
             ImGui.Unindent();
@@ -1051,13 +1073,13 @@ namespace WrathCombo.Window.Functions
             #region Adding to the Stack
 
             ImGuiEx.Spacing(new Vector2(5f.Scale(), 0));
-            ImGui.Text("添加到堆栈：");
+            ImGui.Text("Add to the Stack:".Loc());
             ImGui.SameLine();
             DrawItemAdding(stackName, targetsToRemoveIfStringContains,
                 ref customStackSetting,
                 ref _customStackLongestProperty, ref _customStackTallestProperty,
                 thisIsForRaiseStack);
-            ImGuiComponents.HelpMarker("点击此下拉菜单以打开可用目标选项列表。\n点击任意条目可将其添加到自定义堆栈的底部。\n顶部有一个显示\"筛选...\"的文本框，可在此输入内容以搜索列表。");
+            ImGuiComponents.HelpMarker("Click this dropdown to open the list of available Target options.\nClick any entry to add it to your Custom Stack, at the bottom.\nThere is a Textbox that says 'Filter...' at the top, type into this to search the list.".Loc());
 
             #endregion
 
@@ -1274,75 +1296,26 @@ namespace WrathCombo.Window.Functions
         {
             var name = propertyName switch
             {
-                "default" => "选择要添加的目标",
-                // 特殊情况处理
-                "UIMouseOverTarget" => "UI鼠标悬停目标",
-                "ModelMouseOverTarget" => "场地鼠标悬停目标",
-                "LowestHPAlly" => "最低血量队友",
-                "LowestHPAllyIfMissingHP" => "最低血量队友（仅当掉血时）",
-                "LowestHPPAlly" => "最低血量百分比队友",
-                "LowestHPPAllyIfMissingHP" => "最低血量百分比队友（仅当缺血时）",
-                "AnyDeadRaiserDPSIfNoneAlive" => "所有拥有复活技能的DPS均倒地时",
-                "Self" => "自己",
-                "HardTarget" => "当前目标",
-                "SoftTarget" => "软选目标",
-                "SoftTargetIfMissingHP" => "软选目标（仅当掉血时）",
-                "FocusTarget" => "焦点目标",
-                "FocusTargetIfMissingHP" => "焦点目标（仅当掉血时）",
-                "TargetsTarget" => "目标的目标",
-                "Chocobo" => "陆行鸟",
-                "AnyEnemy" => "任意敌人",
-                "LowestHPEnemy" => "最低血量敌人",
-                "LowestHPEnemyIfNotInvuln" => "最低血量非无敌敌人",
-                "LowestHPPEnemy" => "最低血量百分比敌人",
-                "LowestHPPEnemyIfNotInvuln" => "最低血量百分比非无敌敌人",
-                "InterruptableEnemy" => "可打断敌人",
-                "StunnableEnemy" => "可眩晕敌人",
-                "LastHardTarget" => "上一个目标",
-                "LastHostileHardTarget" => "上一个敌对目标",
-                "MostRecentAttacker" => "最近攻击者",
-                "KardionTarget" => "心关目标",
-                "AnyDeadPartyMember" => "任意倒地队友",
-                "AnyDeadNonPartyMember" => "任意倒地非队友玩家",
-                "PartyMember1" => "1号队员",
-                "PartyMember2" => "2号队员",
-                "PartyMember3" => "3号队员",
-                "PartyMember4" => "4号队员",
-                "PartyMember5" => "5号队员",
-                "PartyMember6" => "6号队员",
-                "PartyMember7" => "7号队员",
-                "PartyMember8" => "8号队员",
-                "AnySupport" => "任意团辅职业",
-                "AnyLivingSupport" => "任意存活团辅职业",
-                "AnyDPS" => "任意DPS",
-                "AnyTank" => "任意坦克",
-                "AnyLivingTank" => "任意存活坦克",
-                "AnyHealer" => "任意治疗",
-                "AnyLivingHealer" => "任意存活治疗",
-                "AnyRaiser" => "任意拥有复活技能的职业",
-                "AnyRaiserDPS" => "任意可复活DPS",
-                "AnyMeleeDPS" => "任意近战DPS",
-                "AnyRangedDPS" => "任意远程DPS",
-                "AnyPhysRangeDPS" => "任意物理远程DPS",
-                "AnyMagicalDPS" => "任意法系DPS",
-                "AnyDeadTankIfNoneAlive" => "任意坦克（如果他们都倒地）",
-                "AnyDeadHealerIfNoneAlive" => "任意治疗（如果他们都倒地）",
-                "AnyDeadRaiserIfNoneAlive" => "任意拥有复活技能的职业（如果他们都倒地）",
-                "AnyPureHealer" => "任意纯治疗职业",
-                "AnyShieldHealer" => "任意盾系治疗职业",
-                "AnySelfishDPS" => "任意无团辅技能的DPS",
-                // 其余用正则格式化
+                "default" => "Select a Target to Add",
+                // Handle special cases
+                "UIMouseOverTarget" => "UI-MouseOver Target",
+                "ModelMouseOverTarget" => "Field-MouseOver Target",
+                "LowestHPAlly" => "Lowest HP Ally",
+                "LowestHPAllyIfMissingHP" => "Lowest HP Ally If Missing HP",
+                "LowestHPPAlly" => "Lowest HP% Ally",
+                "LowestHPPAllyIfMissingHP" => "Lowest HP% Ally If Missing HP",
+                "AnyDeadRaiserDPSIfNoneAlive" => "Any Dead Raiser DPS If None Alive",
+                // Format the rest with Regex
                 _ => Regex.Replace(propertyName,
                     @"(?<=[a-z])(?=[A-Z0-9])", " "),
             };
 
-            // 替换英文括号提示为中文
-            name = name.Replace(" If Missing HP", "（仅当掉血时）");
-            name = name.Replace(" If None Alive", "（仅当无存活者时）");
+            name = name.Replace(" If Missing HP", " (If Missing HP)");
+            name = name.Replace(" If None Alive", " (If None Alive)");
             if (thisIsForRaiseStack)
                 name = name.Replace("Dead ", "");
 
-            return name;
+            return name.Loc();
         }
 #pragma warning restore SYSLIB1045
 

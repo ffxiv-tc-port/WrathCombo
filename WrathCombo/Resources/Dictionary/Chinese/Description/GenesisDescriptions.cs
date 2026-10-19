@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -17,72 +17,121 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 // Temperature: 0.1  
                 // Generation Time: 2025-03-13 18:14:55  
                 #region ADV
-                KeyValuePair.Create("Island Sanctuary Sprint Feature", "无名岛冲刺特性"),
-                KeyValuePair.Create("Replaces Sprint with Isle Sprint.", "用海岛冲刺替换冲刺。"),
-                KeyValuePair.Create("Only works at the Island Sanctuary. Icon does not change.", "仅在无名岛有效。图标不会改变。"),
-                KeyValuePair.Create("Do not use with SimpleTweaks' Island Sanctuary Sprint fix.", "不要与SimpleTweaks的海岛冲刺替换功能一起使用。"),
-                KeyValuePair.Create("Features and options involving shared role actions for Tanks.", "涉及坦克共享职能技能的功能和选项。"),
-                KeyValuePair.Create("Replaces Low Blow (Stun) with Interject (Interrupt) when the target can be interrupted.", "当目标可被中断时，用Interject（中断）替换Low Blow（眩晕）。"),
-                KeyValuePair.Create("PLDs can slot Shield Bash to have the feature to work with Shield Bash.", "骑士可以装备Shield Bash以使该功能与Shield Bash一起使用。"),
-                KeyValuePair.Create("Prevents the use of Reprisal when target already has the effect by replacing it with Savage Blade.", "当目标已有该效果时，用Savage Blade替换Reprisal以防止使用Reprisal。"),
-                KeyValuePair.Create("Features and options involving shared role actions for Healers.", "涉及治疗者共享职能技能的功能和选项。"),
-                KeyValuePair.Create("Changes the class' Raise Ability into Swiftcast.", "将该职业的复活技能更改为Swiftcast。"),
-                KeyValuePair.Create("Features and options involving shared role actions for Magical Ranged DPS.", "涉及远程魔法DPS共享职能技能的功能和选项。"),
-                KeyValuePair.Create("Prevents the use of Addle when target already has the effect by replacing it with Savage Blade.", "当目标已有该效果时，用Savage Blade替换Addle以防止使用Addle。"),
-                KeyValuePair.Create("Red Mage will also show VerCure if Swiftcast is on cooldown.", "如果Swiftcast在冷却中，赤魔法师还会显示Vercure。"),
-                KeyValuePair.Create("Features and options involving shared role actions for Melee DPS.", "涉及近战DPS共享职能技能的功能和选项。"),
-                KeyValuePair.Create("Prevents the use of Feint when target already has the effect by replacing it with Savage Blade.", "当目标已有该效果时，用Savage Blade替换Feint以防止使用Feint。"),
-                KeyValuePair.Create("Prevents the use of True North when its buff is already active by replacing it with Savage Blade.", "当True North的增益效果已激活时，用Savage Blade替换True North以防止使用True North。"),
-                KeyValuePair.Create("Features and options involving shared role actions for Physical Ranged DPS.", "涉及远程物理DPS共享职能技能的功能和选项。"),
-                KeyValuePair.Create("Prevents the use of Tactician/Troubadour/Shield Samba when target already has one of those three effects by replacing them with Savage Blade.", "当目标已有Tactician/Troubadour/Shield Samba中的任一效果时，用Savage Blade替换它们以防止使用这些技能。"),
-                KeyValuePair.Create("Replaces Foot Graze with Head Graze when target can be interrupted.", "当目标可被中断时，用Head Graze替换Foot Graze。"),
-                KeyValuePair.Create("Outputs your performed actions to the chat.", "将你执行的技能输出到聊天窗口。"),
-                KeyValuePair.Create("Uses Recuperate when your HP is under the set threshold and you have sufficient MP.", "当你的HP低于设定阈值且MP充足时，使用Recuperate。"),
-                KeyValuePair.Create("Prevent Mash Cancelling Feature", "防止快速点击取消防御"),
-                KeyValuePair.Create("Uses Guard when your HP is under the set threshold.", "当你的HP低于设定阈值时，使用Guard。"),
-                KeyValuePair.Create("Uses Purify when afflicted with any selected debuff.", "当你受到任何选定的减益效果影响时，使用Purify。"),
-                KeyValuePair.Create("Stops you cancelling your guard if you're pressing buttons quickly by replacing your buttons with Savage Blade.", "如果你快速按下按钮，用Savage Blade替换你的按钮以防止你取消Guard。"),
-                KeyValuePair.Create("Allows you to cancel your guard with Recuperate on the Guard button if health is low enough to not waste it.", "当生命值足够低时，允许你在防御按钮上使用自愈技能来取消防御，以避免浪费。"),
+                // Relocated here (the earliest file this layer loads)
+                // so each entry fires before whatever was shadowing it. Sorted by
+                // descending key length so this block does not shadow itself.
+                KeyValuePair.Create("Target's HP% to be at or under", "目標血量百分比需低於或等於"),
+                KeyValuePair.Create("- Will not use outside combat.", "- 不會在戰鬥外使用。"),
+                KeyValuePair.Create("No Movement Option", "未移動時使用"),
+                KeyValuePair.Create("Summon Garuda II", SMN.SummonGaruda2.ActionName()),
+                KeyValuePair.Create("Summon Ifrit II", SMN.SummonIfrit2.ActionName()),
+                KeyValuePair.Create("Summon Titan II", SMN.SummonTitan2.ActionName()),
+                KeyValuePair.Create("Summon Garuda", SMN.SummonGaruda.ActionName()),
+                KeyValuePair.Create("Summon Ifrit", SMN.SummonIfrit.ActionName()),
+                KeyValuePair.Create("Summon Titan", SMN.SummonTitan.ActionName()),
+
+                KeyValuePair.Create("Island Sanctuary Sprint Feature", "無名島衝刺特性"),
+                KeyValuePair.Create("Replaces Sprint with Isle Sprint.", "用海島衝刺替換衝刺。"),
+                KeyValuePair.Create("Only works at the Island Sanctuary. Icon does not change.", "僅在無名島有效。圖示不會改變。"),
+                KeyValuePair.Create("Do not use with SimpleTweaks' Island Sanctuary Sprint fix.", "不要與SimpleTweaks的海島衝刺替換功能一起使用。"),
+                KeyValuePair.Create("Features and options involving shared role actions for Tanks.", "涉及坦克共享職能技能的功能和選項。"),
+                KeyValuePair.Create("Replaces Low Blow (Stun) with Interject (Interrupt) when the target can be interrupted.", "當目標可被中斷時，用Interject（中斷）替換Low Blow（眩暈）。"),
+                KeyValuePair.Create("PLDs can slot Shield Bash to have the feature to work with Shield Bash.", "騎士可以裝備Shield Bash以使該功能與Shield Bash一起使用。"),
+                KeyValuePair.Create("Prevents the use of Reprisal when target already has the effect by replacing it with Savage Blade.", "當目標已有該效果時，用Savage Blade替換Reprisal以防止使用Reprisal。"),
+                KeyValuePair.Create("Features and options involving shared role actions for Healers.", "涉及治療者共享職能技能的功能和選項。"),
+                KeyValuePair.Create("Changes the class' Raise Ability into Swiftcast.", "將該職業的復活技能更改為Swiftcast。"),
+                KeyValuePair.Create("Features and options involving shared role actions for Magical Ranged DPS.", "涉及遠端魔法DPS共享職能技能的功能和選項。"),
+                KeyValuePair.Create("Prevents the use of Addle when target already has the effect by replacing it with Savage Blade.", "當目標已有該效果時，用Savage Blade替換Addle以防止使用Addle。"),
+                KeyValuePair.Create("Red Mage will also show VerCure if Swiftcast is on cooldown.", "如果Swiftcast在冷卻中，赤魔道士還會顯示Vercure。"),
+                KeyValuePair.Create("Features and options involving shared role actions for Melee DPS.", "涉及近戰DPS共享職能技能的功能和選項。"),
+                KeyValuePair.Create("Prevents the use of Feint when target already has the effect by replacing it with Savage Blade.", "當目標已有該效果時，用Savage Blade替換Feint以防止使用Feint。"),
+                KeyValuePair.Create("Prevents the use of True North when its buff is already active by replacing it with Savage Blade.", "當True North的增益效果已啟用時，用Savage Blade替換True North以防止使用True North。"),
+                KeyValuePair.Create("Features and options involving shared role actions for Physical Ranged DPS.", "涉及遠端物理DPS共享職能技能的功能和選項。"),
+                KeyValuePair.Create("Prevents the use of Tactician/Troubadour/Shield Samba when target already has one of those three effects by replacing them with Savage Blade.", "當目標已有Tactician/Troubadour/Shield Samba中的任一效果時，用Savage Blade替換它們以防止使用這些技能。"),
+                KeyValuePair.Create("Replaces Foot Graze with Head Graze when target can be interrupted.", "當目標可被中斷時，用Head Graze替換Foot Graze。"),
+                KeyValuePair.Create("Outputs your performed actions to the chat.", "將你執行的技能輸出到聊天視窗。"),
+                KeyValuePair.Create("Uses Recuperate when your HP is under the set threshold and you have sufficient MP.", "當你的HP低於設定閾值且MP充足時，使用Recuperate。"),
+                KeyValuePair.Create("Prevent Mash Cancelling Feature", "防止快速點選取消防禦"),
+                KeyValuePair.Create("Uses Guard when your HP is under the set threshold.", "當你的HP低於設定閾值時，使用Guard。"),
+                KeyValuePair.Create("Uses Purify when afflicted with any selected debuff.", "當你受到任何選定的減益效果影響時，使用Purify。"),
+                KeyValuePair.Create("Stops you cancelling your guard if you're pressing buttons quickly by replacing your buttons with Savage Blade.", "如果你快速按下按鈕，用Savage Blade替換你的按鈕以防止你取消Guard。"),
+                KeyValuePair.Create("Allows you to cancel your guard with Recuperate on the Guard button if health is low enough to not waste it.", "當生命值足夠低時，允許你在防禦按鈕上使用自癒技能來取消防禦，以避免浪費。"),
                 
                 // Manually added
                 // PLD
+                KeyValuePair.Create("Adds Sentinel / Guardian to the one-button mitigation.", $"將{PLD.Sentinel.ActionName()} / {PLD.Guardian.ActionName()}新增到一鍵式減傷按鈕。"),
                 KeyValuePair.Create("Guardian", PLD.Guardian.ActionName()),
                 // WAR
                 KeyValuePair.Create("Primal Ruination", WAR.PrimalRuination.ActionName()),
                 // SMN                
                 KeyValuePair.Create("DeathFlare", SMNPvP.DeathFlare.ActionName()),
                 // SGE
-                KeyValuePair.Create("Addersgall Threshold", "蛇胆阈值"),
+                KeyValuePair.Create("Addersgall Threshold", "蛇膽閾值"),
                 // Config
-                KeyValuePair.Create("MP Threshold", "魔力阈值"),
+                KeyValuePair.Create("MP Threshold", "魔力閾值"),
+
+                // Hidden Features: R6S/R7S/M6S shared full-sentence entries, placed in this earliest-processed
+                // Description file so no later generic fragment (e.g. "first"->"優先" in ApocalypseDescriptions.cs)
+                // can partially corrupt them via substring substitution. "Squirrels"/"manta" are translated as
+                // ordinary nouns; "Jabberwock" has no official in-game name so it is kept in English.
+                KeyValuePair.Create("R6S: Hold Burst on Squirrels", "R6S：松鼠階段保留爆發"),
+                KeyValuePair.Create("M6S: Hold Burst on Squirrels", "M6S：松鼠階段保留爆發"),
+                KeyValuePair.Create("When you're targeting Squirrels in R6S add phase, hold burst.", "R6S小怪階段，鎖定松鼠時保留爆發。"),
+                KeyValuePair.Create("When you're targeting Squirrels in M6S add phase, hold burst.", "M6S小怪階段，鎖定松鼠時保留爆發。"),
+                KeyValuePair.Create("(until about the time the first manta is dying)", "（大約第一隻鰩魚快死時釋放）"),
+                KeyValuePair.Create("R6S: Only Stun Jabberwock", "R6S：僅眩暈Jabberwock"),
+                KeyValuePair.Create("When in R6S, stun will only ever be used on the Jabberwock.", "在R6S中，暈眩技能僅會用在Jabberwock身上。"),
+                KeyValuePair.Create("R7S: Only Interrupt the adds casting Circle AoEs", "R7S：僅打斷施放圓形AOE的小怪"),
+                KeyValuePair.Create("When you're in R7S, Interrupting will only work when you're targeting an add casting the circle AoE.", "在R7S中，打斷技能僅會在鎖定正在施放圓形AOE的小怪時作用。"),
+                KeyValuePair.Create("R6S: Save Reprisal and Dark Missionary", $"R6S：保留{RoleActions.Tank.Reprisal.ActionName()}和{DRK.DarkMissionary.ActionName()}"),
+                KeyValuePair.Create("When in R6S, never try use Reprisal or Dark Missionary automatically.", $"在R6S中，絕不會自動使用{RoleActions.Tank.Reprisal.ActionName()}或{DRK.DarkMissionary.ActionName()}。"),
+                KeyValuePair.Create("When in R6S, never try use Reprisal or Shake it Off automatically.", $"在R6S中，絕不會自動使用{RoleActions.Tank.Reprisal.ActionName()}或{WAR.ShakeItOff.ActionName()}。"),
+
+                // Hidden Features: shared "Hidden Options" category blurb (DRK/MNK/SGE/WAR)
+                KeyValuePair.Create("Collection of cheeky or encounter-specific extra options only available to those in the know.", "收錄一些俏皮惡搞或特定遭遇戰專屬的額外選項，僅供知情者使用。"),
+                KeyValuePair.Create("Do not expect these options to be maintained, or even kept, after they are no longer Current.", "在它們不再是最新內容後，請不要期待這些選項會被持續維護，甚至可能被直接移除。"),
+
+                // Balance-community opener labels/tooltips (RDM Balance Opener radio choice)
+                // -- placed here (before BRDDescriptions.cs's bare "Standard Opener") so
+                // they aren't shadowed by that shorter fragment.
+                KeyValuePair.Create("Balance Standard Opener", "Balance版標準起手"),
+                KeyValuePair.Create("GapClosing Adjusted Standard Opener", "位移調整標準起手"),
+
+                // RDM/SMN gap-closer safety options: full sentences placed here so they fire
+                // before the "Melee Range" (PLD), "only" and " to " (Apocalypse) fragments.
+                KeyValuePair.Create("How long you need to be stationary to use. Zero to disable", "需要站立不動多少秒才使用（0=不檢查）"),
+                KeyValuePair.Create("Will only use Crimson Cyclone when in Melee Range", $"僅在近戰範圍內使用{SMN.CrimsonCyclone.ActionName()}"),
+                KeyValuePair.Create("Will gap close with Crimson Cyclone.", $"會用{SMN.CrimsonCyclone.ActionName()}接近目標。"),
+                KeyValuePair.Create("Safe Mode (Will not gap close)", "安全模式（不用來接近）"),
+                KeyValuePair.Create("Standard Rotation", "標準循環"),
                 #endregion
 
                 #region PvP
                 // Melee DPS
-                KeyValuePair.Create("Role Action Smite Option", "职能技能-猛击"),
-                KeyValuePair.Create("Adds Role Action Smite to Burst Mode below selected health", "在目标生命值低于所选阈值时，将职能技能猛击添加到爆发模式"),
+                KeyValuePair.Create("Role Action Smite Option", "職能技能-猛擊"),
+                KeyValuePair.Create("Adds Role Action Smite to Burst Mode below selected health", "在目標生命值低於所選閾值時，將職能技能猛擊新增到爆發模式"),
                 // Healer
-                KeyValuePair.Create("Role Action Diabrosis Option", "职能技能-溃破"),
-                KeyValuePair.Create("Adds Role Action Diabrosis to Burst Mode below selected health", "在目标生命值低于所选阈值时，将职能技能溃破添加到爆发模式"),
-                KeyValuePair.Create("Cure 3 Waste Prevention", "当愈疗就绪增益剩余时间低于6秒时，将愈疗添加到爆发连击"),
-                KeyValuePair.Create("Target HP% to use Diabrosis", "使用溃破的目标生命值百分比阈值"),
-                KeyValuePair.Create("Cure III Priority Option", "愈疗优先级"),
-                KeyValuePair.Create("Makes Cure 3 prioritized before Aquaveil.", "使愈疗在水流幕之前优先使用。"),
-                KeyValuePair.Create("Cure 3 replaces Cure 2 regardless of this setting as that is how SE made it", "无论此设置如何，愈疗都会替换救疗，这是官方的设定。"),
-                KeyValuePair.Create("Self Adlo Option", "自我鼓励"),
-                KeyValuePair.Create("Adds Adloquium to self when at or beneath selected heath threshold.", "当自身生命值低于或等于设定阈值时，为自己使用鼓励激励之策。"),
-                KeyValuePair.Create("Will Not Overwrite Catalyze", "不会覆盖激励。"),
+                KeyValuePair.Create("Role Action Diabrosis Option", "職能技能-潰破"),
+                KeyValuePair.Create("Adds Role Action Diabrosis to Burst Mode below selected health", "在目標生命值低於所選閾值時，將職能技能潰破新增到爆發模式"),
+                KeyValuePair.Create("Cure 3 Waste Prevention", "當大療傷就緒增益剩餘時間低於6秒時，將大療傷新增到爆發連擊"),
+                KeyValuePair.Create("Target HP% to use Diabrosis", "使用潰破的目標生命值百分比閾值"),
+                KeyValuePair.Create("Cure III Priority Option", "大療傷優先順序"),
+                KeyValuePair.Create("Makes Cure 3 prioritized before Aquaveil.", "使大療傷在水流幕之前優先使用。"),
+                KeyValuePair.Create("Cure 3 replaces Cure 2 regardless of this setting as that is how SE made it", "無論此設定如何，大療傷都會替換中療傷，這是官方的設定。"),
+                KeyValuePair.Create("Self Adlo Option", "自我鼓勵"),
+                KeyValuePair.Create("Adds Adloquium to self when at or beneath selected heath threshold.", "當自身生命值低於或等於設定閾值時，為自己使用鼓勵激勵之策。"),
+                KeyValuePair.Create("Will Not Overwrite Catalyze", "不會覆蓋激勵。"),
                 // Physical Ranged DPS
-                KeyValuePair.Create("Role Action Eagle Eye Shot Option", "职能技能-锐眼追击"),
-                KeyValuePair.Create("Automatically Adds Eagle Eye Shot to Burst Mode when target is guarded or under selected health percentage", "当目标处于防御状态或生命值低于所选百分比时，自动在爆发模式中加入锐眼追击"),
-                KeyValuePair.Create("WILL ONLY WORK IN LARGE SCALE PVP", "仅在大规模PVP中有效"),
+                KeyValuePair.Create("Role Action Eagle Eye Shot Option", "職能技能-銳眼追擊"),
+                KeyValuePair.Create("Automatically Adds Eagle Eye Shot to Burst Mode when target is guarded or under selected health percentage", "當目標處於防禦狀態或生命值低於所選百分比時，自動在爆發模式中加入銳眼追擊"),
+                KeyValuePair.Create("WILL ONLY WORK IN LARGE SCALE PVP", "僅在大規模PVP中有效"),
                 // Tank
-                KeyValuePair.Create("Role Action Rampart Option", "职能技能-铁壁"),
-                KeyValuePair.Create("Adds Defensive Role Action Rampart to Burst Mode below selected health", "在生命值低于所选阈值时，将防御型职能技能铁壁添加到爆发模式"),
-                KeyValuePair.Create("Use Rampart below set threshold for self", "低于设定阈值时，为自己使用铁壁"),
+                KeyValuePair.Create("Role Action Rampart Option", "職能技能-鐵壁"),
+                KeyValuePair.Create("Adds Defensive Role Action Rampart to Burst Mode below selected health", "在生命值低於所選閾值時，將防禦型職能技能鐵壁新增到爆發模式"),
+                KeyValuePair.Create("Use Rampart below set threshold for self", "低於設定閾值時，為自己使用鐵壁"),
                 // Magical Ranged DPS
-                KeyValuePair.Create("Phantom Dart Option", "幻影弹"),
-                KeyValuePair.Create("Uses Phantom Dart (if selected) when available at or below set health threshold.", "在可用且目标生命值低于设定阈值时（若已选择），使用幻影弹。"),
+                KeyValuePair.Create("Phantom Dart Option", "幻影彈"),
+                KeyValuePair.Create("Uses Phantom Dart (if selected) when available at or below set health threshold.", "在可用且目標生命值低於設定閾值時（若已選擇），使用幻影彈。"),
                 #endregion
             ];
         }

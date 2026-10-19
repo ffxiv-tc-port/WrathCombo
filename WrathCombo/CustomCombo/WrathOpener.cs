@@ -123,6 +123,11 @@ namespace WrathCombo.CustomComboNS
         private int DelayedStep = 0;
         private DateTime DelayedAt;
 
+        private const int SkipStallLimitSeconds = 20;
+        private int SkippingStep = 0;
+        // null = cap not armed; armed only on the one path with no timeout at all (see FullOpener).
+        internal DateTime? StopSkippingAt { get; private set; }
+
         public uint CurrentOpenerAction
         {
             get;
@@ -181,6 +186,28 @@ namespace WrathCombo.CustomComboNS
                         prevStepSkipping = p.Condition();
 
                     bool delay = PrepullDelays.FindFirst(x => x.Steps.Any(y => y == DelayedStep && y == OpenerStep), out var hold);
+
+                    if (SkippingStep != OpenerStep)
+                    {
+                        SkippingStep = OpenerStep;
+                        StopSkippingAt = null;
+                    }
+
+                    // A skipped previous step suppresses the idle timeout below; without a cap a step whose action
+                    // never becomes usable pins the rotation for the rest of the fight. Out of combat this state is
+                    // the normal wait for the pull when step 1 is skipped by config, so the cap only runs in combat.
+                    if (prevStepSkipping && !delay && InCombat())
+                    {
+                        StopSkippingAt ??= DateTime.Now.AddSeconds(SkipStallLimitSeconds);
+                        if (DateTime.Now > StopSkippingAt)
+                        {
+                            Svc.Log.Information($"[Opener] Step {OpenerStep}: previous step's skip condition held for {SkipStallLimitSeconds}s in combat without progress, failing opener");
+                            StopSkippingAt = null;
+                            CurrentState = OpenerState.FailedOpener;
+                            return false;
+                        }
+                    }
+
                     if ((!delay && !prevStepSkipping && ActionWatching.TimeSinceLastAction.TotalSeconds >= Service.Configuration.OpenerTimeout) || (delay && (DateTime.Now - DelayedAt).TotalSeconds > hold.HoldDelay() + Service.Configuration.OpenerTimeout))
                     {
                         CurrentState = OpenerState.FailedOpener;
@@ -207,7 +234,7 @@ namespace WrathCombo.CustomComboNS
 
                     foreach (var (Steps, NewAction, Condition) in SubstitutionSteps.Where(x => x.Steps.Any(y => y == OpenerStep)))
                     {
-                        if (Condition())
+                        if (Condition() && DashAllowed(NewAction))
                         {
                             CurrentOpenerAction = actionID = NewAction;
                             break;
@@ -238,6 +265,22 @@ namespace WrathCombo.CustomComboNS
                         CurrentOpenerAction = OpenerActions[OpenerStep - 1];
                     }
 
+                    // 自動循環中 BossMod 判這一步的位移技落點危險：跳過這一步，這一幀不出招，下一幀照新步驟重算。
+                    // 第 1 步與最後一步沒有「下一步」可接，原地等（最後一步會照既有逾時判起手失敗）。
+                    // 刻意不用 SkipSteps：登記在 SkipSteps 的步驟會關掉下一步的「未就緒就跳過」並壓住逾時。
+                    if (!DashAllowed(actionID))
+                    {
+                        if (OpenerStep > 1 && OpenerStep < OpenerActions.Count)
+                        {
+                            Svc.Log.Debug($"Skipping {actionID.ActionName()} (landing unsafe per BossMod)");
+                            OpenerStep++;
+                            CurrentOpenerAction = OpenerActions[OpenerStep - 1];
+                        }
+
+                        actionID = All.SavageBlade;
+                        return true;
+                    }
+
                     while (OpenerStep > 1 && !ActionReady(CurrentOpenerAction) &&
                            !SkipSteps.Any(x => x.Steps.Any(y => y == OpenerStep - 1)) &&
                            ActionWatching.TimeSinceLastAction.TotalSeconds > Math.Max(1.5, GCDTotal))
@@ -264,6 +307,8 @@ namespace WrathCombo.CustomComboNS
         {
             Svc.Log.Debug($"Opener Reset");
             DelayedStep = 0;
+            SkippingStep = 0;
+            StopSkippingAt = null;
             OpenerStep = 0;
             CurrentOpenerAction = 0;
             CurrentState = OpenerState.OpenerNotReady;

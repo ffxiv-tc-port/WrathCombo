@@ -12,8 +12,8 @@ namespace WrathCombo.CustomComboNS.Functions
 {
     internal abstract partial class CustomComboFunctions
     {
-        private unsafe static Hate* HateParty => (Hate*)((IntPtr)UIState.Instance() + 0x08);
-        private unsafe static Hate* HateEnemies => (Hate*)((IntPtr)UIState.Instance() + 0x110);
+        private unsafe static Hate* HateParty => &UIState.Instance()->Hate;
+        private unsafe static Hater* HateEnemies => &UIState.Instance()->Hater;
 
         public unsafe static Dictionary<ulong, int>? EnmityDictParty
         {
@@ -38,7 +38,9 @@ namespace WrathCombo.CustomComboNS.Functions
             {
                 field ??= new();
                 field.Clear();
-                foreach (var h in HateEnemies->HateInfo)
+                var haters = HateEnemies->Haters;
+                var count = Math.Clamp(HateEnemies->HaterCount, 0, haters.Length);
+                foreach (var h in haters[..count])
                 {
                     if (h.EntityId == 0)
                         continue;

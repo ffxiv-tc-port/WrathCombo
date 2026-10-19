@@ -300,7 +300,9 @@ internal partial class SCH : Healer
             
             if (IsEnabled(CustomComboPreset.SCH_ST_Heal_Esuna) && 
                 ActionReady(Role.Esuna) && HasCleansableDebuff(healTarget) &&
-                GetTargetHPPercent(healTarget, Config.SCH_ST_Heal_IncludeShields) >= Config.SCH_ST_Heal_EsunaOption)
+                EsunaAllowed(healTarget,
+                    GetTargetHPPercent(healTarget, Config.SCH_ST_Heal_IncludeShields) >= Config.SCH_ST_Heal_EsunaOption,
+                    Config.SCH_ST_Heal_EsunaCriticalHP, Config.SCH_ST_Heal_IncludeShields))
                 return Role.Esuna
                     .RetargetIfEnabled(OptionalTarget, Physick);
 

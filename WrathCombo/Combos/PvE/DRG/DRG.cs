@@ -138,7 +138,7 @@ internal partial class DRG : Melee
                     if (ActionReady(DragonfireDive) &&
                         !HasStatusEffect(Buffs.DragonsFlight) &&
                         (LoTDActive || !TraitLevelChecked(Traits.LifeOfTheDragon)) &&
-                        InMeleeRange())
+                        InMeleeRange() && DashAllowed(DragonfireDive))
                         return DragonfireDive;
                 }
 
@@ -146,7 +146,7 @@ internal partial class DRG : Melee
                 if (ActionReady(Stardiver) &&
                     CanDRGWeave(1.5f, true) &&
                     !HasStatusEffect(Buffs.StarcrossReady) &&
-                    LoTDActive && InMeleeRange())
+                    LoTDActive && InMeleeRange() && DashAllowed(Stardiver))
                     return Stardiver;
             }
 
@@ -331,7 +331,8 @@ internal partial class DRG : Melee
                              DRG_ST_DragonfireDive_Options[1] && InMeleeRange()) &&
                             ActionReady(DragonfireDive) &&
                             !HasStatusEffect(Buffs.DragonsFlight) &&
-                            (LoTDActive || !TraitLevelChecked(Traits.LifeOfTheDragon)))
+                            (LoTDActive || !TraitLevelChecked(Traits.LifeOfTheDragon)) &&
+                            DashAllowed(DragonfireDive))
                             return DragonfireDive;
                     }
 
@@ -344,7 +345,8 @@ internal partial class DRG : Melee
                         ActionReady(Stardiver) &&
                         CanDRGWeave(1.5f, true) &&
                         LoTDActive &&
-                        !HasStatusEffect(Buffs.StarcrossReady))
+                        !HasStatusEffect(Buffs.StarcrossReady) &&
+                        DashAllowed(Stardiver))
                         return Stardiver;
                 }
             }
@@ -496,7 +498,8 @@ internal partial class DRG : Melee
                     //Dragonfire Dive Feature
                     if (ActionReady(DragonfireDive) &&
                         !HasStatusEffect(Buffs.DragonsFlight) && InMeleeRange() &&
-                        (LoTDActive || !TraitLevelChecked(Traits.LifeOfTheDragon)))
+                        (LoTDActive || !TraitLevelChecked(Traits.LifeOfTheDragon)) &&
+                        DashAllowed(DragonfireDive))
                         return DragonfireDive;
                 }
 
@@ -504,7 +507,7 @@ internal partial class DRG : Melee
                 if (ActionReady(Stardiver) &&
                     CanDRGWeave(1.5f, true) &&
                     !HasStatusEffect(Buffs.StarcrossReady) &&
-                    LoTDActive && InMeleeRange())
+                    LoTDActive && InMeleeRange() && DashAllowed(Stardiver))
                     return Stardiver;
             }
 
@@ -662,7 +665,8 @@ internal partial class DRG : Melee
                              DRG_AoE_DragonfireDive_Options[1] && InMeleeRange()) &&
                             ActionReady(DragonfireDive) &&
                             !HasStatusEffect(Buffs.DragonsFlight) &&
-                            (LoTDActive || !TraitLevelChecked(Traits.LifeOfTheDragon)))
+                            (LoTDActive || !TraitLevelChecked(Traits.LifeOfTheDragon)) &&
+                            DashAllowed(DragonfireDive))
                             return DragonfireDive;
                     }
 
@@ -675,7 +679,8 @@ internal partial class DRG : Melee
                         ActionReady(Stardiver) &&
                         CanDRGWeave(1.5f, true) &&
                         LoTDActive &&
-                        !HasStatusEffect(Buffs.StarcrossReady))
+                        !HasStatusEffect(Buffs.StarcrossReady) &&
+                        DashAllowed(Stardiver))
                         return Stardiver;
                 }
             }

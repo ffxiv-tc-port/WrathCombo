@@ -67,9 +67,9 @@ internal partial class WAR : Tank
                 return Upheaval;
             if (ShouldUsePrimalWrath)
                 return PrimalWrath;
-            if (ShouldUseOnslaught(1, 3.5f, !IsMoving()))
+            if (ShouldUseOnslaught(1, 3.5f, !IsMoving()) && DashAllowed(Onslaught))
                 return Onslaught;
-            if (ShouldUsePrimalRend(3.5f, !IsMoving()))
+            if (ShouldUsePrimalRend(3.5f, !IsMoving()) && DashAllowed(PrimalRend))
                 return PrimalRend;
             if (ShouldUsePrimalRuination)
                 return PrimalRuination;
@@ -155,7 +155,7 @@ internal partial class WAR : Tank
             if (IsEnabled(CustomComboPreset.WAR_ST_BalanceOpener) && Opener().FullOpener(ref action))
                 return action;
             if (IsEnabled(CustomComboPreset.WAR_ST_RangedUptime) && ShouldUseTomahawk)
-                return CanPRend(Config.WAR_ST_PrimalRend_Distance, Config.WAR_ST_PrimalRend_Movement == 1 || (Config.WAR_ST_PrimalRend_Movement == 0 && !IsMoving())) ? PrimalRend : CanWeave() && CanOnslaught(Config.WAR_ST_Onslaught_Charges, Config.WAR_ST_Onslaught_Distance, Config.WAR_ST_Onslaught_Movement == 1 || (Config.WAR_ST_Onslaught_Movement == 0 && !IsMoving())) ? Onslaught : Tomahawk;
+                return CanPRend(Config.WAR_ST_PrimalRend_Distance, Config.WAR_ST_PrimalRend_Movement == 1 || (Config.WAR_ST_PrimalRend_Movement == 0 && !IsMoving())) && DashAllowed(PrimalRend) ? PrimalRend : CanWeave() && CanOnslaught(Config.WAR_ST_Onslaught_Charges, Config.WAR_ST_Onslaught_Distance, Config.WAR_ST_Onslaught_Movement == 1 || (Config.WAR_ST_Onslaught_Movement == 0 && !IsMoving())) && DashAllowed(Onslaught) ? Onslaught : Tomahawk;
             if (IsEnabled(CustomComboPreset.WAR_ST_InnerRelease) && ShouldUseInnerRelease(Config.WAR_ST_IRStop))
                 return OriginalHook(Berserk);
             if (IsEnabled(CustomComboPreset.WAR_ST_Infuriate) && ShouldUseInfuriate(Config.WAR_ST_Infuriate_Gauge, Config.WAR_ST_Infuriate_Charges))
@@ -165,11 +165,13 @@ internal partial class WAR : Tank
             if (IsEnabled(CustomComboPreset.WAR_ST_PrimalWrath) && ShouldUsePrimalWrath)
                 return PrimalWrath;
             if (IsEnabled(CustomComboPreset.WAR_ST_Onslaught) && (!IsEnabled(CustomComboPreset.WAR_ST_InnerRelease) || (IsEnabled(CustomComboPreset.WAR_ST_InnerRelease) && IR.Cooldown > 40)) &&
-                ShouldUseOnslaught(Config.WAR_ST_Onslaught_Charges, Config.WAR_ST_Onslaught_Distance, Config.WAR_ST_Onslaught_Movement == 1 || (Config.WAR_ST_Onslaught_Movement == 0 && !IsMoving() && TimeStoodStill > TimeSpan.FromSeconds(Config.WAR_ST_Onslaught_TimeStill))))
+                ShouldUseOnslaught(Config.WAR_ST_Onslaught_Charges, Config.WAR_ST_Onslaught_Distance, Config.WAR_ST_Onslaught_Movement == 1 || (Config.WAR_ST_Onslaught_Movement == 0 && !IsMoving() && TimeStoodStill > TimeSpan.FromSeconds(Config.WAR_ST_Onslaught_TimeStill))) &&
+                DashAllowed(Onslaught))
                 return Onslaught;
             if (IsEnabled(CustomComboPreset.WAR_ST_PrimalRend) &&
                 ShouldUsePrimalRend(Config.WAR_ST_PrimalRend_Distance, (Config.WAR_ST_PrimalRend_Movement == 1 || (Config.WAR_ST_PrimalRend_Movement == 0 && !IsMoving() && TimeStoodStill > TimeSpan.FromSeconds(Config.WAR_ST_PrimalRend_TimeStill)))) &&
-                (Config.WAR_ST_PrimalRend_EarlyLate == 0 || (Config.WAR_ST_PrimalRend_EarlyLate == 1 && (GetStatusEffectRemainingTime(Buffs.PrimalRendReady) <= 15 || (!HasIR.Stacks && !HasBF.Stacks && !HasWrath)))))
+                (Config.WAR_ST_PrimalRend_EarlyLate == 0 || (Config.WAR_ST_PrimalRend_EarlyLate == 1 && (GetStatusEffectRemainingTime(Buffs.PrimalRendReady) <= 15 || (!HasIR.Stacks && !HasBF.Stacks && !HasWrath)))) &&
+                DashAllowed(PrimalRend))
                 return PrimalRend;
             if (IsEnabled(CustomComboPreset.WAR_ST_PrimalRuination) && ShouldUsePrimalRuination)
                 return PrimalRuination;
@@ -235,9 +237,9 @@ internal partial class WAR : Tank
                 return LevelChecked(Orogeny) ? Orogeny : Upheaval;
             if (ShouldUsePrimalWrath)
                 return PrimalWrath;
-            if (ShouldUseOnslaught(1, 3.5f, !IsMoving()))
+            if (ShouldUseOnslaught(1, 3.5f, !IsMoving()) && DashAllowed(Onslaught))
                 return Onslaught;
-            if (ShouldUsePrimalRend(3.5f, !IsMoving()))
+            if (ShouldUsePrimalRend(3.5f, !IsMoving()) && DashAllowed(PrimalRend))
                 return PrimalRend;
             if (ShouldUsePrimalRuination)
                 return PrimalRuination;
@@ -319,7 +321,7 @@ internal partial class WAR : Tank
 
             #region Rotation
             if (IsEnabled(CustomComboPreset.WAR_AoE_RangedUptime) && ShouldUseTomahawk)
-                return CanPRend(Config.WAR_AoE_PrimalRend_Distance, Config.WAR_AoE_PrimalRend_Movement == 1 || (Config.WAR_AoE_PrimalRend_Movement == 0 && !IsMoving())) ? PrimalRend : CanWeave() && CanOnslaught(Config.WAR_AoE_Onslaught_Charges, Config.WAR_AoE_Onslaught_Distance, Config.WAR_AoE_Onslaught_Movement == 1 || (Config.WAR_AoE_Onslaught_Movement == 0 && !IsMoving())) ? Onslaught : Tomahawk;
+                return CanPRend(Config.WAR_AoE_PrimalRend_Distance, Config.WAR_AoE_PrimalRend_Movement == 1 || (Config.WAR_AoE_PrimalRend_Movement == 0 && !IsMoving())) && DashAllowed(PrimalRend) ? PrimalRend : CanWeave() && CanOnslaught(Config.WAR_AoE_Onslaught_Charges, Config.WAR_AoE_Onslaught_Distance, Config.WAR_AoE_Onslaught_Movement == 1 || (Config.WAR_AoE_Onslaught_Movement == 0 && !IsMoving())) && DashAllowed(Onslaught) ? Onslaught : Tomahawk;
             if (IsEnabled(CustomComboPreset.WAR_AoE_InnerRelease) && ShouldUseInnerRelease(Config.WAR_AoE_IRStop))
                 return OriginalHook(Berserk);
             if (IsEnabled(CustomComboPreset.WAR_AoE_Infuriate) && ShouldUseInfuriate(Config.WAR_AoE_Infuriate_Gauge, Config.WAR_AoE_Infuriate_Charges))
@@ -329,10 +331,12 @@ internal partial class WAR : Tank
             if (IsEnabled(CustomComboPreset.WAR_AoE_PrimalWrath) && ShouldUsePrimalWrath)
                 return PrimalWrath;
             if (IsEnabled(CustomComboPreset.WAR_AoE_Onslaught) && (!IsEnabled(CustomComboPreset.WAR_AoE_InnerRelease) || (IsEnabled(CustomComboPreset.WAR_AoE_InnerRelease) && IR.Cooldown > 40)) &&
-                ShouldUseOnslaught(Config.WAR_AoE_Onslaught_Charges, Config.WAR_AoE_Onslaught_Distance, Config.WAR_AoE_Onslaught_Movement == 1 || (Config.WAR_AoE_Onslaught_Movement == 0 && !IsMoving() && TimeStoodStill > TimeSpan.FromSeconds(Config.WAR_AoE_Onslaught_TimeStill))))
+                ShouldUseOnslaught(Config.WAR_AoE_Onslaught_Charges, Config.WAR_AoE_Onslaught_Distance, Config.WAR_AoE_Onslaught_Movement == 1 || (Config.WAR_AoE_Onslaught_Movement == 0 && !IsMoving() && TimeStoodStill > TimeSpan.FromSeconds(Config.WAR_AoE_Onslaught_TimeStill))) &&
+                DashAllowed(Onslaught))
                 return Onslaught;
             if (IsEnabled(CustomComboPreset.WAR_AoE_PrimalRend) && ShouldUsePrimalRend(Config.WAR_AoE_PrimalRend_Distance, Config.WAR_AoE_PrimalRend_Movement == 1 || (Config.WAR_AoE_PrimalRend_Movement == 0 && !IsMoving() && TimeStoodStill > TimeSpan.FromSeconds(Config.WAR_AoE_PrimalRend_TimeStill))) &&
-                (Config.WAR_AoE_PrimalRend_EarlyLate == 0 || (Config.WAR_AoE_PrimalRend_EarlyLate == 1 && (GetStatusEffectRemainingTime(Buffs.PrimalRendReady) <= 15 || (!HasIR.Stacks && !HasBF.Stacks && !HasWrath)))))
+                (Config.WAR_AoE_PrimalRend_EarlyLate == 0 || (Config.WAR_AoE_PrimalRend_EarlyLate == 1 && (GetStatusEffectRemainingTime(Buffs.PrimalRendReady) <= 15 || (!HasIR.Stacks && !HasBF.Stacks && !HasWrath)))) &&
+                DashAllowed(PrimalRend))
                 return PrimalRend;
             if (IsEnabled(CustomComboPreset.WAR_AoE_PrimalRuination) && ShouldUsePrimalRuination)
                 return PrimalRuination;

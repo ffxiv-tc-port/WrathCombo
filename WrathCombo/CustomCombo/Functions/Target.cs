@@ -4,7 +4,7 @@ using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +40,7 @@ internal abstract partial class CustomComboFunctions
         if ((optionalTarget ?? CurrentTarget) is not IBattleChara chara)
             return false;
 
-        return ActionWatching.BNPCSheet.TryGetValue(chara.DataId, out var charaSheet) && charaSheet.Rank is 2 or 6;
+        return ActionWatching.BNPCSheet.TryGetValue(chara.BaseId, out var charaSheet) && charaSheet.Rank is 2 or 6;
     }
 
     /// <summary> Checks if an object is quest-related. Defaults to CurrentTarget unless specified. </summary>
@@ -72,7 +72,7 @@ internal abstract partial class CustomComboFunctions
         if ((optionalTarget ?? CurrentTarget) is not IBattleChara chara || HasStatusEffect(3808, chara, true))
             return false;
 
-        return ActionWatching.BNPCSheet.TryGetValue(chara.DataId, out var charaSheet) && !charaSheet.IsOmnidirectional;
+        return ActionWatching.BNPCSheet.TryGetValue(chara.BaseId, out var charaSheet) && !charaSheet.IsOmnidirectional;
     }
 
     /// <summary>
@@ -325,7 +325,17 @@ internal abstract partial class CustomComboFunctions
         RaycastHit hit;
         var flags = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
 
-        return !Framework.Instance()->BGCollisionModule->RaycastMaterialFilter(&hit, &sourcePos, &direction, distance, 1, flags);
+        // Framework.Instance() 是 isPointer:true 的 [StaticAddress]：回的是全域指標槽的內容，遊戲還沒建好／正在拆掉 Framework 時合法為 null；
+        // BGCollisionModule 也只是普通指標欄位，場景載入前同樣可能是 null。
+        // 每幀熱路徑（AutoRotationController 逐一篩選候選目標時呼叫），所以刻意不寫 log。
+        // fail-closed：拿不到碰撞模組就回 false＝「沒有視線」，這幀不把該目標選進來、不出手；
+        // 回 true 等於在零依據下宣稱「看得到」，會讓 rotation 對著牆後的目標放技能。
+        var framework = Framework.Instance();
+        var collision = framework != null ? framework->BGCollisionModule : null;
+        if (collision == null)
+            return false;
+
+        return !collision->RaycastMaterialFilter(&hit, &sourcePos, &direction, distance, 1, flags);
     }
 
     #endregion
@@ -498,7 +508,7 @@ internal abstract partial class CustomComboFunctions
                    o.IsHostile() &&
                    !TargetIsInvincible(o) &&
                    (!checkIgnoredList ||
-                    !Service.Configuration.IgnoredNPCs.ContainsKey(o.DataId));
+                    !Service.Configuration.IgnoredNPCs.ContainsKey(o.BaseId));
         }
     }
 

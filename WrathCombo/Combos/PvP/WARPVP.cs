@@ -69,6 +69,9 @@ namespace WrathCombo.Combos.PvP
         {
             protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WARPvP_BurstMode;
 
+            // 獻身把目標拉到身邊，只拉得動玩家（NPC、場地物件拉不動）；已變成狂魂時不是拉人，照舊。
+            private static bool BlotaCanPull => OriginalHook(Blota) != Blota || CurrentTarget.IsAPlayer();
+
             protected override uint Invoke(uint actionID)
             {
                 if (actionID is HeavySwing or Maim or StormsPath)
@@ -95,7 +98,7 @@ namespace WrathCombo.Combos.PvP
                         if (!InMeleeRange())
                         {
                             // Blota with specific conditions and burst mode enabled
-                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota))
+                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && BlotaCanPull)
                             {
                                 if (Config.WARPVP_BlotaTiming == 0 && IsOffCooldown(PrimalRend))
                                     return OriginalHook(Blota);
@@ -138,7 +141,7 @@ namespace WrathCombo.Combos.PvP
                             }
 
                             // Blota with specific conditions and burst mode enabled in meleerange
-                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota))
+                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && BlotaCanPull)
                             {
                                 if (Config.WARPVP_BlotaTiming == 0 && IsOffCooldown(PrimalRend))
                                     return OriginalHook(Blota);

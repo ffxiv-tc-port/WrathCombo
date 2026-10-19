@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -21,9 +21,9 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 //KeyValuePair.Create("Lemures Slice", RPR.LemuresSlice.ActionName()),
                 KeyValuePair.Create("Lemure's Slice", RPR.LemuresSlice.ActionName()),
                 KeyValuePair.Create("Soul Slice", RPR.SoulSlice.ActionName()),
-                KeyValuePair.Create("Slice", RPR.Slice.ActionName()),
-                KeyValuePair.Create("Waxing Slice", RPR.WaxingSlice.ActionName()),
                 KeyValuePair.Create("Infernal Slice", RPR.InfernalSlice.ActionName()),
+                KeyValuePair.Create("Waxing Slice", RPR.WaxingSlice.ActionName()),
+                KeyValuePair.Create("Slice", RPR.Slice.ActionName()),
                 KeyValuePair.Create("Shadow of Death", RPR.ShadowOfDeath.ActionName()),
                 KeyValuePair.Create("Shadow Of Death", RPR.ShadowOfDeath.ActionName()),
 

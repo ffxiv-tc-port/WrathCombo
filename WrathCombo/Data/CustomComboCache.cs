@@ -12,8 +12,8 @@ namespace WrathCombo.Data
     {
         private const uint InvalidObjectID = 0xE000_0000;
 
-        // Invalidate these
-        private readonly ConcurrentDictionary<uint, CooldownData?> cooldownCache = new();
+        // 不必清：CooldownData 不存任何遊戲狀態（見該類別），同一個技能一直用同一個實例。
+        private readonly ConcurrentDictionary<uint, CooldownData> cooldownCache = new();
 
         // Do not invalidate these
         private readonly ConcurrentDictionary<Type, JobGaugeBase> jobGaugeCache = new();
@@ -38,15 +38,10 @@ namespace WrathCombo.Data
         /// <returns> Cooldown data. </returns>
         internal unsafe CooldownData GetCooldown(uint actionID)
         {
-            if (cooldownCache.TryGetValue(actionID, out CooldownData? found))
-                return found!;
+            if (cooldownCache.TryGetValue(actionID, out var found))
+                return found;
 
-            CooldownData data = new()
-            {
-                ActionID = actionID,
-            };
-
-            return cooldownCache[actionID] = data;
+            return cooldownCache.GetOrAdd(actionID, static id => new CooldownData(id));
         }
 
         /// <summary> Get the maximum number of charges for an action. </summary>
@@ -68,11 +63,11 @@ namespace WrathCombo.Data
             return cost;
         }
 
-        /// <summary> Triggers when the game framework updates. Clears cooldown and status caches. </summary>
-        private unsafe void Framework_Update(IFramework framework)
+        /// <summary> Triggers when the game framework updates. Clears the status cache. </summary>
+        private void Framework_Update(IFramework framework)
         {
-            statusCache.Clear();
-            cooldownCache.Clear();
+            lock (statusCacheLock)
+                statusCache.Clear();
         }
     }
 }

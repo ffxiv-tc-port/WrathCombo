@@ -275,8 +275,10 @@ internal partial class SGE : Healer
 
             if (IsEnabled(CustomComboPreset.SGE_ST_Heal_Esuna) &&
                 ActionReady(Role.Esuna) &&
-                GetTargetHPPercent(healTarget, SGE_ST_Heal_IncludeShields) >= SGE_ST_Heal_Esuna &&
-                HasCleansableDebuff(healTarget))
+                HasCleansableDebuff(healTarget) &&
+                EsunaAllowed(healTarget,
+                    GetTargetHPPercent(healTarget, SGE_ST_Heal_IncludeShields) >= SGE_ST_Heal_Esuna,
+                    SGE_ST_Heal_EsunaCriticalHP, SGE_ST_Heal_IncludeShields))
                 return Role.Esuna
                     .RetargetIfEnabled(OptionalTarget, Diagnosis);
 

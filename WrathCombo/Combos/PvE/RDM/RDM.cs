@@ -1,4 +1,5 @@
 using System;
+using WrathCombo.Combos.PvE.Enums;
 using WrathCombo.Core;
 using WrathCombo.CustomComboNS;
 using WrathCombo.Data;
@@ -31,10 +32,6 @@ internal partial class RDM : Caster
             #region OGCDs
             if (CanWeave())
             {
-                //Gap Closer
-                if (ActionReady(Corpsacorps) && (HasEnoughManaToStart || CanMagickedSwordplay) && !InMeleeRange()) 
-                    return Corpsacorps;
-                 
                 if (ActionReady(Manafication) && (EmboldenCD <= 5 || HasEmbolden) && !CanPrefulgence) 
                     return Manafication;
                 
@@ -50,7 +47,7 @@ internal partial class RDM : Caster
                 if (CanEngagement && PoolEngagement)  
                     return Engagement;
                 
-                if (CanCorps && InMeleeRange())
+                if (CanCorps && InMeleeRange() && !IsMoving() && DashAllowed(Corpsacorps))
                     return Corpsacorps;
                 
                 if (CanPrefulgence)
@@ -131,10 +128,6 @@ internal partial class RDM : Caster
             #region OGCDs
             if (CanWeave())
             {
-                //Gap Closer Option
-                if (ActionReady(Corpsacorps) && (HasEnoughManaToStart || CanMagickedSwordplay) && !InMeleeRange()) 
-                    return Corpsacorps;
-                 
                 if (ActionReady(Manafication) && (EmboldenCD <= 5 || HasEmbolden) && !CanPrefulgence) 
                     return Manafication;
                 
@@ -150,7 +143,7 @@ internal partial class RDM : Caster
                 if (CanEngagement && PoolEngagement)  
                     return Engagement;
                 
-                if (CanCorps && InMeleeRange())
+                if (CanCorps && InMeleeRange() && !IsMoving() && DashAllowed(Corpsacorps))
                     return Corpsacorps;
                 
                 if (CanPrefulgence)
@@ -216,8 +209,19 @@ internal partial class RDM : Caster
         {
             if (actionID is not (Jolt or Jolt2 or Jolt3))
                 return actionID;
-            
+
+            // 起手走到第 2 步以後不插：接戰動作會吃掉起手排定的步驟。
+            if (!(Opener().CurrentState == OpenerState.OpenerReady && Opener().OpenerStep > 1) &&
+                TryEngage(OptionalTarget, false, out var engage))
+                return engage;
+
             #region Opener
+            // 起手只會因逾時失敗，插一個赤療傷後從同一步接著走；起手期間不放行的話整段起手都不會自補。
+            if (IsEnabled(CustomComboPreset.RDM_ST_VerCure) && IsEnabled(CustomComboPreset.RDM_Balance_Opener) &&
+                Opener().CurrentState == OpenerState.OpenerReady && !CanWeave() &&
+                ShouldSelfVercure(Config.RDM_ST_VerCureThreshold, Config.RDM_ST_VerCureHardcastThreshold))
+                return Vercure.Retarget([Jolt, Jolt2, Jolt3], VercureSelfResolver);
+
             if (IsEnabled(CustomComboPreset.RDM_Balance_Opener) && HasBattleTarget() &&
                 Opener().FullOpener(ref actionID)) 
                 return actionID;
@@ -237,8 +241,16 @@ internal partial class RDM : Caster
             #region OGCDs
             if (CanWeave())
             {
-                if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_GapCloser) && 
-                    ActionReady(Corpsacorps) && (HasEnoughManaToStart || CanMagickedSwordplay) && !InMeleeRange()) 
+                // 減傷有時效，排在輸出能力技前面：提前 5 秒只有一兩個插入視窗。
+                if (IsEnabled(CustomComboPreset.RDM_ST_Addle) && ShouldRaidwideAddle())
+                    return Role.Addle;
+
+                if (IsEnabled(CustomComboPreset.RDM_ST_MagickBarrier) && ShouldRaidwideMagickBarrier())
+                    return MagickBarrier;
+
+                if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_GapCloser) && !InMeleeRange() &&
+                    ActionReady(Corpsacorps) && TimeStoodStill >= TimeSpan.FromSeconds(Config.RDM_ST_GapCloseCorpsacorps_Time) &&
+                    (HasEnoughManaToStart || CanMagickedSwordplay) && DashAllowed(Corpsacorps))
                     return Corpsacorps;
                  
                 if (IsEnabled(CustomComboPreset.RDM_ST_Manafication) && ActionReady(Manafication) && (EmboldenCD <= 5 || HasEmbolden) && !CanPrefulgence) 
@@ -258,7 +270,8 @@ internal partial class RDM : Caster
                 
                 if (IsEnabled(CustomComboPreset.RDM_ST_Corpsacorps) && CanCorps && 
                     GetTargetDistance()<= Config.RDM_ST_Corpsacorps_Distance &&
-                    TimeStoodStill >= TimeSpan.FromSeconds(Config.RDM_ST_Corpsacorps_Time))
+                    TimeStoodStill >= TimeSpan.FromSeconds(Config.RDM_ST_Corpsacorps_Time) &&
+                    DashAllowed(Corpsacorps))
                     return Corpsacorps;
                 
                 if (IsEnabled(CustomComboPreset.RDM_ST_Prefulgence) && CanPrefulgence)
@@ -288,6 +301,10 @@ internal partial class RDM : Caster
             if (IsEnabled(CustomComboPreset.RDM_ST_HolyFlare) && HasManaStacks) 
                 return UseHolyFlare(actionID);
             
+            if (IsEnabled(CustomComboPreset.RDM_ST_VerCure) &&
+                ShouldSelfVercure(Config.RDM_ST_VerCureThreshold, Config.RDM_ST_VerCureHardcastThreshold))
+                return Vercure.Retarget([Jolt, Jolt2, Jolt3], VercureSelfResolver);
+
             if (IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo) )
             {
                 if ((InMeleeRange() || IsEnabled(CustomComboPreset.RDM_ST_MeleeCombo_MeleeCheck)) && (HasEnoughManaForCombo || CanMagickedSwordplay))
@@ -333,6 +350,9 @@ internal partial class RDM : Caster
             if (actionID is not (Scatter or Impact))
                 return actionID;
 
+            if (TryEngage(OptionalTarget, true, out var engage))
+                return engage;
+
             #region Special Content
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
@@ -347,8 +367,16 @@ internal partial class RDM : Caster
             #region OGCDs
             if (CanWeave())
             {
-                if (IsEnabled(CustomComboPreset.RDM_AoE_MeleeCombo_GapCloser) && 
-                    ActionReady(Corpsacorps) && (HasEnoughManaToStart || CanMagickedSwordplay) && !InMeleeRange()) 
+                if (IsEnabled(CustomComboPreset.RDM_AoE_Addle) && ShouldRaidwideAddle())
+                    return Role.Addle;
+
+                if (IsEnabled(CustomComboPreset.RDM_AoE_MagickBarrier) && ShouldRaidwideMagickBarrier())
+                    return MagickBarrier;
+
+                if (IsEnabled(CustomComboPreset.RDM_AoE_MeleeCombo_GapCloser) &&
+                    (LevelChecked(Moulinet) && GetTargetDistance() > 8 || !LevelChecked(Moulinet) && !InMeleeRange()) &&
+                    ActionReady(Corpsacorps) && TimeStoodStill >= TimeSpan.FromSeconds(Config.RDM_AoE_GapCloseCorpsacorps_Time) &&
+                    (HasEnoughManaToStart || CanMagickedSwordplay) && DashAllowed(Corpsacorps))
                     return Corpsacorps;
                  
                 if (IsEnabled(CustomComboPreset.RDM_AoE_Manafication) && ActionReady(Manafication) && (EmboldenCD <= 5 || HasEmbolden) && !CanPrefulgence) 
@@ -368,7 +396,8 @@ internal partial class RDM : Caster
 
                 if (IsEnabled(CustomComboPreset.RDM_AoE_Corpsacorps) && CanCorps &&
                     GetTargetDistance() <= Config.RDM_AoE_Corpsacorps_Distance &&
-                    TimeStoodStill >= TimeSpan.FromSeconds(Config.RDM_AoE_Corpsacorps_Time))
+                    TimeStoodStill >= TimeSpan.FromSeconds(Config.RDM_AoE_Corpsacorps_Time) &&
+                    DashAllowed(Corpsacorps))
                     return Corpsacorps;
                     
                 if (IsEnabled(CustomComboPreset.RDM_AoE_Prefulgence) && CanPrefulgence)
@@ -397,6 +426,10 @@ internal partial class RDM : Caster
             
             if (IsEnabled(CustomComboPreset.RDM_AoE_HolyFlare) && HasManaStacks) 
                 return UseHolyFlare(actionID);   
+
+            if (IsEnabled(CustomComboPreset.RDM_AoE_VerCure) &&
+                ShouldSelfVercure(Config.RDM_AoE_VerCureThreshold, Config.RDM_AoE_VerCureHardcastThreshold))
+                return Vercure.Retarget([Scatter, Impact], VercureSelfResolver);
 
             if (IsEnabled(CustomComboPreset.RDM_AoE_MeleeCombo))
             {

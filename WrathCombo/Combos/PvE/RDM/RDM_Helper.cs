@@ -1,10 +1,16 @@
 #region Dependencies
 using Dalamud.Game.ClientState.JobGauge.Types;
+using Dalamud.Game.ClientState.Objects.Types;
+using ECommons.DalamudServices;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using System;
 using System.Collections.Generic;
+using WrathCombo.Core;
 using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
+using WrathCombo.Data;
+using WrathCombo.Extensions;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
 #endregion
 
@@ -244,6 +250,92 @@ internal partial class RDM
         if (BlackHigher)
             return LevelChecked(Veraero2) ? Veraero2 : Verthunder2;
         return WhiteHigher ? Verthunder2 : actionID;
+    }
+
+    /// <summary>
+    ///     單人或隊伍裡沒有活著的治療職業時，戰鬥中要不要對自己放赤療傷。
+    ///     有連續魔法／即刻詠唱時看 <paramref name="instantThreshold" />；都沒有時只在
+    ///     <paramref name="hardcastThreshold" /> 以下且站著不動才詠唱（0＝不詠唱）。
+    ///     瞬發門檻恆不低於詠唱門檻：會詠唱的血量，有瞬發時一定也補。
+    /// </summary>
+    internal static bool ShouldSelfVercure(int instantThreshold, int hardcastThreshold)
+    {
+        if (!InCombat() || InCombo || HasManaStacks || !ActionReady(Vercure))
+            return false;
+
+        var hp = PlayerHealthPercentageHp();
+        if (HasDualcast || HasSwiftcast)
+        {
+            if (hp > Math.Max(instantThreshold, hardcastThreshold))
+                return false;
+            // 即刻詠唱留給復活；兩個增益同時在時不確定遊戲先吃哪一個，一律不拿來補自己。
+            if (HasSwiftcast && SimpleTarget.AnyDeadPartyMember is not null)
+                return false;
+        }
+        else if (hp > hardcastThreshold || IsMoving())
+            return false;
+
+        return SimpleTarget.AnyLivingHealer is null;
+    }
+
+    // 解析時才取自己，不把物件包裝留到按下按鈕那一幀。
+    [ActionRetargeting.TargetResolver]
+    internal static IGameObject? VercureSelfResolver() => SimpleTarget.Self;
+
+    private static long _addleLoggedAt, _magickBarrierLoggedAt;
+
+    /// <summary>
+    ///     全體傷害是否將至：BMR 有預告時只看預告（≤ 提前秒數），沒有預告或 BMR 不可用時退回敵方詠唱判斷。
+    ///     <paramref name="forecast" /> 為 <see langword="null" />＝這次是詠唱判斷給的答案。
+    /// </summary>
+    /// <remarks>只在框架執行緒判斷：BMR 端點在別的執行緒會阻塞，詠唱判斷也用了不分執行緒的 EzThrottler。</remarks>
+    private static bool RaidwideMitigationDue(out float? forecast)
+    {
+        forecast = null;
+        if (!Svc.Framework.IsInFrameworkUpdateThread)
+            return false;
+
+        forecast = RaidwideForecast.NextRaidwideIn();
+        return RaidwideForecast.Verdict(forecast, Config.RDM_RaidwideMit_LeadTime) ?? RaidWideCasting();
+    }
+
+    /// <summary>戰鬥中、目標是射程內的敵人且身上沒有任何人的昏亂、全體傷害將至。</summary>
+    internal static bool ShouldRaidwideAddle()
+    {
+        if (!InCombat() || !Role.CanAddle() || !HasBattleTarget() || !InActionRange(Role.Addle) ||
+            !RaidwideMitigationDue(out var forecast))
+            return false;
+
+        LogRaidwideMitigation(Role.Addle, forecast, ref _addleLoggedAt);
+        return true;
+    }
+
+    /// <summary>
+    ///     戰鬥中、自己身上沒有抗死、6 秒內沒放過昏亂（同一波不疊兩招）、範圍內隊友達隊伍人數 75%、全體傷害將至。
+    /// </summary>
+    internal static bool ShouldRaidwideMagickBarrier()
+    {
+        if (!InCombat() || !ActionReady(MagickBarrier) ||
+            HasStatusEffect(Buffs.MagickBarrier, anyOwner: true) || JustUsed(Role.Addle, 6) ||
+            !RaidwideMitigationDue(out var forecast) ||
+            NumberOfAlliesInRange(MagickBarrier) < GetPartyMembers().Count * .75)
+            return false;
+
+        LogRaidwideMitigation(MagickBarrier, forecast, ref _magickBarrierLoggedAt);
+        return true;
+    }
+
+    // 快捷列與自動循環每幀都會問好幾次；同一招 10 秒內只記一行（兩招冷卻 90／120 秒）。
+    private static void LogRaidwideMitigation(uint action, float? forecast, ref long loggedAt)
+    {
+        var now = Environment.TickCount64;
+        if (now - loggedAt < 10_000)
+            return;
+
+        loggedAt = now;
+        PluginLog.Information(forecast is { } seconds
+            ? $"[WrathCombo][自動減傷] {action.ActionName()}：BMR 預告 {seconds:0.0} 秒後全體傷害"
+            : $"[WrathCombo][自動減傷] {action.ActionName()}：退回詠唱判斷（敵方正在詠唱全體範圍技）");
     }
     #endregion
 

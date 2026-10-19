@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvP;
@@ -50,17 +50,16 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Danger / Blasting Zone", $"{GNB.DangerZone.ActionName()}/{GNB.BlastingZone.ActionName()}"),
                 KeyValuePair.Create("Danger/Blasting Zone", $"{GNB.DangerZone.ActionName()}/{GNB.BlastingZone.ActionName()}"),
                 KeyValuePair.Create("Blasting Zone", GNB.BlastingZone.ActionName()),
-                KeyValuePair.Create("Reign Combo", $"{GNB.ReignOfBeasts.ActionName()}连击"),
-                KeyValuePair.Create("Reign combo", $"{GNB.ReignOfBeasts.ActionName()}连击"),
+                KeyValuePair.Create("Reign Combo", $"{GNB.ReignOfBeasts.ActionName()}連擊"),
+                KeyValuePair.Create("Reign combo", $"{GNB.ReignOfBeasts.ActionName()}連擊"),
                 KeyValuePair.Create("Reign", GNB.ReignOfBeasts.ActionName()),
                 KeyValuePair.Create("Danger/Blasting", $"{GNB.DangerZone.ActionName()}/{GNB.BlastingZone.ActionName()}"),
-                KeyValuePair.Create("Ammo Overcap", "弹药溢出"),
-                KeyValuePair.Create("Zone", "领域"),
+                KeyValuePair.Create("Ammo Overcap", "彈藥溢位"),
+                KeyValuePair.Create("Zone", "領域"),
 
                 // Defensive
                 KeyValuePair.Create("Camouflage", GNB.Camouflage.ActionName()),
-                KeyValuePair.Create("Royal Guard", GNB.RoyalGuard.ActionName()),
-                KeyValuePair.Create("Release Royal Guard", GNB.ReleaseRoyalGuard.ActionName()),
+                KeyValuePair.Create("Great Nebula", GNB.GreatNebula.ActionName()),
                 KeyValuePair.Create("Nebula", GNB.Nebula.ActionName()),
                 KeyValuePair.Create("Aurora", GNB.Aurora.ActionName()),
                 KeyValuePair.Create("Superbolide", GNB.Superbolide.ActionName()),
@@ -70,7 +69,6 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Trajectory", GNB.Trajectory.ActionName()),
                 KeyValuePair.Create("Heart of Corundum", GNB.HeartOfCorundum.ActionName()),
                 KeyValuePair.Create("Corundum", GNB.HeartOfCorundum.ActionName()),
-                KeyValuePair.Create("Great Nebula", GNB.GreatNebula.ActionName()),
 
                 // GNB PvP
                 KeyValuePair.Create("Rough Divide", GNBPvP.RoughDivide.ActionName()),

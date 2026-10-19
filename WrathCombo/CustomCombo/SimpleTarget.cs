@@ -6,8 +6,10 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using WrathCombo.Attributes;
+using WrathCombo.AutoRotation;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Core;
 using WrathCombo.CustomComboNS.Functions;
@@ -212,12 +214,18 @@ internal static class SimpleTarget
                             $"is dead: {resolved.IsDead(),5})"
                         );
 
+                    if (target != null && SkipLimitedRaiseAutoPick(name, target)) target = null;
                     if (target != null) return target;
                 }
 
                 // Fall back to Hard Target, if the stack is small and returned nothing
                 if (Service.Configuration.RaiseStack.Length <= 4)
-                    return HardTarget.IfCanUseOn(WHM.Raise).IfDead() ?? AnyDeadPartyMember;
+                {
+                    var hard = HardTarget.IfCanUseOn(WHM.Raise).IfDead();
+                    if (hard != null) return hard;
+                    var anyDead = AnyDeadPartyMember;
+                    return anyDead != null && SkipLimitedRaiseAutoPick(nameof(AnyDeadPartyMember), anyDead) ? null : anyDead;
+                }
             }
             #endregion
 
@@ -231,6 +239,15 @@ internal static class SimpleTarget
                 return logicForEachEntryInStack(target);
             }
         }
+
+        // 玩家自己指的目標：「自動復活跳過有『限制復活』的隊友」開著也照選（那就是「改人工」）。
+        private static readonly HashSet<string> ManualRaisePicks = new(StringComparer.Ordinal)
+            { nameof(HardTarget), nameof(SoftTarget), nameof(FocusTarget), nameof(UIMouseOverTarget), nameof(ModelMouseOverTarget) };
+
+        private static bool SkipLimitedRaiseAutoPick(string stackEntry, IGameObject target) =>
+            Service.Configuration.RotationConfig.HealerSettings.AutoRezSkipLimitedRaise &&
+            !ManualRaisePicks.Contains(stackEntry) &&
+            RezThrottle.SkipLimitedRaise(target, "復活重定向");
 
         private static IGameObject? GetSimpleTargetValueFromName(string name)
         {
@@ -291,11 +308,15 @@ internal static class SimpleTarget
     {
         get
         {
-            if (!PronounService.PronounsReady) return null;
             unsafe
             {
+                // 直接判 Module 本身,不要靠 PronounsReady 當前置條件 ——
+                // 兩者各自重新解析,拿 Module 才是真正要解參考的那個指標。
+                var module = PronounService.Module;
+                if (module == null) return null;
+
                 return GameObjectExtensions.GetObjectFrom(
-                    PronounService.Module->UiMouseOverTarget);
+                    module->UiMouseOverTarget);
             }
         }
     }
@@ -345,26 +366,68 @@ internal static class SimpleTarget
             .FirstOrDefault();
 
     public static IGameObject? InterruptableEnemy =>
-        Svc.Objects
-            .OfType<IBattleChara>()
-            .Where(x => x.IsHostile() && x.IsTargetable &&
-                        x.IsWithinRange(3) && x.IsCastInterruptible)
-            .OrderByDescending(x => Svc.Targets.Target?.GameObjectId == x.GameObjectId)
-            .FirstOrDefault();
+        PickEnemy(
+            Svc.Objects
+                .OfType<IBattleChara>()
+                .Where(x => x.IsHostile() && x.IsTargetable &&
+                            x.IsWithinRange(3) && x.IsCastInterruptible),
+            MechanicHints.HintKind.Interrupt);
 
     public static IGameObject? StunnableEnemy(int reStunCheck = 3) =>
-        Svc.Objects
-            .OfType<IBattleChara>()
-            .Where(x => x.IsHostile() && x.IsTargetable &&
-                        !x.IsBoss() && x.IsWithinRange(3) &&
-                        !CustomComboFunctions.HasStatusEffect(All.Debuffs.Stun, x) &&
-                        (ICDTracker.StatusIsExpired(All.Debuffs.Stun, x.GameObjectId) ||
-                         ICDTracker.Trackers.FirstOrDefault(y =>
-                             y.StatusID == All.Debuffs.Stun &&
-                             x.GameObjectId == y.GameObjectId)?
-                             .TimesApplied < reStunCheck))
-            .OrderByDescending(x => Svc.Targets.Target?.GameObjectId == x.GameObjectId)
+        PickEnemy(
+            Svc.Objects
+                .OfType<IBattleChara>()
+                .Where(x => x.IsHostile() && x.IsTargetable &&
+                            !x.IsBoss() && x.IsWithinRange(3) &&
+                            !CustomComboFunctions.HasStatusEffect(All.Debuffs.Stun, x) &&
+                            (ICDTracker.StatusIsExpired(All.Debuffs.Stun, x.GameObjectId) ||
+                             ICDTracker.Trackers.FirstOrDefault(y =>
+                                 y.StatusID == All.Debuffs.Stun &&
+                                 x.GameObjectId == y.GameObjectId)?
+                                 .TimesApplied < reStunCheck) &&
+                            // MonsterDex 明確說「不吃暈眩」才排除；
+                            // 功能關閉／沒安裝／查無資料一律放行。
+                            MonsterVulnerability.CanBeStunned(x)),
+            MechanicHints.HintKind.Stun);
+
+    /// <summary>
+    ///     從已經過濾好的候選敵人裡挑一個，並套用「機制感知」偏好。
+    /// </summary>
+    /// <param name="candidates">
+    ///     <b>已經</b>通過所有既有條件（敵對／可選取／距離／可打斷／ICD…）的候選。
+    /// </param>
+    /// <param name="kind">要問 BossMod(Reborn) 哪一份提示清單。</param>
+    /// <returns>
+    ///     功能關閉時 ＝ 現有硬目標優先，其餘取第一個。<br />
+    ///     功能開啟、非嚴格：BMR 標記過的排前面，沒有標記時退化成上面那條。<br />
+    ///     功能開啟、嚴格：候選先與 BMR 標記<b>取交集</b>，交集為空就回
+    ///     <see langword="null" />（＝不出手）。
+    /// </returns>
+    /// <remarks>
+    ///     🔴 BMR 回的是模組原始標記，不含 InCombat／詠唱中之類的策略過濾 ——
+    ///     所以這裡永遠是「既有過濾 ∩ 標記」，標記從來不會放寬既有條件。
+    /// </remarks>
+    private static IGameObject? PickEnemy
+        (IEnumerable<IBattleChara> candidates, MechanicHints.HintKind kind)
+    {
+        // 功能關閉時完全不碰 IPC。
+        if (!MechanicHints.Enabled)
+            return candidates
+                .OrderByDescending(x =>
+                    Svc.Targets.Target?.GameObjectId == x.GameObjectId)
+                .FirstOrDefault();
+
+        var hints = MechanicHints.Hints(kind);
+
+        if (MechanicHints.StrictOnly)
+            candidates = candidates.Where(x => MechanicHints.IsFlagged(hints, x));
+
+        return candidates
+            .OrderByDescending(x => MechanicHints.IsFlagged(hints, x))
+            .ThenByDescending(x =>
+                Svc.Targets.Target?.GameObjectId == x.GameObjectId)
             .FirstOrDefault();
+    }
 
     public static IGameObject? DottableEnemy
     (uint dotAction,
@@ -434,27 +497,39 @@ internal static class SimpleTarget
 
     #region HP-Based Targets
 
-    public static IGameObject? LowestHPAlly =>
-        CustomComboFunctions
-            .GetPartyMembers()
-            .Select(x => x.BattleChara)
-            .Where(x => x is not null && x.IsDead() == false)
-            .OrderBy(x => x.CurrentHp)
-            .FirstOrDefault();
+    public static IGameObject? LowestHPAlly => LowestAlly(byPercent: false);
 
     public static IGameObject? LowestHPAllyIfMissingHP =>
         LowestHPAlly?.IfMissingHP();
 
-    public static IGameObject? LowestHPPAlly =>
-        CustomComboFunctions
-            .GetPartyMembers()
-            .Select(x => x.BattleChara)
-            .Where(x => x is not null && x.IsDead() == false)
-            .OrderBy(x => x.CurrentHp / x.MaxHp * 100)
-            .FirstOrDefault();
+    public static IGameObject? LowestHPPAlly => LowestAlly(byPercent: true);
 
     public static IGameObject? LowestHPPAllyIfMissingHP =>
         LowestHPPAlly?.IfMissingHP();
+
+    // 同 GetPartyMembers().Select(BattleChara).Where(非 null 且活著).OrderBy(鍵).FirstOrDefault()，不建迭代器：
+    // 照名單順序走訪，鍵「嚴格小於」目前最小值才換人（OrderBy 是穩定排序，平手取先出現的）。
+    // 百分比鍵照原式是整數除法（滿血 100、其餘 0），刻意不改。
+    private static IBattleChara? LowestAlly(bool byPercent)
+    {
+        IBattleChara? best = null;
+        uint bestKey = 0;
+        foreach (var member in CustomComboFunctions.GetPartyMembers())
+        {
+            var x = member.BattleChara;
+            if (x is null || x.IsDeadEvenIfUnraisable())
+                continue;
+
+            var key = byPercent ? x.CurrentHp / x.MaxHp * 100 : x.CurrentHp;
+            if (best is null || key < bestKey)
+            {
+                best = x;
+                bestKey = key;
+            }
+        }
+
+        return best;
+    }
 
     #endregion
 
@@ -611,7 +686,7 @@ internal static class SimpleTarget
 
             if (deadTanks.Length == 0)
                 return null;
-            if (tanks.Any(x => x?.BattleChara.IsDead() == false))
+            if (tanks.Any(x => x?.BattleChara.IsDeadEvenIfUnraisable() == false))
                 return null;
 
             return deadTanks.FirstOrDefault()?.BattleChara;
@@ -632,7 +707,7 @@ internal static class SimpleTarget
 
             if (deadHealers.Length == 0)
                 return null;
-            if (healers.Any(x => x?.BattleChara.IsDead() == false))
+            if (healers.Any(x => x?.BattleChara.IsDeadEvenIfUnraisable() == false))
                 return null;
 
             return deadHealers.FirstOrDefault()?.BattleChara;
@@ -655,7 +730,7 @@ internal static class SimpleTarget
 
             if (deadRaisers.Length == 0)
                 return null;
-            if (raisers.Any(x => x?.BattleChara.IsDead() == false))
+            if (raisers.Any(x => x?.BattleChara.IsDeadEvenIfUnraisable() == false))
                 return null;
 
             return deadRaisers.FirstOrDefault()?.BattleChara;
@@ -677,7 +752,7 @@ internal static class SimpleTarget
 
             if (deadRaisers.Length == 0)
                 return null;
-            if (raisers.Any(x => x?.BattleChara.IsDead() == false))
+            if (raisers.Any(x => x?.BattleChara.IsDeadEvenIfUnraisable() == false))
                 return null;
 
             return deadRaisers.FirstOrDefault()?.BattleChara;

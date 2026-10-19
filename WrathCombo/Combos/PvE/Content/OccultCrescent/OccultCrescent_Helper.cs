@@ -98,6 +98,10 @@ internal partial class OccultCrescent
         Suspend = 41620;
     internal static bool IsEnabledAndUsable(CustomComboPreset preset, uint action) => IsEnabled(preset) && HasActionEquipped(action) && ActionReady(action);
 
+    /// <summary> 自動循環的復活用。與連段裡輔助藥劑師那段同一組條件：根選項關著時「蘇生」子選項不生效。 </summary>
+    internal static bool ReviveEnabledAndUsable =>
+        IsEnabled(CustomComboPreset.Phantom_Chemist) && IsEnabledAndUsable(CustomComboPreset.Phantom_Chemist_Revive, Revive);
+
     public static class JobIDs
     {
         public const int

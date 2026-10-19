@@ -134,8 +134,10 @@ public class ContentCheck
             if (!EZ.Throttle("contentCheckInPVP", TS.FromSeconds(5)))
                 return field;
 
+            // 台服 TerritoryName 是繁中(狼獄停船場),英文字串永遠比對不到;
+            // 改用 TerritoryType ID 250 判定,語言無關。
             field = (Content.ContentType is ContentType.OverWorld &&
-                     Content.TerritoryName == "Wolves' Den Pier") ||
+                     Content.TerritoryID == 250) ||
                     Content.ContentType is ContentType.PVP;
             return field;
         }
@@ -183,7 +185,9 @@ public class ContentCheck
     {
         get
         {
-            if (!EZ.Throttle("contentCheckInFieldOperations", TS.FromSeconds(5)))
+            // 鍵不可與 IsInFieldOperations 共用：呼叫端寫成 `A || B`，共用時 B 永遠
+            // 被 A 剛上緊的節流擋下、只回從未計算過的預設值。
+            if (!EZ.Throttle("contentCheckInFieldRaids", TS.FromSeconds(5)))
                 return field;
 
             field = Content.ContentType is ContentType.FieldRaid;

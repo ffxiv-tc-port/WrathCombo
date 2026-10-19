@@ -4,8 +4,10 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using ECommons.Logging;
 using WrathCombo.AutoRotation;
@@ -30,9 +32,89 @@ namespace WrathCombo.Core
 
         #region EnabledActions
 
-        /// <summary> Gets or sets the collection of enabled combos. </summary>
+        /// <summary>
+        ///     🔴 保護 <see cref="enabledActions" /> 與 <see cref="autoActions" /> 的鎖。
+        ///     <b>只在「換掉整份集合」時取</b>，讀取端完全不需要它。
+        /// </summary>
+        /// <remarks>
+        ///     這把鎖是葉節點：鎖內只做集合複製與參考指派就出來，不呼叫 ImGui、
+        ///     不做檔案 I/O、不呼叫別的外掛、不呼叫 IPC。
+        /// </remarks>
+        [JsonIgnore]
+        private readonly object collectionGate = new();
+
+        /// <summary>
+        ///     The backing store for <see cref="EnabledActions" />.
+        /// </summary>
+        /// <remarks>
+        ///     <b>永遠不要就地增修這一份</b>（Add／Remove／Clear／RemoveWhere）：它被三種執行緒同時讀——繪製執行緒（設定視窗）、
+        ///     framework 執行緒（每一幀的戰鬥判斷式，<see cref="PresetStorage.IsEnabled" />）、<b>承租外掛自己的執行緒</b>（<c>[EzIPC]</c> 端點 →
+        ///     <see cref="Services.IPC.Search.PresetStates" /> → <c>CustomComboFunctions.IsEnabled</c>）。裸 <see cref="HashSet{T}" /> 零同步，失敗形式是<b>集合本身壞掉</b>。<br />
+        ///     所以走 <b>copy-on-write</b>：改動一律在鎖內複製一份新的、改完再一次把參考指派回來；參考指派是原子的，
+        ///     讀取端拿到的永遠是一份完整、不會再被改動的快照，<b>完全不必取鎖</b>。
+        /// </remarks>
         [JsonProperty("EnabledActionsV6")]
-        public HashSet<CustomComboPreset> EnabledActions { get; set; } = [];
+        private HashSet<CustomComboPreset> enabledActions = [];
+
+        /// <summary> Gets the collection of enabled combos. </summary>
+        /// <remarks>
+        ///     這是一份唯讀快照。要改請用 <see cref="EnableAction" />、
+        ///     <see cref="DisableAction" />、<see cref="ClearEnabledActions" />、
+        ///     <see cref="RemoveEnabledActionsWhere" />。
+        /// </remarks>
+        [JsonIgnore]
+        public IReadOnlySet<CustomComboPreset> EnabledActions => enabledActions;
+
+        /// <summary> 把一個 preset 加進已啟用清單。 </summary>
+        /// <returns>是不是真的加了（同 <c>HashSet.Add</c> 的回傳語意）。</returns>
+        public bool EnableAction(CustomComboPreset preset)
+        {
+            lock (collectionGate)
+            {
+                if (enabledActions.Contains(preset))
+                    return false;
+                var rebuilt = new HashSet<CustomComboPreset>(enabledActions)
+                    { preset };
+                enabledActions = rebuilt;
+                return true;
+            }
+        }
+
+        /// <summary> 把一個 preset 從已啟用清單移除。 </summary>
+        /// <returns>是不是真的移除了（同 <c>HashSet.Remove</c> 的回傳語意）。</returns>
+        public bool DisableAction(CustomComboPreset preset)
+        {
+            lock (collectionGate)
+            {
+                if (!enabledActions.Contains(preset))
+                    return false;
+                var rebuilt = new HashSet<CustomComboPreset>(enabledActions);
+                rebuilt.Remove(preset);
+                enabledActions = rebuilt;
+                return true;
+            }
+        }
+
+        /// <summary> 清空已啟用清單。 </summary>
+        public void ClearEnabledActions()
+        {
+            lock (collectionGate)
+                enabledActions = [];
+        }
+
+        /// <summary> 移除所有符合條件的 preset。 </summary>
+        /// <returns>移除了幾個（同 <c>HashSet.RemoveWhere</c> 的回傳語意）。</returns>
+        public int RemoveEnabledActionsWhere(Predicate<CustomComboPreset> match)
+        {
+            lock (collectionGate)
+            {
+                var rebuilt = new HashSet<CustomComboPreset>(enabledActions);
+                var removed = rebuilt.RemoveWhere(match);
+                if (removed > 0)
+                    enabledActions = rebuilt;
+                return removed;
+            }
+        }
 
         #endregion
 
@@ -92,6 +174,41 @@ namespace WrathCombo.Core
 
         public bool UseCustomHealStack = false;
 
+        #region Mechanic-Aware Enemy Targeting
+
+        /// <summary>
+        ///     打斷／暈眩的目標選擇要不要參考 BossMod(Reborn) 的機制標記。
+        /// </summary>
+        /// <remarks>
+        ///     預設 <see langword="false" /> ＝ 完全維持現行行為。<br />
+        ///     開啟後只是把 BMR 標記過的敵人<b>排到前面</b>，仍然要通過既有的
+        ///     敵對／可選取／距離／可打斷／ICD 判斷。BMR 缺席或沒標記任何東西時，
+        ///     排序沒有東西可排，結果與關閉時相同。
+        /// </remarks>
+        public bool MechanicAwareTargeting = false;
+
+        /// <summary>
+        ///     嚴格模式：只把 BMR 標記過的敵人列入候選。
+        /// </summary>
+        /// <remarks>
+        ///     🔴 這一條會<b>減少</b>出手：BMR 缺席或清單為空時，打斷／暈眩的目標
+        ///     選擇一律回 <see langword="null" />（＝不出手）。
+        ///     只在 <see cref="MechanicAwareTargeting" /> 開啟時有效。
+        /// </remarks>
+        public bool MechanicAwareTargetingStrictOnly = false;
+
+        /// <summary>
+        ///     暈眩目標選擇要不要跳過 MonsterDex 明確標示為「不吃暈眩」的敵人。
+        /// </summary>
+        /// <remarks>
+        ///     🔴 只有在 MonsterDex <b>明確回報 bit0 ＝ 0</b> 時才排除。
+        ///     沒安裝、端點不存在、查無資料（回 <c>-1</c>）一律<b>放行</b>，
+        ///     絕不把「不知道」當成「免疫」。
+        /// </remarks>
+        public bool MonsterDexStunGate = false;
+
+        #endregion
+
         // Just has value so the UI element for it is more obvious from the get-go
         public string[] CustomHealStack = [
             "FocusTarget",
@@ -118,11 +235,15 @@ namespace WrathCombo.Core
                 Save();
             }
 
+            // hook 沒解到（遊戲改版）：沒有東西可以開關。
+            if (Service.ActionReplacer.getActionHook is not { } getActionHook)
+                return;
+
             // Checks if action replacing is not in line with the setting
-            if (ActionChanging && !Service.ActionReplacer.getActionHook.IsEnabled)
-                Service.ActionReplacer.getActionHook.Enable();
-            if (!ActionChanging && Service.ActionReplacer.getActionHook.IsEnabled)
-                Service.ActionReplacer.getActionHook.Disable();
+            if (ActionChanging && !getActionHook.IsEnabled)
+                getActionHook.Enable();
+            if (!ActionChanging && getActionHook.IsEnabled)
+                getActionHook.Disable();
         }
 
         public bool ShowHiddenFeatures = false;
@@ -134,7 +255,40 @@ namespace WrathCombo.Core
         #endregion
 
         #region AutoAction Settings
-        public Dictionary<CustomComboPreset, bool> AutoActions { get; set; } = [];
+
+        /// <summary>
+        ///     The backing store for <see cref="AutoActions" />.
+        /// </summary>
+        /// <remarks>
+        ///     與 <see cref="enabledActions" /> 同理：<b>永遠不要就地增修</b>，一律走 <see cref="SetAutoAction" />（copy-on-write）。
+        ///     它同樣被 <c>[EzIPC]</c> 端點的執行緒（<see cref="Services.IPC.Search.PresetStates" /> 裡的 <c>AutoActions.TryGetValue</c>）與繪製執行緒同時碰。<br />
+        ///     <b>型別必須維持 <see cref="Dictionary{TKey,TValue}" /></b>：使用者既有的設定檔裡這一份帶著 <c>$type</c> 標記
+        ///     （Dalamud 存檔用 <c>TypeNameHandling.Objects</c>），換成別的具體型別會在載入時型別不合。
+        /// </remarks>
+        [JsonProperty("AutoActions")]
+        private Dictionary<CustomComboPreset, bool> autoActions = [];
+
+        /// <summary> Gets the Auto-Mode state of each preset. </summary>
+        /// <remarks>這是一份唯讀快照。要改請用 <see cref="SetAutoAction" />。</remarks>
+        [JsonIgnore]
+        public IReadOnlyDictionary<CustomComboPreset, bool> AutoActions => autoActions;
+
+        /// <summary> 設定一個 preset 的自動模式狀態。 </summary>
+        /// <returns>值有沒有真的改變。</returns>
+        public bool SetAutoAction(CustomComboPreset preset, bool state)
+        {
+            lock (collectionGate)
+            {
+                if (autoActions.TryGetValue(preset, out var current) &&
+                    current == state)
+                    return false;
+                var rebuilt =
+                    new Dictionary<CustomComboPreset, bool>(autoActions)
+                        { [preset] = state };
+                autoActions = rebuilt;
+                return true;
+            }
+        }
 
         public AutoRotationConfig RotationConfig { get; set; } = new();
 
@@ -280,8 +434,9 @@ namespace WrathCombo.Core
 
         public void ResetFeatures(string config, int[] values)
         {
-            Svc.Log.Debug($"{config} {GetResetValues(config)}");
-            if (!GetResetValues(config))
+            var alreadyReset = GetResetValues(config);
+            Svc.Log.Debug($"{config} {alreadyReset}");
+            if (!alreadyReset)
             {
                 bool needToResetMessagePrinted = false;
 
@@ -300,21 +455,25 @@ namespace WrathCombo.Core
 
                         if (!needToResetMessagePrinted)
                         {
-                            DuoLog.Error($"由于内部配置更新，某些功能已被禁用:");
+                            DuoLog.Error($"由於內部配置更新，某些功能已被停用:");
                             needToResetMessagePrinted = !needToResetMessagePrinted;
                         }
 
                         var info = preset.GetComboAttribute();
                         DuoLog.Error($"- {info.JobName}: {info.Name}");
-                        EnabledActions.Remove(preset);
+                        DisableAction(preset);
                     }
                 }
 
                 if (needToResetMessagePrinted)
-                    DuoLog.Error($"请重新启用这些功能以继续使用。我们为造成的不便深表歉意");
+                    DuoLog.Error($"請重新啟用這些功能以繼續使用。我們為造成的不便深表歉意");
             }
             SetResetValues(config, true);
-            Save();
+
+            // 已經重設過的版本這一趟什麼都沒改，不存檔：每次登入都會跑到這裡，
+            // 而存檔會更新設定檔的修改時間，讓 Search.PresetStates 下一輪整份重建。
+            if (!alreadyReset)
+                Save();
         }
 
         #endregion
@@ -322,6 +481,7 @@ namespace WrathCombo.Core
         #region Other (SpecialEvent, MotD)
 
         /// <summary> Hides the message of the day. </summary>
+        /// <remarks> 登入公告已停用，這個值不再被讀取；保留屬性，既有設定檔裡的值才不會在存檔時被丟掉。</remarks>
         public bool HideMessageOfTheDay { get; set; } = false;
 
         /// <summary>
@@ -344,7 +504,10 @@ namespace WrathCombo.Core
         /// <summary>
         ///     The queue of items to be saved.
         /// </summary>
-        internal static readonly Queue<(PluginConfiguration, StackTrace)> SaveQueue = [];
+        /// <remarks>
+        ///     第二個欄位是「誰要求存檔」，只在存檔失敗的錯誤訊息裡用到。
+        /// </remarks>
+        internal static readonly Queue<(PluginConfiguration, string)> SaveQueue = [];
 
         /// <summary>
         ///     Whether an item is currently being saved.
@@ -360,7 +523,22 @@ namespace WrathCombo.Core
             if (_isSaving || SaveQueue.Count == 0) return;
 
             _isSaving = true;
-            var (config, trace) = SaveQueue.Dequeue();
+            (PluginConfiguration config, string trace) dequeued;
+
+            // 鎖內只做佇列操作：序列化與寫檔（SavePluginConfig）一律在鎖外，
+            // 否則每一個排存檔的執行緒都得跟著在磁碟上排隊。
+            // 上面的 Count 檢查與這裡的取出不在同一段臨界區，所以用
+            // TryDequeue 而不是 Dequeue：佇列被別人先清空時不會擲例外。
+            lock (SaveQueue)
+            {
+                if (!SaveQueue.TryDequeue(out dequeued))
+                {
+                    _isSaving = false;
+                    return;
+                }
+            }
+
+            var (config, trace) = dequeued;
 
             try
             {
@@ -369,12 +547,16 @@ namespace WrathCombo.Core
             }
             catch (Exception)
             {
-                Svc.Framework.Run(() => RetrySave(config, trace));
+                ScheduleRetrySave(config, trace);
             }
         }
 
+        // 閉包類別會在捕獲它的方法入口就配置；拆出來，每幀都會走到的早退路徑（佇列空）才不配置。
+        private static void ScheduleRetrySave(PluginConfiguration config, string trace) =>
+            Svc.Framework.Run(() => RetrySave(config, trace));
+
         internal static void RetrySave
-            (PluginConfiguration config, StackTrace trace)
+            (PluginConfiguration config, string trace)
         {
             var success = false;
             var retryCount = 0;
@@ -410,14 +592,53 @@ namespace WrathCombo.Core
         /// <remarks>
         ///     Configurations set to be saved will be processed in the order they
         ///     were added, each frame.
+        ///     同一份設定在佇列裡最多只會排一筆：序列化是在出列時才做，已經排隊的那一筆本來就會寫入「當下最新」的內容；
+        ///     每個 tick 只處理一筆，重複排隊只會讓同一份檔案被重寫好幾次、佇列越積越長。
         /// </remarks>
         /// <seealso cref="SaveQueue"/>
-        public void Save()
+        public void Save
+            ([CallerMemberName] string caller = "",
+             [CallerFilePath] string callerFile = "",
+             [CallerLineNumber] int callerLine = 0)
         {
             if (Debug.DebugConfig)
                 return;
 
-            SaveQueue.Enqueue((this, new StackTrace()));
+            lock (SaveQueue)
+            {
+                foreach (var (queued, _) in SaveQueue)
+                    if (ReferenceEquals(queued, this))
+                        return;
+
+                SaveQueue.Enqueue(
+                    (this, $"{caller} ({Path.GetFileName(callerFile)}:{callerLine})"));
+            }
+        }
+
+        /// <summary>
+        ///     卸載時把佇列裡待存的項目收斂成「只存這一份設定一次」。
+        /// </summary>
+        /// <remarks>
+        ///     鎖內只做佇列操作（清空佇列、排入這一份設定），真正的序列化與
+        ///     寫檔由鎖外的 <see cref="ProcessSaveQueue"/> 執行 —— 存檔留在
+        ///     鎖內會讓每一個排存檔的執行緒都跟著在磁碟上排隊。
+        /// </remarks>
+        /// <seealso cref="SaveQueue"/>
+        /// <seealso cref="Save"/>
+        internal void FlushQueuedSavesOnDispose
+            ([CallerMemberName] string caller = "",
+             [CallerFilePath] string callerFile = "",
+             [CallerLineNumber] int callerLine = 0)
+        {
+            lock (SaveQueue)
+            {
+                SaveQueue.Clear();
+                if (!Debug.DebugConfig)
+                    SaveQueue.Enqueue(
+                        (this, $"{caller} ({Path.GetFileName(callerFile)}:{callerLine})"));
+            }
+
+            ProcessSaveQueue();
         }
 
         #endregion

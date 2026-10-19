@@ -1,4 +1,5 @@
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
+using ECommons.LanguageHelpers;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Extensions;
 using WrathCombo.Window.Functions;
@@ -11,6 +12,9 @@ internal partial class SMN
     internal static class Config
     {
         public static UserInt
+            SMN_ST_Simple_Combo_Gapclose = new("SMN_ST_Simple_Combo_Gapclose"),
+            SMN_AoE_Simple_Combo_Gapclose = new("SMN_AoE_Simple_Combo_Gapclose"),
+
             SMN_ST_Advanced_Combo_AltMode = new("SMN_ST_Advanced_Combo_AltMode"),
             SMN_ST_Lucid = new("SMN_ST_Lucid", 8000),
             SMN_ST_BurstPhase = new("SMN_ST_BurstPhase", 1),
@@ -44,9 +48,19 @@ internal partial class SMN
         {
             switch (preset)
             {
+                case CustomComboPreset.SMN_ST_Simple_Combo:
+                    DrawHorizontalRadioButton(SMN_ST_Simple_Combo_Gapclose, "Safe Mode (Will not gap close)", "Will only use Crimson Cyclone when in Melee Range", 0);
+                    DrawHorizontalRadioButton(SMN_ST_Simple_Combo_Gapclose, "Standard Rotation", "Will gap close with Crimson Cyclone.", 1);
+                    break;
+
+                case CustomComboPreset.SMN_AoE_Simple_Combo:
+                    DrawHorizontalRadioButton(SMN_AoE_Simple_Combo_Gapclose, "Safe Mode (Will not gap close)", "Will only use Crimson Cyclone when in Melee Range", 0);
+                    DrawHorizontalRadioButton(SMN_AoE_Simple_Combo_Gapclose, "Standard Rotation", "Will gap close with Crimson Cyclone.", 1);
+                    break;
+
                 case CustomComboPreset.SMN_ST_Advanced_Combo:
-                    DrawRadioButton(SMN_ST_Advanced_Combo_AltMode, "在毁灭、毁坏和毁荡上", "", 0);
-                    DrawRadioButton(SMN_ST_Advanced_Combo_AltMode, "仅在毁灭和毁坏上", "替代DPS模式。保持毁荡独立以获得纯DPS。", 1);
+                    DrawRadioButton(SMN_ST_Advanced_Combo_AltMode, "On Ruin 1, 2, and 3", "", 0);
+                    DrawRadioButton(SMN_ST_Advanced_Combo_AltMode, "On Ruin 1 and 2 Only", "Alternative DPS Mode. Leaves Ruin 3 alone for pure DPS.", 1);
                     break;
 
                 case CustomComboPreset.SMN_ST_Advanced_Combo_Balance_Opener:
@@ -55,11 +69,11 @@ internal partial class SMN
 
                     ImGui.NewLine();
 
-                    DrawHorizontalRadioButton(SMN_Opener_SkipSwiftcast, "使用即刻咏唱",
-                        "将在起手式中插入即刻咏唱，确保药水效果覆盖到短GCD技能。", 1);
+                    DrawHorizontalRadioButton(SMN_Opener_SkipSwiftcast, "Use Swiftcast",
+                        "Will use Swiftcast in opener to try and snapshot in pots for lower gcds", 1);
 
-                    DrawHorizontalRadioButton(SMN_Opener_SkipSwiftcast, "跳过即刻咏唱",
-                        "不在起手式中插入即刻咏唱，优先保证高GCD技能覆盖。", 2);
+                    DrawHorizontalRadioButton(SMN_Opener_SkipSwiftcast, "Skip Swiftcast",
+                        "Will not use swiftcast in opener for higher gcds", 2);
                     break;
 
                 case CustomComboPreset.SMN_ST_Advanced_Combo_Titan:
@@ -116,14 +130,14 @@ internal partial class SMN
 
                 case CustomComboPreset.SMN_ST_Advanced_Combo_Lucid:
                     DrawSliderInt(4000, 9500, SMN_ST_Lucid,
-                        "设置魔力值阈值，当魔力值达到或低于此值时此功能生效。", 150,
+                        "Set value for your MP to be at or under for this feature to take effect.", 150,
                         SliderIncrements.Hundreds);
 
                     break;
 
                 case CustomComboPreset.SMN_AoE_Advanced_Combo_Lucid:
                     DrawSliderInt(4000, 9500, SMN_AoE_Lucid,
-                        "设置魔力值阈值，当魔力值达到或低于此值时此功能生效。", 150,
+                        "Set value for your MP to be at or under for this feature to take effect.", 150,
                         SliderIncrements.Hundreds);
 
                     break;
@@ -141,7 +155,7 @@ internal partial class SMN
                     DrawHorizontalMultiChoice(SMN_ST_Egi_AstralFlow, "Add Slipstream", "", 4, 2);
 
                     if (SMN_ST_Egi_AstralFlow[1])
-                        DrawSliderInt(0, 25, SMN_ST_CrimsonCycloneMeleeDistance, " Maximum range to use Crimson Cyclone.");
+                        DrawSliderInt(0, 25, SMN_ST_CrimsonCycloneMeleeDistance, " Maximum range to use ??.".Loc(CrimsonCyclone.ActionName()));
 
                     break;
                 }
@@ -154,7 +168,7 @@ internal partial class SMN
                     DrawHorizontalMultiChoice(SMN_AoE_Egi_AstralFlow, "Add Slipstream", "", 4, 2);
 
                     if (SMN_AoE_Egi_AstralFlow[1])
-                        DrawSliderInt(0, 25, SMN_AoE_CrimsonCycloneMeleeDistance, " Maximum range to use Crimson Cyclone.");
+                        DrawSliderInt(0, 25, SMN_AoE_CrimsonCycloneMeleeDistance, " Maximum range to use ??.".Loc(CrimsonCyclone.ActionName()));
 
                     break;
                 }

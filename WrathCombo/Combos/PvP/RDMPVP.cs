@@ -1,5 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Objects.Types;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using WrathCombo.Combos.PvE;
 using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
@@ -141,7 +141,7 @@ namespace WrathCombo.Combos.PvP
                     bool isMoving = IsMoving();
                     bool inCombat = InCombat();
                     bool hasTarget = HasTarget();
-                    bool isTargetNPC = CurrentTarget is IBattleNpc && CurrentTarget.DataId != 8016;
+                    bool isTargetNPC = CurrentTarget is IBattleNpc && CurrentTarget.BaseId != 8016;
                     bool inMeleeRange = targetDistance <= 5;
                     bool hasBind = HasStatusEffect(PvPCommon.Debuffs.Bind, anyOwner: true);
                     bool isCorpsAvailable = chargesCorps > 0 && !hasBind;

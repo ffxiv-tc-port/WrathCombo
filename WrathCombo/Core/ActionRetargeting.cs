@@ -397,7 +397,7 @@ public class ActionRetargeting : IDisposable
             }
 
         Svc.Framework.RunOnTick(P.ActionRetargeting.ClearOldRetargets,
-            TS.FromSeconds(11));
+            TS.FromSeconds(11), cancellationToken: UnloadToken);
     };
 
     /// Clears all cached Retargets.

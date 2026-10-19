@@ -41,6 +41,11 @@ namespace WrathCombo.Data
             return null;
         }
 
+        /// <summary>
+        /// 不要把下面那個網址改成本 org 的 feed：這個方法回答的是「是不是從 PunishXIV 官方庫裝的」,對台服 fork 的使用者而言正確答案就是 false。
+        /// 改成我方 feed 會讓它對我們的使用者恆為 true;這段目前不執行,語意反轉沒有徵兆,要到有人(或從上游合併)接上呼叫點才爆出來。
+        /// 保留原判斷 ⇒ 恆 false ⇒ 不論上游拿它當「官方庫使用者才給的提示」還是「非官方來源警告」的閘門都落在安全側,也不會和上游產生合併衝突。
+        /// </summary>
         public static bool IsFromPunishRepo()
         {
             RepoCheck? repo = FetchCurrentRepo();

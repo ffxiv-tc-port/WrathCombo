@@ -7,6 +7,7 @@ using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WrathCombo.Extensions;
 
 namespace WrathCombo.CustomComboNS.Functions
 {
@@ -67,35 +68,53 @@ namespace WrathCombo.CustomComboNS.Functions
             }
         }
 
+        /// <summary> <see cref="UpdateDeadtionary" /> 這一幀要移除的鍵；只在框架執行緒用。 </summary>
+        private static readonly List<ulong> DeadtionaryRemovals = [];
+
         private static void UpdateDeadtionary(IFramework framework)
         {
             if (!Player.Available) return;
-            foreach (var member in DeadPeople.Where(x => x.BattleChara is not null && x.BattleChara.IsDead))
+            foreach (var member in DeadPeople)
             {
-                if (!Deadtionary.ContainsKey(member.BattleChara.GameObjectId))
-                    Deadtionary[member.BattleChara.GameObjectId] = Environment.TickCount64;
+                if (member.BattleChara is not { IsDead: true } chara) continue;
+                var id = chara.GameObjectId;
+                if (!Deadtionary.ContainsKey(id))
+                    Deadtionary[id] = Environment.TickCount64;
             }
 
-            var deadCopy = Deadtionary.ToList();
-            foreach (var member in deadCopy)
-            {
-                if (!Svc.Objects.Any(x => x.GameObjectId == member.Key) || !Svc.Objects.First(x => x.GameObjectId == member.Key).IsDead)
-                    Deadtionary.Remove(member.Key);
-            }
+            if (Deadtionary.Count == 0) return;
+
+            // 不在物件表裡、或已經不是死亡狀態的才移除；先收集再移除，不邊走訪邊改。
+            DeadtionaryRemovals.Clear();
+            foreach (var entry in Deadtionary)
+                if (GameObjectExtensions.FindObjectById(entry.Key) is not { IsDead: true })
+                    DeadtionaryRemovals.Add(entry.Key);
+
+            foreach (var key in DeadtionaryRemovals)
+                Deadtionary.Remove(key);
         }
 
         private static unsafe void UpdatePartyTimer(IFramework framework)
         {
             if (!Player.Available) return;
-            if (GetPartyMembers().Any(x => x.BattleChara is not null && x.BattleChara.Struct()->InCombat) && !partyInCombat)
+            if (AnyPartyMemberInCombat(GetPartyMembers()) && !partyInCombat)
             {
                 partyInCombat = true;
                 partyCombat = DateTime.Now;
             }
-            else if (!GetPartyMembers().Any(x => x.BattleChara is not null && x.BattleChara.Struct()->InCombat))
+            else if (!AnyPartyMemberInCombat(GetPartyMembers()))
             {
                 partyInCombat = false;
             }
+        }
+
+        private static unsafe bool AnyPartyMemberInCombat(List<WrathPartyMember> party)
+        {
+            foreach (var member in party)
+                if (member.BattleChara is { } chara && chara.Struct()->InCombat)
+                    return true;
+
+            return false;
         }
 
         public static void TimerDispose()
@@ -112,9 +131,41 @@ namespace WrathCombo.CustomComboNS.Functions
                 combatStart = DateTime.Now;
         }
 
-        public static unsafe float CountdownRemaining => MathF.Max(0, AgentCountDownSettingDialog.Instance()->TimeRemaining);
+        /// <summary>
+        ///     <c>AgentCountDownSettingDialog.Instance()</c> 兩種失效並存:內部鏈 AgentModule → UIModule → Framework 任一層是 null 就回 null
+        ///     (登入前、切場景、登出後都是常態),底層特徵碼失配時改為擲 <c>InvalidOperationException</c>;只擋一種等於假防護。
+        ///     裸解參考 null 原生指標是 <c>try/catch</c> 攔不到的 AccessViolationException,所以事前判空。
+        ///     下面兩個屬性被連招邏輯每幀讀,所以判空後靜默回退成「沒有倒數」,不寫 log。
+        /// </summary>
+        private static unsafe AgentCountDownSettingDialog* CountDownAgentOrNull()
+        {
+            try
+            {
+                return AgentCountDownSettingDialog.Instance();
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
-        public static unsafe bool CountdownActive => AgentCountDownSettingDialog.Instance()->Active;
+        public static unsafe float CountdownRemaining
+        {
+            get
+            {
+                var agent = CountDownAgentOrNull();
+                return agent == null ? 0f : MathF.Max(0, agent->TimeRemaining);
+            }
+        }
+
+        public static unsafe bool CountdownActive
+        {
+            get
+            {
+                var agent = CountDownAgentOrNull();
+                return agent != null && agent->Active;
+            }
+        }
        
     }
 }

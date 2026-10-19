@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using WrathCombo.Combos;
 using ECommons.DalamudServices;
-using EZ = ECommons.Throttlers.EzThrottler;
 using TS = System.TimeSpan;
 
 // ReSharper disable UnusedMethodReturnValue.Global
@@ -52,6 +51,16 @@ public partial class Provider : IDisposable
     /// </summary>
     // ReSharper disable once MemberCanBePrivate.Global
     internal readonly Helper Helper;
+
+    /// <summary>
+    ///     這個 IPC 提供者自己的節流器（自帶鎖、自帶字典）。
+    /// </summary>
+    /// <remarks>
+    ///     🔴 <b>不要換回 <c>ECommons</c> 的 <c>EzThrottler</c></b>：這個類別裡
+    ///     帶 <c>[EzIPC]</c> 的方法是跑在<b>承租外掛的執行緒</b>上的。理由與
+    ///     注意事項見 <see cref="IpcThrottle" />。
+    /// </remarks>
+    private readonly IpcThrottle _ipcThrottle = new();
 
     /// <summary>
     ///     Whether the IPC (when initialized by <see cref="Init"/>) is ready.
@@ -126,9 +135,6 @@ public partial class Provider : IDisposable
             return;
         }
 
-        // Getting the IPC status early
-        Task.Run(() => P.IPC.Helper.IPCEnabled);
-
         // Build job-specific combo state caches
         // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
         P.IPCSearch.ComboStatesByJob.TryGetValue(Player.Job, out _);
@@ -193,11 +199,6 @@ public partial class Provider : IDisposable
     ///     <list type="bullet">
     ///         <item>
     ///             <description>
-    ///                 A lease exists with the <c>pluginName</c>.
-    ///             </description>
-    ///         </item>
-    ///         <item>
-    ///             <description>
     ///                 Your lease was revoked by the user recently.
     ///             </description>
     ///         </item>
@@ -209,7 +210,10 @@ public partial class Provider : IDisposable
     ///     </list>
     /// </returns>
     /// <remarks>
-    ///     None of this will work correctly - or sometimes at all - with PvP.
+    ///     None of this will work correctly - or sometimes at all - with PvP.<br />
+    ///     Registering again with the same <c>internalPluginName</c> and
+    ///     <c>pluginName</c> replaces your earlier lease: its ID stops working and
+    ///     no cancellation callback is sent for it.
     /// </remarks>
     /// <seealso cref="RegisterForLeaseWithCallback" />
     /// <seealso cref="RegisterForLease(string,string,Action{int,string})" />
@@ -252,9 +256,9 @@ public partial class Provider : IDisposable
     ///     The <see cref="CancellationReason" /> (cast as an int) and a string with
     ///     any additional info will be passed to your method.<br />
     ///     The method should be of the form
-    ///     <c>void WrathComboCallback(int, string)</c>.<br />
-    ///     See <see cref="LeaseeIPC.WrathComboCallback" /> for the exact signature that
-    ///     will be called.
+    ///     <c>void WrathComboCallback(int, string)</c>, registered by you under
+    ///     the IPC tag <c>{yourPrefix}.WrathComboCallback</c>.<br />
+    ///     See <see cref="Helper.CallIPCCallback" /> for how it is called.
     /// </remarks>
     /// <seealso cref="RegisterForLease(string,string)" />
     [EzIPC]
@@ -352,14 +356,16 @@ public partial class Provider : IDisposable
     }
 
     /// <summary>
-    ///     The last time there was a full check for the current job's readiness.
+    ///     <see cref="IsCurrentJobAutoRotationReady" /> 的快取：答案與鍵一次指派（承租外掛的執行緒會並行讀寫）。
     /// </summary>
-    private DateTime _lastJobReadyCheck = DateTime.MinValue;
+    private JobReadySnapshot? _jobReadyCache;
 
-    /// <summary>
-    ///     The state of the last <see cref="IsCurrentJobAutoRotationReady" /> check.
-    /// </summary>
-    private bool _lastJobReady;
+    /// <param name="Ready">答案。</param>
+    /// <param name="Generation">建立前讀到的 <see cref="Leasing.StampsGeneration" />。</param>
+    /// <param name="ClassJob">建立前讀到的 <see cref="Helper.ClassJobSnapshot" />，也是這次實際作答的職業。</param>
+    /// <param name="BuiltAt">開始計算的時間，與設定檔修改時間比。</param>
+    private sealed record JobReadySnapshot(
+        bool Ready, long Generation, long ClassJob, DateTime BuiltAt);
 
     /// <summary>
     ///     Checks if the current job has a Single and Multi-Target combo configured
@@ -373,30 +379,44 @@ public partial class Provider : IDisposable
     [EzIPC]
     public bool IsCurrentJobAutoRotationReady()
     {
-        if (File.GetLastWriteTime(P.IPCSearch.ConfigFilePath) <= _lastJobReadyCheck &&
-            (Leasing.CombosUpdated ?? DateTime.MinValue) <= _lastJobReadyCheck &&
-            !EZ.Throttle("ipcJobReadyCheck", TS.FromSeconds(30)))
-            return _lastJobReady;
+        // 鍵在計算前各讀一次：計算途中才變的話存下的是舊鍵，下一次就不會命中。
+        // 鍵用全部租約時間戳的世代：承租外掛改別類設定也會換掉採用哪把租約的連擊值。
+        var generation = Leasing.StampsGeneration;
+        var classJob = Helper.ClassJobSnapshot;
+        var builtAt = DateTime.Now;
+        var cached = Volatile.Read(ref _jobReadyCache);
+        if (cached is not null &&
+            cached.Generation == generation &&
+            cached.ClassJob == classJob &&
+            File.GetLastWriteTime(P.IPCSearch.ConfigFilePath) <= cached.BuiltAt &&
+            !_ipcThrottle.Throttle("ipcJobReadyCheck", TS.FromSeconds(30)))
+            return cached.Ready;
+
+        // 職業只在框架執行緒讀一次，四項檢查都用同一個。
+        var classJobId = Helper.CurrentClassJobIdFromFramework();
 
         // Check if the current job has a Single and Multi-Target combo configured on
-        var jobOn = IsCurrentJobConfiguredOn();
+        var jobOn = InternalIsCurrentJobConfiguredOn(classJobId);
         // Check if the current job has those same combos configured on in Auto-Mode
-        var jobAutoOn = InternalIsCurrentJobAutoModeOn(jobOn);
+        var jobAutoOn = InternalIsCurrentJobAutoModeOn(jobOn, classJobId);
 
         // Check that all combos are configured and enabled in Auto-Mode
         var allGood = jobOn.All(x => x.Value is not null) &&
                jobAutoOn.All(x => x.Value is not null);
 
         // Log if not ready
-        if (!allGood && EZ.Throttle("ipcJobReadyCheckLog", TS.FromSeconds(5)))
+        if (!allGood && _ipcThrottle.Throttle("ipcJobReadyCheckLog", TS.FromSeconds(5)))
             Logging.Log(
                 $"Current job is not fully ready for Auto-Rotation.\n" +
                 $"jobOn: {JsonConvert.SerializeObject(jobOn)}\n" +
                 $"jobAutoOn: {JsonConvert.SerializeObject(jobAutoOn)}"
             );
 
-        _lastJobReadyCheck = DateTime.Now;
-        _lastJobReady = allGood;
+        // 快照與實際讀到的職業不同（換職業、讀取畫面的那一幀）就不留快取：答案不一定屬於快照那個職業。
+        Volatile.Write(ref _jobReadyCache,
+            (classJobId ?? -1L) == classJob
+                ? new JobReadySnapshot(allGood, generation, classJob, builtAt)
+                : null);
         return allGood;
     }
 
@@ -522,29 +542,60 @@ public partial class Provider : IDisposable
     }
 
     /// <summary>
+    ///     Same as <see cref="IsCurrentJobConfiguredOn" />, but for a job already
+    ///     read on the framework thread.
+    /// </summary>
+    /// <param name="classJobId">
+    ///     <see cref="Helper.CurrentClassJobIdFromFramework" />；<c>null</c>＝沒有玩家，兩項都回 null。
+    /// </param>
+    private Dictionary<ComboTargetTypeKeys, ComboSimplicityLevelKeys?>
+        InternalIsCurrentJobConfiguredOn(uint? classJobId)
+    {
+        return new Dictionary<ComboTargetTypeKeys, ComboSimplicityLevelKeys?>
+        {
+            {
+                ComboTargetTypeKeys.SingleTarget,
+                classJobId is null ? null : Helper.CheckJobModeIsEnabled(
+                    classJobId.Value,
+                    ComboTargetTypeKeys.SingleTarget, ComboStateKeys.Enabled)
+            },
+            {
+                ComboTargetTypeKeys.MultiTarget,
+                classJobId is null ? null : Helper.CheckJobModeIsEnabled(
+                    classJobId.Value,
+                    ComboTargetTypeKeys.MultiTarget, ComboStateKeys.Enabled)
+            },
+        };
+    }
+
+    /// <summary>
     ///     Same as <see cref="IsCurrentJobAutoModeOn" />, but with a parameter
     ///     to make sure that Auto-Mode is enabled for the same enabled combos.
     /// </summary>
     /// <param name="previousMatches">
     ///     The result of <see cref="IsCurrentJobConfiguredOn" />.
     /// </param>
+    /// <param name="classJobId">同 <see cref="InternalIsCurrentJobConfiguredOn" />。</param>
     /// <returns></returns>
     /// <seealso cref="IsCurrentJobAutoModeOn"/>
     private Dictionary<ComboTargetTypeKeys, ComboSimplicityLevelKeys?>
         InternalIsCurrentJobAutoModeOn
-        (Dictionary<ComboTargetTypeKeys, ComboSimplicityLevelKeys?> previousMatches)
+        (Dictionary<ComboTargetTypeKeys, ComboSimplicityLevelKeys?> previousMatches,
+            uint? classJobId)
     {
         return new Dictionary<ComboTargetTypeKeys, ComboSimplicityLevelKeys?>
         {
             {
                 ComboTargetTypeKeys.SingleTarget,
-                Helper.CheckCurrentJobModeIsEnabled(
+                classJobId is null ? null : Helper.CheckJobModeIsEnabled(
+                    classJobId.Value,
                     ComboTargetTypeKeys.SingleTarget, ComboStateKeys.AutoMode,
                     previousMatches[ComboTargetTypeKeys.SingleTarget])
             },
             {
                 ComboTargetTypeKeys.MultiTarget,
-                Helper.CheckCurrentJobModeIsEnabled(
+                classJobId is null ? null : Helper.CheckJobModeIsEnabled(
+                    classJobId.Value,
                     ComboTargetTypeKeys.MultiTarget, ComboStateKeys.AutoMode,
                     previousMatches[ComboTargetTypeKeys.MultiTarget])
             },
@@ -619,7 +670,17 @@ public partial class Provider : IDisposable
         }
 
         // Otherwise just the saved state
-        return P.IPCSearch.PresetStates.GetValueOrDefault(comboInternalName);
+        // 🔴 PresetStates 的內層字典是快取本體的一部分（ComboStatesByJob 與
+        //    CurrentJobComboStatesCategorized 都直接持有同一個參考）。CallGate
+        //    在同一個行程內是把物件原樣交給對方的 ⇒ 直接回傳等於把快取的可變
+        //    內部交到承租外掛手上，對方改一下就污染了 Wrath 自己的判斷，而且
+        // 是在承租外掛的執行緒上改。回一份複本。
+        var snapshotOfPresetState =
+            P.IPCSearch.PresetStates.GetValueOrDefault(comboInternalName);
+
+        return snapshotOfPresetState is null
+            ? null
+            : new Dictionary<ComboStateKeys, bool>(snapshotOfPresetState);
     }
 
     /// <summary>
@@ -679,11 +740,23 @@ public partial class Provider : IDisposable
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public bool GetComboOptionState(string optionName)
     {
-        // Override if the combo option is controlled by a lease,
-        // otherwise return the saved state
-        return Leasing.CheckComboOptionControlled(optionName) ??
-               P.IPCSearch.PresetStates.GetValueOrDefault(optionName)[
-                   ComboStateKeys.Enabled];
+        // Override if the combo option is controlled by a lease
+        var leased = Leasing.CheckComboOptionControlled(optionName);
+        if (leased is not null)
+            return leased.Value;
+
+        // Otherwise the saved state
+        var state = P.IPCSearch.PresetStates.GetValueOrDefault(optionName);
+        if (state is not null)
+            return state[ComboStateKeys.Enabled];
+
+        // 刻意不擲例外：不認得的選項名回 false。
+        if (_ipcThrottle.Throttle("ipcUnknownComboOption", TS.FromMinutes(5)))
+            Logging.Information(
+                $"Unknown combo option name: '{optionName}'. Returning false. " +
+                "Valid names come from GetComboOptionNamesForJob().");
+
+        return false;
     }
 
     /// <summary>

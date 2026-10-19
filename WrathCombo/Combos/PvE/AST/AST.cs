@@ -461,8 +461,10 @@ internal partial class AST : Healer
             #endregion
 
             if (IsEnabled(CustomComboPreset.AST_ST_Heals_Esuna) && ActionReady(Role.Esuna) &&
-                GetTargetHPPercent(healTarget, Config.AST_ST_SimpleHeals_IncludeShields) >= Config.AST_ST_SimpleHeals_Esuna &&
-                HasCleansableDebuff(healTarget))
+                HasCleansableDebuff(healTarget) &&
+                EsunaAllowed(healTarget,
+                    GetTargetHPPercent(healTarget, Config.AST_ST_SimpleHeals_IncludeShields) >= Config.AST_ST_SimpleHeals_Esuna,
+                    Config.AST_ST_SimpleHeals_EsunaCriticalHP, Config.AST_ST_SimpleHeals_IncludeShields))
                 return Role.Esuna
                     .RetargetIfEnabled(OptionalTarget, Benefic2);
             

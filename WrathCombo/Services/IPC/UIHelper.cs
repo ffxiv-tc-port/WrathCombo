@@ -5,15 +5,18 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.ImGuiMethods;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using WrathCombo.AutoRotation;
 using WrathCombo.Combos;
 using WrathCombo.CustomComboNS.Functions;
+using WrathCombo.Extensions;
 // ReSharper disable VariableHidesOuterVariable
 
 #endregion
@@ -29,36 +32,48 @@ public class UIHelper(Leasing leasing)
 
     #region Auto-Rotation
 
-    private DateTime? _autoRotationUpdated;
+    /// <summary>
+    ///     <see cref="AutoRotationControlled" /> 這份快取上次重建時，<c>Leasing</c>
+    ///     五個時間戳的值；<see langword="null" />＝還沒建過。
+    /// </summary>
+    /// <remarks>
+    ///     沒有任何 <c>[EzIPC]</c> 端點走得到這一支：<c>Provider.GetAutoRotationState</c>
+    ///     直接打 <c>Leasing.CheckAutoRotationControlled()</c>，那一支自己有鎖。<br />
+    ///     另外四個時間戳：改其他設定只動 <c>LastUpdated</c>，而它決定多個控制者的排序與採用誰的開關值。
+    /// </remarks>
+    private (DateTime? State, DateTime? Configs, DateTime? Jobs, DateTime? Combos, DateTime? Options)?
+        _autoRotationUpdated;
 
-    private (string controllers, bool state)
-        AutoRotationControlled { get; set; } = (string.Empty, false);
+    /// <summary> <see langword="null" />＝沒人控制；這也要快取，否則被控制過一次之後每幀都重查。 </summary>
+    private (string controllers, bool state)? AutoRotationControlled { get; set; }
 
     internal (string controllers, bool state)? AutoRotationStateControlled()
     {
+        // 只讀一次時間戳：判快取有效與寫回快取各讀一次的話，中間承租外掛的執行緒改掉時，
+        // 會用「新的時間戳」把「舊的快照」存起來，那份快取之後永遠不會再失效。同 PresetControlled 的處理。
+        var leasingStamp = (_leasing.AutoRotationStateUpdated,
+            _leasing.AutoRotationConfigsUpdated, _leasing.JobsUpdated,
+            _leasing.CombosUpdated, _leasing.OptionsUpdated);
+
         // Return the cached value if it is valid, fastest
-        if (string.IsNullOrEmpty(AutoRotationControlled.controllers) &&
-            _autoRotationUpdated is not null &&
-            _autoRotationUpdated == _leasing.AutoRotationStateUpdated)
+        if (_autoRotationUpdated == leasingStamp)
             return AutoRotationControlled;
 
         // Bail if the state is not controlled, fast
         var controlled = _leasing.CheckAutoRotationControlled();
-        if (controlled is null)
-            return null;
 
         // Re-populate the cache with the current state, slowest
-        var controllers = _leasing.Registrations.Values
-            .Where(l => l.AutoRotationControlled.Count != 0)
-            .OrderByDescending(l => l.LastUpdated)
-            .ToList();
-        var controllingLeases = controllers
-            .Select(l => l.PluginName);
-        var controlledState = controllers
-            .First().AutoRotationControlled[0];
-        AutoRotationControlled =
-            (string.Join(", ", controllingLeases), controlledState);
-        _autoRotationUpdated = _leasing.AutoRotationStateUpdated;
+        //
+        // 🔴 這裡跑在繪製執行緒上，而 IPC 端點在別條執行緒上改同一批字典
+        //    ⇒ 走訪一定要在 Leasing 的鎖內做，拿回來的是值不是活字典。
+        var snapshot = controlled is null
+            ? null
+            : _leasing.SnapshotAutoRotationControllers();
+
+        AutoRotationControlled = snapshot is null
+            ? null
+            : (string.Join(", ", snapshot.Value.Controllers), snapshot.Value.State);
+        _autoRotationUpdated = leasingStamp;
 
         return AutoRotationControlled;
     }
@@ -67,7 +82,11 @@ public class UIHelper(Leasing leasing)
 
     #region Jobs
 
-    private DateTime? _jobsUpdated;
+    /// <summary> 上次重建時的 <c>Leasing.StampsGeneration + 1</c>；<c>0</c>＝還沒建過。 </summary>
+    /// <remarks>
+    ///     形狀與理由見 <see cref="_presetsGeneration" />。
+    /// </remarks>
+    private long _jobsGeneration;
 
     private Dictionary<string, (string controllers, bool state)>
         JobsControlled { get; } = new();
@@ -76,12 +95,17 @@ public class UIHelper(Leasing leasing)
     {
         var jobName = CustomComboFunctions.JobIDs.JobIDToShorthand(job);
 
-        if (_jobsUpdated != _leasing.JobsUpdated)
+        // 🔴 世代只讀一次（承租外掛的執行緒會寫它）：讀兩次會用新的世代存下舊的快照、永不失效。
+        //    鍵是全部時間戳的世代而不只 JobsUpdated：改別類設定也會讓多個控制者換排序。
+        var stamp = _leasing.StampsGeneration + 1;
+        var cachedStamp = Volatile.Read(ref _jobsGeneration);
+
+        if (cachedStamp != stamp)
             JobsControlled.Clear();
 
         // Return the cached value if it is valid, fastest
-        if (_jobsUpdated is not null &&
-            _jobsUpdated == _leasing.JobsUpdated &&
+        if (cachedStamp != 0 &&
+            cachedStamp == stamp &&
             JobsControlled.TryGetValue(jobName, out var jobControlled))
         {
             if (string.IsNullOrEmpty(jobControlled.controllers))
@@ -94,10 +118,13 @@ public class UIHelper(Leasing leasing)
              string.IsNullOrEmpty(jobNotControlled.controllers)) ||
             _leasing.CheckJobControlled((int)job) is null)
         {
-            if (string.IsNullOrEmpty(jobNotControlled.controllers))
+            // 沒有玩家（讀圖畫面）時 CheckJobControlled 一律回 null，那不代表沒人控制：不寫進快取，
+            // 否則玩家回來後要等到下一次租約變動才會再顯示被控制。
+            if (string.IsNullOrEmpty(jobNotControlled.controllers) &&
+                CustomComboFunctions.LocalPlayer is not null)
             {
                 JobsControlled[jobName] = (string.Empty, false);
-                _jobsUpdated = _leasing.JobsUpdated;
+                Volatile.Write(ref _jobsGeneration, stamp);
             }
 
             return null;
@@ -110,7 +137,7 @@ public class UIHelper(Leasing leasing)
         foreach (var controlledJob in _search.AllJobsControlled)
             JobsControlled[controlledJob.Key.ToString()] =
                 (string.Join(", ", controlledJob.Value.Keys), true);
-        _jobsUpdated = _leasing.JobsUpdated;
+        Volatile.Write(ref _jobsGeneration, stamp);
 
         return JobsControlled[jobName];
     }
@@ -119,7 +146,14 @@ public class UIHelper(Leasing leasing)
 
     #region Presets
 
-    private DateTime? _presetsUpdated;
+    /// <summary> 上次重建時的 <c>Leasing.StampsGeneration + 1</c>；<c>0</c>＝還沒建過。 </summary>
+    /// <remarks>
+    ///     用 <c>long</c> 而不是 <c>DateTime?</c>（<c>bool</c> ＋ <c>DateTime</c> 共 16 bytes，<b>寫入不是原子的</b>）：
+    ///     <see cref="PresetControlled" /> 被兩種執行緒同時呼叫：繪製執行緒（設定視窗每一格 preset）與<b>承租外掛自己的執行緒</b>
+    ///     （<c>[EzIPC]</c> 端點 → <c>Search.PresetStates</c> → <c>CustomComboFunctions.IsEnabled</c> → 這一支）。
+    ///     撕裂讀會得到「有值旗標是新的、時間值還是舊的」之類的組合，讓快取有效性判斷得到錯的答案。
+    /// </remarks>
+    private long _presetsGeneration;
 
     private ConcurrentDictionary<string, (string controllers, bool enabled, bool autoMode)>
         PresetsControlled { get; } = new();
@@ -127,21 +161,19 @@ public class UIHelper(Leasing leasing)
     internal (string controllers, bool enabled, bool autoMode)?
         PresetControlled(CustomComboPreset preset)
     {
-        var presetName = preset.ToString();
+        // 每個連段入口與每個選項判斷都會走到這裡（IsEnabled），所以不用會裝箱的 ToString()。
+        var presetName = preset.EnumName();
 
-        var presetsUpdated = (DateTime)
-            (_leasing.CombosUpdated > _leasing
-                .OptionsUpdated
-                ? _leasing.CombosUpdated
-                : _leasing.OptionsUpdated ?? DateTime.MinValue);
+        // 🔴 理由與鍵的範圍同 JobControlled；排第一的那把決定 IsEnabled 看到的開關。
+        var stamp = _leasing.StampsGeneration + 1;
+        var cachedStamp = Volatile.Read(ref _presetsGeneration);
 
-        if (_presetsUpdated != presetsUpdated &&
-            _presetsUpdated is not null)
+        if (cachedStamp != stamp && cachedStamp != 0)
             PresetsControlled.Clear();
 
         // Return the cached value if it is valid, fastest
-        if (_presetsUpdated is not null &&
-            _presetsUpdated == presetsUpdated &&
+        if (cachedStamp != 0 &&
+            cachedStamp == stamp &&
             PresetsControlled.TryGetValue(presetName, out var presetControlled))
         {
             if (string.IsNullOrEmpty(presetControlled.controllers))
@@ -160,7 +192,7 @@ public class UIHelper(Leasing leasing)
             {
                 PresetsControlled[presetName] =
                     (string.Empty, false, false);
-                _presetsUpdated = presetsUpdated;
+                Volatile.Write(ref _presetsGeneration, stamp);
             }
 
             return null;
@@ -177,7 +209,7 @@ public class UIHelper(Leasing leasing)
         if (!PresetsControlled.ContainsKey(presetName))
             PresetsControlled[presetName] =
                 (string.Empty, false, false);
-        _presetsUpdated = presetsUpdated;
+        Volatile.Write(ref _presetsGeneration, stamp);
 
         return PresetsControlled[presetName];
     }
@@ -186,7 +218,11 @@ public class UIHelper(Leasing leasing)
 
     #region Auto-Rotation Configs
 
-    private DateTime? _autoRotationConfigsUpdated;
+    /// <summary> 上次重建時的 <c>Leasing.StampsGeneration + 1</c>；<c>0</c>＝還沒建過。 </summary>
+    /// <remarks>
+    ///     形狀與理由見 <see cref="_presetsGeneration" />。
+    /// </remarks>
+    private long _autoRotationConfigsGeneration;
 
     private Dictionary<string, (string controllers, int state)>
         AutoRotationConfigsControlled { get; } = new();
@@ -196,18 +232,22 @@ public class UIHelper(Leasing leasing)
     {
         var configOption = Enum.Parse<AutoRotationConfigOption>(configName);
 
-        if (_autoRotationConfigsUpdated != _leasing.AutoRotationConfigsUpdated)
+        // 🔴 理由與鍵的範圍同 JobControlled；排第一的那把決定自動循環採用的設定值。
+        var stamp = _leasing.StampsGeneration + 1;
+        var cachedStamp = Volatile.Read(ref _autoRotationConfigsGeneration);
+
+        if (cachedStamp != stamp)
             AutoRotationConfigsControlled.Clear();
 
         // Return the cached value if it is valid, fastest
-        if (_autoRotationConfigsUpdated is not null &&
-            _autoRotationConfigsUpdated == _leasing.AutoRotationConfigsUpdated &&
+        if (cachedStamp != 0 &&
+            cachedStamp == stamp &&
             AutoRotationConfigsControlled.TryGetValue(configName,
                 out var configControlled))
         {
             if (string.IsNullOrEmpty(configControlled.controllers))
                 return null;
-            return AutoRotationConfigsControlled[configName];
+            return configControlled;
         }
 
         // Bail if the config is not controlled, fast-ish
@@ -219,7 +259,7 @@ public class UIHelper(Leasing leasing)
             if (string.IsNullOrEmpty(configNotControlled.controllers))
             {
                 AutoRotationConfigsControlled[configName] = (string.Empty, 0);
-                _autoRotationConfigsUpdated = _leasing.AutoRotationConfigsUpdated;
+                Volatile.Write(ref _autoRotationConfigsGeneration, stamp);
             }
 
             return null;
@@ -235,9 +275,23 @@ public class UIHelper(Leasing leasing)
                 (controllers, state);
         }
 
-        _autoRotationConfigsUpdated = _search.LastCacheUpdateForAutoRotationConfigs;
+        Volatile.Write(ref _autoRotationConfigsGeneration, stamp);
 
-        return AutoRotationConfigsControlled[configName];
+        // 上面 CheckAutoRotationConfigControlled() 說「有人控制」，但它回來之後 Leasing 的鎖就放開了：租約可能剛好在這個空檔被收走
+        // （承租端自己 ReleaseControl()、或它的外掛被停用），重建出來的表就不含 configName，直接索引會擲 KeyNotFoundException；
+        // 呼叫點裡 ShowIPCControlledIndicator 那一條沒有 try/catch，例外會冒進 Dalamud 的 Draw() 失敗處理。
+        // 照本方法自己的慣例（controllers 為空就是「沒人控制」）回 null，並把這個結論也寫進快取。
+        if (!AutoRotationConfigsControlled.TryGetValue(
+                configName, out var rebuilt))
+        {
+            AutoRotationConfigsControlled[configName] = (string.Empty, 0);
+            return null;
+        }
+
+        if (string.IsNullOrEmpty(rebuilt.controllers))
+            return null;
+
+        return rebuilt;
     }
 
     #endregion
@@ -271,12 +325,10 @@ public class UIHelper(Leasing leasing)
 
     #endregion
 
-    internal int ShowNumberOfLeasees() => _leasing.Registrations.Count;
+    internal int ShowNumberOfLeasees() => _leasing.RegistrationCount;
 
     internal (string pluginName, int configurationsCount)[] ShowLeasees() =>
-        _leasing.Registrations.Values
-            .Select(l => (l.PluginName, l.SetsLeased))
-            .ToArray();
+        _leasing.SnapshotLeaseeSummaries();
 
     // Method to display the controlled indicator, which lists the plugins
     private bool ShowIPCControlledIndicator
@@ -371,10 +423,14 @@ public class UIHelper(Leasing leasing)
             ImGui.PopStyleColor(2);
             ImGui.EndGroup();
 
-            if (ImGui.IsItemHovered())
+            // 職業列被停用時也要看得到；不帶旗標判不到＝停用中，只在這時把說明框推回全亮。
+            if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                using var tooltipAlpha = ImRaii.PushStyle(ImGuiStyleVar.Alpha, 1f, !ImGui.IsItemHovered());
                 ImGui.SetTooltip(
                     IndicatorTooltip.Split("X")[0]
                     + "Job to revoke control inside.");
+            }
         }
 
         return true;
@@ -461,9 +517,9 @@ public class UIHelper(Leasing leasing)
         ImGui.SameLine();
 
         if (forPreset is null)
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudGrey, label);
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey, label);
         else
-            ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudGrey,
+            ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey,
                 label.Contains("Auto") ? "" : label.Split('#')[0]);
 
         ImGui.PopStyleColor(2);
@@ -520,7 +576,7 @@ public class UIHelper(Leasing leasing)
         ImGui.EndDisabled();
 
         ImGui.SameLine();
-        ImGuiHelpers.SafeTextColoredWrapped(ImGuiColors.DalamudGrey, label);
+        ImGui.TextColoredWrapped(ImGuiColors.DalamudGrey, label);
 
         ImGui.PopStyleColor(3);
         ImGui.EndGroup();
@@ -602,13 +658,22 @@ public class UIHelper(Leasing leasing)
     private void RevokeControl(string controllers)
     {
         var controllerNames = controllers.Split(", ");
-        var leases = _leasing.Registrations.Values
-            .Where(l => controllerNames.Contains(l.PluginName))
-            .Select(l => l.ID)
-            .ToList();
+
+        // 🔴 先在鎖內把 ID 抄出來，再在鎖外一把一把收：RemoveRegistration() 會
+        //    回呼承租外掛的碼，握著鎖跑它會死結。
+        var leases = _leasing.FindLeasesByPluginNames(controllerNames);
         foreach (var lease in leases)
-            _leasing.RemoveRegistration(
-                lease, CancellationReason.WrathUserManuallyCancelled);
+            try
+            {
+                _leasing.RemoveRegistration(
+                    lease, CancellationReason.WrathUserManuallyCancelled);
+            }
+            catch (Exception e)
+            {
+                Logging.Error(
+                    "Failed to revoke a lease the user asked to revoke; " +
+                    "it may already have been released.\n" + e);
+            }
     }
 
     #region Actual UI Method overloads

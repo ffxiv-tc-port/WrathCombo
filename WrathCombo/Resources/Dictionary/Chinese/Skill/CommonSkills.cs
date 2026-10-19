@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Combos.PvE.Content;
@@ -28,10 +28,10 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Skill
                 KeyValuePair.Create("Reprisal", RoleActions.Tank.Reprisal.ActionName()),
                 KeyValuePair.Create("Shirk", RoleActions.Tank.Shirk.ActionName()),
                 // Tank Descriptions
-                KeyValuePair.Create("one-button mitigation.", "一键减伤。"),
-                KeyValuePair.Create("when your target's cast is interruptible.", "(目标的施法可被打断时)。"),
-                KeyValuePair.Create("when your target's casting, interruptible or not.", "(目标正在施法时，无论是否可被打断。)。"),
-                KeyValuePair.Create("when your target is casting, interruptible or not.", "(目标正在施法时，无论是否可被打断。)。"),
+                KeyValuePair.Create("one-button mitigation.", "一鍵減傷。"),
+                KeyValuePair.Create("when your target's cast is interruptible.", "(目標的施法可被打斷時)。"),
+                KeyValuePair.Create("when your target's casting, interruptible or not.", "(目標正在施法時，無論是否可被打斷。)。"),
+                KeyValuePair.Create("when your target is casting, interruptible or not.", "(目標正在施法時，無論是否可被打斷。)。"),
 
                 // Healer
                 KeyValuePair.Create("Healing Wind", RoleActions.Healer.HealingWind.ActionName()),
@@ -63,18 +63,42 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Skill
                 KeyValuePair.Create("Sleep", RoleActions.Caster.Sleep.ActionName()),
 
                 // Multi-role actions
-                KeyValuePair.Create("Second Wind", "内丹"),
-                KeyValuePair.Create("Lucid Dreaming", "醒梦"),
-                KeyValuePair.Create("Swiftcast", "即刻咏唱"),
+                KeyValuePair.Create("Uses Second Wind when below set HP percentage.", "血量低於設定百分比時使用內丹。"),
+                KeyValuePair.Create("Second Wind", "內丹"),
+                KeyValuePair.Create("Lucid Dreaming", "醒夢"),
+                KeyValuePair.Create("Swiftcast", "即刻詠唱"),
                 KeyValuePair.Create("Arm's Length", RoleActions.Physical.ArmsLength.ActionName()),
                 KeyValuePair.Create("Arms Length", RoleActions.Physical.ArmsLength.ActionName()),
                 KeyValuePair.Create("Surecast", RoleActions.Magic.Surecast.ActionName()),
 
                 // Misc
-                KeyValuePair.Create("Resurrection", "复生"),
-                KeyValuePair.Create("Raise", "复活"),
+                KeyValuePair.Create("Resurrection", "復生"),
+                KeyValuePair.Create("Raise", "復活"),
                 KeyValuePair.Create("Solid Reason", DOL.SolidReason.ActionName()),
                 KeyValuePair.Create("Ageless Words", DOL.AgelessWords.ActionName()),
+
+                // Common config option labels/descriptions
+                KeyValuePair.Create("Interrupt Option", "打斷選項"),
+                KeyValuePair.Create("Interrupt with Stun Option", "暈眩打斷選項"),
+                KeyValuePair.Create("Mitigation Options", "減傷選項"),
+                KeyValuePair.Create("Combo Heals Option", "連段自療選項"),
+                KeyValuePair.Create("Not on Bosses", "不對首領使用"),
+                KeyValuePair.Create("Only Weave", "僅插入使用"),
+                KeyValuePair.Create("Hidden Options", "隱藏選項"),
+                KeyValuePair.Create("Will not use on ST in Boss encounters.", "首領戰中不會對單體目標使用。"),
+                KeyValuePair.Create("Output Combat Log", "輸出戰鬥紀錄"),
+                KeyValuePair.Create("Include Mitigations", "包含減傷"),
+                KeyValuePair.Create("Exclude Mitigations", "排除減傷"),
+                KeyValuePair.Create("Enables the use of mitigations in Simple Mode.", "在簡易模式中啟用減傷技能。"),
+                KeyValuePair.Create("Disables the use of mitigations in Simple Mode.", "在簡易模式中停用減傷技能。"),
+                KeyValuePair.Create("Non-boss Encounters Only", "僅非Boss遭遇戰"),
+                KeyValuePair.Create("Buffs Option", "增益選項"),
+                KeyValuePair.Create("Buffs AoE Option", "AoE增益選項"),
+                KeyValuePair.Create("Normal Opener", "一般起手式"),
+                KeyValuePair.Create("Early Opener", "提前起手式"),
+                // "Opener (Level 100)" is NOT here on purpose: this file is merged long before ApocalypseDescriptions.cs,
+                // so a bare entry here would fire first and shadow its more specific "Balance Opener (Level 100)" entry.
+                // The standalone entry lives in ApocalypseDescriptions.cs, after the "Balance Opener (Level 100)" family.
                 #endregion
 
                 #region PVP

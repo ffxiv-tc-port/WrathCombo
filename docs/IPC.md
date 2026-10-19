@@ -235,6 +235,17 @@ comments on each method.
   - The `object` must be of the type specified in the enum for the option
   - Sets the state of an Auto-Rotation configuration option
   - Locks the state away from the user
+- `Dictionary<string, bool>? GetOccultCrescentUserOptionStates()`
+  - No lease involved (addition of this fork)
+  - The user's own saved state of every Occult Crescent (Phantom Job) option,
+    ignoring any lease
+- `int SetOccultCrescentUserOptionStates(Dictionary<string, bool>, string)`
+  - No lease involved (addition of this fork): this changes the user's saved
+    settings, so only do it on an explicit action of the user
+  - Only Occult Crescent options are accepted, only the named options are
+    changed, and only when called on the framework thread
+  - Returns the number of options changed, or a negative value when the whole
+    batch was refused (see the doc comment for the values)
 
 ## Setting up the Wrath Combo IPC in your plugin
 

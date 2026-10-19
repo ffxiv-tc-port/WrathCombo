@@ -13,7 +13,7 @@ using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using ECommons.Logging;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using WrathCombo.Attributes;
 using WrathCombo.Combos;
 using WrathCombo.Combos.PvE;
@@ -24,6 +24,7 @@ using WrathCombo.Data;
 using WrathCombo.Extensions;
 using WrathCombo.Resources.Dictionary.Chinese;
 using WrathCombo.Services;
+using ECommons.LanguageHelpers;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
 using static WrathCombo.Attributes.PossiblyRetargetedAttribute;
 using ECommons.Throttlers;
@@ -59,26 +60,32 @@ namespace WrathCombo.Window.Functions
             public ComboType ComboType;
 
             public PresetAttributes(CustomComboPreset preset)
+                : this(preset, PresetStorage.ReadAttributes(preset))
+            {
+            }
+
+            /// <param name="attributes"> <see cref="PresetStorage.ReadAttributes" /> 對同一個 preset 讀出來的屬性。 </param>
+            internal PresetAttributes(CustomComboPreset preset, object[] attributes)
             {
                 Preset = preset;
                 IsPvP = PresetStorage.IsPvP(preset);
                 Conflicts = PresetStorage.GetConflicts(preset);
                 Parent = PresetStorage.GetParent(preset);
-                BlueInactive = preset.GetAttribute<BlueInactiveAttribute>();
-                Variant = preset.GetAttribute<VariantAttribute>();
-                VariantParent = preset.GetAttribute<VariantParentAttribute>();
-                PossiblyRetargeted = preset.GetAttribute<PossiblyRetargetedAttribute>();
-                RetargetedAttribute = preset.GetAttribute<RetargetedAttribute>();
-                BozjaParent = preset.GetAttribute<BozjaParentAttribute>();
-                EurekaParent = preset.GetAttribute<EurekaParentAttribute>();
-                OccultCrescentJob = preset.GetAttribute<OccultCrescentAttribute>();
-                HoverInfo = preset.GetAttribute<HoverInfoAttribute>();
-                ReplaceSkill = preset.GetAttribute<ReplaceSkillAttribute>();
-                CustomComboInfo = preset.GetAttribute<CustomComboInfoAttribute>();
-                AutoAction = preset.GetAttribute<AutoActionAttribute>();
-                RoleAttribute = preset.GetAttribute<RoleAttribute>();
-                Hidden = preset.GetAttribute<HiddenAttribute>();
-                ComboType = PresetStorage.GetComboType(preset);
+                BlueInactive = PresetStorage.Pick<BlueInactiveAttribute>(attributes);
+                Variant = PresetStorage.Pick<VariantAttribute>(attributes);
+                VariantParent = PresetStorage.Pick<VariantParentAttribute>(attributes);
+                PossiblyRetargeted = PresetStorage.Pick<PossiblyRetargetedAttribute>(attributes);
+                RetargetedAttribute = PresetStorage.Pick<RetargetedAttribute>(attributes);
+                BozjaParent = PresetStorage.Pick<BozjaParentAttribute>(attributes);
+                EurekaParent = PresetStorage.Pick<EurekaParentAttribute>(attributes);
+                OccultCrescentJob = PresetStorage.Pick<OccultCrescentAttribute>(attributes);
+                HoverInfo = PresetStorage.Pick<HoverInfoAttribute>(attributes);
+                ReplaceSkill = PresetStorage.Pick<ReplaceSkillAttribute>(attributes);
+                CustomComboInfo = PresetStorage.Pick<CustomComboInfoAttribute>(attributes);
+                AutoAction = PresetStorage.Pick<AutoActionAttribute>(attributes);
+                RoleAttribute = PresetStorage.Pick<RoleAttribute>(attributes);
+                Hidden = PresetStorage.Pick<HiddenAttribute>(attributes);
+                ComboType = PresetStorage.GetComboType(attributes);
             }
         }
         
@@ -128,8 +135,86 @@ namespace WrathCombo.Window.Functions
             return retargetAttribute.RetargetedActions;
         }
 
-        internal static Dictionary<CustomComboPreset, bool> GetJobAutorots => P
-            .IPCSearch.AutoActions.Where(x => x.Key.Attributes().IsPvP == CustomComboFunctions.InPvP() && (Player.JobId == x.Key.Attributes().CustomComboInfo.JobID || CustomComboFunctions.JobIDs.ClassToJob((byte)Player.Job) == x.Key.Attributes().CustomComboInfo.JobID) && x.Value && CustomComboFunctions.IsEnabled(x.Key) && x.Key.Attributes().Parent == null).ToDictionary();
+        internal static Dictionary<CustomComboPreset, bool> GetJobAutorots =>
+            BuildJobAutorots(P.IPCSearch.AutoActions, CustomComboFunctions.InPvP(),
+                Player.JobId, CustomComboFunctions.JobIDs.ClassToJob((byte)Player.Job),
+                CustomComboFunctions.IsEnabled);
+
+        /// <summary>
+        ///     <see cref="GetJobAutorots" /> 的本體。
+        /// </summary>
+        /// <remarks>
+        ///     只看屬性、自動模式與職業的那段篩選按輸入快取；<paramref name="isEnabled" />
+        ///     每次即時判，它讀的設定與租約改了不一定會換掉 <c>AutoActions</c> 的快照。
+        /// </remarks>
+        internal static Dictionary<CustomComboPreset, bool> BuildJobAutorots(
+            Dictionary<CustomComboPreset, bool> autoActions, bool inPvP, uint jobId,
+            uint classJobId, Func<CustomComboPreset, bool> isEnabled)
+        {
+            var candidates = JobAutorotCandidates(autoActions, inPvP, jobId, classJobId);
+            Span<bool> enabled = candidates.Length <= 256
+                ? stackalloc bool[candidates.Length]
+                : new bool[candidates.Length];
+            for (var i = 0; i < candidates.Length; i++)
+                enabled[i] = isEnabled(candidates[i]);
+
+            // 回傳的字典發佈後不再修改，所以內容相同時可以交出同一個實例。
+            var last = _jobAutorotResult;
+            if (last is not null && ReferenceEquals(last.Candidates, candidates) &&
+                enabled.SequenceEqual(last.Enabled))
+                return last.Result;
+
+            var result = new Dictionary<CustomComboPreset, bool>();
+            for (var i = 0; i < candidates.Length; i++)
+                if (enabled[i])
+                    result.Add(candidates[i], true);
+            _jobAutorotResult = new JobAutorotResult(candidates, enabled.ToArray(), result);
+            return result;
+        }
+
+        /// <summary>整份替換式快取，讀取端先抄進區域變數再判斷；<c>Result</c> 發佈後唯讀。</summary>
+        private static JobAutorotResult? _jobAutorotResult;
+
+        private sealed record JobAutorotResult(
+            CustomComboPreset[] Candidates, bool[] Enabled,
+            Dictionary<CustomComboPreset, bool> Result);
+
+        private static CustomComboPreset[] JobAutorotCandidates(
+            Dictionary<CustomComboPreset, bool> autoActions, bool inPvP, uint jobId,
+            uint classJobId)
+        {
+            var cached = _jobAutorotCandidates;
+            if (cached is not null && ReferenceEquals(cached.Source, autoActions) &&
+                cached.InPvP == inPvP && cached.JobId == jobId &&
+                cached.ClassJobId == classJobId)
+                return cached.Candidates;
+
+            return BuildJobAutorotCandidates(autoActions, inPvP, jobId, classJobId);
+        }
+
+        // 拆出來：捕獲參數的閉包在方法入口就配置，留在上面那支會讓快取命中也配置。
+        private static CustomComboPreset[] BuildJobAutorotCandidates(
+            Dictionary<CustomComboPreset, bool> autoActions, bool inPvP, uint jobId,
+            uint classJobId)
+        {
+            var candidates = autoActions
+                .Where(x => x.Key.Attributes()!.IsPvP == inPvP &&
+                            (jobId == x.Key.Attributes()!.CustomComboInfo!.JobID ||
+                             classJobId == x.Key.Attributes()!.CustomComboInfo!.JobID) &&
+                            x.Value && x.Key.Attributes()!.Parent == null)
+                .Select(x => x.Key)
+                .ToArray();
+            _jobAutorotCandidates = new JobAutorotCandidateCache(
+                autoActions, inPvP, jobId, classJobId, candidates);
+            return candidates;
+        }
+
+        /// <summary>整份替換式快取，讀取端先抄進區域變數再判斷。</summary>
+        private static JobAutorotCandidateCache? _jobAutorotCandidates;
+
+        private sealed record JobAutorotCandidateCache(
+            Dictionary<CustomComboPreset, bool> Source, bool InPvP, uint JobId,
+            uint ClassJobId, CustomComboPreset[] Candidates);
 
         internal static void DrawPreset(CustomComboPreset preset, CustomComboInfoAttribute info)
         {
@@ -154,9 +239,9 @@ namespace WrathCombo.Window.Functions
             if (auto != null)
             {
                 if (!Service.Configuration.AutoActions.ContainsKey(preset))
-                    Service.Configuration.AutoActions[preset] = false;
+                    Service.Configuration.SetAutoAction(preset, false);
 
-                var label = "加入自动循环";
+                var label = "Auto-Mode".Loc();
                 var labelSize = ImGui.CalcTextSize(label);
                 ImGui.SetCursorPosX(ImGui.GetContentRegionAvail().X - labelSize.X.Scale() - 64f.Scale());
                 bool autoOn = Service.Configuration.AutoActions[preset];
@@ -165,17 +250,17 @@ namespace WrathCombo.Window.Functions
                 {
                     DebugFile.AddLog($"Set Auto-Mode for {preset} to {autoOn}");
                     P.IPCSearch.UpdateActiveJobPresets();
-                    Service.Configuration.AutoActions[preset] = autoOn;
+                    Service.Configuration.SetAutoAction(preset, autoOn);
                     Service.Configuration.Save();
                 }
                 ImGui.SameLine();
                 ImGui.Text(label);
-                ImGuiComponents.HelpMarker($"将此功能添加到自动循环中。\n" +
-                    $"自动循环将自动使用勾选的功能，使你可以专注于移动。在“自动循环”选项卡中进行设置。");
+                ImGuiComponents.HelpMarker(("Add this feature to Auto-Rotation.\n" +
+                    "Auto-Rotation will automatically use the actions selected within the feature, allowing you to focus on movement. Configure the settings in the 'Auto-Rotation' section.").Loc());
                 ImGui.Separator();
             }
 
-            if (info.Name.Contains(" - AoE") || info.Name.Contains(" - Sin"))
+            if (info.InternalName.Contains(" - AoE") || info.InternalName.Contains(" - Sin"))
                 if (P.UIHelper.PresetControlled(preset) is not null)
                     P.UIHelper.ShowIPCControlledIndicatorIfNeeded(preset);
 
@@ -232,7 +317,7 @@ namespace WrathCombo.Window.Functions
 
             if (conflicts.Length > 0)
             {
-                ImGui.TextColored(ImGuiColors.DalamudRed, "冲突：");
+                ImGui.TextColored(ImGuiColors.DalamudRed, "Conflicts with:".Loc());
                 StringBuilder conflictBuilder = new();
                 ImGui.Indent();
                 foreach (var conflict in conflicts)
@@ -272,14 +357,14 @@ namespace WrathCombo.Window.Functions
                 if (blueAttr.Actions.Count > 0)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, blueAttr.NoneSet ? ImGuiColors.DPSRed : ImGuiColors.DalamudOrange);
-                    ImGui.Text($"{(blueAttr.NoneSet ? "需要的法术未激活：" : "缺少激活的法术：")} {string.Join(", ", blueAttr.Actions.Select(x => ActionWatching.GetBLUIndex(x) + GetActionName(x)))}");
+                    ImGui.Text($"{(blueAttr.NoneSet ? "No Required Spells Active:".Loc() : "Missing active spells:".Loc())} {string.Join(", ", blueAttr.Actions.Select(x => ActionWatching.GetBLUIndex(x) + GetActionName(x)))}");
                     ImGui.PopStyleColor();
                 }
 
                 else
                 {
                     ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
-                    ImGui.Text("所有需要的法术已激活！");
+                    ImGui.Text("All required spells active!".Loc());
                     ImGui.PopStyleColor();
                 }
             }
@@ -287,7 +372,7 @@ namespace WrathCombo.Window.Functions
             if (variantParents is not null)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
-                ImGui.TextWrapped($"属于正常连击的一部分{(variantParents.ParentPresets.Length > 1 ? "（复数）" : "")}:");
+                ImGui.TextWrapped(("Part of normal combo" + (variantParents.ParentPresets.Length > 1 ? "s" : "") + ":").Loc());
                 StringBuilder builder = new();
                 foreach (var par in variantParents.ParentPresets)
                 {
@@ -313,7 +398,7 @@ namespace WrathCombo.Window.Functions
             if (bozjaParents is not null)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
-                ImGui.TextWrapped($"属于正常连击的一部分{(bozjaParents.ParentPresets.Length > 1 ? "（复数）" : "")}:");
+                ImGui.TextWrapped(("Part of normal combo" + (bozjaParents.ParentPresets.Length > 1 ? "s" : "") + ":").Loc());
                 StringBuilder builder = new();
                 foreach (var par in bozjaParents.ParentPresets)
                 {
@@ -338,7 +423,7 @@ namespace WrathCombo.Window.Functions
             if (eurekaParents is not null)
             {
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
-                ImGui.TextWrapped($"属于正常连击的一部分{(variantParents.ParentPresets.Length > 1 ? "（复数）" : "")}:");
+                ImGui.TextWrapped(("Part of normal combo" + (variantParents.ParentPresets.Length > 1 ? "s" : "") + ":").Loc());
                 StringBuilder builder = new();
                 foreach (var par in eurekaParents.ParentPresets)
                 {
@@ -451,9 +536,8 @@ namespace WrathCombo.Window.Functions
                         if (Service.Configuration.HideConflictedCombos)
                         {
                             var conflictOriginals = PresetStorage.GetConflicts(childPreset);    // Presets that are contained within a ConflictedAttribute
-                            var conflictsSource = PresetStorage.GetAllConflicts();              // Presets with the ConflictedAttribute
 
-                            if (!conflictsSource.Where(x => x == childPreset || x == preset).Any() || conflictOriginals.Length == 0)
+                            if (!(PresetStorage.HasConflictEntry(childPreset) || PresetStorage.HasConflictEntry(preset)) || conflictOriginals.Length == 0)
                             {
                                 draw();
                                 if (grandchildren?.Count() > 0)
@@ -465,7 +549,7 @@ namespace WrathCombo.Window.Functions
                             {
                                 if (DateTime.UtcNow - LastPresetDeconflictTime > TimeSpan.FromSeconds(3))
                                 {
-                                    if (Service.Configuration.EnabledActions.Remove(childPreset))
+                                    if (Service.Configuration.DisableAction(childPreset))
                                     {
                                         PluginLog.Debug($"Removed {childPreset} due to conflict with {preset}");
                                         Service.Configuration.Save();
@@ -509,14 +593,14 @@ namespace WrathCombo.Window.Functions
             {
                 string skills = string.Join(", ", att.ActionNames);
 
-                ImGuiComponents.HelpMarker($"替换：{skills}");
+                ImGuiComponents.HelpMarker("Replaces: ??".Loc(skills));
                 if (ImGui.IsItemHovered())
                 {
                     ImGui.BeginTooltip();
                     foreach (var icon in att.ActionIcons)
                     {
                         var img = Svc.Texture.GetFromGameIcon(new(icon)).GetWrapOrEmpty();
-                        ImGui.Image(img.ImGuiHandle, (img.Size / 2f) * ImGui.GetIO().FontGlobalScale);
+                        ImGui.Image(img.Handle, (img.Size / 2f) * ImGui.GetIO().FontGlobalScale);
                         ImGui.SameLine();
                     }
                     ImGui.EndTooltip();
@@ -526,11 +610,11 @@ namespace WrathCombo.Window.Functions
 
         public static void DrawRetargetedSymbolForSettingsPage() =>
             DrawRetargetedAttribute(
-                firstLine: "启用后，该功能将涉及重定向技能目标。",
-                secondLine: "此功能影响的技能会自动按照你配置的优先级\n" +
-                            "依次选定目标进行施放。",
-                thirdLine: "如同时使用Redirect或Reaction等插件，\n" +
-                           "并对相同技能有重定向设置，可能会产生冲突或异常。");
+                firstLine: "This Feature will involve retargeting actions if enabled.".Loc(),
+                secondLine: ("The actions this Feature affects will automatically be\n" +
+                            "targeted onto the targets in the priority you have configured.").Loc(),
+                thirdLine: ("Using plugins like Redirect or Reaction with configurations\n" +
+                           "affecting the same actions will Conflict and may cause issues.").Loc());
 
         private static void DrawRetargetedAttribute
             (CustomComboPreset? preset = null,
@@ -585,21 +669,22 @@ namespace WrathCombo.Window.Functions
                     {
                         if (possiblyRetargeted)
                             ImGui.TextUnformatted(
-                                "此功能的技能可能会被重新选择目标。");
+                                "This Feature's actions may be retargeted.".Loc());
                         if (retargeted)
                             ImGui.TextUnformatted(
                                 firstLine ??
-                                "此功能的技能已被重新选择目标。");
+                                "This Feature's actions are retargeted.".Loc());
 
                         ImGui.TextUnformatted(
                             secondLine ??
-                            "此功能的技能将自动选择开发者认为的最佳目标\n" +
-                            "（在适用的情况下遵循The Balance指南）。");
+                            ("The actions from this Feature will automatically be\n" +
+                            "targeted onto what the developers feel is the best target\n" +
+                            "(following The Balance where applicable).").Loc());
 
                         ImGui.TextUnformatted(
                             thirdLine ??
-                            "使用Redirect或Reaction等插件并配置影响此技能时\n" +
-                            "会产生冲突并可能导致问题。");
+                            ("Using plugins like Redirect or Reaction with configurations\n" +
+                            "affecting this action will Conflict and may cause issues.").Loc());
 
                         var settingInfo = "";
                         if (preset.HasValue)
@@ -612,7 +697,7 @@ namespace WrathCombo.Window.Functions
                         {
                             ImGui.NewLine();
                             ImGui.TextUnformatted(
-                                "控制此技能是否重新选择目标的设置是：\n" +
+                                "The setting that controls if this action is retargeted is:\n".Loc() +
                                 settingInfo);
                         }
                     }
@@ -652,7 +737,7 @@ namespace WrathCombo.Window.Functions
             var imgSize = new Vector2(icon.Size.X * scale, icon.Size.Y * scale);
 
             ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 6f.Scale());
-            ImGui.Image(icon.ImGuiHandle, imgSize);
+            ImGui.Image(icon.Handle, imgSize);
             return true;
         }
 

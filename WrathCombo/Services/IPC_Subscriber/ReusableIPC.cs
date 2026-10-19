@@ -33,9 +33,30 @@ public abstract class ReusableIPC : IDisposable
         DisposalTokens = ReflectionNotIPC ? [] : EzIPC.Init(this, PluginName);
     }
 
-    public bool IsEnabled =>
-        InstalledVersion >= ValidVersion || // release version
-        InstalledVersion == new Version(0, 0, 0, 0); // debug ver for some plugins
+    /// <summary>
+    ///     對方外掛有沒有裝(而且版本夠新)。
+    /// </summary>
+    /// <remarks>
+    ///         <b>「沒裝」必須確定回 <c>false</c>。</b>先問「載入了沒」,而不是拿版本號去反推有沒有裝。
+    ///         反射查詢刻意只做一次:這個屬性在逐幀路徑上被呼叫
+    ///         (見 <c>ConflictingPluginsChecks</c> 那則「一定要快取」的註解)。
+    /// </remarks>
+    public bool IsEnabled
+    {
+        get
+        {
+            // 沒裝／沒載入 = 確定 false,不讓哨兵版本號矇混過關。
+            if (!DalamudReflector.TryGetDalamudPlugin(
+                    PluginName, out var plugin, ignoreCache: true))
+                return false;
+
+            var installed = plugin.GetType().Assembly.GetName().Version
+                            ?? new Version(0, 0, 0, 1);
+
+            return installed >= ValidVersion || // release version
+                   installed == new Version(0, 0, 0, 0); // debug ver for some plugins
+        }
+    }
 
     protected bool PluginIsLoaded =>
         DalamudReflector.TryGetDalamudPlugin(
