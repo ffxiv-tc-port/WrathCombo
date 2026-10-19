@@ -152,6 +152,9 @@ public static class ConflictingPluginsChecks
         /// <inheritdoc cref="BossModIPC.IsActionDashSafe" />
         internal Func<uint, ulong, int> DashSafeQuery => IPC.IsActionDashSafe;
 
+        /// <inheritdoc cref="BossModIPC.IsPullSafe" />
+        internal Func<ulong, bool> PullSafeQuery => IPC.IsPullSafe;
+
         /// <inheritdoc cref="BossModIPC.NextRaidwideDamageIn" />
         public float? NextRaidwideDamageIn() => IPC.NextRaidwideDamageIn();
 

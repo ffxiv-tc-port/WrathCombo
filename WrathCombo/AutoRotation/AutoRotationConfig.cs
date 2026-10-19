@@ -18,6 +18,8 @@ namespace WrathCombo.AutoRotation
         public DPSSettings DPSSettings = new();
         public int Throttler = 50;
         public bool OrbwalkerIntegration;
+        // 深層迷宮裡開打還沒戰鬥的敵人前先問 BossMod(Reborn)；見 Data/DeepDungeonPullSafety.cs。
+        public bool DeepDungeonPullSafety = true;
     }
 
     public class DPSSettings

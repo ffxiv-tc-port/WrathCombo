@@ -210,6 +210,12 @@ internal sealed class BossModIPC(
     /// </remarks>
     internal Func<uint, ulong, int> IsActionDashSafe => _isActionDashSafe;
 
+    /// <summary>
+    ///     <c>BossMod.DeepDungeon.IsPullSafe</c>：(目標 GameObjectId) → true＝可以安全開打、false＝會一次拉太多隻。
+    /// </summary>
+    /// <remarks> 不包 try：呼叫端 <c>DeepDungeonPullSafety</c> 攔所有例外並退避，失敗一律當 true。 </remarks>
+    internal Func<ulong, bool> IsPullSafe => _isPullSafe;
+
     private long _raidwideFailureLoggedAt;
 
     /// <summary>
@@ -278,6 +284,9 @@ internal sealed class BossModIPC(
 
     [EzIPC("BossMod.Hints.IsActionDashSafe", false)]
     private readonly Func<uint, ulong, int> _isActionDashSafe = null!;
+
+    [EzIPC("BossMod.DeepDungeon.IsPullSafe", false)]
+    private readonly Func<ulong, bool> _isPullSafe = null!;
 
     [EzIPC("BossMod.Hints.NextRaidwideDamageIn", false)]
     private readonly Func<float> _nextRaidwideDamageIn = null!;

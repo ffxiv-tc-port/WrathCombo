@@ -366,6 +366,10 @@ namespace WrathCombo.Window.Tabs
 
                 ImGuiComponents.HelpMarker("Normally, Auto-rotation will only target an enemy if the next action it would fire needs a target. This will change the behaviour so it will always select the target regardless of what the action can target.".Loc());
 
+                changed |= ImGui.Checkbox("Deep Dungeons: Ask BossMod (Reborn) Before Pulling".Loc(), ref cfg.DeepDungeonPullSafety);
+
+                ImGuiComponents.HelpMarker("In deep dungeons, before Auto-Rotation attacks an enemy that is not in combat yet (including enemies caught in an AoE), it asks BossMod (Reborn) whether that would pull too many enemies at once. If it says so, Auto-Rotation attacks an enemy already in combat instead, or holds that attack (with Manual targeting your target is never changed).\nActions you press yourself are never blocked. If BossMod (Reborn) is not loaded or cannot answer, Auto-Rotation attacks as usual.\n\nDefault: On".Loc());
+
                 var npcs = Service.Configuration.IgnoredNPCs.ToList();
                 var selected = npcs.FirstOrNull(x => x.Key == _selectedNpc);
                 var prev = selected is null ? "" : $"{GetIgnoredNpcName(selected.Value.Value)} (ID: {selected.Value.Key})";

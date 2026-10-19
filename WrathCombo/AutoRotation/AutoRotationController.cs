@@ -1109,6 +1109,13 @@ namespace WrathCombo.AutoRotation
                     if (TimeMoving.TotalMilliseconds > 0 && castTime > 0 && !orbwalking)
                         return false;
 
+                    // 深層迷宮會開打不安全的敵人 ⇒ 這一招不放、解除 AoE 鎖，讓單體預設（會改挑已在戰鬥中的目標）接手。
+                    if (mode is DPSRotationMode && !DeepDungeonPullSafety.AllowsAction(outAct, target, mustTarget))
+                    {
+                        LockedAoE = false;
+                        return false;
+                    }
+
                     if (mustTarget || cfg.DPSSettings.AlwaysSelectTarget)
                         Svc.Targets.Target = target;
 
@@ -1146,6 +1153,16 @@ namespace WrathCombo.AutoRotation
                 var diag = mode is DPSRotationMode;
                 if (_ninjaLockedAoE) return DiagSt(diag, NoActStOutcome.Transient);
                 var target = GetSingleTarget(mode);
+                var pullBlocked = false;
+                if (mode is DPSRotationMode dpsMode && !DeepDungeonPullSafety.AllowsTarget(target))
+                {
+                    // 有替代目標就改打它；沒有就保留原目標，但下面不對它出手、也不選它。
+                    var fallback = PullFallback(dpsMode);
+                    if (fallback is null)
+                        pullBlocked = true;
+                    else
+                        target = fallback;
+                }
 
                 var outAct = OriginalHook(InvokeCombo(preset, attributes, ref gameAct, target));
                 if (!CanQueue(outAct))
@@ -1181,7 +1198,13 @@ namespace WrathCombo.AutoRotation
 
                 var canUse = (canUseSelf || canUseTarget || areaTargeted) && outAct.ActionAttackType() is { } type && (type is ActionAttackType.Ability || type is not ActionAttackType.Ability && RemainingGCD == 0);
 
-                if (canUse || cfg.DPSSettings.AlwaysSelectTarget)
+                // IPC 只在真的要送出時問（目標本身上面已問過、走快取）；自用技不打目標，照常放。
+                var hitsTarget = canUseTarget || areaTargeted;
+                if (mode is DPSRotationMode && (pullBlocked && hitsTarget ||
+                    canUse && (inRange || areaTargeted) && !DeepDungeonPullSafety.AllowsAction(outAct, target, hitsTarget)))
+                    return DiagSt(diag, NoActStOutcome.Transient);
+
+                if ((canUse || cfg.DPSSettings.AlwaysSelectTarget) && !pullBlocked)
                     Svc.Targets.Target = target;
 
                 var castTime = ActionManager.GetAdjustedCastTime(ActionType.Action, outAct);
@@ -1210,6 +1233,32 @@ namespace WrathCombo.AutoRotation
                 return DiagSt(diag, canUseSelf || canUseTarget || areaTargeted
                     ? NoActStOutcome.Transient
                     : NoActStOutcome.TargetNotAttackable);
+            }
+
+            /// <summary> 深層迷宮裡 BMR 擋下選到的目標時的替代：可選目標裡已在戰鬥中、最近的一隻。 </summary>
+            /// <returns> null＝沒有替代，或目標是玩家自己選的（手動類模式不替玩家換目標）。 </returns>
+            private static IGameObject? PullFallback(DPSRotationMode mode)
+            {
+                if (mode is DPSRotationMode.Manual or DPSRotationMode.ManualNonPlayer ||
+                    mode is DPSRotationMode.Tank_Target && Player.Object.GetRole() is CombatRole.Tank)
+                    return null;
+
+                var priority = DPSTargeting.AnyPriority();
+                IGameObject? best = null;
+                var bestDistance = float.MaxValue;
+                foreach (var x in Svc.Objects)
+                {
+                    if (x is not IBattleChara c || !c.Struct()->InCombat || !DPSTargeting.InBaseSelection(x, priority))
+                        continue;
+                    var distance = GetTargetDistance(x);
+                    if (distance < bestDistance)
+                    {
+                        best = x;
+                        bestDistance = distance;
+                    }
+                }
+
+                return best;
             }
 
             private static bool SwitchOnDChole(Presets.PresetAttributes attributes, uint outAct, ref IGameObject? newtarget)
