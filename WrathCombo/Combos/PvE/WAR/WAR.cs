@@ -360,7 +360,7 @@ internal partial class WAR : Tank
                 PlayerHealthPercentageHp() <= Config.WAR_Mit_Holmgang_Health &&
                 ContentCheck.IsInConfiguredContent(Config.WAR_Mit_Holmgang_Difficulty, Config.WAR_Mit_Holmgang_DifficultyListSet))
                 return Holmgang;
-            foreach(int priority in Config.WAR_Mit_Priorities.Items.OrderBy(x => x))
+            foreach(int priority in Config.WAR_Mit_Priorities.SortedItems(stackalloc int[16]))
             {
                 int index = Config.WAR_Mit_Priorities.IndexOf(priority);
                 if (CheckMitigationConfigMeetsRequirements(index, out uint actionID))

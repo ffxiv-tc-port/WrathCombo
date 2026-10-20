@@ -117,6 +117,22 @@ namespace WrathCombo.CustomComboNS.Functions
         public int Count => PluginConfiguration.GetCustomIntArrayValue(this.pName).Length;
         public bool Any(Func<int, bool> func) => PluginConfiguration.GetCustomIntArrayValue(this.pName).Any(func);
         public int[] Items => PluginConfiguration.GetCustomIntArrayValue(this.pName);
+
+        /// <summary>
+        ///     <see cref="Items" /> 由小到大的複本，與 <c>Items.OrderBy(x =&gt; x)</c> 同序（相同的值分不出先後）。
+        ///     放得進 <paramref name="buffer" /> 就不配置（連段每次判斷都會走到）。
+        /// </summary>
+        public ReadOnlySpan<int> SortedItems(Span<int> buffer)
+        {
+            var items = Items;
+            var sorted = items.Length <= buffer.Length
+                ? buffer[..items.Length]
+                : new int[items.Length];
+            items.CopyTo(sorted);
+            sorted.Sort();
+            return sorted;
+        }
+
         public int IndexOf(int item)
         {
             for (int i = 0; i < Count; i++)

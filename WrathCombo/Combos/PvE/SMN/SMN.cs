@@ -742,7 +742,7 @@ internal partial class SMN : Caster
             #endregion
 
             #region Egi Priority
-            foreach (var prio in Config.SMN_ST_Egi_Priority.Items.OrderBy(x => x))
+            foreach (var prio in Config.SMN_ST_Egi_Priority.SortedItems(stackalloc int[16]))
             {
                 var index = Config.SMN_ST_Egi_Priority.IndexOf(prio);
                 var config = GetMatchingConfigST(index, OptionalTarget,
@@ -957,7 +957,7 @@ internal partial class SMN : Caster
             #endregion
 
             #region Egi Priority
-            foreach (var prio in Config.SMN_AoE_Egi_Priority.Items.OrderBy(x => x))
+            foreach (var prio in Config.SMN_AoE_Egi_Priority.SortedItems(stackalloc int[16]))
             {
                 var index = Config.SMN_AoE_Egi_Priority.IndexOf(prio);
                 var config = GetMatchingConfigAoE(index, OptionalTarget,

@@ -841,13 +841,35 @@ public partial class Leasing
 
         lock (_gate)
         {
-            var lease = _registrations.Values
-                .Where(l => l.JobsControlled.ContainsKey(resolvedJob))
-                .OrderByDescending(l => l.LastUpdated)
-                .FirstOrDefault();
+            if (_registrations.Count == 0)
+                return null;
+
+            var lease = NewestLeaseWhere(
+                static (l, j) => l.JobsControlled.ContainsKey(j), resolvedJob);
 
             return lease?.JobsControlled[resolvedJob];
         }
+    }
+
+    /// <summary>
+    ///     與 <c>Values.Where(match).OrderByDescending(l =&gt; l.LastUpdated).FirstOrDefault()</c>
+    ///     同結果（LastUpdated 平手時取列舉順序較前的那把），但不配置。只能在 <see cref="_gate" /> 內呼叫。
+    /// </summary>
+    private Lease? NewestLeaseWhere<TKey>(Func<Lease, TKey, bool> match, TKey key)
+    {
+        Lease? newest = null;
+        foreach (var lease in _registrations.Values)
+            if (match(lease, key) &&
+                (newest is null || lease.LastUpdated > newest.LastUpdated))
+                newest = lease;
+        return newest;
+    }
+
+    /// <summary> 目前是否至少有一把租約（取值當下的快照）。 </summary>
+    private bool HasRegistrations()
+    {
+        lock (_gate)
+            return _registrations.Count != 0;
     }
 
     /// <summary>
@@ -1063,6 +1085,10 @@ public partial class Leasing
     /// <seealso cref="Provider.GetComboState" />
     internal (bool enabled, bool autoMode)? CheckComboControlled(string combo)
     {
+        // 沒有租約時不論字串解不解得開都回 null：先判，省下每次解析的裝箱。
+        if (!HasRegistrations())
+            return null;
+
         CustomComboPreset customComboPreset;
         try
         {
@@ -1074,14 +1100,21 @@ public partial class Leasing
             return null;
         }
 
+        return CheckComboControlled(customComboPreset);
+    }
+
+    /// <inheritdoc cref="CheckComboControlled(string)" />
+    internal (bool enabled, bool autoMode)? CheckComboControlled(CustomComboPreset preset)
+    {
         lock (_gate)
         {
-            var lease = _registrations.Values
-                .Where(l => l.CombosControlled.ContainsKey(customComboPreset))
-                .OrderByDescending(l => l.LastUpdated)
-                .FirstOrDefault();
+            if (_registrations.Count == 0)
+                return null;
 
-            return lease?.CombosControlled[customComboPreset];
+            var lease = NewestLeaseWhere(
+                static (l, p) => l.CombosControlled.ContainsKey(p), preset);
+
+            return lease?.CombosControlled[preset];
         }
     }
 
@@ -1158,6 +1191,10 @@ public partial class Leasing
     /// <seealso cref="Provider.GetComboOptionState" />
     internal bool? CheckComboOptionControlled(string option)
     {
+        // 理由同 CheckComboControlled(string)。
+        if (!HasRegistrations())
+            return null;
+
         CustomComboPreset customComboPreset;
         try
         {
@@ -1169,14 +1206,21 @@ public partial class Leasing
             return null;
         }
 
+        return CheckComboOptionControlled(customComboPreset);
+    }
+
+    /// <inheritdoc cref="CheckComboOptionControlled(string)" />
+    internal bool? CheckComboOptionControlled(CustomComboPreset option)
+    {
         lock (_gate)
         {
-            var lease = _registrations.Values
-                .Where(l => l.OptionsControlled.ContainsKey(customComboPreset))
-                .OrderByDescending(l => l.LastUpdated)
-                .FirstOrDefault();
+            if (_registrations.Count == 0)
+                return null;
 
-            return lease?.OptionsControlled[customComboPreset];
+            var lease = NewestLeaseWhere(
+                static (l, p) => l.OptionsControlled.ContainsKey(p), option);
+
+            return lease?.OptionsControlled[option];
         }
     }
 

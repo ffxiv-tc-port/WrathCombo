@@ -351,7 +351,7 @@ public class Search(Leasing leasing)
                         var isEnabled =
                             CustomComboFunctions.IsEnabled(preset.Value.ID);
                         var ipcAutoMode = _leasing.CheckComboControlled(
-                            preset.Value.ID.ToString())?.autoMode ?? false;
+                            preset.Value.ID)?.autoMode ?? false;
                         var isAutoMode =
                             Service.Configuration.AutoActions.TryGetValue(
                                 preset.Value.ID, out var autoMode) &&

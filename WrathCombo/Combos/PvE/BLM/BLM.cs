@@ -306,7 +306,7 @@ internal partial class BLM : Caster
 
             if (IsMoving() && InCombat())
             {
-                foreach(int priority in BLM_ST_Movement_Priority.Items.OrderBy(x => x))
+                foreach(int priority in BLM_ST_Movement_Priority.SortedItems(stackalloc int[16]))
                 {
                     int index = BLM_ST_Movement_Priority.IndexOf(priority);
                     if (CheckMovementConfigMeetsRequirements(index, out uint action))

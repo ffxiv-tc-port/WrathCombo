@@ -25,10 +25,11 @@ public partial class Leasing
     {
         lock (_gate)
         {
-            var lease = _registrations.Values
-                .Where(l => l.AutoRotationConfigsControlled.ContainsKey(option))
-                .OrderByDescending(l => l.LastUpdated)
-                .FirstOrDefault();
+            if (_registrations.Count == 0)
+                return null;
+
+            var lease = NewestLeaseWhere(
+                static (l, o) => l.AutoRotationConfigsControlled.ContainsKey(o), option);
 
             return lease?.AutoRotationConfigsControlled[option];
         }

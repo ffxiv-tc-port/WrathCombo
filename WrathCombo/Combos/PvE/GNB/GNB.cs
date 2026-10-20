@@ -600,7 +600,7 @@ internal partial class GNB : Tank
                 HPP <= Config.GNB_Mit_Superbolide_Health &&
                 ContentCheck.IsInConfiguredContent(Config.GNB_Mit_Superbolide_Difficulty, Config.GNB_Mit_Superbolide_DifficultyListSet))
                 return Superbolide;
-            foreach(int priority in Config.GNB_Mit_Priorities.Items.OrderBy(x => x))
+            foreach(int priority in Config.GNB_Mit_Priorities.SortedItems(stackalloc int[16]))
             {
                 int index = Config.GNB_Mit_Priorities.IndexOf(priority);
                 if (CheckMitigationConfigMeetsRequirements(index, out uint action))

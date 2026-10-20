@@ -185,8 +185,8 @@ public class UIHelper(Leasing leasing)
         if ((PresetsControlled.TryGetValue(presetName,
                  out var presetNotControlled) &&
              string.IsNullOrEmpty(presetNotControlled.controllers)) ||
-            (_leasing.CheckComboControlled(presetName) is null &&
-             _leasing.CheckComboOptionControlled(presetName) is null))
+            (_leasing.CheckComboControlled(preset) is null &&
+             _leasing.CheckComboOptionControlled(preset) is null))
         {
             if (string.IsNullOrEmpty(presetNotControlled.controllers))
             {
