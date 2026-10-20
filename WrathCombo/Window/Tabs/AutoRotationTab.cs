@@ -516,6 +516,14 @@ namespace WrathCombo.Window.Tabs
             changed |= ImGui.InputInt("Throttle Delay (ms)".Loc(), ref cfg.Throttler);
             ImGuiComponents.HelpMarker("Auto-Rotation has a built in throttler to only run every so many milliseconds for performance reasons. If you experience issues with frame rate, try increasing this value. Do note this may have a side-effect of introducing clipping if set too high, so experiment with the value.".Loc());
 
+            ImGuiEx.SetNextItemWidthScaled(100);
+            if (ImGui.SliderFloat("Queue Window (s)".Loc(), ref cfg.QueueWindow, 0f, QueueTiming.MaxWindow, "%.2f"))
+            {
+                cfg.QueueWindow = QueueTiming.Sanitize(cfg.QueueWindow);
+                changed = true;
+            }
+            ImGuiComponents.HelpMarker("Sends the next weaponskill or spell this many seconds before the GCD finishes (abilities: before the animation lock ends), so the game queues it instead of waiting for the next check. 0 = off (wait until the GCD has fully finished). Your latency may have an effect on what actions are performed, so lower this if you notice improper action use, e.g. double Blizzard IV casts due to MP not updating in time.".Loc());
+
             using (ImRaii.Disabled(!OrbwalkerIPC.IpcAvailable))
             {
                 changed |= ImGui.Checkbox("Enable Orbwalker Integration".Loc(), ref cfg.OrbwalkerIntegration);

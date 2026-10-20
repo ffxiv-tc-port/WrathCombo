@@ -667,8 +667,8 @@ namespace WrathCombo.AutoRotation
             if (Player.Job is Job.SGE && cfg.HealerSettings.ManageKardia)
                 UpdateKardiaTarget();
 
-            // Don't act if animation locked
-            if (ActionManager.Instance()->AnimationLock > 0)
+            // Don't act if animation locked (beyond the queue window)
+            if (ActionManager.Instance()->AnimationLock > cfg.QueueWindow)
             {
                 DiagEndTick(NoActStage.Busy);
                 return;
@@ -977,6 +977,15 @@ namespace WrathCombo.AutoRotation
 
         public static class AutoRotationHelper
         {
+            private static bool InQueueWindow(uint outAct) =>
+                QueueTiming.CanSend(outAct.ActionAttackType() is ActionAttackType.Ability, RemainingGCD,
+                    ActionManager.Instance()->AnimationLock, cfg.QueueWindow);
+
+            // 排隊窗內 GCD 的重鑄還在跑；只對重鑄放寬，其他不能放的原因（MP、狀態）照舊擋。
+            private static bool StatusAllowsSend(uint outAct) =>
+                ActionManager.Instance()->GetActionStatus(ActionType.Action, outAct,
+                    checkRecastActive: cfg.QueueWindow <= 0) == 0;
+
             public static IGameObject? GetSingleTarget(Enum rotationMode)
             {
                 if (rotationMode is DPSRotationMode dpsmode)
@@ -1040,7 +1049,7 @@ namespace WrathCombo.AutoRotation
                     LockedST = false;
 
                     uint outAct = OriginalHook(InvokeCombo(preset, attributes, ref gameAct, Player.Object));
-                    if (ActionManager.Instance()->GetActionStatus(ActionType.Action, outAct) != 0) return false;
+                    if (!StatusAllowsSend(outAct) || !InQueueWindow(outAct)) return false;
                     if (!ActionReady(outAct))
                         return false;
 
@@ -1097,7 +1106,7 @@ namespace WrathCombo.AutoRotation
                     if (!ActionReady(outAct, true, true))
                         return false;
 
-                    if (ActionManager.Instance()->GetActionStatus(ActionType.Action, outAct) != 0)
+                    if (!StatusAllowsSend(outAct) || !InQueueWindow(outAct))
                         return false;
 
                     var sheet = ActionSheet[outAct];
@@ -1196,7 +1205,7 @@ namespace WrathCombo.AutoRotation
                         ? GetTargetDistance(target) <= 20f
                         : InActionRange(outAct, target));
 
-                var canUse = (canUseSelf || canUseTarget || areaTargeted) && outAct.ActionAttackType() is { } type && (type is ActionAttackType.Ability || type is not ActionAttackType.Ability && RemainingGCD == 0);
+                var canUse = (canUseSelf || canUseTarget || areaTargeted) && InQueueWindow(outAct);
 
                 // IPC 只在真的要送出時問（目標本身上面已問過、走快取）；自用技不打目標，照常放。
                 var hitsTarget = canUseTarget || areaTargeted;

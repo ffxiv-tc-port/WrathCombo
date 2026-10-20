@@ -18,6 +18,9 @@ namespace WrathCombo.AutoRotation
         public DPSSettings DPSSettings = new();
         public int Throttler = 50;
         public bool OrbwalkerIntegration;
+        // 秒；GCD 剩這麼多（能力技：動畫鎖剩這麼多）就先送，讓遊戲排進佇列。0＝等轉完才送。
+        // 讀取一律經 AutoRotationConfigIPCWrapper（夾在 0～QueueTiming.MaxWindow）。
+        public float QueueWindow = QueueTiming.DefaultWindow;
         // 深層迷宮裡開打還沒戰鬥的敵人前先問 BossMod(Reborn)；見 Data/DeepDungeonPullSafety.cs。
         public bool DeepDungeonPullSafety = true;
     }

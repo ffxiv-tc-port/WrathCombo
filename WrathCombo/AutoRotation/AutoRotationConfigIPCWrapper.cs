@@ -100,6 +100,8 @@ public class AutoRotationConfigIPCWrapper(AutoRotationConfig? config)
 
     public int Throttler => config.Throttler;
 
+    public float QueueWindow => QueueTiming.Sanitize(config.QueueWindow);
+
     public bool DeepDungeonPullSafety => config.DeepDungeonPullSafety;
 
     #endregion
