@@ -535,10 +535,11 @@ internal partial class RDM : Caster
             if (HasManaStacks)
                 return UseHolyFlare(actionID);
 
-            if (IsEnabled(CustomComboPreset.RDM_VerAero_Stone) && CanVerStone)
+            // 有瞬發（連續魔法／促進／即刻詠唱）時按鈕本身就是要的招，不換成詠唱技。
+            if (IsEnabled(CustomComboPreset.RDM_VerAero_Stone) && CanVerStone && !CanInstantCast)
                 return Verstone;
 
-            if (!HasDualcast && !HasSwiftcast)
+            if (!CanInstantCast)
                 return OriginalHook(Jolt);
 
             return actionID;
@@ -560,10 +561,10 @@ internal partial class RDM : Caster
             if (HasManaStacks) 
                 return UseHolyFlare(actionID);
 
-            if (IsEnabled(CustomComboPreset.RDM_VerThunder_Fire) && CanVerFire) 
+            if (IsEnabled(CustomComboPreset.RDM_VerThunder_Fire) && CanVerFire && !CanInstantCast) 
                 return Verfire;
         
-            if (!HasDualcast && !HasSwiftcast)
+            if (!CanInstantCast)
                 return OriginalHook(Jolt);
         
             return actionID;
