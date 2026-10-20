@@ -154,6 +154,9 @@ internal partial class RDM
     internal static bool PoolEngagement => !LevelChecked(Embolden) || HasEmbolden || GetRemainingCharges(Engagement) >= 1 && GetCooldownChargeRemainingTime(Engagement) < 3;
     internal static bool CanCorps => LevelChecked(Corpsacorps) && GetRemainingCharges(Corpsacorps) >= 1 && GetCooldownChargeRemainingTime(Corpsacorps) < 1;
     internal static bool CanInstantCast => HasDualcast || HasAccelerate || HasSwiftcast;
+    // 與 RDM_EmboldenProtection 換成佔位技的條件相同：隊上別的赤魔已開鼓勵時按鼓勵放不出去。
+    internal static bool EmboldenBlockedByProtection => IsEnabled(CustomComboPreset.RDM_EmboldenProtection) &&
+        ActionReady(Embolden) && HasStatusEffect(Buffs.EmboldenOthers, anyOwner: true);
     internal static bool CanNotMagickBarrier => !ActionReady(MagickBarrier) || HasStatusEffect(Buffs.MagickBarrier, anyOwner: true);
     #endregion
     
@@ -398,6 +401,12 @@ internal partial class RDM
             ([1], Jolt3, () => PartyInCombat() && !Player.Object.IsCasting)
         ];
 
+        // 第 8 步鼓勵被防覆蓋換掉時跳過，否則起手停在這一步直到逾時失敗。
+        public override List<(int[] Steps, Func<bool> Condition)> SkipSteps { get; set; } =
+        [
+            ([8], () => EmboldenBlockedByProtection)
+        ];
+
         internal override UserData? ContentCheckConfig => Config.RDM_BalanceOpener_Content;
 
             public override bool HasCooldowns()
@@ -458,6 +467,12 @@ internal partial class RDM
         public override List<(int[] Steps, uint NewAction, Func<bool> Condition)> SubstitutionSteps { get; set; } =
         [
             ([1], Jolt3, () => PartyInCombat() && !Player.Object.IsCasting)
+        ];
+
+        // 第 8 步鼓勵被防覆蓋換掉時跳過，否則起手停在這一步直到逾時失敗。
+        public override List<(int[] Steps, Func<bool> Condition)> SkipSteps { get; set; } =
+        [
+            ([8], () => EmboldenBlockedByProtection)
         ];
 
         internal override UserData? ContentCheckConfig => Config.RDM_BalanceOpener_Content;
