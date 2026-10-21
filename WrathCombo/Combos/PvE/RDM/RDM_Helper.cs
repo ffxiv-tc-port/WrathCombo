@@ -288,7 +288,8 @@ internal partial class RDM
     private static long _addleLoggedAt, _magickBarrierLoggedAt;
 
     /// <summary>
-    ///     全體傷害是否將至：BMR 有預告時只看預告（≤ 提前秒數），沒有預告或 BMR 不可用時退回敵方詠唱判斷。
+    ///     全體傷害是否將至：BMR 有預告時只看預告（≤ 提前秒數），沒有預告或 BMR 不可用時退回敵方詠唱判斷，
+    ///     兩條都用同一個提前秒數（詠唱剩餘秒數 ≤ 提前秒數才算）。
     ///     <paramref name="forecast" /> 為 <see langword="null" />＝這次是詠唱判斷給的答案。
     /// </summary>
     /// <remarks>只在框架執行緒判斷：BMR 端點在別的執行緒會阻塞，詠唱判斷也用了不分執行緒的 EzThrottler。</remarks>
@@ -299,7 +300,9 @@ internal partial class RDM
             return false;
 
         forecast = RaidwideForecast.NextRaidwideIn();
-        return RaidwideForecast.Verdict(forecast, Config.RDM_RaidwideMit_LeadTime) ?? RaidWideCasting();
+        int lead = Config.RDM_RaidwideMit_LeadTime;
+        // RaidWideCasting(0) 等於不看剩餘秒數；滑桿下限 1，0 只會來自手改設定檔，那時照舊不限。
+        return RaidwideForecast.Verdict(forecast, lead) ?? RaidWideCasting(lead);
     }
 
     /// <summary>戰鬥中、目標是射程內的敵人且身上沒有任何人的昏亂、全體傷害將至。</summary>
@@ -338,7 +341,7 @@ internal partial class RDM
         loggedAt = now;
         PluginLog.Information(forecast is { } seconds
             ? $"[WrathCombo][自動減傷] {action.ActionName()}：BMR 預告 {seconds:0.0} 秒後全體傷害"
-            : $"[WrathCombo][自動減傷] {action.ActionName()}：退回詠唱判斷（敵方正在詠唱全體範圍技）");
+            : $"[WrathCombo][自動減傷] {action.ActionName()}：退回詠唱判斷（敵方全體範圍技詠唱剩 {(int)Config.RDM_RaidwideMit_LeadTime} 秒以內）");
     }
     #endregion
 

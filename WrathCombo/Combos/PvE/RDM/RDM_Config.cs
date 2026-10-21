@@ -121,7 +121,7 @@ internal partial class RDM
                 case CustomComboPreset.RDM_AoE_Addle:
                 case CustomComboPreset.RDM_AoE_MagickBarrier:
                     DrawSliderInt(1, 15, RDM_RaidwideMit_LeadTime,
-                        "Use it this many seconds or less before a raidwide predicted by BossMod (Reborn) (shared by all four options)".Loc(), 200);
+                        "Use it this many seconds or less before a raidwide: the BossMod (Reborn) prediction, or the remaining enemy cast time when there is no prediction (shared by all four options)".Loc(), 200);
                     break;
             }
         }

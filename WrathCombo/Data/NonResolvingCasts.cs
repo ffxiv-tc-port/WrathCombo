@@ -17,6 +17,7 @@ internal static class NonResolvingCasts
     [
         28510, // 處決風刃（究極武器破壞作戰，CFC 830）：使用者實機觀察詠唱完不會放出來
         29435, // 土神的激怒（同上）：IINACT 戰鬥紀錄顯示詠唱中被取消（Cancelled）、從不結算
+        41379, // 新月島「鬼火苗」的無名 2.5 秒詠唱：IINACT 戰鬥紀錄每次都只結算在施放者自己身上、從不打到玩家
     ]);
 
     internal static bool Contains(uint actionId) => Ids.Contains(actionId);
