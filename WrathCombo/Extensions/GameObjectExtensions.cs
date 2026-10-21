@@ -247,7 +247,9 @@ public static class GameObjectExtensions
     ///     boolean check for if the target is below 99% HP.
     /// </summary>
     public static bool IsMissingHP(this IGameObject? obj) =>
-        obj is IBattleChara battle && battle.CurrentHp / battle.MaxHp * 100 < 99;
+        // 與原式 `CurrentHp / MaxHp * 100 < 99`（uint 整數除法＝「沒滿血」）結果逐一相同；
+        // 只差 MaxHp 為 0 時回 false，不再擲 DivideByZeroException。
+        obj is IBattleChara { MaxHp: > 0 and var max } battle && battle.CurrentHp < max;
 
     /// <summary>
     ///     Can be chained onto a <see cref="IGameObject" /> to make it a quick
