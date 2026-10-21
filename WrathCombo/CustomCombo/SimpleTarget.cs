@@ -509,18 +509,27 @@ internal static class SimpleTarget
 
     // 同 GetPartyMembers().Select(BattleChara).Where(非 null 且活著).OrderBy(鍵).FirstOrDefault()，不建迭代器：
     // 照名單順序走訪，鍵「嚴格小於」目前最小值才換人（OrderBy 是穩定排序，平手取先出現的）。
-    // 百分比鍵照原式是整數除法（滿血 100、其餘 0），刻意不改。
+    // 百分比鍵用浮點；MaxHp 為 0 的人跳過（原式在那裡會除以零擲例外），不參與比較。
     private static IBattleChara? LowestAlly(bool byPercent)
     {
         IBattleChara? best = null;
-        uint bestKey = 0;
+        double bestKey = 0;
         foreach (var member in CustomComboFunctions.GetPartyMembers())
         {
             var x = member.BattleChara;
             if (x is null || x.IsDeadEvenIfUnraisable())
                 continue;
 
-            var key = byPercent ? x.CurrentHp / x.MaxHp * 100 : x.CurrentHp;
+            double key;
+            if (byPercent)
+            {
+                var maxHp = x.MaxHp;
+                if (maxHp == 0)
+                    continue;
+                key = (double)x.CurrentHp / maxHp;
+            }
+            else
+                key = x.CurrentHp;
             if (best is null || key < bestKey)
             {
                 best = x;
