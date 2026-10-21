@@ -206,9 +206,9 @@ public static class DebugFile
         AddLine($"Current Zone: {currentZone}");
         AddLine($"Current Party Size: {GetPartyMembers().Count}");
         AddLine();
-        AddLine($"HP: {(player.CurrentHp / player.MaxHp * 100):F0}%");
+        AddLine($"HP: {player.CurrentHp * 100f / player.MaxHp:F0}%");
         AddLine($"+Shield: {player.ShieldPercentage:F0}%");
-        AddLine($"MP: {(player.CurrentMp / player.MaxMp * 100):F0}%");
+        AddLine($"MP: {player.CurrentMp * 100f / player.MaxMp:F0}%");
         AddLine("END PLAYER INFO");
 
         AddLine();
@@ -237,7 +237,7 @@ public static class DebugFile
             AddLine($"Is Casting: {battleTarget.IsCasting}");
             AddLine($"Is Cast Interruptable: {battleTarget.IsCastInterruptible}");
             AddLine();
-            AddLine($"HP: {(battleTarget.CurrentHp / battleTarget.MaxHp * 100):F0}%");
+            AddLine($"HP: {battleTarget.CurrentHp * 100f / battleTarget.MaxHp:F0}%");
             AddLine($"+Shield: {battleTarget.ShieldPercentage:F0}%");
         }
         AddLine("END TARGET INFO");
