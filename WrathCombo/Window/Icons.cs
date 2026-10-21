@@ -98,8 +98,14 @@ namespace WrathCombo.Window
                     try
                     {
                         var tex = Svc.Data.GameData.GetFileFromDisk<TexFile>(resolvePath);
-                        var spec = RawImageSpecification.Rgba32(tex.Header.Width, tex.Header.Width);
+                        var spec = RawImageSpecification.Rgba32(tex.Header.Width, tex.Header.Height);
                         var data = tex.GetRgbaImageData();
+                        // CreateFromRaw 不核對長度、直接讓 D3D 讀 Pitch×Height 位元組：資料不夠就當讀檔失敗。
+                        if (data.Length < (long)spec.Pitch * spec.Height)
+                        {
+                            FailedModdedPaths.TryAdd(resolvePath, 0);
+                            return;
+                        }
                         Svc.Framework.RunOnFrameworkThread(() =>
                         {
                             // 外掛已卸載（排進來之後才 Dispose）：做出來的 wrap 沒人畫、也沒人釋放。
