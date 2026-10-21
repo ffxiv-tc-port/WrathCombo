@@ -190,7 +190,8 @@ internal partial class MCH : PhysicalRanged
                  ActionReady(Chainsaw) && MCH_ST_Reassembled[1] ||
                  LevelChecked(AirAnchor) && IsOffCooldown(AirAnchor) && MCH_ST_Reassembled[2] ||
                  ActionReady(Drill) && MCH_ST_Reassembled[3]) &&
-                StHpAllows(MCH_ST_ReassembleHPOption, MCH_ST_ReassembleHPBossOption, TargetIsBossCheck))
+                StHpAllows(MCH_ST_ReassembleHPOption, MCH_ST_ReassembleHPBossOption, TargetIsBossCheck) &&
+                StHpAllows(MCH_ST_ToolsHPOption, MCH_ST_ToolsHPBossOption, TargetIsBossCheck))
                 return Reassemble;
 
             // Interrupt
@@ -264,7 +265,9 @@ internal partial class MCH : PhysicalRanged
                     if (IsEnabled(CustomComboPreset.MCH_ST_Adv_Reassemble) &&
                         GetRemainingCharges(Reassemble) > MCH_ST_ReassemblePool &&
                         Reassembled() &&
-                        StHpAllows(MCH_ST_ReassembleHPOption, MCH_ST_ReassembleHPBossOption, TargetIsBossCheck))
+                        StHpAllows(MCH_ST_ReassembleHPOption, MCH_ST_ReassembleHPBossOption, TargetIsBossCheck) &&
+                        // 這裡的整備是為工具技而放：工具被血量門檻擋下時，整備會落到普通連擊上。
+                        StHpAllows(MCH_ST_ToolsHPOption, MCH_ST_ToolsHPBossOption, TargetIsBossCheck))
                         return Reassemble;
 
                     // Gauss Round and Ricochet outside HC
