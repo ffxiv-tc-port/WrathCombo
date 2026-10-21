@@ -200,7 +200,7 @@ internal static class SimpleTarget
 
                 foreach (var name in Service.Configuration.RaiseStack)
                 {
-                    var resolved = GetSimpleTargetValueFromName(name);
+                    var resolved = ResolveRaiseEntry(name);
                     var target =
                         CustomLogic(resolved.IfCanUseOn(WHM.Raise).IfTargetable()
                             .IfDead().IfWithinRange(30));
@@ -223,8 +223,7 @@ internal static class SimpleTarget
                 {
                     var hard = HardTarget.IfCanUseOn(WHM.Raise).IfDead();
                     if (hard != null) return hard;
-                    var anyDead = AnyDeadPartyMember;
-                    return anyDead != null && SkipLimitedRaiseAutoPick(nameof(AnyDeadPartyMember), anyDead) ? null : anyDead;
+                    return ResolveRaiseEntry(nameof(AnyDeadPartyMember));
                 }
             }
             #endregion
@@ -244,10 +243,22 @@ internal static class SimpleTarget
         private static readonly HashSet<string> ManualRaisePicks = new(StringComparer.Ordinal)
             { nameof(HardTarget), nameof(SoftTarget), nameof(FocusTarget), nameof(UIMouseOverTarget), nameof(ModelMouseOverTarget) };
 
-        private static bool SkipLimitedRaiseAutoPick(string stackEntry, IGameObject target) =>
+        internal static bool SkipLimitedRaiseAutoPick(string stackEntry, IGameObject target) =>
             Service.Configuration.RotationConfig.HealerSettings.AutoRezSkipLimitedRaise &&
             !ManualRaisePicks.Contains(stackEntry) &&
             RezThrottle.SkipLimitedRaise(target, "復活重定向");
+
+        // 「挑第一個死者」的條目在選項開著時跳過有限制復活的、改挑同一條件下的下一位；選項關著時與屬性本身相同。
+        private static IGameObject? ResolveRaiseEntry(string name) => name switch
+        {
+            nameof(AnyDeadPartyMember) => FirstDeadPartyMember(name),
+            nameof(AnyDeadNonPartyMember) => FirstDeadNonPartyMember(name),
+            nameof(AnyDeadTankIfNoneAlive) => DeadIfNoneAlive(TankGroup, name),
+            nameof(AnyDeadHealerIfNoneAlive) => DeadIfNoneAlive(HealerGroup, name),
+            nameof(AnyDeadRaiserIfNoneAlive) => DeadIfNoneAlive(RaiserGroup, name),
+            nameof(AnyDeadRaiserDPSIfNoneAlive) => DeadIfNoneAlive(RaiserDPSGroup, name),
+            _ => GetSimpleTargetValueFromName(name),
+        };
 
         private static IGameObject? GetSimpleTargetValueFromName(string name)
         {
@@ -485,17 +496,30 @@ internal static class SimpleTarget
             .FirstOrDefault(x =>
                 CustomComboFunctions.HasStatusEffect(SGE.Buffs.Kardion, x));
 
-    public static IGameObject? AnyDeadPartyMember =>
-        CustomComboFunctions
-            .GetPartyMembers()
-            .Select(x => x.BattleChara)
-            .FirstOrDefault(x => x?.IsDead() == true);
+    public static IGameObject? AnyDeadPartyMember => FirstDeadPartyMember(null);
 
-    public static IGameObject? AnyDeadNonPartyMember =>
-        Svc.Objects
-            .Where(x => x.IsAPlayer() && x.IsTargetable &&
-                        !x.IsInParty())
-            .FirstOrDefault(x => x.IsDead());
+    public static IGameObject? AnyDeadNonPartyMember => FirstDeadNonPartyMember(null);
+
+    // skipLimitedFor：null＝不跳過任何人；否則是復活堆疊的條目名，交給 Stack.SkipLimitedRaiseAutoPick 判要不要跳過。
+    private static IGameObject? FirstDeadPartyMember(string? skipLimitedFor)
+    {
+        foreach (var member in CustomComboFunctions.GetPartyMembers())
+        {
+            var x = member.BattleChara;
+            if (x?.IsDead() == true && (skipLimitedFor is null || !Stack.SkipLimitedRaiseAutoPick(skipLimitedFor, x)))
+                return x;
+        }
+        return null;
+    }
+
+    private static IGameObject? FirstDeadNonPartyMember(string? skipLimitedFor)
+    {
+        foreach (var x in Svc.Objects)
+            if (x.IsAPlayer() && x.IsTargetable && !x.IsInParty() && x.IsDead() &&
+                (skipLimitedFor is null || !Stack.SkipLimitedRaiseAutoPick(skipLimitedFor, x)))
+                return x;
+        return null;
+    }
 
     #region HP-Based Targets
 
@@ -684,90 +708,42 @@ internal static class SimpleTarget
     #region Slightly More Specific Roles, with Additions
 
     /// Gets any Tank that is dead (but only if all tanks are dead).
-    public static IGameObject? AnyDeadTankIfNoneAlive
-    {
-        get
-        {
-            var tanks = CustomComboFunctions
-                .GetPartyMembers()
-                .Where(x => x.BattleChara.IsNotThePlayer() && x.GetRole() is CombatRole.Tank)
-                .ToArray();
-            var deadTanks =
-                tanks.Where(x => x?.BattleChara.IsDead() == true).ToArray();
-
-            if (deadTanks.Length == 0)
-                return null;
-            if (tanks.Any(x => x?.BattleChara.IsDeadEvenIfUnraisable() == false))
-                return null;
-
-            return deadTanks.FirstOrDefault()?.BattleChara;
-        }
-    }
+    public static IGameObject? AnyDeadTankIfNoneAlive => DeadIfNoneAlive(TankGroup, null);
 
     /// Gets any Healer that is dead (but only if all healers are dead).
-    public static IGameObject? AnyDeadHealerIfNoneAlive
-    {
-        get
-        {
-            var healers = CustomComboFunctions
-                .GetPartyMembers()
-                .Where(x => x.BattleChara.IsNotThePlayer() && x.GetRole() is CombatRole.Healer)
-                .ToArray();
-            var deadHealers =
-                healers.Where(x => x?.BattleChara.IsDead() == true).ToArray();
-
-            if (deadHealers.Length == 0)
-                return null;
-            if (healers.Any(x => x?.BattleChara.IsDeadEvenIfUnraisable() == false))
-                return null;
-
-            return deadHealers.FirstOrDefault()?.BattleChara;
-        }
-    }
+    public static IGameObject? AnyDeadHealerIfNoneAlive => DeadIfNoneAlive(HealerGroup, null);
 
     /// Gets any Raiser (Healer or DPS) that is dead (but only if all Raisers are dead).
-    public static IGameObject? AnyDeadRaiserIfNoneAlive
-    {
-        get
-        {
-            var raisers = CustomComboFunctions
-                .GetPartyMembers()
-                .Where(x => x.BattleChara.IsNotThePlayer() &&
-                            (x.GetRole() is CombatRole.Healer ||
-                             x?.RealJob?.RowId is SMN.JobID or RDM.JobID))
-                .ToArray();
-            var deadRaisers =
-                raisers.Where(x => x?.BattleChara.IsDead() == true).ToArray();
-
-            if (deadRaisers.Length == 0)
-                return null;
-            if (raisers.Any(x => x?.BattleChara.IsDeadEvenIfUnraisable() == false))
-                return null;
-
-            return deadRaisers.FirstOrDefault()?.BattleChara;
-        }
-    }
+    public static IGameObject? AnyDeadRaiserIfNoneAlive => DeadIfNoneAlive(RaiserGroup, null);
 
     /// Gets any Raiser DPS that is dead (but only if all Raiser DPS are dead).
-    public static IGameObject? AnyDeadRaiserDPSIfNoneAlive
+    public static IGameObject? AnyDeadRaiserDPSIfNoneAlive => DeadIfNoneAlive(RaiserDPSGroup, null);
+
+    private static readonly Func<WrathPartyMember, bool>
+        TankGroup = static x => x.GetRole() is CombatRole.Tank,
+        HealerGroup = static x => x.GetRole() is CombatRole.Healer,
+        RaiserGroup = static x => x.GetRole() is CombatRole.Healer || x?.RealJob?.RowId is SMN.JobID or RDM.JobID,
+        RaiserDPSGroup = static x => x?.RealJob?.RowId is SMN.JobID or RDM.JobID;
+
+    // 該組（不含自己）有人死且沒有人活著時回第一個死者；skipLimitedFor 同 FirstDeadPartyMember。
+    private static IGameObject? DeadIfNoneAlive(Func<WrathPartyMember, bool> inGroup, string? skipLimitedFor)
     {
-        get
-        {
-            var raisers = CustomComboFunctions
-                .GetPartyMembers()
-                .Where(x => x.BattleChara.IsNotThePlayer() &&
-                            x?.RealJob?.RowId is SMN.JobID or RDM.JobID)
-                .ToArray();
-            var deadRaisers =
-                raisers.Where(x => x?.BattleChara.IsDead() == true).ToArray();
+        var group = CustomComboFunctions
+            .GetPartyMembers()
+            .Where(x => x.BattleChara.IsNotThePlayer() && inGroup(x))
+            .ToArray();
+        var dead =
+            group.Where(x => x?.BattleChara.IsDead() == true).ToArray();
 
-            if (deadRaisers.Length == 0)
-                return null;
-            if (raisers.Any(x => x?.BattleChara.IsDeadEvenIfUnraisable() == false))
-                return null;
+        if (dead.Length == 0)
+            return null;
+        if (group.Any(x => x?.BattleChara.IsDeadEvenIfUnraisable() == false))
+            return null;
 
-            return deadRaisers.FirstOrDefault()?.BattleChara;
-        }
+        foreach (var x in dead)
+            if (skipLimitedFor is null || !Stack.SkipLimitedRaiseAutoPick(skipLimitedFor, x.BattleChara!))
+                return x.BattleChara;
+        return null;
     }
 
     #endregion
