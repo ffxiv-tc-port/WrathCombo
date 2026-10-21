@@ -118,10 +118,13 @@ namespace WrathCombo.AutoRotation
             ret || BossModRebornQueueTakeover;
 
         // 同 BaseSelection.Any(IsCombatBypassTarget)、判斷順序相同；非戰鬥時每一輪都問，不建 Where 列舉器。
+        // 兩個繞過都不可能成立時直接回 false：不掃物件表（每隻都要做視線檢查）。
         static bool CombatBypass
         {
             get
             {
+                if (!cfg.BypassQuest && !(cfg.BypassFATE && InFATE()))
+                    return false;
                 var priority = DPSTargeting.AnyPriority();
                 foreach (var x in Svc.Objects)
                     if (DPSTargeting.InBaseSelection(x, priority) && IsCombatBypassTarget(x))
@@ -150,6 +153,8 @@ namespace WrathCombo.AutoRotation
         {
             var targetFateId = TargetFateId(target);
             var inFate = InFATE();
+            if (!cfg.BypassQuest && !(cfg.BypassFATE && inFate && targetFateId != 0))
+                return false;
             foreach (var x in DPSTargeting.BaseSelection)
                 if (IsCombatBypassCandidateFor(cfg.BypassQuest, IsQuestMob(x), cfg.BypassFATE, x.Struct()->FateId, inFate, targetFateId))
                     return true;
