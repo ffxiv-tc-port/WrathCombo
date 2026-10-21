@@ -201,6 +201,8 @@ namespace WrathCombo.AutoRotation
         private static long _diagSourceNextAt;
         private static int _diagSourceSkipped;
         private static ulong _diagNotFateTargetId;
+        private static uint _diagMovingAct;
+        private static CustomComboPreset _diagMovingPreset;
         private static NoActReason _diagLastRaw;
         private static long _diagLastRawAt;
 
@@ -223,6 +225,7 @@ namespace WrathCombo.AutoRotation
         {
             _diagStOutcome = NoActStOutcome.None;
             _diagNotFateTargetId = 0;
+            _diagMovingAct = 0;
             _diagDpsSeen = 0;
             _diagDpsPvpBlocked = 0;
             _diagTranscendent = false;
@@ -241,6 +244,17 @@ namespace WrathCombo.AutoRotation
             if (record && outcome > _diagStOutcome)
                 _diagStOutcome = outcome;
             return false;
+        }
+
+        // 同一輪記第一個（優先序最高的）被移動擋下的招；只存數值，字串等真的要寫 log 才組。
+        private static bool DiagMovingCaster(bool record, uint outAct, CustomComboPreset preset)
+        {
+            if (record && NoActStOutcome.MovingCaster > _diagStOutcome)
+            {
+                _diagMovingAct = outAct;
+                _diagMovingPreset = preset;
+            }
+            return DiagSt(record, NoActStOutcome.MovingCaster);
         }
 
         // 對敵人出招的閘門擋下時用：拿掉「目標是 FATE 怪」條件就會放行的，才算目標不是 FATE 怪。
@@ -315,6 +329,9 @@ namespace WrathCombo.AutoRotation
                     NoActReason.NotInCombat => DiagNotInCombatDetail(),
                     NoActReason.NoTarget => $"目標選擇模式 {cfg.DPSRotationMode}",
                     NoActReason.NotFateTarget => DiagNotFateTargetDetail(),
+                    NoActReason.MovingCaster => _diagMovingAct == 0
+                        ? ""
+                        : $"{_diagMovingAct.ActionName()}（{_diagMovingAct}，{_diagMovingPreset}）",
                     _ => "",
                 };
             }
@@ -1116,7 +1133,7 @@ namespace WrathCombo.AutoRotation
                     var castTime = ActionManager.GetAdjustedCastTime(ActionType.Action, outAct);
                     bool orbwalking = cfg.OrbwalkerIntegration && OrbwalkerIPC.CanOrbwalk;
                     if (TimeMoving.TotalMilliseconds > 0 && castTime > 0 && !orbwalking)
-                        return false;
+                        return DiagMovingCaster(mode is DPSRotationMode, outAct, preset);
 
                     // 深層迷宮會開打不安全的敵人 ⇒ 這一招不放、解除 AoE 鎖，讓單體預設（會改挑已在戰鬥中的目標）接手。
                     if (mode is DPSRotationMode && !DeepDungeonPullSafety.AllowsAction(outAct, target, mustTarget))
@@ -1219,7 +1236,7 @@ namespace WrathCombo.AutoRotation
                 var castTime = ActionManager.GetAdjustedCastTime(ActionType.Action, outAct);
                 bool orbwalking = cfg.OrbwalkerIntegration && OrbwalkerIPC.CanOrbwalk;
                 if (TimeMoving.TotalMilliseconds > 0 && castTime > 0 && !orbwalking)
-                    return DiagSt(diag, NoActStOutcome.MovingCaster);
+                    return DiagMovingCaster(diag, outAct, preset);
 
                 if (canUse && (inRange || areaTargeted))
                 {

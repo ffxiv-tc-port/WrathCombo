@@ -23,7 +23,7 @@ internal enum NoActStage : byte
     Processed,
 }
 
-/// <summary> 攻擊技能這一輪沒送出的原因；同一輪多個連擊功能取數值最大者。範圍技能只記「僅於戰鬥中」閘門。 </summary>
+/// <summary> 攻擊技能這一輪沒送出的原因；同一輪多個連擊功能取數值最大者。範圍技能只記「僅於戰鬥中」閘門與移動中。 </summary>
 internal enum NoActStOutcome : byte
 {
     None = 0,
