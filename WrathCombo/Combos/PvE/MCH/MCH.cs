@@ -189,7 +189,8 @@ internal partial class MCH : PhysicalRanged
                 (ActionReady(Excavator) && MCH_ST_Reassembled[0] ||
                  ActionReady(Chainsaw) && MCH_ST_Reassembled[1] ||
                  LevelChecked(AirAnchor) && IsOffCooldown(AirAnchor) && MCH_ST_Reassembled[2] ||
-                 ActionReady(Drill) && MCH_ST_Reassembled[3]))
+                 ActionReady(Drill) && MCH_ST_Reassembled[3]) &&
+                StHpAllows(MCH_ST_ReassembleHPOption, MCH_ST_ReassembleHPBossOption, TargetIsBossCheck))
                 return Reassemble;
 
             // Interrupt
@@ -218,7 +219,8 @@ internal partial class MCH : PhysicalRanged
                     (MCH_ST_Adv_Wildfire_SubOption == 0 || TargetIsBoss()) &&
                     CanApplyStatus(CurrentTarget, Debuffs.Wildfire) &&
                     JustUsed(Hypercharge) && ActionReady(Wildfire) &&
-                    !HasStatusEffect(Buffs.Wildfire))
+                    !HasStatusEffect(Buffs.Wildfire) &&
+                    StHpAllows(MCH_ST_WildfireHPOption, MCH_ST_WildfireHPBossOption, TargetIsBossCheck))
                     return Wildfire;
 
                 if (!IsOverheated)
@@ -226,13 +228,15 @@ internal partial class MCH : PhysicalRanged
                     // BarrelStabilizer
                     if (IsEnabled(CustomComboPreset.MCH_ST_Adv_Stabilizer) &&
                         (MCH_ST_Adv_BarrelStabiliser_SubOption == 0 || TargetIsBoss()) &&
-                        ActionReady(BarrelStabilizer) && !HasStatusEffect(Buffs.FullMetalMachinist))
+                        ActionReady(BarrelStabilizer) && !HasStatusEffect(Buffs.FullMetalMachinist) &&
+                        StHpAllows(MCH_ST_BarrelStabilizerHPOption, MCH_ST_BarrelStabilizerHPBossOption, TargetIsBossCheck))
                         return BarrelStabilizer;
 
                     // Hypercharge
                     if (IsEnabled(CustomComboPreset.MCH_ST_Adv_Hypercharge) &&
                         (Heat >= 50 || HasStatusEffect(Buffs.Hypercharged)) &&
-                        !IsComboExpiring(6) && ActionReady(Hypercharge))
+                        !IsComboExpiring(6) && ActionReady(Hypercharge) &&
+                        StHpAllows(MCH_ST_HyperchargeHPOption, MCH_ST_HyperchargeHPBossOption, TargetIsBossCheck))
                     {
                         // Ensures Hypercharge is double weaved with WF
                         if (LevelChecked(FullMetalField) && JustUsed(FullMetalField) &&
@@ -252,13 +256,15 @@ internal partial class MCH : PhysicalRanged
 
                     // Queen
                     if (IsEnabled(CustomComboPreset.MCH_ST_Adv_TurretQueen) &&
-                        UseQueen())
+                        UseQueen() &&
+                        StHpAllows(MCH_ST_QueenHPOption, MCH_ST_QueenHPBossOption, InBossEncounterCheck))
                         return OriginalHook(RookAutoturret);
 
                     // Reassemble
                     if (IsEnabled(CustomComboPreset.MCH_ST_Adv_Reassemble) &&
                         GetRemainingCharges(Reassemble) > MCH_ST_ReassemblePool &&
-                        Reassembled())
+                        Reassembled() &&
+                        StHpAllows(MCH_ST_ReassembleHPOption, MCH_ST_ReassembleHPBossOption, TargetIsBossCheck))
                         return Reassemble;
 
                     // Gauss Round and Ricochet outside HC
@@ -318,7 +324,8 @@ internal partial class MCH : PhysicalRanged
                 return OriginalHook(Heatblast);
 
             //Tools
-            if (Tools(ref actionID))
+            if (StHpAllows(MCH_ST_ToolsHPOption, MCH_ST_ToolsHPBossOption, TargetIsBossCheck) &&
+                Tools(ref actionID))
                 return actionID;
 
             // 1-2-3 Combo
@@ -329,7 +336,8 @@ internal partial class MCH : PhysicalRanged
 
                 if (IsEnabled(CustomComboPreset.MCH_ST_Adv_Reassemble) && MCH_ST_Reassembled[4] &&
                     ComboAction is SlugShot &&
-                    !LevelChecked(Drill) && !HasStatusEffect(Buffs.Reassembled) && ActionReady(Reassemble))
+                    !LevelChecked(Drill) && !HasStatusEffect(Buffs.Reassembled) && ActionReady(Reassemble) &&
+                    StHpAllows(MCH_ST_ReassembleHPOption, MCH_ST_ReassembleHPBossOption, TargetIsBossCheck))
                     return Reassemble;
 
                 if (ComboAction is SlugShot && LevelChecked(CleanShot))
@@ -523,7 +531,8 @@ internal partial class MCH : PhysicalRanged
                         (LevelChecked(BioBlaster) && GetCooldownRemainingTime(BioBlaster) > 10 ||
                          !LevelChecked(BioBlaster) || IsNotEnabled(CustomComboPreset.MCH_AoE_Adv_Bioblaster)) &&
                         (LevelChecked(Flamethrower) && GetCooldownRemainingTime(Flamethrower) > 10 ||
-                         !LevelChecked(Flamethrower) || IsNotEnabled(CustomComboPreset.MCH_AoE_Adv_FlameThrower)))
+                         !LevelChecked(Flamethrower) || IsNotEnabled(CustomComboPreset.MCH_AoE_Adv_FlameThrower)) &&
+                        AoEHpAllows(MCH_AoE_HyperchargeHPThreshold))
                         return Hypercharge;
 
                     if (IsEnabled(CustomComboPreset.MCH_AoE_Adv_Reassemble) &&
@@ -534,7 +543,8 @@ internal partial class MCH : PhysicalRanged
                          IsOverheated && MCH_AoE_Reassembled[1] && LevelChecked(AutoCrossbow) ||
                          GetCooldownRemainingTime(Chainsaw) < 1 && MCH_AoE_Reassembled[2] && LevelChecked(Chainsaw) ||
                          GetCooldownRemainingTime(OriginalHook(Chainsaw)) < 1 && MCH_AoE_Reassembled[3] &&
-                         LevelChecked(Excavator)))
+                         LevelChecked(Excavator)) &&
+                        AoEHpAllows(MCH_AoE_ReassembleHPThreshold))
                         return Reassemble;
 
                     //gauss and ricochet outside HC
@@ -584,7 +594,8 @@ internal partial class MCH : PhysicalRanged
                     return OriginalHook(BioBlaster);
 
                 if (IsEnabled(CustomComboPreset.MCH_AoE_Adv_FlameThrower) &&
-                    ActionReady(Flamethrower) && !IsMoving())
+                    ActionReady(Flamethrower) && !IsMoving() &&
+                    AoEHpAllows(MCH_AoE_FlamethrowerHPOption))
                     return OriginalHook(Flamethrower);
 
                 if (IsEnabled(CustomComboPreset.MCH_AoE_Adv_Excavator) &&

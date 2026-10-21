@@ -78,6 +78,21 @@ internal partial class MCH
 
     #endregion
 
+    #region HP cutoff
+
+    private static readonly Func<bool> TargetIsBossCheck = static () => TargetIsBoss();
+    private static readonly Func<bool> InBossEncounterCheck = static () => InBossEncounter();
+    private static readonly Func<float> TargetHpCheck = static () => GetTargetHPPercent();
+
+    // 門檻 0 時只讀一次設定就放行，不讀範圍選項、不碰目標。
+    internal static bool StHpAllows(int hpCutoff, UserInt bossScope, Func<bool> isBoss) =>
+        hpCutoff <= 0 || HpCutoffAllows(hpCutoff, bossScope, isBoss, TargetHpCheck);
+
+    internal static bool AoEHpAllows(int hpCutoff) =>
+        hpCutoff <= 0 || HpCutoffAllows(hpCutoff, 1, TargetIsBossCheck, TargetHpCheck);
+
+    #endregion
+
     #region Reassembled
 
     internal static bool ReassembledExcavatorST =>
