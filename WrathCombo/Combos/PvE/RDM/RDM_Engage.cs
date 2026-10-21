@@ -116,6 +116,12 @@ internal partial class RDM
                 if (inCombat && s.Target != 0)
                     return None;
                 s = new State { Target = targetId, Start = now };
+                // 與下面 Continue 的關閉條件相同：決定前不久已送出的接戰動作算這一次的，這一幀就不再交出。
+                if (lastEngageSend >= now - SentBeforeStartMs)
+                {
+                    s.Closed = true;
+                    return None;
+                }
                 return New;
             }
 
