@@ -56,3 +56,4 @@ jobs:
         with:
           path: |
             ./WrathCombo/bin/Release/*
+# workflow re-registration trigger 2026-10-26T19:01:57Z
