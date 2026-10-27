@@ -29,6 +29,4 @@ jobs:
           Expand-Archive -Force dalamud-pinned.zip "$env:RUNNER_TEMP\dalamud-pinned\"
       - name: Build with dotnet
         run: dotnet build --configuration Release -p:DalamudLibPath="$env:RUNNER_TEMP\dalamud-pinned\"
-      - name: Archive
-        run: Compress-Archive -Path WrathCombo/bin/Release/* -DestinationPath WrathCombo.zip
 # workflow re-registration trigger 2026-10-26T19:01:57Z
