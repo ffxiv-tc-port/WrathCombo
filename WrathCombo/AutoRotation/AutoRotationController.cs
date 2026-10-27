@@ -39,6 +39,14 @@ namespace WrathCombo.AutoRotation
         static long LastHealAt = 0;
         static long LastRezAt = 0;
 
+        // 康復送出後的短鎖：鎖內不重推康復、也不推輸出（BMR 佇列只有一格，輸出會把康復換掉）。
+        static long _cleanseLockUntil;
+        static long _cleanseSentAt;
+        static int _cleanseMisses;
+        static long _cleanseBackoffUntil;
+        const int CleanseLockMs = 1200;
+        const int CleanseBackoffMs = 5000;
+
         static bool _lockedST = false;
         static bool _lockedAoE = false;
 
@@ -678,8 +686,11 @@ namespace WrathCombo.AutoRotation
             if (isHealer || (Player.Job is Job.SMN or Job.RDM && cfg.HealerSettings.AutoRezDPSJobs) || OccultCrescent.ReviveEnabledAndUsable)
             {
                 // 有人要補時只清致命狀態（死亡宣告這類），其餘照舊等補完再清。
-                if (cfg.HealerSettings.AutoCleanse && isHealer)
-                    CleanseParty(lethalOnly: needsHeal);
+                if (cfg.HealerSettings.AutoCleanse && isHealer && CleanseParty(lethalOnly: needsHeal))
+                {
+                    DiagEndTick(NoActStage.Busy);
+                    return;
+                }
 
                 if (!needsHeal && cfg.HealerSettings.AutoRez)
                     RezParty();
@@ -900,9 +911,27 @@ namespace WrathCombo.AutoRotation
             }
         }
 
-        private static void CleanseParty(bool lethalOnly)
+        /// <returns> true＝這一節拍已被康復佔用（剛送出，或仍在送出後的短鎖內），呼叫端不可再推別的動作。 </returns>
+        private static bool CleanseParty(bool lethalOnly)
         {
-            if (HasStatusEffect(418)) return;
+            var now = Environment.TickCount64;
+            if (now < _cleanseLockUntil)
+                return true;
+
+            // 送出後沒有真的放出來（佇列被丟、目標跑掉）連兩次就暫停清除，免得輸出一直被鎖。
+            if (_cleanseSentAt != 0)
+            {
+                if (LastSuccessfulUseTime.TryGetValue(RoleActions.Healer.Esuna, out var castAt) && castAt >= _cleanseSentAt)
+                    _cleanseMisses = 0;
+                else if (++_cleanseMisses >= 2)
+                {
+                    _cleanseMisses = 0;
+                    _cleanseBackoffUntil = now + CleanseBackoffMs;
+                }
+                _cleanseSentAt = 0;
+            }
+
+            if (now < _cleanseBackoffUntil || HasStatusEffect(418)) return false;
 
             // 致命狀態優先；lethalOnly 時沒有就整個不動（含不清掉已排入的復原）。
             WrathPartyMember? member = null;
@@ -920,16 +949,26 @@ namespace WrathCombo.AutoRotation
             }
 
             if (lethalOnly && member is null)
-                return;
+                return false;
 
             if (ActionManager.Instance()->QueuedActionId == RoleActions.Healer.Esuna)
                 ActionManager.Instance()->QueuedActionId = 0;
 
-            if (member is not null)
-            {
-                if (InActionRange(RoleActions.Healer.Esuna, member.BattleChara) && IsInLineOfSight(member.BattleChara))
-                    ActionManager.Instance()->UseAction(ActionType.Action, RoleActions.Healer.Esuna, member.BattleChara.GameObjectId);
-            }
+            if (member is null
+                || !InActionRange(RoleActions.Healer.Esuna, member.BattleChara) || !IsInLineOfSight(member.BattleChara)
+                || !AutoRotationHelper.InQueueWindow(RoleActions.Healer.Esuna)
+                || Player.Object.CurrentMp < GetResourceCost(RoleActions.Healer.Esuna))
+                return false;
+
+            var ret = ActionManager.Instance()->UseAction(ActionType.Action, RoleActions.Healer.Esuna, member.BattleChara.GameObjectId);
+            if (!ActionAccepted(ret))
+                return false;
+
+            var castTime = ActionManager.GetAdjustedCastTime(ActionType.Action, RoleActions.Healer.Esuna);
+            _cleanseSentAt = now;
+            _cleanseLockUntil = now + castTime + CleanseLockMs;
+            DiagNoteFired();
+            return true;
         }
 
         private static void UpdateKardiaTarget()
@@ -999,7 +1038,7 @@ namespace WrathCombo.AutoRotation
 
         public static class AutoRotationHelper
         {
-            private static bool InQueueWindow(uint outAct) =>
+            internal static bool InQueueWindow(uint outAct) =>
                 QueueTiming.CanSend(outAct.ActionAttackType() is ActionAttackType.Ability, RemainingGCD,
                     ActionManager.Instance()->AnimationLock, cfg.QueueWindow);
 
