@@ -200,7 +200,7 @@ public partial class WrathCombo
             {
                 preset = presetCanNumber
                     ? (CustomComboPreset)targetNumber
-                    : Enum.Parse<CustomComboPreset>(target, true);
+                    : PresetNames.ParseByNameOrId(target);
             }
             catch
             {

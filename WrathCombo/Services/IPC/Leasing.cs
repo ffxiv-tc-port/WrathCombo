@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using WrathCombo.Combos;
+using WrathCombo.Core;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Extensions;
 // 🔴🔴 這個檔<b>刻意不引用</b> ECommons.Throttlers.EzThrottler。
@@ -979,8 +980,7 @@ public partial class Leasing
             var state = true;
             if (locking)
             {
-                var ccpOption = (CustomComboPreset)
-                    Enum.Parse(typeof(CustomComboPreset), option);
+                var ccpOption = PresetNames.ParseByNameOrId(option);
                 state = CustomComboFunctions.IsEnabled(ccpOption);
             }
 
@@ -1089,16 +1089,8 @@ public partial class Leasing
         if (!HasRegistrations())
             return null;
 
-        CustomComboPreset customComboPreset;
-        try
-        {
-            customComboPreset = (CustomComboPreset)
-                Enum.Parse(typeof(CustomComboPreset), combo, true);
-        }
-        catch
-        {
+        if (!PresetNames.TryGetByNameOrId(combo, out var customComboPreset))
             return null;
-        }
 
         return CheckComboControlled(customComboPreset);
     }
@@ -1131,8 +1123,7 @@ public partial class Leasing
     internal SetResult AddRegistrationForCombo
         (Guid lease, string combo, bool newState, bool newAutoState)
     {
-        var preset = (CustomComboPreset)
-            Enum.Parse(typeof(CustomComboPreset), combo, true);
+        var preset = PresetNames.ParseByNameOrId(combo);
 
         // Disable the combo of the opposite type mode, if one exists
         var oppositeModeCombo = Helper.GetOppositeModeCombo(preset);
@@ -1195,16 +1186,8 @@ public partial class Leasing
         if (!HasRegistrations())
             return null;
 
-        CustomComboPreset customComboPreset;
-        try
-        {
-            customComboPreset = (CustomComboPreset)
-                Enum.Parse(typeof(CustomComboPreset), option, true);
-        }
-        catch
-        {
+        if (!PresetNames.TryGetByNameOrId(option, out var customComboPreset))
             return null;
-        }
 
         return CheckComboOptionControlled(customComboPreset);
     }
@@ -1236,8 +1219,7 @@ public partial class Leasing
     internal SetResult AddRegistrationForOption
         (Guid lease, string option, bool newState)
     {
-        var preset = (CustomComboPreset)
-            Enum.Parse(typeof(CustomComboPreset), option, true);
+        var preset = PresetNames.ParseByNameOrId(option);
 
         Lease registration;
         byte[] configurationsHash;

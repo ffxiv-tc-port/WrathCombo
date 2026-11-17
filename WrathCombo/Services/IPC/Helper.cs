@@ -15,6 +15,7 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using WrathCombo.Attributes;
 using WrathCombo.Combos;
+using WrathCombo.Core;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Extensions;
 using TS = System.TimeSpan;
@@ -112,8 +113,7 @@ public partial class Helper(ref Leasing leasing)
 
             // Return the opposite mode, as a proper preset
             var oppositeMode = categorizedPreset.FirstOrDefault().Key;
-            var oppositeModePreset = (CustomComboPreset)
-                Enum.Parse(typeof(CustomComboPreset), oppositeMode, true);
+            var oppositeModePreset = PresetNames.ParseByNameOrId(oppositeMode);
             return oppositeModePreset;
         }
         catch (Exception ex)
@@ -387,8 +387,7 @@ public partial class Helper(ref Leasing leasing)
 
         CustomComboPreset? simpleComboPreset = simpleHigher is null
             ? null
-            : (CustomComboPreset)
-            Enum.Parse(typeof(CustomComboPreset), simpleHigher.Value.Key, true);
+            : PresetNames.ParseByNameOrId(simpleHigher.Value.Key);
         bool? simpleState = simpleComboPreset is null
             ? null
             : StateOf(simpleComboPreset.Value);
@@ -401,8 +400,7 @@ public partial class Helper(ref Leasing leasing)
 
         #region Override the Values with any IPC-control
 
-        var advancedComboPreset = (CustomComboPreset)
-            Enum.Parse(typeof(CustomComboPreset), advancedKey, true);
+        var advancedComboPreset = PresetNames.ParseByNameOrId(advancedKey);
         var advancedState = StateOf(advancedComboPreset);
 
         #endregion

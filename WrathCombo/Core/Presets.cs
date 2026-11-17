@@ -172,11 +172,7 @@ namespace WrathCombo.Core
 
         public static CustomComboPreset? GetPresetByString(string value)
         {
-            if (Enum.GetValues<CustomComboPreset>().TryGetFirst(x => x.ToString().ToLower() == value.ToLower(), out var pre))
-            {
-                return pre;
-            }
-            return null;
+            return PresetNames.TryGetByName(value, out var pre) ? pre : null;
         }
 
         public static CustomComboPreset? GetPresetByInt(int value)
