@@ -8321,7 +8321,13 @@ public enum CustomComboPreset
         "目前目標不是玩家（NPC、物件或沒有目標）時，各職業 PvP 連擊不放冷卻時間 30 秒以上的攻擊技能與極限爆發。勾選後下方可看適用技能。", ADV.JobID)]
     PvP_LongCDOnlyOnPlayers = 1100050,
 
-    // Last value = 1100050
+    [Role(JobRole.All)]
+    [PvPCustomCombo]
+    [CustomComboInfo("目標太近時不放位移技能",
+        "目標距離（扣掉雙方的碰撞圈）小於設定值時，各職業 PvP 連擊不放「衝到敵人面前」或「把敵人拉過來」的技能。勾選後下方可調距離、看適用技能。", ADV.JobID)]
+    PvP_GapCloserMinDistance = 1100060,
+
+    // Last value = 1100060
     // Extra 0 on the end keeps things working the way they should be. Nothing to see here.
 
     #endregion
@@ -9475,7 +9481,7 @@ public enum CustomComboPreset
 
     [PvPCustomCombo]
     [ParentCombo(WARPvP_BurstMode)]
-    [CustomComboInfo("PrimalScream Option", "Adds Primal Scream to Burst Mode.", WARPvP.JobID)]
+    [CustomComboInfo("原初的怒震選項", "放完原初的怒號（極限爆發）後，在近戰距離內把追擊原初的怒震加入 Burst Mode。\n極限爆發本身要另外勾「原初的怒號（極限爆發）選項」。", WARPvP.JobID)]
     WARPvP_BurstMode_PrimalScream = 128008,
 
     [PvPCustomCombo]
@@ -9484,7 +9490,19 @@ public enum CustomComboPreset
         "Adds Defensive Role Action Rampart to Burst Mode below selected health", WARPvP.JobID)]
     WARPvP_Rampart = 128009,
 
-    // Last value = 128009
+    [PvPCustomCombo]
+    [ParentCombo(WARPvP_BurstMode)]
+    [CustomComboInfo("原初的怒號（極限爆發）選項",
+        "極限槽滿、目標在 12 米內且 HP% 在設定值以下時，放原初的怒號（錐形範圍無法防禦，之後技能強化）。\n受「目標不是玩家時不放長冷卻技能」開關管。", WARPvP.JobID)]
+    WARPvP_BurstMode_PrimalScreamLB = 128010,
+
+    [PvPCustomCombo]
+    [ParentCombo(WARPvP_BurstMode)]
+    [CustomComboInfo("職能技能 暴怒選項",
+        "PvP 職能技能選了暴怒時，目標在 10 米內就在能力技空檔放（自身周圍範圍攻擊，目標所受傷害提高 25%）。\n受「目標不是玩家時不放長冷卻技能」開關管。", WARPvP.JobID)]
+    WARPvP_Rampage = 128011,
+
+    // Last value = 128011
 
     #endregion
 

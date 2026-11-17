@@ -158,7 +158,7 @@ namespace WrathCombo.Combos.PvP
 
                         // Soten
                         if (IsEnabled(CustomComboPreset.SAMPvP_Soten) && isSotenPrimed && targetDistance <= Config.SAMPvP_Soten_Range &&
-                            (!Config.SAMPvP_Soten_SubOption || (Config.SAMPvP_Soten_SubOption && isYukikazePrimed)))
+                            (!Config.SAMPvP_Soten_SubOption || (Config.SAMPvP_Soten_SubOption && isYukikazePrimed)) && PvPCommon.GapCloserAllowed(Soten))
                             return OriginalHook(Soten);
 
                         if (inMeleeRange)

@@ -130,7 +130,7 @@ namespace WrathCombo.Combos.PvP
                             // 滿層才為防溢出而放；層數上限讀遊戲（台服 7.3 起 3 層），讀不到（≤1）就不做防溢出。
                             var rdMaxCharges = GetMaxCharges(RoughDivide);
                             if (HasCharges(RoughDivide) && !HasStatusEffect(Buffs.NoMercy) && !JustUsed(RoughDivide, 3f) &&
-                               (ActionReady(FatedCircle)|| ActionReady(GnashingFang) || rdMaxCharges > 1 && GetRemainingCharges(RoughDivide) >= rdMaxCharges)) // Will RD for no mercy when at max charges, or before the fated circle or gnashing fang combo
+                               (ActionReady(FatedCircle)|| ActionReady(GnashingFang) || rdMaxCharges > 1 && GetRemainingCharges(RoughDivide) >= rdMaxCharges) && PvPCommon.GapCloserAllowed(RoughDivide)) // Will RD for no mercy when at max charges, or before the fated circle or gnashing fang combo
                                 return RoughDivide;
                         }
 

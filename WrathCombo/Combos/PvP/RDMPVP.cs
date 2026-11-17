@@ -202,7 +202,7 @@ namespace WrathCombo.Combos.PvP
                             }
 
                             // Corps-a-Corps
-                            if (IsEnabled(CustomComboPreset.RDMPvP_Corps) && isCorpsPrimed)
+                            if (IsEnabled(CustomComboPreset.RDMPvP_Corps) && isCorpsPrimed && PvPCommon.GapCloserAllowed(CorpsACorps))
                                 return OriginalHook(CorpsACorps);
                         }
 

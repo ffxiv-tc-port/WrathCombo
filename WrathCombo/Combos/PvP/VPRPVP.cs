@@ -172,7 +172,7 @@ namespace WrathCombo.Combos.PvP
 
                     // Slither
                     if (IsEnabled(CustomComboPreset.VPRPvP_Slither) && chargesSlither > Config.VPRPvP_Slither_Charges &&
-                        isSlitherPrimed && targetDistance <= Config.VPRPvP_Slither_Range)
+                        isSlitherPrimed && targetDistance <= Config.VPRPvP_Slither_Range && PvPCommon.GapCloserAllowed(Slither))
                         return OriginalHook(Slither);
 
                     // Serpent's Tail

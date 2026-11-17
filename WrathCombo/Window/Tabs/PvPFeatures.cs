@@ -1,5 +1,6 @@
 ﻿using System;
 using Dalamud.Interface;
+using Dalamud.Interface.Colors;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -9,7 +10,9 @@ using Dalamud.Bindings.ImGui;
 using System.Linq;
 using System.Numerics;
 using ECommons.Logging;
+using WrathCombo.Combos;
 using WrathCombo.Core;
+using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Services;
 using WrathCombo.Window.Functions;
 
@@ -110,6 +113,9 @@ namespace WrathCombo.Window.Tabs
 
                     }
 
+                    if (id != Combos.PvE.ADV.JobID)
+                        DrawGlobalTogglesNotice();
+
                     using (var contents = ImRaii.Child("Contents", new Vector2(0)))
                     {
                         currentPreset = 1;
@@ -131,6 +137,32 @@ namespace WrathCombo.Window.Tabs
                     }
                 }
 
+            }
+        }
+
+        private static readonly (CustomComboPreset Preset, string Name)[] GlobalPvPToggles =
+        [
+            (CustomComboPreset.PvP_CCOnlyOnPlayers, "目標不是玩家時不放控場技能"),
+            (CustomComboPreset.PvP_LongCDOnlyOnPlayers, "目標不是玩家時不放長冷卻技能"),
+            (CustomComboPreset.PvP_GapCloserMinDistance, "目標太近時不放位移技能"),
+        ];
+
+        // 這三個開關掛在「通用/多職業」，各職業頁只顯示狀態與捷徑，不在這裡改值（勾選仍走原本的 preset 介面）。
+        private static void DrawGlobalTogglesNotice()
+        {
+            string advName = CustomComboFunctions.JobIDs.JobIDToName(Combos.PvE.ADV.JobID);
+            ImGui.TextDisabled($"全職業 PvP 開關（在「{advName}」裡設定）：");
+            if (groupedPresets.ContainsKey(advName))
+            {
+                ImGui.SameLine();
+                if (ImGui.SmallButton($"前往{advName}###pvpGlobalToggles"))
+                    OpenJob = advName;
+            }
+
+            foreach (var (preset, name) in GlobalPvPToggles)
+            {
+                bool on = PresetStorage.IsEnabled(preset);
+                ImGui.TextColored(on ? ImGuiColors.HealerGreen : ImGuiColors.DalamudGrey, $"　・{name}：{(on ? "已開啟" : "未開啟")}");
             }
         }
 

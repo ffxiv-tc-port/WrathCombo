@@ -43,7 +43,8 @@ namespace WrathCombo.Combos.PvP
         {
             public static UserInt
                 WARPVP_BlotaTiming = new("WARPVP_BlotaTiming"),
-                WARPvP_RampartThreshold = new("WARPvP_RampartThreshold");
+                WARPvP_RampartThreshold = new("WARPvP_RampartThreshold"),
+                WARPvP_PrimalScreamLBThreshold = new("WARPvP_PrimalScreamLBThreshold", 100);
 
 
             internal static void Draw(CustomComboPreset preset)
@@ -53,6 +54,11 @@ namespace WrathCombo.Combos.PvP
                     case CustomComboPreset.WARPvP_Rampart:
                         UserConfig.DrawSliderInt(1, 100, WARPvP_RampartThreshold,
                             "Use Rampart below set threshold for self");
+                        break;
+
+                    case CustomComboPreset.WARPvP_BurstMode_PrimalScreamLB:
+                        UserConfig.DrawSliderInt(1, 100, WARPvP_PrimalScreamLBThreshold,
+                            "目標 HP% 在這個值以下才放（100＝不限）");
                         break;
 
                     case CustomComboPreset.WARPvP_BurstMode_Blota:
@@ -90,6 +96,17 @@ namespace WrathCombo.Combos.PvP
                                 return OriginalHook(Bloodwhetting);
                         }
 
+                        // 原初的怒號（極限爆發）是錐形 12 米，目標在範圍內才放；按鈕已變成原初的怒震時不放。
+                        if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalScreamLB) && IsLB1Ready && HasBattleTarget() &&
+                            OriginalHook(PrimalScream) == PrimalScream && GetTargetDistance() <= 12 &&
+                            GetTargetHPPercent() <= Config.WARPvP_PrimalScreamLBThreshold && PvPCommon.LongCDAllowed())
+                            return PrimalScream;
+
+                        // 暴怒是自身周圍 10 米的範圍攻擊。
+                        if (IsEnabled(CustomComboPreset.WARPvP_Rampage) && canWeave && PvPTank.CanRampage() && HasBattleTarget() &&
+                            GetTargetDistance() <= 10 && PvPCommon.LongCDAllowed())
+                            return PvPTank.Rampage;
+
                         // Primal Wrath if in melee range and Wrathfull effect is active
                         if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalScream) && InMeleeRange() && canWeave && HasStatusEffect(Buffs.Wrathfull))
                             return OriginalHook(PrimalScream);
@@ -98,7 +115,7 @@ namespace WrathCombo.Combos.PvP
                         if (!InMeleeRange())
                         {
                             // Blota with specific conditions and burst mode enabled
-                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && BlotaCanPull)
+                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && BlotaCanPull && PvPCommon.GapCloserAllowed(Blota))
                             {
                                 if (Config.WARPVP_BlotaTiming == 0 && IsOffCooldown(PrimalRend))
                                     return OriginalHook(Blota);
@@ -109,7 +126,7 @@ namespace WrathCombo.Combos.PvP
                             // PrimalRend if ready or BurstMode enabled
                             if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalRend))
                             {
-                                if ((IsOffCooldown(PrimalRend) || HasStatusEffect(Buffs.PrimalRuinationReady)))
+                                if ((IsOffCooldown(PrimalRend) || HasStatusEffect(Buffs.PrimalRuinationReady)) && PvPCommon.GapCloserAllowed(PrimalRend))
                                     return OriginalHook(PrimalRend);
                             }
 
@@ -123,7 +140,7 @@ namespace WrathCombo.Combos.PvP
                                 return OriginalHook(Blota);
 
                             // Onslaught and Orogeny conditions for melee
-                            if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_Onslaught) && !GetCooldown(Onslaught).IsCooldown && canWeave)
+                            if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_Onslaught) && !GetCooldown(Onslaught).IsCooldown && canWeave && PvPCommon.GapCloserAllowed(Onslaught))
                                 return OriginalHook(Onslaught);
 
                             // Nascent Chaos and Orogeny conditions
@@ -136,12 +153,12 @@ namespace WrathCombo.Combos.PvP
                             // PrimalRend if ready or BurstMode enabled
                             if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalRend))
                             {
-                                if (IsOffCooldown(PrimalRend) || HasStatusEffect(Buffs.PrimalRuinationReady))
+                                if ((IsOffCooldown(PrimalRend) || HasStatusEffect(Buffs.PrimalRuinationReady)) && PvPCommon.GapCloserAllowed(PrimalRend))
                                     return OriginalHook(PrimalRend);
                             }
 
                             // Blota with specific conditions and burst mode enabled in meleerange
-                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && BlotaCanPull)
+                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && BlotaCanPull && PvPCommon.GapCloserAllowed(Blota))
                             {
                                 if (Config.WARPVP_BlotaTiming == 0 && IsOffCooldown(PrimalRend))
                                     return OriginalHook(Blota);

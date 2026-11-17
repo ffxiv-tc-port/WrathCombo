@@ -87,7 +87,8 @@ namespace WrathCombo.Combos.PvP
                     {
                         if (IsEnabled(CustomComboPreset.DRKPvP_Plunge) && ActionReady(Plunge))
                         {
-                            if (HasTarget() && (!InMeleeRange()) || (InMeleeRange() && IsEnabled(CustomComboPreset.DRKPvP_PlungeMelee)))
+                            if ((HasTarget() && (!InMeleeRange()) || (InMeleeRange() && IsEnabled(CustomComboPreset.DRKPvP_PlungeMelee))) &&
+                                PvPCommon.GapCloserAllowed(Plunge))
                                 return OriginalHook(Plunge);
                         }
 

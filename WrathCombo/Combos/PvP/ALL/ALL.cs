@@ -61,7 +61,8 @@ internal static class PvPCommon
         public static UserInt
             EmergencyHealThreshold = new("EmergencyHealThreshold"),
             EmergencyGuardThreshold = new("EmergencyGuardThreshold"),
-            PurifyMPThreshold = new("PurifyMPThreshold");
+            PurifyMPThreshold = new("PurifyMPThreshold"),
+            GapCloserMinDistance = new("PvP_GapCloserMinDistance", 10);
 
         public static UserBoolArray
             QuickPurifyStatuses = new("QuickPurifyStatuses");
@@ -108,10 +109,19 @@ internal static class PvPCommon
                         "防禦、治療類技能，以及極限爆發之後的追擊（英雄的返場餘音、掠影的蔑視等）不受影響；" +
                         "蛇鱗術、本輪等單一按鍵功能裡的用法也不受影響。");
                     break;
+
+                case CustomComboPreset.PvP_GapCloserMinDistance:
+                    DrawSliderInt(0, 25, GapCloserMinDistance, "目標距離至少幾米才放位移技能（扣掉雙方碰撞圈；PvP 近戰射程是 5 米）");
+                    DrawAppliesTo(ref _gapCloserTooltip, GapCloserActions,
+                        "衝到目標面前或把目標拉過來的技能；距離量法同連擊判斷近戰射程（水平距離扣掉雙方碰撞圈）。\n" +
+                        "技能已變成追擊（盡毀、狂魂、深紅強襲等）時不算位移，照常放。\n" +
+                        "不算：往前或往後的自身位移（本輪、地獄入境、速塗、前衝步、後躍射擊、迴避跳躍、移轉、縮地）、" +
+                        "對隊友的位移、腐穢大地（主要是自身恢復／減傷場地）、極限爆發（隕石衝擊）。");
+                    break;
             }
         }
 
-        private static string? _ccTooltip, _longCdTooltip;
+        private static string? _ccTooltip, _longCdTooltip, _gapCloserTooltip;
 
         // 清單第一次畫的時候才組（技能名讀台服 Action 表），之後沿用同一個字串。
         private static void DrawAppliesTo(ref string? cache, (string Job, uint Action)[] actions, string note)
@@ -150,6 +160,16 @@ internal static class PvPCommon
     public static bool LongCDAllowed() =>
         !IsEnabled(CustomComboPreset.PvP_LongCDOnlyOnPlayers) || TargetIsPlayer();
 
+    /// <summary>
+    ///     位移技能 <paramref name="gapCloser" /> 這一刻可以放：沒開「目標太近時不放位移技能」、
+    ///     它現在已變成別的技能（追擊，不是位移），或目標距離（<see cref="GetTargetDistance" />）達到設定值。
+    ///     開關沒勾時第一項就成立，不讀遊戲狀態。
+    /// </summary>
+    public static bool GapCloserAllowed(uint gapCloser) =>
+        !IsEnabled(CustomComboPreset.PvP_GapCloserMinDistance) ||
+        OriginalHook(gapCloser) != gapCloser ||
+        GetTargetDistance() >= Config.GapCloserMinDistance;
+
     // 只給設定頁的說明用；實際判斷寫在各職業檔的出招條件裡（加 CCAllowed／LongCDAllowed 的地方）。
     // 分類依據台服 Action 表的冷卻時間（Recast100ms）與 ActionTransient 的技能說明。
     internal static readonly (string Job, uint Action)[]
@@ -175,6 +195,25 @@ internal static class PvPCommon
             ("毒蛇劍士", VPRPvP.RattlingCoil),
             ("白魔道士", WHMPvP.AfflatusPurgation),
             ("占星術師、學者、賢者、白魔道士", PvPHealer.Diabrosis),
+            ("戰士", WARPvP.PrimalScream),
+            ("戰士", PvPTank.Rampage),
+        ],
+        // 只列連擊裡真的會放的；實際判斷是各職業檔加 GapCloserAllowed 的地方。
+        GapCloserActions =
+        [
+            ("騎士", PLDPvP.Intervene),
+            ("戰士", WARPvP.Onslaught),
+            ("戰士", WARPvP.PrimalRend),
+            ("戰士", WARPvP.Blota),
+            ("暗黑騎士", DRKPvP.Plunge),
+            ("絕槍戰士", GNBPvP.RoughDivide),
+            ("白魔道士", WHMPvP.SeraphStrike),
+            ("武僧", MNKPvP.Thunderclap),
+            ("龍騎士", DRGPvP.HighJump),
+            ("武士", SAMPvP.Soten),
+            ("召喚士", SMNPvP.CrimsonCyclone),
+            ("赤魔道士", RDMPvP.CorpsACorps),
+            ("毒蛇劍士", VPRPvP.Slither),
         ];
 
     /// <summary> Checks if the target is immune to damage. Optionally, include buffs that provide significant damage reduction. </summary>

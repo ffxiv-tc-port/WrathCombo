@@ -78,7 +78,8 @@ namespace WrathCombo.Combos.PvP
                     if (IsEnabled(CustomComboPreset.PLDPvP_Rampart) && PvPTank.CanRampart(Config.PLDPvP_RampartThreshold))
                         return PvPTank.Rampart;
 
-                    if (IsEnabled(CustomComboPreset.PLDPvP_Intervene) && !InMeleeRange() && IsOffCooldown(Intervene) || IsEnabled(CustomComboPreset.PLDPvP_Intervene_Melee) && InMeleeRange() && IsOffCooldown(Intervene))
+                    if ((IsEnabled(CustomComboPreset.PLDPvP_Intervene) && !InMeleeRange() && IsOffCooldown(Intervene) || IsEnabled(CustomComboPreset.PLDPvP_Intervene_Melee) && InMeleeRange() && IsOffCooldown(Intervene)) &&
+                        PvPCommon.GapCloserAllowed(Intervene))
                         return Intervene;
 
                     // Check conditions for Holy Sheltron
