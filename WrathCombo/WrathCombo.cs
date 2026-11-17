@@ -414,8 +414,9 @@ public sealed partial class WrathCombo : IDalamudPlugin
 
     private void PrintLoginMessage()
     {
-        Task.Delay(TimeSpan.FromSeconds(5), UnloadToken)
-            .ContinueWith(_ => ResetFeatures(), UnloadToken);
+        // 遷移會改設定並存檔：排到框架執行緒，與其他設定寫入同一條執行緒。
+        _ = Svc.Framework.RunOnTick(ResetFeatures, TimeSpan.FromSeconds(5),
+            cancellationToken: UnloadToken);
 
         // 刻意不抓登入公告（MotD）：來源在第三方網域，內容會原樣印進使用者的聊天欄。
     }
