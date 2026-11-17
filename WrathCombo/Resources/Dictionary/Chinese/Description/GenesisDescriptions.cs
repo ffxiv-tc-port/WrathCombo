@@ -54,6 +54,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Prevent Mash Cancelling Feature", "防止快速點選取消防禦"),
                 KeyValuePair.Create("Uses Guard when your HP is under the set threshold.", "當你的HP低於設定閾值時，使用Guard。"),
                 KeyValuePair.Create("Uses Purify when afflicted with any selected debuff.", "當你受到任何選定的減益效果影響時，使用Purify。"),
+                KeyValuePair.Create("Do not use Purify below set MP", "MP低於設定值時不使用Purify"),
                 KeyValuePair.Create("Stops you cancelling your guard if you're pressing buttons quickly by replacing your buttons with Savage Blade.", "如果你快速按下按鈕，用Savage Blade替換你的按鈕以防止你取消Guard。"),
                 KeyValuePair.Create("Allows you to cancel your guard with Recuperate on the Guard button if health is low enough to not waste it.", "當生命值足夠低時，允許你在防禦按鈕上使用自癒技能來取消防禦，以避免浪費。"),
                 

@@ -15,7 +15,9 @@ namespace WrathCombo.Combos.PvP;
 
 internal static class PvPCommon
 {
-    const uint RecuperateCost = 2500; // Recuperate MP Cost
+    // MP 消耗與恢復力照台服 Action／ActionTransient 表；台服 7.3 起自癒、淨化都是 2000。
+    const uint RecuperateCost = 2000; // Recuperate MP Cost
+    const int PurifyCost = 2000; // Purify MP Cost
     const uint RecuperateAmount = 15000; // Recuperate Base Heal
 
     public const uint
@@ -58,7 +60,8 @@ internal static class PvPCommon
     {
         public static UserInt
             EmergencyHealThreshold = new("EmergencyHealThreshold"),
-            EmergencyGuardThreshold = new("EmergencyGuardThreshold");
+            EmergencyGuardThreshold = new("EmergencyGuardThreshold"),
+            PurifyMPThreshold = new("PurifyMPThreshold");
 
         public static UserBoolArray
             QuickPurifyStatuses = new("QuickPurifyStatuses");
@@ -89,6 +92,7 @@ internal static class PvPCommon
                     break;
 
                 case CustomComboPreset.PvP_QuickPurify:
+                    DrawSliderInt(PurifyCost, 10000, PurifyMPThreshold, "Do not use Purify below set MP", sliderIncrement: 100);
                     DrawPvPStatusMultiChoice(QuickPurifyStatuses);
                     break;
 
@@ -340,6 +344,9 @@ internal static class PvPCommon
         public static bool Execute()
         {
             if (LocalPlayer is not { } player || player.IsDead || IsOnCooldown(Purify)) return false;
+
+            // MP 不足時遊戲不讓放，回傳淨化只會讓按鈕卡住；門檻設得比消耗低時以消耗為準。
+            if (player.CurrentMp < Math.Max(PurifyCost, Config.PurifyMPThreshold)) return false;
 
             bool[] selectedStatuses = Config.QuickPurifyStatuses;
 
