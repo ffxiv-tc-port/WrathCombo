@@ -1387,6 +1387,10 @@ public partial class Leasing
         Svc.Framework.Update += CheckIfLeaseePluginsUnloaded;
     }
 
+    /// <summary> 與建構子的訂閱成對；外掛卸載時由 <see cref="Provider.Dispose" /> 呼叫。 </summary>
+    internal void StopWatchingLeaseePlugins() =>
+        Svc.Framework.Update -= CheckIfLeaseePluginsUnloaded;
+
     /// <summary>
     ///     Checks currently loaded plugins against leases.<br />
     ///     Will run every 500 frames and check if the leasees plugin is still

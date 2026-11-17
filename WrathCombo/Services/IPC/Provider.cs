@@ -154,6 +154,7 @@ public partial class Provider : IDisposable
     public void Dispose()
     {
         ActionToken.Cancel();
+        Leasing.StopWatchingLeaseePlugins();
         Leasing.SuspendLeases(CancellationReason.WrathPluginDisabled);
     }
 

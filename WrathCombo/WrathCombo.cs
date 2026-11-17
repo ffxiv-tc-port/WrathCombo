@@ -442,7 +442,8 @@ public sealed partial class WrathCombo : IDalamudPlugin
         Svc.Framework.Update -= OnFrameworkUpdate;
         Svc.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
-        Svc.PluginInterface.UiBuilder.Draw -= DrawUI;
+        Svc.PluginInterface.UiBuilder.OpenMainUi -= OnOpenMainUi;
+        Svc.PluginInterface.UiBuilder.Draw -= DrawWindows;
         
         Service.ActionReplacer.Dispose();
         Service.ComboCache.Dispose();
