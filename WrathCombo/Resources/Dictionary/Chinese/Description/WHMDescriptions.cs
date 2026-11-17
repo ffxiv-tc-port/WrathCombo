@@ -31,7 +31,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Adds Afflatus Rapture to the single target combo when at three Lilies.", "當擁有三個血百合時，在單體連擊中新增Afflatus Rapture。"),
                 KeyValuePair.Create("Adds Presence of Mind to the single target combo.", "在單體連擊中新增Presence of Mind。"),
                 KeyValuePair.Create("Adds Lucid Dreaming to the single target combo when below set MP value.", "當魔力值低於設定值時，在單體連擊中新增Lucid Dreaming。"),
-                KeyValuePair.Create("Collection of cooldowns and spell features on Holy/Holy III.", "神聖/豪聖替換為冷卻技和法術集合。"),
+                KeyValuePair.Create("Collection of cooldowns and spell features on Holy/Holy III.", "神聖/大神聖替換為冷卻技和法術集合。"),
                 KeyValuePair.Create("Adds Assize to the AoE combo.", "在AoE連擊中新增Assize。"),
                 KeyValuePair.Create("Adds Glare IV to the AoE combo when under Sacred Sight", "在Sacred Sight狀態下，在AoE連擊中新增Glare IV。"),
                 KeyValuePair.Create("Adds Afflatus Misery to the AoE combo when it is ready to be used.", "當Afflatus Misery準備就緒時，在AoE連擊中新增Afflatus Misery。"),

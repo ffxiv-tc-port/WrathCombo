@@ -7359,7 +7359,7 @@ public enum CustomComboPreset
     WAR_AoE_PrimalRend = 18021,
 
     [ParentCombo(WAR_AoE_Advanced)]
-    [CustomComboInfo("Primal Wrath Option", "在AOE循環中加入原初的激震。", WAR.JobID)]
+    [CustomComboInfo("Primal Wrath Option", "在AOE循環中加入原初的怒震。", WAR.JobID)]
     WAR_AoE_PrimalWrath = 18020,
 
     [ParentCombo(WAR_AoE_Advanced)]

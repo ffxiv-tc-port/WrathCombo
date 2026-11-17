@@ -109,7 +109,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("Use Lost Cure when available.", "可用時使用失傳療傷。"),
                 KeyValuePair.Create("Use Lost Cure II when available.", "可用時使用失傳中療傷。"),
                 KeyValuePair.Create("Use Lost Cure III when available.", "可用時使用失傳大療傷。"),
-                KeyValuePair.Create("Use Lost Cure IV when available.", "可用時使用失傳聖療。"),
+                KeyValuePair.Create("Use Lost Cure IV when available.", "可用時使用失傳超療傷。"),
                 KeyValuePair.Create("Use Lost Arise when available.", "可用時使用失傳完全復活。"),
                 KeyValuePair.Create("Use Lost Sacrifice when available.", "可用時使用失傳獻祭。"),
                 KeyValuePair.Create("Use Lost Reraise when available.", "可用時使用失傳復生。"),
