@@ -28,6 +28,7 @@ namespace WrathCombo.Data;
 /// <remarks>
 ///     只在框架執行緒、設定開啟、身在深層迷宮且樓層號不是 10 的倍數時生效；其餘一律照舊、不碰 IPC。
 ///     BMR 不在、端點沒註冊、型別不合或擲任何例外 ⇒ 照舊全打，並退避一段時間不再呼叫。
+///     只有 BMR 說它的深宮模組正在接手選擇性打斷時才問清單（見 <see cref="EvaluateActive" />），否則照舊全打。
 ///     BMR 有回答時以它為準：回空清單＝現在沒有該打斷的詠唱，打斷技保留。
 ///     改打只換這一招送出的目標（技能重定向或自動循環的 UseAction 參數），不改玩家選中的目標。
 /// </remarks>
@@ -46,6 +47,9 @@ internal static class DeepDungeonInterruptFilter
     private static uint _casterEntityId; // 0＝本幀沒有可改打的施放者；跨幀只留 id，不留物件
 
     private static long _queryBlockedUntil;
+    private static long _activeNextCheckAt;
+    private static bool _active;
+    private static int _activeLoggedOutcome;
     private static long _missingLogNextAt;
     private static long _failedLogNextAt;
     private static readonly Dictionary<ulong, long> SkipLogNextAt = [];
@@ -160,14 +164,9 @@ internal static class DeepDungeonInterruptFilter
 
     private static ulong[]? Query(long now)
     {
-        var query = ResolveQuery();
-        if (query is null)
-        {
-            LogMissing(now);
-            return null;
-        }
-
-        var flagged = Evaluate(query, now, out var outcome, out var error);
+        var flagged = Decide(BmrLoaded, ConflictingPluginsChecks.BossModReborn.SelectiveInterruptActiveQuery, ResolveQuery(), now,
+            out var activeOutcome, out var activeError, out var outcome, out var error);
+        LogActive(activeOutcome, activeError);
         if (outcome == Missing)
             LogMissing(now);
         else if (outcome == Failed && now >= _failedLogNextAt)
@@ -216,6 +215,82 @@ internal static class DeepDungeonInterruptFilter
         }
     }
 
+    // EvaluateActive 的結果分類（只給診斷與量測台用）。
+    internal const int ActiveOn = 11, ActiveOff = 12, ActiveNotLoaded = 13, ActiveMissing = 14, ActiveFailed = 15, ActiveCached = 16;
+    internal const long ActiveRefreshMs = 500;
+
+    /// <summary> 一次判斷：回 null＝照舊全打；非 null＝只打這份清單裡的（可為空）。 </summary>
+    /// <remarks> BMR 說深宮模組沒在接手選擇性打斷時不呼叫 <paramref name="listQuery" />。只在框架執行緒呼叫。 </remarks>
+    internal static ulong[]? Decide(Func<bool> bmrLoaded, Func<bool> activeQuery, Func<ulong[]>? listQuery, long now,
+        out int activeOutcome, out Exception? activeError, out int listOutcome, out Exception? listError)
+    {
+        listOutcome = 0;
+        listError = null;
+        if (!EvaluateActive(bmrLoaded, activeQuery, now, out activeOutcome, out activeError))
+            return null;
+        if (listQuery is null)
+        {
+            listOutcome = Missing;
+            return null;
+        }
+        return Evaluate(listQuery, now, out listOutcome, out listError);
+    }
+
+    /// <summary>
+    ///     <c>BossMod.DeepDungeon.SelectiveInterruptActive</c>：BMR 深宮模組此刻在一般層標記打斷、且它的「只標記必要的打斷」開著。
+    ///     BMR 沒載入、端點不存在（舊版 BMR／原版 BossMod）、型別不合或擲例外一律 false（照舊全打）。
+    /// </summary>
+    /// <remarks>
+    ///     只在框架執行緒呼叫。結果快取：有回答或沒載入 <see cref="ActiveRefreshMs" />、端點不在 5 秒、失敗 60 秒；
+    ///     快取期間不呼叫任何委派（端點每幀都會被問，不每幀打 IPC）。
+    /// </remarks>
+    internal static bool EvaluateActive(Func<bool> bmrLoaded, Func<bool> query, long now, out int outcome, out Exception? error)
+    {
+        error = null;
+        if (now < _activeNextCheckAt)
+        {
+            outcome = ActiveCached;
+            return _active;
+        }
+
+        _active = false;
+        if (!bmrLoaded())
+        {
+            outcome = ActiveNotLoaded;
+            _activeNextCheckAt = now + ActiveRefreshMs;
+            return false;
+        }
+
+        try
+        {
+            _active = query();
+            outcome = _active ? ActiveOn : ActiveOff;
+            _activeNextCheckAt = now + ActiveRefreshMs;
+        }
+        catch (IpcNotReadyError e)
+        {
+            outcome = ActiveMissing;
+            error = e;
+            _activeNextCheckAt = now + MissingBackoffMs;
+        }
+        catch (Exception e)
+        {
+            outcome = ActiveFailed;
+            error = e;
+            _activeNextCheckAt = now + FailedBackoffMs;
+        }
+        return _active;
+    }
+
+    // 別的插件在不在即時讀 IsLoaded（不用會快取的反射查詢）；EvaluateActive 的快取擋住每幀列舉。
+    private static bool BmrLoaded()
+    {
+        foreach (var p in Svc.PluginInterface.InstalledPlugins)
+            if (p.IsLoaded && string.Equals(p.InternalName, "BossModReborn", StringComparison.Ordinal))
+                return true;
+        return false;
+    }
+
     // BossModReborn 優先、沒裝才退回原版 BossMod（同 DeepDungeonPullSafety）。
     private static Func<ulong[]>? ResolveQuery()
     {
@@ -254,6 +329,25 @@ internal static class DeepDungeonInterruptFilter
             return;
         _missingLogNextAt = now + MissingLogIntervalMs;
         PluginLog.Information("[深宮打斷] 沒有可用的 BossMod(Reborn) 打斷標記（沒載入或尚未就緒），打斷技照舊全打。");
+    }
+
+    // 只在判斷結果換了一種時記一行（快取命中不算）。
+    private static void LogActive(int outcome, Exception? error)
+    {
+        if (outcome == ActiveCached || outcome == _activeLoggedOutcome)
+            return;
+        _activeLoggedOutcome = outcome;
+        var why = outcome switch
+        {
+            ActiveOn => null,
+            ActiveOff => "BossModReborn 的深宮模組沒在一般層運作，或它的「一般層只標記必要的打斷」沒開",
+            ActiveNotLoaded => "BossModReborn 沒載入",
+            ActiveMissing => "BossModReborn 版本沒有 BossMod.DeepDungeon.SelectiveInterruptActive 端點（或尚未就緒）",
+            _ => $"呼叫 BossMod.DeepDungeon.SelectiveInterruptActive 失敗：{error?.ToStringFull()}",
+        };
+        PluginLog.Information(why is null
+            ? "[深宮打斷] BossModReborn 深宮模組接手選擇性打斷：只打它標記的詠唱。"
+            : $"[深宮打斷] {why}，打斷技照舊全打。");
     }
 
     private static void LogRetarget(IBattleChara caster)

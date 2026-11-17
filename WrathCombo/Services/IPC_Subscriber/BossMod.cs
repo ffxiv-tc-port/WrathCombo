@@ -220,6 +220,10 @@ internal sealed class BossModIPC(
     /// <remarks> 呼叫端 <c>DeepDungeonInterruptFilter</c> 攔所有例外並退避，失敗一律照舊全打。 </remarks>
     internal Func<ulong[]> ShouldInterruptTargetsQuery => _shouldInterruptTargets;
 
+    /// <summary> <c>BossMod.DeepDungeon.SelectiveInterruptActive</c> 的原始委派（不吞例外：端點不存在才分得出來）。 </summary>
+    /// <remarks> 呼叫端 <c>DeepDungeonInterruptFilter</c> 攔所有例外並退避，失敗一律照舊全打。 </remarks>
+    internal Func<bool> SelectiveInterruptActive => _selectiveInterruptActive;
+
     private long _raidwideFailureLoggedAt;
 
     /// <summary>
@@ -294,5 +298,9 @@ internal sealed class BossModIPC(
 
     [EzIPC("BossMod.Hints.NextRaidwideDamageIn", false)]
     private readonly Func<float> _nextRaidwideDamageIn = null!;
+
+    // SafeWrapper.IPCException 會把 IpcNotReadyError 吞成 false，舊版 BMR 就分不出來。
+    [EzIPC("BossMod.DeepDungeon.SelectiveInterruptActive", false, wrapper: SafeWrapper.None)]
+    private readonly Func<bool> _selectiveInterruptActive = null!;
 #pragma warning restore CS8618, CS0649
 }

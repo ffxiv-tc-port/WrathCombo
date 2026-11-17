@@ -392,8 +392,8 @@ namespace WrathCombo.Window.Tabs
 
                 ImGuiComponents.HelpMarker((
                     "On deep dungeon floors that are not boss floors, Interject and Head Graze are only used on casts that BossMod (Reborn) flags as worth interrupting; other interruptible casts are let through so the cooldown is ready for the ones that matter.\n\n" +
-                    "If BossMod (Reborn) answers with nothing flagged, nothing is interrupted. This relies on the BossMod (Reborn) deep dungeon module being active.\n" +
-                    "Boss floors, other content, and BossMod (Reborn) missing or failing to answer all behave exactly like this is off.\n" +
+                    "This only takes effect while the BossModReborn deep dungeon module is running with its 'Only flag must-interrupt casts on normal floors' option on; while it does, casts BossModReborn has not flagged are not interrupted.\n" +
+                    "Boss floors, other content, that module or option being off, an older BossModReborn, the original BossMod, and BossModReborn missing or failing to answer all behave exactly like this is off.\n" +
                     "Each skipped or redirected interrupt is written to the log (Information level).\n\n" +
                     "Default: Off").Loc());
 

@@ -158,6 +158,9 @@ public static class ConflictingPluginsChecks
         /// <inheritdoc cref="BossModIPC.ShouldInterruptTargetsQuery" />
         internal Func<ulong[]> InterruptQuery => IPC.ShouldInterruptTargetsQuery;
 
+        /// <inheritdoc cref="BossModIPC.SelectiveInterruptActive" />
+        internal Func<bool> SelectiveInterruptActiveQuery => IPC.SelectiveInterruptActive;
+
         /// <inheritdoc cref="BossModIPC.NextRaidwideDamageIn" />
         public float? NextRaidwideDamageIn() => IPC.NextRaidwideDamageIn();
 
