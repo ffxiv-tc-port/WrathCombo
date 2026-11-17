@@ -71,7 +71,7 @@ namespace WrathCombo.Combos.PvP
                     if (!PvPCommon.TargetImmuneToDamage())
                     {
                         //Limit break, with health slider
-                        if (IsEnabled(CustomComboPreset.WHMPvP_AfflatusPurgation) && IsLB1Ready && GetTargetHPPercent() <= Config.WHMPvP_PurgationThreshold)
+                        if (IsEnabled(CustomComboPreset.WHMPvP_AfflatusPurgation) && IsLB1Ready && GetTargetHPPercent() <= Config.WHMPvP_PurgationThreshold && PvPCommon.LongCDAllowed())
                             return AfflatusPurgation;
 
                         // Seraph Strike if enabled and off cooldown
@@ -82,12 +82,12 @@ namespace WrathCombo.Combos.PvP
                         if (CanWeave())
                         {
                             //Role Action Diabrosis Role action
-                            if (IsEnabled(CustomComboPreset.WHMPvP_Diabrosis) && PvPHealer.CanDiabrosis() && HasTarget() &&
+                            if (IsEnabled(CustomComboPreset.WHMPvP_Diabrosis) && PvPHealer.CanDiabrosis() && HasTarget() && PvPCommon.LongCDAllowed() &&
                             GetTargetHPPercent() <= Config.WHMPvP_DiabrosisThreshold)
                                 return PvPHealer.Diabrosis;
 
                             // Miracle of Nature if enabled and off cooldown and inrange 
-                            if (IsEnabled(CustomComboPreset.WHMPvP_Mirace_of_Nature) && IsOffCooldown(MiracleOfNature) && InActionRange(MiracleOfNature))
+                            if (IsEnabled(CustomComboPreset.WHMPvP_Mirace_of_Nature) && IsOffCooldown(MiracleOfNature) && InActionRange(MiracleOfNature) && PvPCommon.CCAllowed())
                                 return MiracleOfNature;
                         }
 

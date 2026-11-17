@@ -8309,7 +8309,19 @@ public enum CustomComboPreset
         ADV.JobID)]
     PvP_MashCancelRecup = 1100031,
 
-    // Last value = 1100030
+    [Role(JobRole.All)]
+    [PvPCustomCombo]
+    [CustomComboInfo("目標不是玩家時不放控場技能",
+        "目前目標不是玩家（NPC、物件或沒有目標）時，各職業 PvP 連擊不放以控場為主的技能（暈眩、沉默、加重、變身等）。勾選後下方可看適用技能。", ADV.JobID)]
+    PvP_CCOnlyOnPlayers = 1100040,
+
+    [Role(JobRole.All)]
+    [PvPCustomCombo]
+    [CustomComboInfo("目標不是玩家時不放長冷卻技能",
+        "目前目標不是玩家（NPC、物件或沒有目標）時，各職業 PvP 連擊不放冷卻時間 30 秒以上的攻擊技能與極限爆發。勾選後下方可看適用技能。", ADV.JobID)]
+    PvP_LongCDOnlyOnPlayers = 1100050,
+
+    // Last value = 1100050
     // Extra 0 on the end keeps things working the way they should be. Nothing to see here.
 
     #endregion

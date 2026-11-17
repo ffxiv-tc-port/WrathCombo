@@ -92,7 +92,7 @@ namespace WrathCombo.Combos.PvP
                     }
 
                     //Uses Diabrosis when below set health
-                    if (IsEnabled(CustomComboPreset.SCHPvP_Diabrosis) && PvPHealer.CanDiabrosis() && HasTarget() && 
+                    if (IsEnabled(CustomComboPreset.SCHPvP_Diabrosis) && PvPHealer.CanDiabrosis() && HasTarget() && PvPCommon.LongCDAllowed() && 
                             GetTargetHPPercent() <= Config.SCHPvP_DiabrosisThreshold)
                         return PvPHealer.Diabrosis;
 

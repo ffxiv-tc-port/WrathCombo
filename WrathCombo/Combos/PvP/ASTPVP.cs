@@ -100,12 +100,12 @@ namespace WrathCombo.Combos.PvP
                         
                     if (!PvPCommon.TargetImmuneToDamage())
                     { 
-                        if (IsEnabled(CustomComboPreset.ASTPvP_Diabrosis) && PvPHealer.CanDiabrosis() && HasTarget() &&
+                        if (IsEnabled(CustomComboPreset.ASTPvP_Diabrosis) && PvPHealer.CanDiabrosis() && HasTarget() && PvPCommon.LongCDAllowed() &&
                             GetTargetHPPercent() <= Config.ASTPvP_DiabrosisThreshold)
                             return PvPHealer.Diabrosis;
 
                         // Macrocosmos only with double gravity or on coodlown when double gravity is disabled
-                        if (IsEnabled(CustomComboPreset.ASTPvP_Burst_Macrocosmos) && IsOffCooldown(Macrocosmos) &&
+                        if (IsEnabled(CustomComboPreset.ASTPvP_Burst_Macrocosmos) && IsOffCooldown(Macrocosmos) && PvPCommon.LongCDAllowed() &&
                            (ComboAction == DoubleGravity || !IsEnabled(CustomComboPreset.ASTPvP_Burst_DoubleGravity)))
                             return Macrocosmos;
 

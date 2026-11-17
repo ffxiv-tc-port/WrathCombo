@@ -210,7 +210,7 @@ namespace WrathCombo.Combos.PvP
                         if (!targetHasGuard)
                         {
                             // Lethargy
-                            if (IsEnabled(CustomComboPreset.BLMPvP_Lethargy) && IsOffCooldown(Lethargy) && !isTargetNPC)
+                            if (IsEnabled(CustomComboPreset.BLMPvP_Lethargy) && IsOffCooldown(Lethargy) && !isTargetNPC && PvPCommon.CCAllowed())
                             {
                                 // Offensive
                                 if (targetCurrentPercentHp < Config.BLMPvP_Lethargy_TargetHP && !targetHasHeavy)

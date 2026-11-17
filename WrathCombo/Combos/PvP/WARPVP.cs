@@ -70,7 +70,7 @@ namespace WrathCombo.Combos.PvP
             protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.WARPvP_BurstMode;
 
             // 獻身把目標拉到身邊，只拉得動玩家（NPC、場地物件拉不動）；已變成狂魂時不是拉人，照舊。
-            private static bool BlotaCanPull => OriginalHook(Blota) != Blota || CurrentTarget.IsAPlayer();
+            private static bool BlotaCanPull => OriginalHook(Blota) != Blota || PvPCommon.TargetIsPlayer();
 
             protected override uint Invoke(uint actionID)
             {

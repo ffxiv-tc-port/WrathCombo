@@ -164,7 +164,7 @@ namespace WrathCombo.Combos.PvP
                                     return OriginalHook(DeathWarrant);
 
                                 if (plentifulReady && immortalStacks >= immortalThreshold &&
-                                HasStatusEffect(Debuffs.DeathWarrant, CurrentTarget) && distance <= 15)
+                                HasStatusEffect(Debuffs.DeathWarrant, CurrentTarget) && distance <= 15 && PvPCommon.LongCDAllowed())
                                     return PlentifulHarvest;
                             }
 

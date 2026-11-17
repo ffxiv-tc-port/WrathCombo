@@ -7,6 +7,9 @@ using WrathCombo.CustomComboNS.Functions;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
 using static WrathCombo.Window.Functions.UserConfig;
 using System.Collections.Frozen;
+using System.Text;
+using Dalamud.Bindings.ImGui;
+using WrathCombo.Extensions;
 
 namespace WrathCombo.Combos.PvP;
 
@@ -88,9 +91,87 @@ internal static class PvPCommon
                 case CustomComboPreset.PvP_QuickPurify:
                     DrawPvPStatusMultiChoice(QuickPurifyStatuses);
                     break;
+
+                case CustomComboPreset.PvP_CCOnlyOnPlayers:
+                    DrawAppliesTo(ref _ccTooltip, CCActions,
+                        "以控場為主、附帶傷害很低或沒有傷害的技能。傷害為主、順帶控場的技能（例如山崩、空氣錨、發炎III）不受影響。\n" +
+                        "戰士的獻身原本就只在目標是玩家或狂魂預備時放，不受這個開關影響。");
+                    break;
+
+                case CustomComboPreset.PvP_LongCDOnlyOnPlayers:
+                    DrawAppliesTo(ref _longCdTooltip, LongCDActions,
+                        "冷卻時間 30 秒以上的攻擊技能（含補師職能技能潰破）與極限爆發。\n" +
+                        "防禦、治療類技能，以及極限爆發之後的追擊（英雄的返場餘音、掠影的蔑視等）不受影響；" +
+                        "蛇鱗術、本輪等單一按鍵功能裡的用法也不受影響。");
+                    break;
             }
         }
+
+        private static string? _ccTooltip, _longCdTooltip;
+
+        // 清單第一次畫的時候才組（技能名讀台服 Action 表），之後沿用同一個字串。
+        private static void DrawAppliesTo(ref string? cache, (string Job, uint Action)[] actions, string note)
+        {
+            ImGui.TextDisabled("適用技能 (?)");
+            if (!ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                return;
+
+            if (cache is null)
+            {
+                var sb = new StringBuilder(note).Append("\n");
+                foreach (var (job, action) in actions)
+                    sb.Append("\n・").Append(job).Append("：").Append(GetActionName(action));
+                cache = sb.ToString();
+            }
+
+            ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 1f);
+            ImGui.BeginTooltip();
+            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 32f);
+            ImGui.TextUnformatted(cache);
+            ImGui.PopTextWrapPos();
+            ImGui.EndTooltip();
+            ImGui.PopStyleVar();
+        }
     }
+
+    /// <summary> 目前目標（或指定目標）是玩家角色；沒有目標＝不是。 </summary>
+    public static bool TargetIsPlayer(IGameObject? optionalTarget = null) =>
+        (optionalTarget ?? CurrentTarget).IsAPlayer();
+
+    /// <summary> 控場技能這一刻可以放：沒開「目標不是玩家時不放控場技能」，或目標是玩家。 </summary>
+    public static bool CCAllowed() =>
+        !IsEnabled(CustomComboPreset.PvP_CCOnlyOnPlayers) || TargetIsPlayer();
+
+    /// <summary> 長冷卻技能（冷卻 30 秒以上的攻擊技能與極限爆發）這一刻可以放；條件同 <see cref="CCAllowed" />。 </summary>
+    public static bool LongCDAllowed() =>
+        !IsEnabled(CustomComboPreset.PvP_LongCDOnlyOnPlayers) || TargetIsPlayer();
+
+    // 只給設定頁的說明用；實際判斷寫在各職業檔的出招條件裡（加 CCAllowed／LongCDAllowed 的地方）。
+    // 分類依據台服 Action 表的冷卻時間（Recast100ms）與 ActionTransient 的技能說明。
+    internal static readonly (string Job, uint Action)[]
+        CCActions =
+        [
+            ("吟遊詩人", BRDPvP.SilentNocturne),
+            ("黑魔道士", BLMPvP.Lethargy),
+            ("武士", SAMPvP.Mineuchi),
+            ("白魔道士", WHMPvP.MiracleOfNature),
+            ("武僧", MNKPvP.Meteordrive),
+        ],
+        LongCDActions =
+        [
+            ("占星術師", ASTPvP.Macrocosmos),
+            ("機工士", MCHPvP.MarksmanSpite),
+            ("機工士", MCHPvP.FullMetalField),
+            ("武僧", MNKPvP.Meteordrive),
+            ("忍者", NINPvP.SeitonTenchu),
+            ("忍者", NINPvP.Bunshin),
+            ("奪魂者", RPRPvP.PlentifulHarvest),
+            ("武士", SAMPvP.Zantetsuken),
+            ("賢者", SGEPvP.Pneuma),
+            ("毒蛇劍士", VPRPvP.RattlingCoil),
+            ("白魔道士", WHMPvP.AfflatusPurgation),
+            ("占星術師、學者、賢者、白魔道士", PvPHealer.Diabrosis),
+        ];
 
     /// <summary> Checks if the target is immune to damage. Optionally, include buffs that provide significant damage reduction. </summary>
     /// <param name="includeReductions"> Includes buffs that provide significant damage reduction. </param>

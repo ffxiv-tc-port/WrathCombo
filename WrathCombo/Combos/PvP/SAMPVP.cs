@@ -138,7 +138,7 @@ namespace WrathCombo.Combos.PvP
                     #endregion
 
                     // Zantetsuken
-                    if (IsEnabled(CustomComboPreset.SAMPvP_Zantetsuken) && isZantetsukenPrimed && !isTargetInvincible)
+                    if (IsEnabled(CustomComboPreset.SAMPvP_Zantetsuken) && isZantetsukenPrimed && !isTargetInvincible && PvPCommon.LongCDAllowed())
                         return OriginalHook(Zantetsuken);
 
                     //Smite
@@ -168,7 +168,7 @@ namespace WrathCombo.Combos.PvP
                                 return OriginalHook(MeikyoShisui);
 
                             // Mineuchi
-                            if (IsEnabled(CustomComboPreset.SAMPvP_Mineuchi) && IsOffCooldown(Mineuchi) && !HasBattleTarget() &&
+                            if (IsEnabled(CustomComboPreset.SAMPvP_Mineuchi) && IsOffCooldown(Mineuchi) && !HasBattleTarget() && PvPCommon.CCAllowed() &&
                                 (targetCurrentPercentHp < Config.SAMPvP_Mineuchi_TargetHP || (Config.SAMPvP_Mineuchi_SubOption && hasTendo && !hasKaiten)))
                                 return OriginalHook(Mineuchi);
                         }

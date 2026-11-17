@@ -89,7 +89,7 @@ namespace WrathCombo.Combos.PvP
                         if (canWeave)
                         {
                             // Silence shot that gives PP, set up to not happen right after apex to tighten burst and silence after the bigger damage. Apex > Harmonic> Silent > Burst > PP or Apex > Burst > Silent >  PP
-                            if (IsEnabled(CustomComboPreset.BRDPvP_SilentNocturne) && !GetCooldown(SilentNocturne).IsCooldown && !WasLastAction(ApexArrow) && !HasStatusEffect(Buffs.Repertoire)) 
+                            if (IsEnabled(CustomComboPreset.BRDPvP_SilentNocturne) && !GetCooldown(SilentNocturne).IsCooldown && PvPCommon.CCAllowed() && !WasLastAction(ApexArrow) && !HasStatusEffect(Buffs.Repertoire)) 
                                 return OriginalHook(SilentNocturne);
 
                             if (IsEnabled(CustomComboPreset.BRDPvP_EncoreOfLight) && HasStatusEffect(Buffs.EncoreofLightReady)) // LB finisher shot

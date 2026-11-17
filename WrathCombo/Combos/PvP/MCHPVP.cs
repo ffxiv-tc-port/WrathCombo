@@ -110,14 +110,14 @@ namespace WrathCombo.Combos.PvP
                     if (!PvPCommon.TargetImmuneToDamage() && HasBattleTarget())
                     {
                         // MarksmanSpite execute condition - todo add config
-                        if (IsEnabled(CustomComboPreset.MCHPvP_BurstMode_MarksmanSpite) && HasBattleTarget() && GetTargetCurrentHP() < Config.MCHPvP_MarksmanSpite && IsLB1Ready)
+                        if (IsEnabled(CustomComboPreset.MCHPvP_BurstMode_MarksmanSpite) && HasBattleTarget() && GetTargetCurrentHP() < Config.MCHPvP_MarksmanSpite && IsLB1Ready && PvPCommon.LongCDAllowed())
                             return MarksmanSpite;
 
                         if (IsEnabled(CustomComboPreset.MCHPvP_BurstMode_Wildfire) && canWeave && overheated && IsOffCooldown(Wildfire))
                             return OriginalHook(Wildfire);
 
                         // FullMetalField condition when not overheated or if overheated and FullMetalField is off cooldown
-                        if (IsEnabled(CustomComboPreset.MCHPvP_BurstMode_FullMetalField) && IsOffCooldown(FullMetalField))
+                        if (IsEnabled(CustomComboPreset.MCHPvP_BurstMode_FullMetalField) && IsOffCooldown(FullMetalField) && PvPCommon.LongCDAllowed())
                         {
                             if (Config.MCHPvP_FMFOption == 1)
                             {

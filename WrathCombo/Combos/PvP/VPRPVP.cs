@@ -166,7 +166,7 @@ namespace WrathCombo.Combos.PvP
                         return OriginalHook(SnakeScales);
 
                     // Rattling Coil
-                    if (IsEnabled(CustomComboPreset.VPRPvP_RattlingCoil) && IsOffCooldown(RattlingCoil) &&
+                    if (IsEnabled(CustomComboPreset.VPRPvP_RattlingCoil) && IsOffCooldown(RattlingCoil) && PvPCommon.LongCDAllowed() &&
                         ((optionsRattlingCoil[0] && chargesUncoiledFury == 0) || (optionsRattlingCoil[1] && isSnakeScalesDown)))
                         return OriginalHook(RattlingCoil);
 
