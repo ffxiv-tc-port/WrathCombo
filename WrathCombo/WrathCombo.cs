@@ -275,11 +275,39 @@ public sealed partial class WrathCombo : IDalamudPlugin
                 }
             }
             if (save)
-                File.WriteAllText(Svc.PluginInterface.ConfigFile.FullName, json.ToString());
+            {
+                var path = Svc.PluginInterface.ConfigFile.FullName;
+                ReplaceConfigFile(path, json.ToString());
+                Svc.Log.Information($"[RemoveNullAutos] 已移除自動施放清單裡不存在的項目；原檔備份為 {Path.GetFileName(path) + NullAutosBackupSuffix}");
+            }
         }
         catch (Exception e)
         {
             e.Log();
+        }
+    }
+
+    internal const string NullAutosBackupSuffix = ".bak-autoactions";
+
+    // 契約：先寫 <檔>.tmp 並落盤，再 File.Replace 換掉正式檔、原檔留成 <檔>.bak-autoactions；
+    // 任一步擲例外時正式檔不動、暫存檔刪掉，例外照擲給呼叫端。編碼同 File.WriteAllText（UTF-8 無 BOM）。
+    internal static void ReplaceConfigFile(string path, string contents)
+    {
+        var tmp = path + ".tmp";
+        try
+        {
+            var bytes = new System.Text.UTF8Encoding(false).GetBytes(contents);
+            using (var fs = new FileStream(tmp, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                fs.Write(bytes);
+                fs.Flush(true);
+            }
+            File.Replace(tmp, path, path + NullAutosBackupSuffix);
+        }
+        catch
+        {
+            try { File.Delete(tmp); } catch { }
+            throw;
         }
     }
 
