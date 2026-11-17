@@ -1,4 +1,5 @@
-﻿using WrathCombo.CustomComboNS;
+﻿using WrathCombo.Core;
+using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Window.Functions;
 
@@ -24,14 +25,17 @@ namespace WrathCombo.Combos.PvP
             Microcosmos = 29254,
             MinorArcana = 41503,
             Epicycle = 41506,
-            Retrograde = 41507;
+            Retrograde = 41507,
+            Oracle = 41508;
 
         internal class Buffs
         {
             internal const ushort
             LadyOfCrowns = 4328,
             LordOfCrowns = 4329,
-            RetrogradeReady = 4331;
+            RetrogradeReady = 4331,
+            Divining = 4332,
+            DiurnalBenefic = 3099;
         }
 
         #endregion
@@ -39,7 +43,11 @@ namespace WrathCombo.Combos.PvP
         #region Config
         public static class Config
         {
+            public static UserBool
+                ASTPvP_BurstHealRetarget = new("ASTPvP_BurstHealRetarget");
+
             public static UserInt
+                ASTPvP_Burst_HealThreshold = new("ASTPvP_Burst_HealThreshold", 50),
                 ASTPvP_Burst_PlayCardOption = new("ASTPvP_Burst_PlayCardOption"),
                 ASTPvP_DiabrosisThreshold = new("ASTPvP_DiabrosisThreshold");
 
@@ -57,6 +65,11 @@ namespace WrathCombo.Combos.PvP
                         UserConfig.DrawHorizontalRadioButton(ASTPvP_Burst_PlayCardOption, "Lady of Crowns card play",
                             "Only uses Lady of Crowns when available.", 3);
 
+                        break;
+
+                    case CustomComboPreset.ASTPvP_Burst_Heal:
+                        UserConfig.DrawAdditionalBoolChoice(ASTPvP_BurstHealRetarget, "重新指定目標", "改對治療堆疊（插件設定裡的治療目標堆疊）放吉星相位；沒勾＝對友方目標，沒有就對自己。");
+                        UserConfig.DrawSliderInt(1, 100, ASTPvP_Burst_HealThreshold, "對象 HP% 在這個值以下才放吉星相位");
                         break;
 
                     case CustomComboPreset.ASTPvP_Diabrosis:
@@ -100,6 +113,10 @@ namespace WrathCombo.Combos.PvP
                         
                     if (!PvPCommon.TargetImmuneToDamage())
                     { 
+                        // 神諭是星河漫天（極限爆發）之後的追擊。
+                        if (IsEnabled(CustomComboPreset.ASTPvP_Burst_Oracle) && HasStatusEffect(Buffs.Divining) && HasBattleTarget())
+                            return Oracle;
+
                         if (IsEnabled(CustomComboPreset.ASTPvP_Diabrosis) && PvPHealer.CanDiabrosis() && HasTarget() && PvPCommon.LongCDAllowed() &&
                             GetTargetHPPercent() <= Config.ASTPvP_DiabrosisThreshold)
                             return PvPHealer.Diabrosis;
@@ -125,6 +142,15 @@ namespace WrathCombo.Combos.PvP
                                 return DoubleMalefic;
                         }
 
+                    }
+
+                    // 補血放在所有傷害選項之後；目標無敵時也照樣判斷。
+                    if (IsEnabled(CustomComboPreset.ASTPvP_Burst_Heal))
+                    {
+                        bool retarget = Config.ASTPvP_BurstHealRetarget;
+                        if (PvPCommon.HealCheckTarget(retarget) is { } healTarget && !HasStatusEffect(Buffs.DiurnalBenefic, healTarget) &&
+                            GetTargetHPPercent(healTarget) <= Config.ASTPvP_Burst_HealThreshold && ActionReady(AspectedBenefic))
+                            return retarget ? AspectedBenefic.Retarget(Malefic, PvPCommon.HealStackResolver) : AspectedBenefic;
                     }
 
                 }

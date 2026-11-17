@@ -1,4 +1,5 @@
-﻿using WrathCombo.CustomComboNS;
+﻿using WrathCombo.Core;
+using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Window.Functions;
 
@@ -109,6 +110,14 @@ namespace WrathCombo.Combos.PvP
                 }
                 return actionID;
             }
+        }
+
+        internal class SGEPvP_RetargetKardia : CustomCombo
+        {
+            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.SGEPvP_RetargetKardia;
+
+            protected override uint Invoke(uint actionID) =>
+                actionID is Kardia ? Kardia.Retarget(PvPCommon.HealStackResolver) : actionID;
         }
     }
 }

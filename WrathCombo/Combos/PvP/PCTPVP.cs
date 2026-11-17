@@ -143,5 +143,34 @@ namespace WrathCombo.Combos.PvP
                 return actionID;
             }
         }
+
+        internal class PCTPvP_OneButtonMotifs : CustomCombo
+        {
+            protected internal override CustomComboPreset Preset { get; } = CustomComboPreset.PCTPvP_OneButtonMotifs;
+
+            protected override uint Invoke(uint actionID)
+            {
+                if (actionID is not LivingMuse)
+                    return actionID;
+
+                bool hasMotifDrawn = HasStatusEffect(Buffs.PomMotif) || HasStatusEffect(Buffs.WingMotif) ||
+                                     HasStatusEffect(Buffs.ClawMotif) || HasStatusEffect(Buffs.MawMotif);
+
+                if (HasTarget() && !PvPCommon.TargetImmuneToDamage())
+                {
+                    if (IsEnabled(CustomComboPreset.PCTPvP_StarPrismOneButtonMotifs) && HasStatusEffect(Buffs.Starstruck) &&
+                        GetStatusEffectRemainingTime(Buffs.Starstruck) <= 3)
+                        return StarPrism;
+
+                    if (HasStatusEffect(Buffs.MooglePortrait) || HasStatusEffect(Buffs.MadeenPortrait))
+                        return OriginalHook(MogOfTheAges);
+
+                    if (hasMotifDrawn && HasCharges(OriginalHook(LivingMuse)))
+                        return OriginalHook(LivingMuse);
+                }
+
+                return hasMotifDrawn ? actionID : OriginalHook(CreatureMotif);
+            }
+        }
     }
 }

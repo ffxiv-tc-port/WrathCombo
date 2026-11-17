@@ -8388,7 +8388,18 @@ public enum CustomComboPreset
     [CustomComboInfo("Epicycle Burst Feature", "Turns Epicycle into burst combo.", ASTPvP.JobID)]
     ASTPvP_Epicycle = 111008,
 
-    // Last value = 111010
+    [PvPCustomCombo]
+    [ParentCombo(ASTPvP_Burst)]
+    [CustomComboInfo("吉星相位選項",
+        "對象 HP% 在設定值以下、且身上沒有吉星相位（日）時，在 Burst Mode 所有傷害選項之後放吉星相位。\n可勾「重新指定目標」改對治療堆疊放。", ASTPvP.JobID)]
+    ASTPvP_Burst_Heal = 111011,
+
+    [PvPCustomCombo]
+    [ParentCombo(ASTPvP_Burst)]
+    [CustomComboInfo("神諭選項", "放完星河漫天（極限爆發）、有神諭預備時，把神諭加入 Burst Mode。", ASTPvP.JobID)]
+    ASTPvP_Burst_Oracle = 111012,
+
+    // Last value = 111012
 
     #endregion
 
@@ -9047,7 +9058,18 @@ public enum CustomComboPreset
     [CustomComboInfo("Phantom Dart Option", "Uses Phantom Dart (if selected) when available at or below set health threshold.", PCTPvP.JobID)]
     PCTPvP_PhantomDart = 140009,
 
-    // Last value = 140009
+    [PvPCustomCombo]
+    [ReplaceSkill(PCTPvP.LivingMuse)]
+    [CustomComboInfo("動物構想一鍵彩繪",
+        "動物構想按鈕依序處理：有標識時放對應的莫古利激流／馬蒂恩懲罰、已畫好動物彩繪時放動物構想、還沒畫時放動物彩繪。", PCTPvP.JobID)]
+    PCTPvP_OneButtonMotifs = 140010,
+
+    [PvPCustomCombo]
+    [ParentCombo(PCTPvP_OneButtonMotifs)]
+    [CustomComboInfo("天星棱光選項", "天星棱光預備剩 3 秒內時，在動物構想按鈕放天星棱光。", PCTPvP.JobID)]
+    PCTPvP_StarPrismOneButtonMotifs = 140011,
+
+    // Last value = 140011
 
     #endregion
 
@@ -9225,7 +9247,13 @@ public enum CustomComboPreset
        SGEPvP.JobID)]
     SGEPvP_Diabrosis = 124008,
 
-    // Last value = 124008
+    [PvPCustomCombo]
+    [ReplaceSkill(SGEPvP.Kardia)]
+    [Retargeted]
+    [CustomComboInfo("心關重新指定目標", "按心關時改對治療堆疊（插件設定裡的治療目標堆疊）放，不必先選隊友。", SGEPvP.JobID)]
+    SGEPvP_RetargetKardia = 124009,
+
+    // Last value = 124009
 
     #endregion
 
@@ -9324,7 +9352,19 @@ public enum CustomComboPreset
        SCHPvP.JobID)]
     SCHPvP_Selfcare = 126006,
 
-    // Last value = 126006
+    [PvPCustomCombo]
+    [ReplaceSkill(SCHPvP.Adloquilum)]
+    [Retargeted]
+    [CustomComboInfo("鼓舞激勵之策重新指定目標", "按鼓舞激勵之策時改對治療堆疊（插件設定裡的治療目標堆疊）放。", SCHPvP.JobID)]
+    SCHPvP_RetargetAdlo = 126007,
+
+    [PvPCustomCombo]
+    [ParentCombo(SCHPvP_Burst)]
+    [CustomComboInfo("對隊友放鼓舞激勵之策選項",
+        "對象 HP% 在設定值以下、且身上沒有激勵時，把鼓舞激勵之策加入 Burst Mode；對自己放的既有選項照舊，兩個都勾時先判自己。\n可勾「重新指定目標」改對治療堆疊放。", SCHPvP.JobID)]
+    SCHPvP_AllyAdlo = 126008,
+
+    // Last value = 126008
 
     #endregion
 
@@ -9546,6 +9586,17 @@ public enum CustomComboPreset
     WHMPvP_NoWasteCure = 129010,
 
     [PvPCustomCombo]
+    [ParentCombo(WHMPvP_Burst)]
+    [CustomComboInfo("Burst Mode 補血選項",
+        "對象 HP% 在設定值以下時，在 Burst Mode 所有傷害選項之後放勾選的大療傷／水流幕／中療傷（閃颯預備中不放）。\n可勾「重新指定目標」改對治療堆疊放。", WHMPvP.JobID)]
+    WHMPvP_Burst_Heals = 129013,
+
+    [PvPCustomCombo]
+    [ReplaceSkill(WHMPvP.SeraphStrike)]
+    [CustomComboInfo("熾天強襲變閃颯", "閃颯預備中，熾天強襲按鈕改放閃颯。", WHMPvP.JobID)]
+    WHMPvP_Seraphstrike = 129011,
+
+    [PvPCustomCombo]
     [ReplaceSkill(WHMPvP.Cure2)]
     [CustomComboInfo("Heal Feature", "Adds the below options onto Cure II.", WHMPvP.JobID)]
     WHMPvP_Heals = 129004,
@@ -9560,7 +9611,7 @@ public enum CustomComboPreset
     [CustomComboInfo("Aquaveil Option", "Adds Aquaviel to Cure II when available.", WHMPvP.JobID)]
     WHMPvP_Aquaveil = 129007,
 
-    // Last value = 129010
+    // Last value = 129013
 
     #endregion
 

@@ -2,6 +2,7 @@
 using Dalamud.Game.ClientState.Objects.Types;
 using System.Linq;
 using WrathCombo.Combos.PvE;
+using WrathCombo.Core;
 using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
@@ -169,6 +170,14 @@ internal static class PvPCommon
         !IsEnabled(CustomComboPreset.PvP_GapCloserMinDistance) ||
         OriginalHook(gapCloser) != gapCloser ||
         GetTargetDistance() >= Config.GapCloserMinDistance;
+
+    /// <summary> 補師 PvP「重新指定目標」用：按下按鈕那一刻才解析治療堆疊（插件設定裡的治療目標堆疊），不把物件包裝留到下一幀。 </summary>
+    [ActionRetargeting.TargetResolver]
+    internal static IGameObject? HealStackResolver() => SimpleTarget.Stack.AllyToHeal;
+
+    /// <summary> 連擊裡的補血判斷對象：勾了重新指定就看治療堆疊，否則看友方目標（沒有就自己）；倒地或不是戰鬥角色＝null。 </summary>
+    internal static IBattleChara? HealCheckTarget(bool retarget) =>
+        (retarget ? SimpleTarget.Stack.AllyToHeal : SimpleTarget.Stack.Allies) is IBattleChara { IsDead: false } c ? c : null;
 
     // 只給設定頁的說明用；實際判斷寫在各職業檔的出招條件裡（加 CCAllowed／LongCDAllowed 的地方）。
     // 分類依據台服 Action 表的冷卻時間（Recast100ms）與 ActionTransient 的技能說明。
