@@ -6,6 +6,7 @@ using ECommons;
 using ECommons.DalamudServices;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using WrathCombo.AutoRotation;
 using WrathCombo.Combos.PvE;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Extensions;
@@ -191,10 +192,18 @@ public static class StancePartner
         PluginLog.Verbose(
             $"OnIPCInstanceChange: Casting {action.ActionName()} {target}");
 
-        if (target is null)
-            ActionManager.Instance()->UseAction(ActionType.Action, action);
-        else
-            ActionManager.Instance()->UseAction(ActionType.Action, action,
-                (ulong)target);
+        ManualPressDiag.OwnSendOutsideRotation = true;
+        try
+        {
+            if (target is null)
+                ActionManager.Instance()->UseAction(ActionType.Action, action);
+            else
+                ActionManager.Instance()->UseAction(ActionType.Action, action,
+                    (ulong)target);
+        }
+        finally
+        {
+            ManualPressDiag.OwnSendOutsideRotation = false;
+        }
     }
 }

@@ -154,6 +154,12 @@
             <Private>false</Private>
         </Reference>
 
+        <!-- 只為了讀 Dalamud.EntryPoint.LogLevelSwitch（log 的真閘門）；Dalamud 自帶、不隨插件出貨。 -->
+        <Reference Include="Serilog">
+            <HintPath>$(DalamudLibPath)Serilog.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+
     </ItemGroup>
 
     <!-- Release Manifest -->

@@ -4,6 +4,7 @@ using Dalamud.Utility;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using WrathCombo.AutoRotation;
 using WrathCombo.Attributes;
 using WrathCombo.Combos;
 using WrathCombo.Combos.PvE;
@@ -126,7 +127,10 @@ namespace WrathCombo.CustomComboNS
                 // todo: tauren: remember why this condition was in the if below:
                 //      `&& WrathOpener.CurrentOpener?.OpenerStep <= 1`
                 if (resultingActionID != All.SavageBlade)
+                {
+                    ManualPressDiag.NoteSuppressed(actionID, ActionManager.Instance()->QueuedActionId, resultingActionID, Preset);
                     return false;
+                }
             }
             newActionID = resultingActionID;
 

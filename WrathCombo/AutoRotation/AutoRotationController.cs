@@ -606,6 +606,7 @@ namespace WrathCombo.AutoRotation
             finally
             {
                 InRotation = false;
+                ManualPressDiag.DirectPath = null;
             }
         }
 
@@ -619,7 +620,11 @@ namespace WrathCombo.AutoRotation
 
             // Pre-emptive HoT for healers
             if (cfg.HealerSettings.PreEmptiveHoT && Player.Job is Job.CNJ or Job.WHM or Job.AST)
+            {
+                ManualPressDiag.DirectPath = "預先放持續回復";
                 PreEmptiveHot();
+                ManualPressDiag.DirectPath = null;
+            }
 
             // Bypass buffs logic
             if (cfg.BypassBuffs && NotInCombat)
@@ -686,19 +691,26 @@ namespace WrathCombo.AutoRotation
             if (isHealer || (Player.Job is Job.SMN or Job.RDM && cfg.HealerSettings.AutoRezDPSJobs) || OccultCrescent.ReviveEnabledAndUsable)
             {
                 // 有人要補時只清致命狀態（死亡宣告這類），其餘照舊等補完再清。
+                ManualPressDiag.DirectPath = "自動康復";
                 if (cfg.HealerSettings.AutoCleanse && isHealer && CleanseParty(lethalOnly: needsHeal))
                 {
                     DiagEndTick(NoActStage.Busy);
                     return;
                 }
 
+                ManualPressDiag.DirectPath = "自動復活";
                 if (!needsHeal && cfg.HealerSettings.AutoRez)
                     RezParty();
+                ManualPressDiag.DirectPath = null;
             }
 
             // SGE Kardia logic
             if (Player.Job is Job.SGE && cfg.HealerSettings.ManageKardia)
+            {
+                ManualPressDiag.DirectPath = "心關目標";
                 UpdateKardiaTarget();
+                ManualPressDiag.DirectPath = null;
+            }
 
             // Don't act if animation locked (beyond the queue window)
             if (ActionManager.Instance()->AnimationLock > cfg.QueueWindow)
@@ -859,7 +871,10 @@ namespace WrathCombo.AutoRotation
                 return;
 
             if (ActionManager.Instance()->QueuedActionId == resSpell)
+            {
+                ManualPressDiag.NoteQueueCleared("自動復活", resSpell);
                 ActionManager.Instance()->QueuedActionId = 0;
+            }
 
             if (Player.Object.CurrentMp >= GetResourceCost(resSpell) && ActionReady(resSpell))
             {
@@ -952,7 +967,10 @@ namespace WrathCombo.AutoRotation
                 return false;
 
             if (ActionManager.Instance()->QueuedActionId == RoleActions.Healer.Esuna)
+            {
+                ManualPressDiag.NoteQueueCleared("自動康復", RoleActions.Healer.Esuna);
                 ActionManager.Instance()->QueuedActionId = 0;
+            }
 
             if (member is null
                 || !InActionRange(RoleActions.Healer.Esuna, member.BattleChara) || !IsInLineOfSight(member.BattleChara)

@@ -11,6 +11,7 @@ using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using WrathCombo.AutoRotation;
 using WrathCombo.Combos.PvE;
 using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
@@ -151,6 +152,8 @@ internal sealed class ActionReplacer : IDisposable
 
                 if (combo.TryInvoke(actionID, out uint newActionID))
                 {
+                    ManualPressDiag.NoteReplaced(actionID, combo.Preset);
+
                     if (Service.Configuration.BlockSpellOnMove &&
                         ActionManager.GetAdjustedCastTime(ActionType.Action, newActionID) > 0 &&
                         CustomComboFunctions.TimeMoving.Ticks > 0)

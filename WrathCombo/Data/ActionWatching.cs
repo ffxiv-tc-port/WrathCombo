@@ -14,6 +14,8 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using WrathCombo.AutoRotation;
+using WrathCombo.Combos;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Core;
 using WrathCombo.CustomComboNS;
@@ -346,6 +348,7 @@ public static class ActionWatching
         var requestedActionId = actionId; //What the game asked for, used to roll back if our logic throws
         var requestedTargetId = targetId;
         var changed = false;
+        ManualPressDiag.Press press = default;
 
         if (actionType is ActionType.Action or ActionType.Ability &&
             FrameworkThreadGate.Check("UseAction"))
@@ -354,6 +357,7 @@ public static class ActionWatching
             {
                 var original = actionId; //Save the original action, do not modify
                 var originalTargetId = targetId; //Save the original target, do not modify
+                CustomComboPreset? perfPreset = null;
 
                 if (Service.Configuration.ActionChanging && Service.Configuration.PerformanceMode) //Performance mode only logic, to modify the actionId
                 {
@@ -363,10 +367,14 @@ public static class ActionWatching
                         if (combo.TryInvoke(actionId, out result))
                         {
                             actionId = Service.ActionReplacer.LastActionInvokeFor[actionId] = result; //Sets actionId and the LastActionInvokeFor dictionary entry to the result of the combo
+                            perfPreset = combo.Preset;
                             break;
                         }
                     }
                 }
+
+                if (ManualPressDiag.Active)
+                    press = ManualPressDiag.Begin(actionManager, mode, original, actionId, perfPreset);
 
                 changed = CheckForChangedTarget(original, ref targetId,
                     out var replacedWith); //Passes the original action to the retargeting framework, outputs a targetId and a replaced action
@@ -391,6 +399,9 @@ public static class ActionWatching
 
         //Important to pass actionId here and not replaced. Performance mode = result from earlier, which could be modified. Non-performance mode = original action, which gets modified by the hook. Same result.
         var hookResult = UseActionHook.OriginalDisposeSafe(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
+
+        if (press.Valid)
+            ManualPressDiag.End(in press, actionManager, hookResult);
 
         // If the target was changed, support changing the target for ground actions, too
         if (changed)
