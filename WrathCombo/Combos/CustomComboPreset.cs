@@ -8351,7 +8351,8 @@ public enum CustomComboPreset
 
     [PvPCustomCombo]
     [ReplaceSkill(ASTPvP.AspectedBenefic)]
-    [CustomComboInfo("Double Cast Heal Feature", "Adds Double Cast to Aspected Benefic.", ASTPvP.JobID)]
+    [CustomComboInfo("吉星相位治療功能",
+        "把下列選項加到吉星相位上。\n「雙重詠唱」預設勾（＝原本的行為）；取消勾選就不再接第二發。\n「重新指定目標」預設不勾；勾了吉星相位改對治療堆疊放。", ASTPvP.JobID)]
     ASTPvP_Heal = 111004,
 
     [PvPCustomCombo]
@@ -9255,7 +9256,8 @@ public enum CustomComboPreset
 
     [PvPCustomCombo]
     [ParentCombo(SGEPvP_BurstMode)]
-    [CustomComboInfo("Kardia Reminder Option", "Adds Kardia to Burst Mode.", SGEPvP.JobID)]
+    [CustomComboInfo("心關提醒選項",
+        "自己沒有心關時，把心關加入 Burst Mode。\n可勾「移動心關」（預設不勾）：能力技空檔把心關移到治療堆疊的對象身上。", SGEPvP.JobID)]
     SGEPvP_BurstMode_KardiaReminder = 124007,
 
     [PvPCustomCombo]
@@ -9616,7 +9618,8 @@ public enum CustomComboPreset
 
     [PvPCustomCombo]
     [ReplaceSkill(WHMPvP.Cure2)]
-    [CustomComboInfo("Heal Feature", "Adds the below options onto Cure II.", WHMPvP.JobID)]
+    [CustomComboInfo("治療功能",
+        "把下列選項加到中療傷上。\n可分別勾「重新指定中療傷／大療傷／水流幕」（預設都不勾）：勾了的技能改對治療堆疊放；大療傷預備時遊戲自己換成的大療傷也算。", WHMPvP.JobID)]
     WHMPvP_Heals = 129004,
 
     [PvPCustomCombo]

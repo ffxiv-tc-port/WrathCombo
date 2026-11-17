@@ -49,13 +49,24 @@ namespace WrathCombo.Combos.PvP
         #region Config
         public static class Config
         {
+            public static UserBool
+               SGEPvP_BurstMode_KardiaReminder_Retarget = new("SGEPvP_BurstMode_KardiaReminder_Retarget");
+
             public static UserInt
+               SGEPvP_KardiaThreshold = new("SGEPvP_KardiaThreshold", 100),
                SGEPvP_DiabrosisThreshold = new("SGEPvP_DiabrosisThreshold");
 
             internal static void Draw(CustomComboPreset preset)
             {
                 switch (preset)
                 {
+                    case CustomComboPreset.SGEPvP_BurstMode_KardiaReminder:
+                        UserConfig.DrawAdditionalBoolChoice(SGEPvP_BurstMode_KardiaReminder_Retarget, "移動心關",
+                            "在能力技空檔把心關移到治療堆疊（插件設定裡的治療目標堆疊）的對象身上；對象已有你的關心就不動。");
+                        if (SGEPvP_BurstMode_KardiaReminder_Retarget)
+                            UserConfig.DrawSliderInt(1, 100, SGEPvP_KardiaThreshold, "對象 HP% 在這個值以下才移動（100＝不看血量）");
+                        break;
+
                     case CustomComboPreset.SGEPvP_Diabrosis:
                         UserConfig.DrawSliderInt(0, 100, SGEPvP_DiabrosisThreshold,
                             "Target HP% to use Diabrosis");
@@ -107,6 +118,10 @@ namespace WrathCombo.Combos.PvP
                             return OriginalHook(Toxikon);
                     }
 
+                    if (IsEnabled(CustomComboPreset.SGEPvP_BurstMode_KardiaReminder) && Config.SGEPvP_BurstMode_KardiaReminder_Retarget && CanWeave() &&
+                        PvPCommon.HealCheckTarget(true) is { } kardiaTarget && !HasStatusEffect(Buffs.Kardion, kardiaTarget) &&
+                        InActionRange(Kardia, kardiaTarget) && GetTargetHPPercent(kardiaTarget) <= Config.SGEPvP_KardiaThreshold)
+                        return Kardia.Retarget(Dosis, PvPCommon.HealStackResolver);
                 }
                 return actionID;
             }

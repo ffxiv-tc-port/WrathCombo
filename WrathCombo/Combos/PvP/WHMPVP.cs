@@ -41,7 +41,8 @@ namespace WrathCombo.Combos.PvP
                WHMPvP_Burst_HealsRetarget = new("WHMPvP_Burst_HealsRetarget");
 
             public static UserBoolArray
-               WHMPvP_Burst_Heals_Options = new("WHMPvP_Burst_Heals_Options");
+               WHMPvP_Burst_Heals_Options = new("WHMPvP_Burst_Heals_Options"),
+               WHMPvP_Heals_Options = new("WHMPvP_Heals_Options");
 
             public static UserInt
                WHMPvP_Burst_HealsThreshold = new("WHMPvP_Burst_HealsThreshold", 50),
@@ -64,6 +65,12 @@ namespace WrathCombo.Combos.PvP
                         UserConfig.DrawHorizontalMultiChoice(WHMPvP_Burst_Heals_Options, "中療傷", "加入中療傷", 3, 0);
                         UserConfig.DrawHorizontalMultiChoice(WHMPvP_Burst_Heals_Options, "大療傷", "大療傷預備時加入大療傷", 3, 1);
                         UserConfig.DrawHorizontalMultiChoice(WHMPvP_Burst_Heals_Options, "水流幕", "在能力技空檔加入水流幕", 3, 2);
+                        break;
+
+                    case CustomComboPreset.WHMPvP_Heals:
+                        UserConfig.DrawHorizontalMultiChoice(WHMPvP_Heals_Options, "重新指定中療傷", "中療傷改對治療堆疊（插件設定裡的治療目標堆疊）放", 3, 0);
+                        UserConfig.DrawHorizontalMultiChoice(WHMPvP_Heals_Options, "重新指定大療傷", "大療傷改對治療堆疊放", 3, 1);
+                        UserConfig.DrawHorizontalMultiChoice(WHMPvP_Heals_Options, "重新指定水流幕", "水流幕改對治療堆疊放", 3, 2);
                         break;
 
                     case CustomComboPreset.WHMPvP_AfflatusPurgation:
@@ -144,16 +151,21 @@ namespace WrathCombo.Combos.PvP
 
             protected override uint Invoke(uint actionID)
             {
-                if (actionID is Cure2)
-                { 
-                    if (IsEnabled(CustomComboPreset.WHMPvP_Cure3) && HasStatusEffect(Buffs.Cure3Ready))
-                        return Cure3;
+                if (actionID is not Cure2)
+                    return actionID;
 
-                    if (IsEnabled(CustomComboPreset.WHMPvP_Aquaveil) && IsOffCooldown(Aquaveil))
-                        return Aquaveil;      
-                }
+                var options = Config.WHMPvP_Heals_Options;
 
-                return actionID;
+                if (IsEnabled(CustomComboPreset.WHMPvP_Cure3) && HasStatusEffect(Buffs.Cure3Ready))
+                    return options[1] ? Cure3.Retarget(Cure2, PvPCommon.HealStackResolver) : Cure3;
+
+                if (IsEnabled(CustomComboPreset.WHMPvP_Aquaveil) && IsOffCooldown(Aquaveil))
+                    return options[2] ? Aquaveil.Retarget(Cure2, PvPCommon.HealStackResolver) : Aquaveil;
+
+                // 大療傷預備時遊戲自己把中療傷換成大療傷，照實際會放的技能挑勾選。
+                uint cure = OriginalHook(Cure2);
+                bool retarget = cure == Cure3 ? options[1] : options[0];
+                return retarget ? cure.Retarget(Cure2, PvPCommon.HealStackResolver) : actionID;
             }
         }
 

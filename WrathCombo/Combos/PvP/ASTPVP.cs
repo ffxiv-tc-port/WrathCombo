@@ -44,7 +44,12 @@ namespace WrathCombo.Combos.PvP
         public static class Config
         {
             public static UserBool
-                ASTPvP_BurstHealRetarget = new("ASTPvP_BurstHealRetarget");
+                ASTPvP_BurstHealRetarget = new("ASTPvP_BurstHealRetarget"),
+                ASTPvP_Heal_Retarget = new("ASTPvP_Heal_Retarget");
+
+            // 預設勾：這個功能原本就是無條件接雙重詠唱，不勾才是新行為。
+            public static UserBool
+                ASTPvP_Heal_DoubleCast = new("ASTPvP_Heal_DoubleCast", true);
 
             public static UserInt
                 ASTPvP_Burst_HealThreshold = new("ASTPvP_Burst_HealThreshold", 50),
@@ -70,6 +75,11 @@ namespace WrathCombo.Combos.PvP
                     case CustomComboPreset.ASTPvP_Burst_Heal:
                         UserConfig.DrawAdditionalBoolChoice(ASTPvP_BurstHealRetarget, "重新指定目標", "改對治療堆疊（插件設定裡的治療目標堆疊）放吉星相位；沒勾＝對友方目標，沒有就對自己。");
                         UserConfig.DrawSliderInt(1, 100, ASTPvP_Burst_HealThreshold, "對象 HP% 在這個值以下才放吉星相位");
+                        break;
+
+                    case CustomComboPreset.ASTPvP_Heal:
+                        UserConfig.DrawAdditionalBoolChoice(ASTPvP_Heal_DoubleCast, "雙重詠唱", "剛放完吉星相位、能力技空檔有雙重詠唱可用時，接著放第二發吉星相位。");
+                        UserConfig.DrawAdditionalBoolChoice(ASTPvP_Heal_Retarget, "重新指定目標", "吉星相位（含雙重詠唱那一發）改對治療堆疊（插件設定裡的治療目標堆疊）放，不必先選隊友。");
                         break;
 
                     case CustomComboPreset.ASTPvP_Diabrosis:
@@ -188,12 +198,15 @@ namespace WrathCombo.Combos.PvP
 
                 protected override uint Invoke(uint actionID)
                 {
-                    if (actionID is AspectedBenefic && CanWeave() &&
-                        ComboAction == AspectedBenefic &&
-                        HasCharges(DoubleCast))
-                        return OriginalHook(DoubleCast);
+                    if (actionID is not AspectedBenefic)
+                        return actionID;
 
-                    return actionID;
+                    bool retarget = Config.ASTPvP_Heal_Retarget;
+
+                    if (Config.ASTPvP_Heal_DoubleCast && CanWeave() && ComboAction == AspectedBenefic && HasCharges(DoubleCast))
+                        return retarget ? OriginalHook(DoubleCast).Retarget(AspectedBenefic, PvPCommon.HealStackResolver) : OriginalHook(DoubleCast);
+
+                    return retarget ? AspectedBenefic.Retarget(PvPCommon.HealStackResolver) : actionID;
                 }
             }
         }
