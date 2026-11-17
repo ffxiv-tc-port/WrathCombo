@@ -37,6 +37,16 @@ public partial class Provider : IDisposable
     [SuppressMessage("Performance", "CA1822:Mark members as static")]
     public void Test() => Logging.Log("IPC connection successful.");
 
+    /// <summary>
+    ///     急停：收回所有插件的租約並關掉自動循環，等同使用者打 <c>/wrath stop</c>。
+    ///     與艦隊其他插件的 <c>StopAll</c> 同形（<c>Action&lt;string&gt;</c>）。
+    /// </summary>
+    /// <param name="source">呼叫端署名，寫進聊天欄訊息與紀錄。</param>
+    [EzIPC]
+    [SuppressMessage("Performance", "CA1822:Mark members as static")]
+    public void StopAll(string source) =>
+        global::WrathCombo.WrathCombo.RequestEmergencyStop(string.IsNullOrWhiteSpace(source) ? "IPC" : source);
+
     #region Helpers
 
     /// <summary>

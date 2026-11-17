@@ -15,6 +15,7 @@ using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Data;
 using WrathCombo.Extensions;
 using WrathCombo.Services;
+using WrathCombo.Services.IPC;
 using WrathCombo.Window;
 using WrathCombo.Window.Tabs;
 using WrathCombo.AutoRotation;
@@ -81,6 +82,9 @@ public partial class WrathCombo
 
             case "auto":
                 HandleAutoCommands(argumentParts); break;
+
+            case "stop":
+                RequestEmergencyStop("/wrath stop"); break;
 
             case "ignore":
                 HandleIgnoreCommand(); break;
@@ -478,6 +482,46 @@ public partial class WrathCombo
     /// <param name="value">
     ///     Whether to enable or disable auto-rotation.
     /// </param>
+    /// <summary>
+    ///     急停（<c>/wrath stop</c> 與 IPC <c>WrathCombo.StopAll</c> 共用）：不在框架執行緒時排到下一幀做。
+    /// </summary>
+    internal static void RequestEmergencyStop(string source)
+    {
+        if (Svc.Framework.IsInFrameworkUpdateThread)
+            EmergencyStop(source);
+        else
+            _ = Svc.Framework.Run(() => EmergencyStop(source));
+    }
+
+    /// <summary>
+    ///     收回所有插件的租約（承租者收到「使用者撤銷」，暫時不能重新承租），再關掉自動循環。
+    /// </summary>
+    /// <remarks>
+    ///     關的是與 <c>/wrath auto off</c> 同一個使用者設定值，<c>/wrath auto on</c> 就開得回來；
+    ///     刻意不另設「急停中」旗標：那種旗標沒清乾淨＝使用者再也開不回來。
+    /// </remarks>
+    private static void EmergencyStop(string source)
+    {
+        if (P is null)
+            return;
+
+        try
+        {
+            var leases = P.IPC?.Leasing.RegistrationCount ?? 0;
+            P.IPC?.Leasing.SuspendLeases(CancellationReason.WrathUserManuallyCancelled);
+
+            Service.Configuration.RotationConfig.Enabled = false;
+            Service.Configuration.Save();
+
+            DuoLog.Information($"急停（{source}）：自動循環已關閉" +
+                               (leases > 0 ? $"，已收回 {leases} 筆其他插件的控制權。" : "。"));
+        }
+        catch (Exception ex)
+        {
+            PluginLog.Error($"急停（{source}）失敗：{ex}");
+        }
+    }
+
     private static void ToggleAutoRotation(bool value)
     {
         Service.Configuration.RotationConfig.Enabled = value;
