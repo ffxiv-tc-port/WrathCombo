@@ -133,6 +133,7 @@ namespace WrathCombo.CustomComboNS
                 }
             }
             newActionID = resultingActionID;
+            DeepDungeonInterruptFilter.OnComboResult(actionID, resultingActionID);
 
             return true;
         }

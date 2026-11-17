@@ -1192,13 +1192,18 @@ namespace WrathCombo.AutoRotation
                     var mustTarget = sheet.CanTargetHostile;
 
                     bool switched = SwitchOnDChole(attributes, outAct, ref target);
+                    // 深宮遠程打斷改打被標記的施放者：只換送出的目標，玩家選中的目標照舊是 target。
+                    var actTarget = mode is DPSRotationMode && target is not null &&
+                                    DeepDungeonInterruptFilter.ActionTargetOverride(outAct) is { } ddCaster
+                        ? ddCaster
+                        : target;
                     var castTime = ActionManager.GetAdjustedCastTime(ActionType.Action, outAct);
                     bool orbwalking = cfg.OrbwalkerIntegration && OrbwalkerIPC.CanOrbwalk;
                     if (TimeMoving.TotalMilliseconds > 0 && castTime > 0 && !orbwalking)
                         return DiagMovingCaster(mode is DPSRotationMode, outAct, preset);
 
                     // 深層迷宮會開打不安全的敵人 ⇒ 這一招不放、解除 AoE 鎖，讓單體預設（會改挑已在戰鬥中的目標）接手。
-                    if (mode is DPSRotationMode && !DeepDungeonPullSafety.AllowsAction(outAct, target, mustTarget))
+                    if (mode is DPSRotationMode && !DeepDungeonPullSafety.AllowsAction(outAct, actTarget, mustTarget))
                     {
                         LockedAoE = false;
                         return false;
@@ -1207,12 +1212,12 @@ namespace WrathCombo.AutoRotation
                     if (mustTarget || cfg.DPSSettings.AlwaysSelectTarget)
                         Svc.Targets.Target = target;
 
-                    if (mustTarget && target is not null)
+                    if (mustTarget && actTarget is not null)
                     {
                         Svc.GameConfig.TryGet(Dalamud.Game.Config.UiControlOption.AutoFaceTargetOnAction, out uint original);
                         Svc.GameConfig.Set(Dalamud.Game.Config.UiControlOption.AutoFaceTargetOnAction, 1);
                         Vector3 pos = new(Player.Object.Position.X, Player.Object.Position.Y, Player.Object.Position.Z);
-                        ActionManager.Instance()->AutoFaceTargetPosition(&pos, target.GameObjectId);
+                        ActionManager.Instance()->AutoFaceTargetPosition(&pos, actTarget.GameObjectId);
                         Svc.GameConfig.Set(Dalamud.Game.Config.UiControlOption.AutoFaceTargetOnAction, original);
                     }
 
@@ -1220,7 +1225,7 @@ namespace WrathCombo.AutoRotation
                     var ret = ActionManager.Instance()->UseAction(
                         ActionType.Action,
                         Service.ActionReplacer.getActionHook?.IsEnabled == true ? gameAct : outAct,
-                        (mustTarget && target != null) || switched ? target.GameObjectId : Player.Object.GameObjectId);
+                        (mustTarget && actTarget != null) || switched ? actTarget.GameObjectId : Player.Object.GameObjectId);
 
                     if (outAct is NIN.Ten or NIN.Chi or NIN.Jin or NIN.TenCombo or NIN.ChiCombo or NIN.JinCombo && ActionAccepted(ret))
                         _ninjaLockedAoE = true;
@@ -1261,6 +1266,11 @@ namespace WrathCombo.AutoRotation
                 // 「目標是不是 FATE 怪」看選出來的目標，不看賢者把治療轉給隊友之後的目標。
                 var selectedTarget = target;
                 bool switched = SwitchOnDChole(attributes, outAct, ref target);
+                // 深宮遠程打斷改打被標記的施放者：下面的可用／射程／送出都對它算，玩家選中的目標照舊是 target。
+                var actTarget = mode is DPSRotationMode && target is not null &&
+                                DeepDungeonInterruptFilter.ActionTargetOverride(outAct) is { } ddCaster
+                    ? ddCaster
+                    : target;
 
                 var canUseSelf = NIN.MudraSigns.Contains(outAct)
                     ? target is not null && target.IsHostile()
@@ -1276,20 +1286,20 @@ namespace WrathCombo.AutoRotation
                     return DiagSt(diag, NoActStOutcome.NoTarget);
 
                 var areaTargeted = ActionSheet[outAct].TargetArea;
-                var canUseTarget = target is not null && ActionManager.CanUseActionOnTarget(outAct, target.Struct());
+                var canUseTarget = actTarget is not null && ActionManager.CanUseActionOnTarget(outAct, actTarget.Struct());
 
-                var inRange = target is null
+                var inRange = actTarget is null
                     ? canUseSelf
-                    : IsInLineOfSight(target) && (NIN.MudraSigns.Contains(outAct)
-                        ? GetTargetDistance(target) <= 20f
-                        : InActionRange(outAct, target));
+                    : IsInLineOfSight(actTarget) && (NIN.MudraSigns.Contains(outAct)
+                        ? GetTargetDistance(actTarget) <= 20f
+                        : InActionRange(outAct, actTarget));
 
                 var canUse = (canUseSelf || canUseTarget || areaTargeted) && InQueueWindow(outAct);
 
                 // IPC 只在真的要送出時問（目標本身上面已問過、走快取）；自用技不打目標，照常放。
                 var hitsTarget = canUseTarget || areaTargeted;
                 if (mode is DPSRotationMode && (pullBlocked && hitsTarget ||
-                    canUse && (inRange || areaTargeted) && !DeepDungeonPullSafety.AllowsAction(outAct, target, hitsTarget)))
+                    canUse && (inRange || areaTargeted) && !DeepDungeonPullSafety.AllowsAction(outAct, actTarget, hitsTarget)))
                     return DiagSt(diag, NoActStOutcome.Transient);
 
                 if ((canUse || cfg.DPSSettings.AlwaysSelectTarget) && !pullBlocked)
@@ -1302,7 +1312,7 @@ namespace WrathCombo.AutoRotation
 
                 if (canUse && (inRange || areaTargeted))
                 {
-                    var ret = ActionManager.Instance()->UseAction(ActionType.Action, Service.ActionReplacer.getActionHook?.IsEnabled == true ? gameAct : outAct, canUseTarget || areaTargeted ? target.GameObjectId : Player.Object.GameObjectId);
+                    var ret = ActionManager.Instance()->UseAction(ActionType.Action, Service.ActionReplacer.getActionHook?.IsEnabled == true ? gameAct : outAct, canUseTarget || areaTargeted ? actTarget.GameObjectId : Player.Object.GameObjectId);
                     var accepted = ActionAccepted(ret);
                     if (mode is HealerRotationMode && accepted)
                         LastHealAt = Environment.TickCount64 + castTime;

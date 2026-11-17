@@ -155,6 +155,9 @@ public static class ConflictingPluginsChecks
         /// <inheritdoc cref="BossModIPC.IsPullSafe" />
         internal Func<ulong, bool> PullSafeQuery => IPC.IsPullSafe;
 
+        /// <inheritdoc cref="BossModIPC.ShouldInterruptTargetsQuery" />
+        internal Func<ulong[]> InterruptQuery => IPC.ShouldInterruptTargetsQuery;
+
         /// <inheritdoc cref="BossModIPC.NextRaidwideDamageIn" />
         public float? NextRaidwideDamageIn() => IPC.NextRaidwideDamageIn();
 

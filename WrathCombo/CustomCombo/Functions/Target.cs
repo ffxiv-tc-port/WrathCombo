@@ -121,7 +121,8 @@ internal abstract partial class CustomComboFunctions
 
         float minThreshold = Math.Clamp(minCastPercent ?? (float)Service.Configuration.InterruptDelay, 0f, 1f);
 
-        return chara.CurrentCastTime >= chara.TotalCastTime * minThreshold;
+        return chara.CurrentCastTime >= chara.TotalCastTime * minThreshold &&
+               DeepDungeonInterruptFilter.Allows(chara);
     }
 
     /// <summary> Gets all bosses from the object table. </summary>

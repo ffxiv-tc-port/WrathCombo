@@ -117,11 +117,14 @@ internal static partial class RoleActions
         public static bool CanPeloton() =>
             ActionReady(Peloton);
 
+        // 深宮改打：目前目標不該打時，被標記的施放者也算（送出時由 DeepDungeonInterruptFilter 換技能目標）。
         public static bool CanHeadGraze(CustomComboPreset preset, WeaveTypes weave = WeaveTypes.None) =>
-            IsEnabled(preset) && CanInterruptEnemy() && ActionReady(HeadGraze) && CheckWeave(weave);
+            IsEnabled(preset) && (CanInterruptEnemy() || DeepDungeonInterruptFilter.RetargetCaster(HeadGraze) is not null) &&
+            ActionReady(HeadGraze) && CheckWeave(weave);
 
         public static bool CanHeadGraze(bool simpleMode, WeaveTypes weave = WeaveTypes.None) =>
-            simpleMode && CanInterruptEnemy() && ActionReady(HeadGraze) && CheckWeave(weave);
+            simpleMode && (CanInterruptEnemy() || DeepDungeonInterruptFilter.RetargetCaster(HeadGraze) is not null) &&
+            ActionReady(HeadGraze) && CheckWeave(weave);
     }
 
     public static class Melee

@@ -216,6 +216,10 @@ internal sealed class BossModIPC(
     /// <remarks> 不包 try：呼叫端 <c>DeepDungeonPullSafety</c> 攔所有例外並退避，失敗一律當 true。 </remarks>
     internal Func<ulong, bool> IsPullSafe => _isPullSafe;
 
+    /// <summary> <c>BossMod.Hints.ShouldInterruptTargets</c> 的原始委派（不吞例外，失敗與「沒有標記」才分得開）。 </summary>
+    /// <remarks> 呼叫端 <c>DeepDungeonInterruptFilter</c> 攔所有例外並退避，失敗一律照舊全打。 </remarks>
+    internal Func<ulong[]> ShouldInterruptTargetsQuery => _shouldInterruptTargets;
+
     private long _raidwideFailureLoggedAt;
 
     /// <summary>

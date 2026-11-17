@@ -198,6 +198,20 @@ namespace WrathCombo.Core
         public bool MechanicAwareTargetingStrictOnly = false;
 
         /// <summary>
+        ///     深層迷宮非首領層：打斷技只打 BossMod(Reborn) 標記為該打斷的詠唱。
+        /// </summary>
+        /// <remarks>
+        ///     預設 <see langword="false" />＝現行行為。BMR 不在或 IPC 失敗時照舊全打；見 <c>Data/DeepDungeonInterruptFilter.cs</c>。
+        /// </remarks>
+        public bool DeepDungeonSelectiveInterrupt = false;
+
+        /// <summary>
+        ///     承上：目前目標不該打斷時，傷頭改打被標記的施放者（只換技能目標，不換玩家選中的目標）。
+        ///     只在 <see cref="DeepDungeonSelectiveInterrupt" /> 開啟時有效。
+        /// </summary>
+        public bool DeepDungeonInterruptRetarget = false;
+
+        /// <summary>
         ///     暈眩目標選擇要不要跳過 MonsterDex 明確標示為「不吃暈眩」的敵人。
         /// </summary>
         /// <remarks>

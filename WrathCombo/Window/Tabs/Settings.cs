@@ -382,6 +382,41 @@ namespace WrathCombo.Window.Tabs
                     ImGui.Unindent();
                 }
 
+                var ddSelective = Service.Configuration.DeepDungeonSelectiveInterrupt;
+                if (ImGui.Checkbox("Deep Dungeons: Only Interrupt Casts BossMod (Reborn) Flags".Loc(),
+                        ref ddSelective))
+                {
+                    Service.Configuration.DeepDungeonSelectiveInterrupt = ddSelective;
+                    Service.Configuration.Save();
+                }
+
+                ImGuiComponents.HelpMarker((
+                    "On deep dungeon floors that are not boss floors, Interject and Head Graze are only used on casts that BossMod (Reborn) flags as worth interrupting; other interruptible casts are let through so the cooldown is ready for the ones that matter.\n\n" +
+                    "If BossMod (Reborn) answers with nothing flagged, nothing is interrupted. This relies on the BossMod (Reborn) deep dungeon module being active.\n" +
+                    "Boss floors, other content, and BossMod (Reborn) missing or failing to answer all behave exactly like this is off.\n" +
+                    "Each skipped or redirected interrupt is written to the log (Information level).\n\n" +
+                    "Default: Off").Loc());
+
+                if (ddSelective)
+                {
+                    ImGui.Indent();
+
+                    var ddRetarget = Service.Configuration.DeepDungeonInterruptRetarget;
+                    if (ImGui.Checkbox("Head Graze the flagged caster instead".Loc(),
+                            ref ddRetarget))
+                    {
+                        Service.Configuration.DeepDungeonInterruptRetarget = ddRetarget;
+                        Service.Configuration.Save();
+                    }
+
+                    ImGuiComponents.HelpMarker((
+                        "When your current target does not need interrupting but another enemy in range and line of sight is casting a flagged spell, Head Graze is sent at that enemy.\n" +
+                        "Only the action's target changes; your selected target stays the same.\n\n" +
+                        "Default: Off").Loc());
+
+                    ImGui.Unindent();
+                }
+
                 var dexStunGate = Service.Configuration.MonsterDexStunGate;
                 if (ImGui.Checkbox("Skip Stun-Immune Enemies (MonsterDex)".Loc(),
                         ref dexStunGate))
