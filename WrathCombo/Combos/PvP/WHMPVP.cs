@@ -92,7 +92,7 @@ namespace WrathCombo.Combos.PvP
                             return AfflatusPurgation;
 
                         // Seraph Strike if enabled and off cooldown
-                        if (IsEnabled(CustomComboPreset.WHMPvP_Seraph_Strike) && IsOffCooldown(SeraphStrike) && PvPCommon.GapCloserAllowed(SeraphStrike))
+                        if (IsEnabled(CustomComboPreset.WHMPvP_Seraph_Strike) && IsOffCooldown(SeraphStrike) && (!PvPCommon.GapCloserRuleOn(SeraphStrike) || PvPCommon.GapCloserInWindow(SeraphStrike)))
                             return SeraphStrike;
 
                         // Weave conditions

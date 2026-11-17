@@ -78,9 +78,14 @@ namespace WrathCombo.Combos.PvP
                     if (IsEnabled(CustomComboPreset.PLDPvP_Rampart) && PvPTank.CanRampart(Config.PLDPvP_RampartThreshold))
                         return PvPTank.Rampart;
 
-                    if ((IsEnabled(CustomComboPreset.PLDPvP_Intervene) && !InMeleeRange() && IsOffCooldown(Intervene) || IsEnabled(CustomComboPreset.PLDPvP_Intervene_Melee) && InMeleeRange() && IsOffCooldown(Intervene)) &&
-                        PvPCommon.GapCloserAllowed(Intervene))
+                    if (PvPCommon.GapCloserRuleOn(Intervene)
+                            ? (IsEnabled(CustomComboPreset.PLDPvP_Intervene) || IsEnabled(CustomComboPreset.PLDPvP_Intervene_Melee)) && IsOffCooldown(Intervene) && PvPCommon.GapCloserInWindow(Intervene)
+                            : IsEnabled(CustomComboPreset.PLDPvP_Intervene) && !InMeleeRange() && IsOffCooldown(Intervene) || IsEnabled(CustomComboPreset.PLDPvP_Intervene_Melee) && InMeleeRange() && IsOffCooldown(Intervene))
                         return Intervene;
+
+                    if (IsEnabled(CustomComboPreset.PLDPvP_Rampage) && CanWeave() && !PvPCommon.TargetImmuneToDamage() && PvPTank.CanRampage() && HasBattleTarget() &&
+                        GetTargetDistance() <= 10 && PvPCommon.LongCDAllowed())
+                        return PvPTank.Rampage;
 
                     // Check conditions for Holy Sheltron
                     if (IsEnabled(CustomComboPreset.PLDPvP_Sheltron) && IsOffCooldown(HolySheltron) && InCombat() && InMeleeRange())

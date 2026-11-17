@@ -8324,7 +8324,7 @@ public enum CustomComboPreset
     [Role(JobRole.All)]
     [PvPCustomCombo]
     [CustomComboInfo("目標太近時不放位移技能",
-        "目標距離（扣掉雙方的碰撞圈）小於設定值時，各職業 PvP 連擊不放「衝到敵人面前」或「把敵人拉過來」的技能。勾選後下方可調距離、看適用技能。", ADV.JobID)]
+        "勾選後，各職業 PvP 連擊的位移技能（衝到敵人面前、把敵人拉過來）改成目標距離 ≥ 設定值、且在技能射程內才放，用來拉近距離；原本的近戰內／外子選項在勾選時不適用，近戰內不放。勾選後下方可調距離、看適用技能。", ADV.JobID)]
     PvP_GapCloserMinDistance = 1100060,
 
     // Last value = 1100060
@@ -8595,7 +8595,13 @@ public enum CustomComboPreset
         "Adds Defensive Role Action Rampart to Burst Mode below selected health", DRK.JobID)]
     DRKPvP_Rampart = 115009,
 
-    // Last value = 115009
+    [PvPCustomCombo]
+    [ParentCombo(DRKPvP_Burst)]
+    [CustomComboInfo("職能技能 暴怒選項",
+        "PvP 職能技能選了暴怒時，目標在 10 米內就在能力技空檔放（自身周圍範圍攻擊，目標所受傷害提高 25%）。\n受「目標不是玩家時不放長冷卻技能」開關管。", DRKPvP.JobID)]
+    DRKPvP_Rampage = 115010,
+
+    // Last value = 115010
 
     #endregion
 
@@ -8714,7 +8720,13 @@ public enum CustomComboPreset
     [CustomComboInfo("Continuation Feature", "Adds Continuation to Gnashing Fang.", GNBPvP.JobID)]
     GNBPvP_GnashingFang = 117010,
 
-    // Last value = 117012
+    [PvPCustomCombo]
+    [ParentCombo(GNBPvP_Burst)]
+    [CustomComboInfo("職能技能 暴怒選項",
+        "PvP 職能技能選了暴怒時，目標在 10 米內就在能力技空檔放（自身周圍範圍攻擊，目標所受傷害提高 25%）。\n受「目標不是玩家時不放長冷卻技能」開關管。", GNBPvP.JobID)]
+    GNBPvP_Rampage = 117013,
+
+    // Last value = 117013
 
     #endregion
 
@@ -8999,7 +9011,13 @@ public enum CustomComboPreset
         "Adds Defensive Role Action Rampart to Burst Mode below selected health", PLDPvP.JobID)]
     PLDPvP_Rampart = 121009,
 
-    // Last value = 121009
+    [PvPCustomCombo]
+    [ParentCombo(PLDPvP_Burst)]
+    [CustomComboInfo("職能技能 暴怒選項",
+        "PvP 職能技能選了暴怒時，目標在 10 米內就在能力技空檔放（自身周圍範圍攻擊，目標所受傷害提高 25%）。\n受「目標不是玩家時不放長冷卻技能」開關管。", PLDPvP.JobID)]
+    PLDPvP_Rampage = 121010,
+
+    // Last value = 121010
 
     #endregion
 

@@ -117,7 +117,7 @@ namespace WrathCombo.Combos.PvP
                         if (IsEnabled(CustomComboPreset.SMNPvP_BurstMode_CrimsonStrike) && OriginalHook(CrimsonCyclone) is CrimsonStrike)
                             return CrimsonStrike;
 
-                        if (IsEnabled(CustomComboPreset.SMNPvP_BurstMode_CrimsonCyclone) && IsOffCooldown(CrimsonCyclone) && PvPCommon.GapCloserAllowed(CrimsonCyclone))
+                        if (IsEnabled(CustomComboPreset.SMNPvP_BurstMode_CrimsonCyclone) && IsOffCooldown(CrimsonCyclone) && (!PvPCommon.GapCloserRuleOn(CrimsonCyclone) || PvPCommon.GapCloserInWindow(CrimsonCyclone)))
                             return CrimsonCyclone;
 
                         // Titan

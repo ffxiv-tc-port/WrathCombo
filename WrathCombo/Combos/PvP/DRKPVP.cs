@@ -87,8 +87,9 @@ namespace WrathCombo.Combos.PvP
                     {
                         if (IsEnabled(CustomComboPreset.DRKPvP_Plunge) && ActionReady(Plunge))
                         {
-                            if ((HasTarget() && (!InMeleeRange()) || (InMeleeRange() && IsEnabled(CustomComboPreset.DRKPvP_PlungeMelee))) &&
-                                PvPCommon.GapCloserAllowed(Plunge))
+                            if (PvPCommon.GapCloserRuleOn(Plunge)
+                                    ? PvPCommon.GapCloserInWindow(Plunge)
+                                    : HasTarget() && (!InMeleeRange()) || (InMeleeRange() && IsEnabled(CustomComboPreset.DRKPvP_PlungeMelee)))
                                 return OriginalHook(Plunge);
                         }
 
@@ -99,6 +100,10 @@ namespace WrathCombo.Combos.PvP
                         {
                             if (IsEnabled(CustomComboPreset.DRKPvP_BlackestNight) && ActionReady(BlackestNight) && !HasStatusEffect(Buffs.BlackestNight) && !WasLastAbility(BlackestNight))
                                 return OriginalHook(BlackestNight);
+
+                            if (IsEnabled(CustomComboPreset.DRKPvP_Rampage) && PvPTank.CanRampage() && HasBattleTarget() &&
+                                GetTargetDistance() <= 10 && PvPCommon.LongCDAllowed())
+                                return PvPTank.Rampage;
 
                             if (IsEnabled(CustomComboPreset.DRKPvP_SaltedEarth) && ActionReady(SaltedEarth) && IsEnabled(CustomComboPreset.DRKPvP_SaltedEarth))
                                 return OriginalHook(SaltedEarth);

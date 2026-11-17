@@ -95,7 +95,8 @@ namespace WrathCombo.Combos.PvP
                         if (IsEnabled(CustomComboPreset.MNKPvP_Burst_RiddleOfEarth) && IsOffCooldown(RiddleOfEarth) && PlayerHealthPercentageHp() <= 95)
                             return OriginalHook(RiddleOfEarth);
 
-                        if (IsEnabled(CustomComboPreset.MNKPvP_Burst_Thunderclap) && GetRemainingCharges(Thunderclap) > 0 && !InMeleeRange() && PvPCommon.GapCloserAllowed(Thunderclap))
+                        if (IsEnabled(CustomComboPreset.MNKPvP_Burst_Thunderclap) && GetRemainingCharges(Thunderclap) > 0 &&
+                            (PvPCommon.GapCloserRuleOn(Thunderclap) ? PvPCommon.GapCloserInWindow(Thunderclap) : !InMeleeRange()))
                             return OriginalHook(Thunderclap);
 
                         if (IsEnabled(CustomComboPreset.MNKPvP_Burst_WindsReply) && InActionRange(WindsReply) && IsOffCooldown(WindsReply))

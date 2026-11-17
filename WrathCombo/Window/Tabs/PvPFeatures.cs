@@ -114,7 +114,7 @@ namespace WrathCombo.Window.Tabs
                     }
 
                     if (id != Combos.PvE.ADV.JobID)
-                        DrawGlobalTogglesNotice();
+                        DrawGlobalTogglesNotice(OpenJob);
 
                     using (var contents = ImRaii.Child("Contents", new Vector2(0)))
                     {
@@ -148,7 +148,7 @@ namespace WrathCombo.Window.Tabs
         ];
 
         // 這三個開關掛在「通用/多職業」，各職業頁只顯示狀態與捷徑，不在這裡改值（勾選仍走原本的 preset 介面）。
-        private static void DrawGlobalTogglesNotice()
+        private static void DrawGlobalTogglesNotice(string jobName)
         {
             string advName = CustomComboFunctions.JobIDs.JobIDToName(Combos.PvE.ADV.JobID);
             ImGui.TextDisabled($"全職業 PvP 開關（在「{advName}」裡設定）：");
@@ -162,7 +162,11 @@ namespace WrathCombo.Window.Tabs
             foreach (var (preset, name) in GlobalPvPToggles)
             {
                 bool on = PresetStorage.IsEnabled(preset);
-                ImGui.TextColored(on ? ImGuiColors.HealerGreen : ImGuiColors.DalamudGrey, $"　・{name}：{(on ? "已開啟" : "未開啟")}");
+                string note = on && preset == CustomComboPreset.PvP_GapCloserMinDistance &&
+                              Combos.PvP.PvPCommon.GapCloserActions.Any(a => a.Job.Contains(jobName))
+                    ? "（本頁的位移技能改依距離放，下面「近戰內／外」相關的子選項不適用）"
+                    : "";
+                ImGui.TextColored(on ? ImGuiColors.HealerGreen : ImGuiColors.DalamudGrey, $"　・{name}：{(on ? "已開啟" : "未開啟")}{note}");
             }
         }
 

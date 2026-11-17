@@ -111,11 +111,26 @@ namespace WrathCombo.Combos.PvP
                         if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalScream) && InMeleeRange() && canWeave && HasStatusEffect(Buffs.Wrathfull))
                             return OriginalHook(PrimalScream);
 
+                        // 位移距離規則生效時，獻身／蠻荒崩裂／猛攻改在這裡依距離放，下面近戰內外的同一招不再放。
+                        if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && PvPCommon.GapCloserRuleOn(Blota) && IsOffCooldown(Blota) &&
+                            !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && BlotaCanPull &&
+                            (Config.WARPVP_BlotaTiming == 0 && IsOffCooldown(PrimalRend) || Config.WARPVP_BlotaTiming == 1 && IsOnCooldown(PrimalRend)) &&
+                            PvPCommon.GapCloserInWindow(Blota))
+                            return Blota;
+
+                        if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalRend) && PvPCommon.GapCloserRuleOn(PrimalRend) && IsOffCooldown(PrimalRend) &&
+                            PvPCommon.GapCloserInWindow(PrimalRend))
+                            return PrimalRend;
+
+                        if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_Onslaught) && PvPCommon.GapCloserRuleOn(Onslaught) && !GetCooldown(Onslaught).IsCooldown && canWeave &&
+                            PvPCommon.GapCloserInWindow(Onslaught))
+                            return Onslaught;
+
                         // Blota and PrimalRend conditions based on range and cooldowns
                         if (!InMeleeRange())
                         {
                             // Blota with specific conditions and burst mode enabled
-                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && BlotaCanPull && PvPCommon.GapCloserAllowed(Blota))
+                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && BlotaCanPull && !PvPCommon.GapCloserRuleOn(Blota))
                             {
                                 if (Config.WARPVP_BlotaTiming == 0 && IsOffCooldown(PrimalRend))
                                     return OriginalHook(Blota);
@@ -126,7 +141,7 @@ namespace WrathCombo.Combos.PvP
                             // PrimalRend if ready or BurstMode enabled
                             if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalRend))
                             {
-                                if ((IsOffCooldown(PrimalRend) || HasStatusEffect(Buffs.PrimalRuinationReady)) && PvPCommon.GapCloserAllowed(PrimalRend))
+                                if ((IsOffCooldown(PrimalRend) || HasStatusEffect(Buffs.PrimalRuinationReady)) && !PvPCommon.GapCloserRuleOn(PrimalRend))
                                     return OriginalHook(PrimalRend);
                             }
 
@@ -140,7 +155,7 @@ namespace WrathCombo.Combos.PvP
                                 return OriginalHook(Blota);
 
                             // Onslaught and Orogeny conditions for melee
-                            if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_Onslaught) && !GetCooldown(Onslaught).IsCooldown && canWeave && PvPCommon.GapCloserAllowed(Onslaught))
+                            if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_Onslaught) && !GetCooldown(Onslaught).IsCooldown && canWeave && !PvPCommon.GapCloserRuleOn(Onslaught))
                                 return OriginalHook(Onslaught);
 
                             // Nascent Chaos and Orogeny conditions
@@ -153,12 +168,12 @@ namespace WrathCombo.Combos.PvP
                             // PrimalRend if ready or BurstMode enabled
                             if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalRend))
                             {
-                                if ((IsOffCooldown(PrimalRend) || HasStatusEffect(Buffs.PrimalRuinationReady)) && PvPCommon.GapCloserAllowed(PrimalRend))
+                                if ((IsOffCooldown(PrimalRend) || HasStatusEffect(Buffs.PrimalRuinationReady)) && !PvPCommon.GapCloserRuleOn(PrimalRend))
                                     return OriginalHook(PrimalRend);
                             }
 
                             // Blota with specific conditions and burst mode enabled in meleerange
-                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && BlotaCanPull && PvPCommon.GapCloserAllowed(Blota))
+                            if (IsOffCooldown(Blota) && !HasStatusEffect(PvPCommon.Debuffs.Stun, CurrentTarget, true) && IsEnabled(CustomComboPreset.WARPvP_BurstMode_Blota) && BlotaCanPull && !PvPCommon.GapCloserRuleOn(Blota))
                             {
                                 if (Config.WARPVP_BlotaTiming == 0 && IsOffCooldown(PrimalRend))
                                     return OriginalHook(Blota);

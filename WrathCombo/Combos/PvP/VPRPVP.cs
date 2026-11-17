@@ -171,8 +171,12 @@ namespace WrathCombo.Combos.PvP
                         return OriginalHook(RattlingCoil);
 
                     // Slither
+                    // 規則生效時不看 isSlitherPrimed 裡的「不在近戰內」，其餘條件照舊。
                     if (IsEnabled(CustomComboPreset.VPRPvP_Slither) && chargesSlither > Config.VPRPvP_Slither_Charges &&
-                        isSlitherPrimed && targetDistance <= Config.VPRPvP_Slither_Range && PvPCommon.GapCloserAllowed(Slither))
+                        (PvPCommon.GapCloserRuleOn(Slither)
+                            ? hasTarget && isUncoiledFuryDependant && !hasSlither && !hasBind && PvPCommon.GapCloserInWindow(Slither)
+                            : isSlitherPrimed) &&
+                        targetDistance <= Config.VPRPvP_Slither_Range)
                         return OriginalHook(Slither);
 
                     // Serpent's Tail

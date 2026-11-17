@@ -114,8 +114,11 @@ internal static class PvPCommon
                 case CustomComboPreset.PvP_GapCloserMinDistance:
                     DrawSliderInt(0, 25, GapCloserMinDistance, "目標距離至少幾米才放位移技能（扣掉雙方碰撞圈；PvP 近戰射程是 5 米）");
                     DrawAppliesTo(ref _gapCloserTooltip, GapCloserActions,
-                        "衝到目標面前或把目標拉過來的技能；距離量法同連擊判斷近戰射程（水平距離扣掉雙方碰撞圈）。\n" +
-                        "技能已變成追擊（盡毀、狂魂、深紅強襲等）時不算位移，照常放。\n" +
+                        "勾選後，下列技能改成「目標距離 ≥ 上面的設定值、且在該技能射程內」才放，用來拉近距離；" +
+                        "各職業原本的「近戰內才放／近戰外才放／近戰內也放」判斷（例如戰士猛攻、騎士調停的近戰選項、暗黑騎士跳斬的近戰選項）" +
+                        "在勾選時不再適用，近戰內不放。各職業自己的冷卻、層數、射程上限等其他條件照舊。\n" +
+                        "戰士獻身仍然只對玩家或已變狂魂時放。距離量法同連擊判斷近戰射程（水平距離扣掉雙方碰撞圈）。\n" +
+                        "技能已變成追擊（盡毀、狂魂、深紅強襲等）時不算位移，照原本的判斷放。\n" +
                         "不算：往前或往後的自身位移（本輪、地獄入境、速塗、前衝步、後躍射擊、迴避跳躍、移轉、縮地）、" +
                         "對隊友的位移、腐穢大地（主要是自身恢復／減傷場地）、極限爆發（隕石衝擊）。");
                     break;
@@ -162,14 +165,15 @@ internal static class PvPCommon
         !IsEnabled(CustomComboPreset.PvP_LongCDOnlyOnPlayers) || TargetIsPlayer();
 
     /// <summary>
-    ///     位移技能 <paramref name="gapCloser" /> 這一刻可以放：沒開「目標太近時不放位移技能」、
-    ///     它現在已變成別的技能（追擊，不是位移），或目標距離（<see cref="GetTargetDistance" />）達到設定值。
-    ///     開關沒勾時第一項就成立，不讀遊戲狀態。
+    ///     「位移距離規則」對 <paramref name="gapCloser" /> 生效：開關勾選、且技能還是位移本身（沒被換成追擊）。
+    ///     生效時各職業改用 <see cref="GapCloserInWindow" /> 取代原本的近戰內／外判斷；沒勾時第一項就不成立，不讀遊戲狀態。
     /// </summary>
-    public static bool GapCloserAllowed(uint gapCloser) =>
-        !IsEnabled(CustomComboPreset.PvP_GapCloserMinDistance) ||
-        OriginalHook(gapCloser) != gapCloser ||
-        GetTargetDistance() >= Config.GapCloserMinDistance;
+    public static bool GapCloserRuleOn(uint gapCloser) =>
+        IsEnabled(CustomComboPreset.PvP_GapCloserMinDistance) && OriginalHook(gapCloser) == gapCloser;
+
+    /// <summary> 規則生效時的放技窗口：有敵對目標、距離（<see cref="GetTargetDistance" />）≥ 滑桿值、且在技能射程內（遊戲的技能射程）。 </summary>
+    public static bool GapCloserInWindow(uint gapCloser) =>
+        HasBattleTarget() && GetTargetDistance() >= Config.GapCloserMinDistance && InActionRange(gapCloser);
 
     /// <summary> 補師 PvP「重新指定目標」用：按下按鈕那一刻才解析治療堆疊（插件設定裡的治療目標堆疊），不把物件包裝留到下一幀。 </summary>
     [ActionRetargeting.TargetResolver]
@@ -205,9 +209,9 @@ internal static class PvPCommon
             ("白魔道士", WHMPvP.AfflatusPurgation),
             ("占星術師、學者、賢者、白魔道士", PvPHealer.Diabrosis),
             ("戰士", WARPvP.PrimalScream),
-            ("戰士", PvPTank.Rampage),
+            ("騎士、戰士、暗黑騎士、絕槍戰士", PvPTank.Rampage),
         ],
-        // 只列連擊裡真的會放的；實際判斷是各職業檔加 GapCloserAllowed 的地方。
+        // 只列連擊裡真的會放的；實際判斷是各職業檔用 GapCloserRuleOn／GapCloserInWindow 的地方。
         GapCloserActions =
         [
             ("騎士", PLDPvP.Intervene),
