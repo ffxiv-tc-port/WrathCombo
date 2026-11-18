@@ -3,6 +3,9 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using ECommons.ImGuiMethods;
+using ECommons.DalamudServices;
+using ECommons.Logging;
+using Dalamud.Interface.Textures;
 using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
@@ -631,18 +634,33 @@ namespace WrathCombo.Window.Functions
             bool[]? values = PluginConfiguration.GetCustomBoolArrayValue(config);
             Array.Resize(ref values, PvPCommon.QuickPurify.Statuses.Length);
 
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedPink);
-            ImGui.Columns(4, $"{config}", false);
+            var rows = GetPvPStatusRows(config);
+            var iconHeight = ImGui.GetFrameHeight();
 
-            for (var i = 0; i < PvPCommon.QuickPurify.Statuses.Length; i++)
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedPink);
+            ImGui.Columns(4, config, false);
+
+            for (var i = 0; i < rows.Length; i++)
             {
-                var status = PvPCommon.QuickPurify.Statuses[i];
-                if (ImGui.Checkbox($"{status.label}###{config}{i}", ref values[i]))
+                var row = rows[i];
+                if (row.Icon is not null)
+                {
+                    // 狀態圖示是直的，寬度照材質實際比例；還沒載入好先占同樣的位置，免得勾選框左右跳。
+                    if (row.Icon.TryGetWrap(out var tex, out _) && tex.Height > 0)
+                        ImGui.Image(tex.Handle, new Vector2(iconHeight * tex.Width / tex.Height, iconHeight));
+                    else
+                        ImGui.Dummy(new Vector2(iconHeight * 0.75f, iconHeight));
+                    DrawPvPStatusTooltip(row.Description);
+                    ImGui.SameLine();
+                }
+
+                if (ImGui.Checkbox(row.CheckboxLabel, ref values[i]))
                 {
                     DebugFile.AddLog($"Set Config {config} to {string.Join(", ", values)}");
                     PluginConfiguration.SetCustomBoolArrayValue(config, values);
                     Service.Configuration.Save();
                 }
+                DrawPvPStatusTooltip(row.Description);
 
                 ImGui.NextColumn();
             }
@@ -650,6 +668,74 @@ namespace WrathCombo.Window.Functions
             ImGui.Columns(1);
             ImGui.PopStyleColor();
             ImGui.Spacing();
+        }
+
+        /// <summary>
+        ///     <see cref="DrawPvPStatusMultiChoice"/> 每一格的顯示資料，索引與
+        ///     <see cref="PvPCommon.QuickPurify.Statuses"/> 一一對應（設定按索引存）。
+        ///     勾選框的 ImGui id 固定是 <c>{config}{索引}</c>，只有 ### 前的顯示文字換成台服狀態名稱。
+        /// </summary>
+        private sealed class PvPStatusRow
+        {
+            public required string CheckboxLabel;
+            public string? Description;
+            public ISharedImmediateTexture? Icon;
+        }
+
+        private static PvPStatusRow[]? _pvpStatusRows;
+        private static string? _pvpStatusRowsConfig;
+
+        // 第一次畫時讀台服 Status 表建好，之後每幀沿用；查不到列或名稱空白就用 Statuses 裡的英文標籤。
+        private static PvPStatusRow[] GetPvPStatusRows(string config)
+        {
+            if (_pvpStatusRows is not null && _pvpStatusRowsConfig == config)
+                return _pvpStatusRows;
+
+            var statuses = PvPCommon.QuickPurify.Statuses;
+            var rows = new PvPStatusRow[statuses.Length];
+            for (var i = 0; i < statuses.Length; i++)
+            {
+                var (id, fallback) = statuses[i];
+                string? name = null, description = null;
+                uint icon = 0;
+                try
+                {
+                    if (Svc.Data.GetExcelSheet<Lumina.Excel.Sheets.Status>().TryGetRow(id, out var status))
+                    {
+                        name = status.Name.ExtractText();
+                        description = status.Description.ExtractText();
+                        icon = status.Icon;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    PluginLog.Warning($"PvP 淨化狀態 {id} 讀 Status 表失敗，改用英文標籤：{ex.Message}");
+                }
+
+                rows[i] = new PvPStatusRow
+                {
+                    CheckboxLabel = $"{(string.IsNullOrWhiteSpace(name) ? fallback : name)}###{config}{i}",
+                    Description = string.IsNullOrWhiteSpace(description) ? null : description,
+                    Icon = icon == 0 ? null : Svc.Texture.GetFromGameIcon(new GameIconLookup(icon)),
+                };
+            }
+
+            _pvpStatusRowsConfig = config;
+            return _pvpStatusRows = rows;
+        }
+
+        private static void DrawPvPStatusTooltip(string? description)
+        {
+            if (description is null || !ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                return;
+
+            ImGui.BeginTooltip();
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudWhite);
+            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 24f);
+            ImGui.TextUnformatted(description);
+            ImGui.PopTextWrapPos();
+            ImGui.PopStyleColor();
+            ImGui.EndTooltip();
         }
 
         /// <summary>
