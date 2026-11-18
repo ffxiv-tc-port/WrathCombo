@@ -54,7 +54,7 @@ namespace WrathCombo.Window
             return Enum
             .GetValues<CustomComboPreset>()
             .Where(preset => (int)preset > 100)
-            .Select(preset => (Preset: preset, Info: preset.GetAttribute<CustomComboInfoAttribute>()))
+            .Select(preset => (Preset: preset, Info: InfoOf(preset)))
             .Where(tpl => tpl.Info != null && PresetStorage.GetParent(tpl.Preset) == null)
             .OrderByDescending(tpl => tpl.Info.Role == 1)
             .ThenByDescending(tpl => tpl.Info.Role == 4)
@@ -80,7 +80,7 @@ namespace WrathCombo.Window
 
             foreach (var preset in Enum.GetValues<CustomComboPreset>())
             {
-                var parent = preset.GetAttribute<ParentComboAttribute>()?.ParentPreset;
+                var parent = ParentOf(preset);
                 if (parent != null)
                     childCombos[parent.Value].Add(preset);
             }
@@ -88,9 +88,21 @@ namespace WrathCombo.Window
             return childCombos.ToDictionary(
                 kvp => kvp.Key,
                 kvp => kvp.Value
-                    .Select(preset => (Preset: preset, Info: preset.GetAttribute<CustomComboInfoAttribute>()))
+                    .Select(preset => (Preset: preset, Info: InfoOf(preset)))
                     .OrderBy(tpl => tpl.Info.Order).ToArray())!;
         }
+
+        // 插件組件可卸載，Dalamud 的 GetAttribute 對它不快取、每次重建該欄位的全部屬性（數千個 preset 約數百毫秒）；
+        // 載入時 PresetStorage.Init 已讀過一次並存在 Presets.Attributes，同一份值。查不到才退回反射。
+        private static CustomComboInfoAttribute? InfoOf(CustomComboPreset preset) =>
+            Functions.Presets.Attributes.TryGetValue(preset, out var attributes)
+                ? attributes.CustomComboInfo
+                : preset.GetAttribute<CustomComboInfoAttribute>();
+
+        private static CustomComboPreset? ParentOf(CustomComboPreset preset) =>
+            Functions.Presets.Attributes.TryGetValue(preset, out var attributes)
+                ? attributes.Parent
+                : preset.GetAttribute<ParentComboAttribute>()?.ParentPreset;
 
         public OpenWindow OpenWindow { get; set; } = OpenWindow.PvE;
 
@@ -128,10 +140,35 @@ namespace WrathCombo.Window
                   (OpenWindow == OpenWindow.PvE ? $"、職業頁「{PvEFeatures.OpenJob}」" : "") +
                   $"、開啟後第 {_framesSinceOpen} 幀）";
 
+        private bool _staticTablesBuilt;
+
         public override void Draw()
+        {
+            var drawStart = DrawHitchDiag.Begin();
+            try
+            {
+                DrawMain();
+            }
+            finally
+            {
+                DrawHitchDiag.End(DrawHitchDiag.Section.ConfigTotal, drawStart);
+            }
+        }
+
+        private void DrawMain()
         {
             if (_framesSinceOpen < int.MaxValue)
                 _framesSinceOpen++;
+
+            // 靜態表本來就會在這一幀第一次用到時建；提前到這裡只是讓卡頓診斷能單獨計時。
+            if (!_staticTablesBuilt)
+            {
+                var initStart = DrawHitchDiag.Begin();
+                System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(ConfigWindow).TypeHandle);
+                DrawHitchDiag.End(DrawHitchDiag.Section.ConfigStaticInit, initStart);
+                _staticTablesBuilt = true;
+            }
+
             var region = ImGui.GetContentRegionAvail();
             var topLeftSideHeight = region.Y;
             var columns = 2;

@@ -18,8 +18,11 @@ internal static class DrawHitchDiag
     internal const int ThresholdMs = 200;
     private const long LogIntervalMs = 60_000;
 
+    /// <remarks> <see cref="Section.ConfigTotal" /> 是設定視窗整個 Draw，包住側欄、內容與第一次建表；其他段互不重疊。 </remarks>
     internal enum Section
     {
+        ConfigTotal,
+        ConfigStaticInit,
         ConfigSidebar,
         ConfigBody,
         MajorChanges,
@@ -86,12 +89,19 @@ internal static class DrawHitchDiag
         var jit = (JitInfo.GetCompilationTime(true) - _frameJit).TotalMilliseconds;
         var pause = (GC.GetTotalPauseDuration() - _framePause).TotalMilliseconds;
         var gen2 = GC.CollectionCount(2) - _frameGen2;
+        var configTotal = SectionTicks[(int)Section.ConfigTotal];
+        var staticInit = SectionTicks[(int)Section.ConfigStaticInit];
+        var sidebar = SectionTicks[(int)Section.ConfigSidebar];
+        var body = SectionTicks[(int)Section.ConfigBody];
+        var majorChanges = SectionTicks[(int)Section.MajorChanges];
+        var targetHelper = SectionTicks[(int)Section.TargetHelper];
         PluginLog.Information(
             $"[DrawHitch] 介面一幀花了 {Ms(elapsed):0} 毫秒（門檻 {ThresholdMs}）：" +
-            $"設定視窗側欄 {Ms(SectionTicks[(int)Section.ConfigSidebar]):0}、" +
-            $"設定視窗內容 {Ms(SectionTicks[(int)Section.ConfigBody]):0}、" +
-            $"新版變更視窗 {Ms(SectionTicks[(int)Section.MajorChanges]):0}、" +
-            $"隊伍卡片標示 {Ms(SectionTicks[(int)Section.TargetHelper]):0} 毫秒，其餘是視窗框架本身；" +
+            $"設定視窗 {Ms(configTotal):0}（第一次建表 {Ms(staticInit):0}、側欄 {Ms(sidebar):0}、內容 {Ms(body):0}、" +
+            $"其他 {Ms(configTotal - staticInit - sidebar - body):0}）、" +
+            $"新版變更視窗 {Ms(majorChanges):0}、" +
+            $"隊伍卡片標示 {Ms(targetHelper):0}、" +
+            $"視窗框架（Dalamud／ImGui）{Ms(elapsed - configTotal - majorChanges - targetHelper):0} 毫秒；" +
             $"這一幀 JIT 編譯 {jit:0} 毫秒、GC 暫停 {pause:0} 毫秒（第 2 代 {gen2} 次）；{windows}；" +
             $"職業 {(global::WrathCombo.WrathCombo.JobID?.ToString() ?? "?")}、戰鬥中 {(Svc.Condition[ConditionFlag.InCombat] ? "是" : "否")}、" +
             $"地區 {Svc.ClientState.TerritoryType}、開著的連擊 {Service.Configuration.EnabledActions.Count}" +
