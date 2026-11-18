@@ -136,24 +136,25 @@ internal static class SimpleTarget
             (StackOption stack = StackOption.UserChosenHealStack,
                 Func<IGameObject?, IGameObject?>? logicForEachEntryInStack = null)
         {
+            // 兩個治療集合的每一項都跳過屍體（補不到），照原優先序往下找；復活集合（RaiseStack）不經過這裡、照舊挑屍體。
             #region Default Heal Stack
             if (stack is StackOption.DefaultHealStack ||
                 (stack is StackOption.UserChosenHealStack &&
                  !cfg.UseCustomHealStack))
                 return
                     (cfg.UseUIMouseoverOverridesInDefaultHealStack
-                        ? CustomLogic(UIMouseOverTarget.IfFriendly())
+                        ? CustomLogic(UIMouseOverTarget.IfAlive().IfFriendly())
                         : null) ??
                     (cfg.UseFieldMouseoverOverridesInDefaultHealStack
-                        ? CustomLogic(ModelMouseOverTarget.IfFriendly())
+                        ? CustomLogic(ModelMouseOverTarget.IfAlive().IfFriendly())
                         : null) ??
-                    CustomLogic(SoftTarget.IfFriendly()) ??
-                    CustomLogic(HardTarget.IfFriendly()) ??
+                    CustomLogic(SoftTarget.IfAlive().IfFriendly()) ??
+                    CustomLogic(HardTarget.IfAlive().IfFriendly()) ??
                     (cfg.UseFocusTargetOverrideInDefaultHealStack
-                        ? CustomLogic(FocusTarget.IfFriendly().IfWithinRange())
+                        ? CustomLogic(FocusTarget.IfAlive().IfFriendly().IfWithinRange())
                         : null) ??
                     (cfg.UseLowestHPOverrideInDefaultHealStack
-                        ? CustomLogic(LowestHPPAlly.IfWithinRange().IfMissingHP())
+                        ? CustomLogic(LowestHPPAlly.IfAlive().IfWithinRange().IfMissingHP())
                         : null) ??
                     Self;
             #endregion
@@ -169,7 +170,7 @@ internal static class SimpleTarget
                 {
                     var resolved = GetSimpleTargetValueFromName(name);
                     var target =
-                        CustomLogic(resolved.IfFriendly().IfTargetable().IfWithinRange());
+                        CustomLogic(resolved.IfAlive().IfFriendly().IfTargetable().IfWithinRange());
 
                     // Only include Missing-HP options if they are missing HP
                     if (name.Contains("Missing"))
