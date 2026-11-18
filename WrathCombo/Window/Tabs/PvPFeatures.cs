@@ -64,13 +64,12 @@ namespace WrathCombo.Window.Tabs
                                                       !PresetStorage.ShouldBeHidden(y.Preset)))
                                      .Select(x => x.Key))
                         {
-                            string abbreviation = groupedPresets[jobName].First().Info.JobShorthand;
-                            string header = string.IsNullOrEmpty(abbreviation) ? jobName : $"{jobName} - {abbreviation}";
+                            var row = GetJobListRow(jobName);
                             var id = groupedPresets[jobName].First().Info.JobID;
                             IDalamudTextureWrap? icon = Icons.GetJobIcon(id);
-                            using (var disabled = ImRaii.Disabled(DisabledJobsPVP.Any(x => x == id)))
+                            using (var disabled = ImRaii.Disabled(DisabledJobsPVP.Contains(id)))
                             {
-                                if (ImGui.Selectable($"###{header}", OpenJob == jobName, ImGuiSelectableFlags.None,
+                                if (ImGui.Selectable(row.SelectableLabel, OpenJob == jobName, ImGuiSelectableFlags.None,
                                         icon == null ? new Vector2(0, 32).Scale() : new Vector2(0, icon.Size.Y / 2f).Scale()))
                                 {
                                     OpenJob = jobName;
@@ -81,7 +80,7 @@ namespace WrathCombo.Window.Tabs
                                     ImGui.Image(icon.Handle, new Vector2(icon.Size.X, icon.Size.Y).Scale() / 2f);
                                     ImGui.SameLine(indentwidth2);
                                 }
-                                ImGui.Text($"{header} {(disabled ? "(Disabled due to update)".Loc() : "")}");
+                                ImGui.Text(disabled ? $"{row.Header} {"(Disabled due to update)".Loc()}" : row.EnabledText);
                             }
 
                             ImGui.TableNextColumn();
@@ -101,7 +100,7 @@ namespace WrathCombo.Window.Tabs
                             return;
                         }
                         ImGui.SameLine();
-                        ImGuiEx.LineCentered(() =>
+                        ImGuiEx.LineCentered("WrathPvPJobHeading", () =>
                         {
                             if (icon != null)
                             {
@@ -174,7 +173,7 @@ namespace WrathCombo.Window.Tabs
         {
             foreach (var (preset, info) in groupedPresets[jobName].Where(x => PresetStorage.IsPvP(x.Preset)))
             {
-                InfoBox presetBox = new() { Color = Colors.Grey, BorderThickness = 1f.Scale(), ContentsOffset = 8f.Scale(), ContentsAction = () => { Presets.DrawPreset(preset, info); } };
+                var presetBox = Presets.GetPresetBox(preset, info, Colors.Grey, 1f.Scale(), 1f, 8f.Scale(), false);
 
                 if (Service.Configuration.HideConflictedCombos)
                 {

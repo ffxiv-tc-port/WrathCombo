@@ -530,8 +530,7 @@ namespace WrathCombo.Window.Functions
                         if (PresetStorage.ShouldBeHidden(childPreset)) continue;
 
                         presetChildren.TryGetValue(childPreset, out var grandchildren);
-                        InfoBox box = new() { HasMaxWidth = true, Color = Colors.Grey, BorderThickness = 1f, CurveRadius = 4f, ContentsAction = () => { DrawPreset(childPreset, childInfo); } };
-                        Action draw = grandchildren?.Count() > 0 ? () => box.Draw() : () => DrawPreset(childPreset, childInfo);
+                        var boxed = grandchildren?.Count() > 0;
 
                         if (Service.Configuration.HideConflictedCombos)
                         {
@@ -539,8 +538,8 @@ namespace WrathCombo.Window.Functions
 
                             if (!(PresetStorage.HasConflictEntry(childPreset) || PresetStorage.HasConflictEntry(preset)) || conflictOriginals.Length == 0)
                             {
-                                draw();
-                                if (grandchildren?.Count() > 0)
+                                DrawChild(childPreset, childInfo, boxed);
+                                if (boxed)
                                     ImGui.Spacing();
                                 continue;
                             }
@@ -563,15 +562,15 @@ namespace WrathCombo.Window.Functions
 
                             else
                             {
-                                draw();
-                                if (grandchildren?.Count() > 0)
+                                DrawChild(childPreset, childInfo, boxed);
+                                if (boxed)
                                     ImGui.Spacing();
                             }
                         }
                         else
                         {
-                            draw();
-                            if (grandchildren?.Count() > 0)
+                            DrawChild(childPreset, childInfo, boxed);
+                            if (boxed)
                                 ImGui.Spacing();
                         }
                     }
@@ -585,6 +584,39 @@ namespace WrathCombo.Window.Functions
                 }
             }
         }
+
+        private static void DrawChild(CustomComboPreset childPreset, CustomComboInfoAttribute childInfo, bool boxed)
+        {
+            if (boxed)
+                GetPresetBox(childPreset, childInfo, Colors.Grey, 1f, 4f, 0f, true).Draw();
+            else
+                DrawPreset(childPreset, childInfo);
+        }
+
+        // 設定視窗每幀每個功能都要一個外框；改成每個 preset 留一個，內容委派只建一次。
+        // 會被 Draw 改寫的只有 Size（為零時才取可用寬度），每次交出前歸零＝與每幀新建的外框畫法相同。只在框架執行緒用。
+        private static readonly Dictionary<CustomComboPreset, InfoBox> PresetBoxes = new();
+
+        internal static InfoBox GetPresetBox(CustomComboPreset preset, CustomComboInfoAttribute info,
+            Vector4 color, float borderThickness, float curveRadius, float contentsOffset, bool hasMaxWidth)
+        {
+            if (!PresetBoxes.TryGetValue(preset, out var box))
+            {
+                box = CreatePresetBox(preset, info);
+                PresetBoxes[preset] = box;
+            }
+            box.Color = color;
+            box.BorderThickness = borderThickness;
+            box.CurveRadius = curveRadius;
+            box.ContentsOffset = contentsOffset;
+            box.HasMaxWidth = hasMaxWidth;
+            box.Size = Vector2.Zero;
+            return box;
+        }
+
+        // 拆出來：捕獲參數的閉包在方法入口就配置，留在上面那支會讓快取命中也配置。
+        private static InfoBox CreatePresetBox(CustomComboPreset preset, CustomComboInfoAttribute info) =>
+            new() { ContentsAction = () => DrawPreset(preset, info) };
 
         private static void DrawReplaceAttribute(CustomComboPreset preset)
         {

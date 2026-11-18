@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ECommons.Logging;
@@ -13,10 +14,32 @@ namespace WrathCombo.Resources.Dictionary.Chinese
     // 统一替换文字的扩展方法
     public static class TextReplacer
     {
+        // 設定視窗每幀對每個選項標籤都呼叫；字典在型別初始化後不再變動，結果只由（原文, arrowTo）決定，所以按原文記住。
+        // 上限是防呆：呼叫端若傳進含即時數值的字串，鍵會一直長，滿了整份清掉重來。
+        private const int CacheLimit = 8192;
+        private static readonly ConcurrentDictionary<string, string> Cache = new(StringComparer.Ordinal);
+        private static readonly ConcurrentDictionary<string, string> CacheArrowTo = new(StringComparer.Ordinal);
+
         public static string ReplaceWithChinese(this string text, bool arrowTo = false)
         {
             if (string.IsNullOrEmpty(text))
                 return text;
+#if DEBUG
+            return ReplaceWithChineseUncached(text, arrowTo);
+#else
+            var cache = arrowTo ? CacheArrowTo : Cache;
+            if (cache.TryGetValue(text, out var hit))
+                return hit;
+            if (cache.Count >= CacheLimit)
+                cache.Clear();
+            var result = ReplaceWithChineseUncached(text, arrowTo);
+            cache.TryAdd(text, result);
+            return result;
+#endif
+        }
+
+        private static string ReplaceWithChineseUncached(string text, bool arrowTo)
+        {
 
 #if DEBUG
             DictionaryDebugger.StartReplacementSession(text);

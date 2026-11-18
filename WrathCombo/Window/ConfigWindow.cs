@@ -33,6 +33,22 @@ namespace WrathCombo.Window
         internal static readonly Dictionary<CustomComboPreset, (CustomComboPreset Preset, CustomComboInfoAttribute Info)[]> presetChildren = GetPresetChildren();
         internal static int currentPreset = 1;
         internal static float lastLeftColumnWidth;
+
+        /// <summary>職業清單一列的固定字串。職業名與縮寫都來自啟動後不變的表，按職業名記住；只在框架執行緒讀寫。</summary>
+        internal sealed record JobListRow(string Abbreviation, string Header, string SelectableLabel, string EnabledText);
+        private static readonly Dictionary<string, JobListRow> jobListRows = new();
+
+        internal static JobListRow GetJobListRow(string jobName)
+        {
+            if (jobListRows.TryGetValue(jobName, out var row))
+                return row;
+            var abbreviation = groupedPresets[jobName].First().Info.JobShorthand;
+            var header = string.IsNullOrEmpty(abbreviation) ? jobName : $"{jobName} - {abbreviation}";
+            row = new JobListRow(abbreviation, header, $"###{header}", $"{header} ");
+            jobListRows[jobName] = row;
+            return row;
+        }
+
         internal static Dictionary<string, List<(CustomComboPreset Preset, CustomComboInfoAttribute Info)>> GetGroupedPresets()
         {
             return Enum

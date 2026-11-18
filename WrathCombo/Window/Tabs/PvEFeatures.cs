@@ -42,7 +42,8 @@ namespace WrathCombo.Window.Tabs
                 if (OpenJob == string.Empty)
                 {
                     ImGui.SameLine(indentwidth);
-                    ImGuiEx.LineCentered(() =>
+                    // 不給 id 的多載每幀擷取整條呼叫堆疊當鍵。
+                    ImGuiEx.LineCentered("WrathPvEJobListTitle", static () =>
                     {
                         ImGuiEx.TextUnderlined("Select a job from below to enable and configure features for it.".Loc());
                     });
@@ -58,14 +59,14 @@ namespace WrathCombo.Window.Tabs
 
                         foreach (string? jobName in groupedPresets.Keys)
                         {
-                            string abbreviation = groupedPresets[jobName].First().Info.JobShorthand;
-                            string header = string.IsNullOrEmpty(abbreviation) ? jobName : $"{jobName} - {abbreviation}";
+                            var row = GetJobListRow(jobName);
+                            string abbreviation = row.Abbreviation;
                             var id = groupedPresets[jobName].First().Info.JobID;
                             IDalamudTextureWrap? icon = Icons.GetJobIcon(id);
                             ImGuiEx.Spacing(new Vector2(0, 2f.Scale()));
-                            using (var disabled = ImRaii.Disabled(DisabledJobsPVE.Any(x => x == id)))
+                            using (var disabled = ImRaii.Disabled(DisabledJobsPVE.Contains(id)))
                             {
-                                if (ImGui.Selectable($"###{header}", OpenJob == jobName, ImGuiSelectableFlags.None, new Vector2(0, iconMaxSize)))
+                                if (ImGui.Selectable(row.SelectableLabel, OpenJob == jobName, ImGuiSelectableFlags.None, new Vector2(0, iconMaxSize)))
                                 {
                                     OpenJob = jobName;
                                 }
@@ -86,7 +87,7 @@ namespace WrathCombo.Window.Tabs
                                 ImGui.SameLine(indentwidth2);
 
                                 ImGuiEx.Spacing(new Vector2(0, verticalCenteringPadding));
-                                ImGui.Text($"{header} {(disabled ? "(Disabled due to update)".Loc() : "")}");
+                                ImGui.Text(disabled ? $"{row.Header} {"(Disabled due to update)".Loc()}" : row.EnabledText);
 
                                 if (!string.IsNullOrEmpty(abbreviation) &&
                                     P.UIHelper.JobControlled(id) is not null)
@@ -114,7 +115,7 @@ namespace WrathCombo.Window.Tabs
                             return;
                         }
                         ImGui.SameLine();
-                        ImGuiEx.LineCentered(() =>
+                        ImGuiEx.LineCentered("WrathPvEJobHeading", () =>
                         {
                             if (icon != null)
                             {
@@ -202,7 +203,7 @@ namespace WrathCombo.Window.Tabs
                          PresetStorage.IsVariant(x.Preset) &&
                          !PresetStorage.ShouldBeHidden(x.Preset)))
             {
-                InfoBox presetBox = new() { Color = Colors.Grey, BorderThickness = 1f, CurveRadius = 8f, ContentsAction = () => { Presets.DrawPreset(preset, info); } };
+                var presetBox = Presets.GetPresetBox(preset, info, Colors.Grey, 1f, 8f, 0f, false);
                 presetBox.Draw();
                 ImGuiEx.Spacing(new Vector2(0, 12));
             }
@@ -213,7 +214,7 @@ namespace WrathCombo.Window.Tabs
                          PresetStorage.IsBozja(x.Preset) &&
                          !PresetStorage.ShouldBeHidden(x.Preset)))
             {
-                InfoBox presetBox = new() { Color = Colors.Grey, BorderThickness = 1f, CurveRadius = 8f, ContentsAction = () => { Presets.DrawPreset(preset, info); } };
+                var presetBox = Presets.GetPresetBox(preset, info, Colors.Grey, 1f, 8f, 0f, false);
                 presetBox.Draw();
                 ImGuiEx.Spacing(new Vector2(0, 12));
             }
@@ -230,7 +231,7 @@ namespace WrathCombo.Window.Tabs
                          !PresetStorage.IsEureka(x.Preset) &&
                          !PresetStorage.ShouldBeHidden(x.Preset)))
             {
-                InfoBox presetBox = new() { Color = Colors.Grey, BorderThickness = 2f.Scale(), ContentsOffset = 5f.Scale(), ContentsAction = () => { Presets.DrawPreset(preset, info); } };
+                var presetBox = Presets.GetPresetBox(preset, info, Colors.Grey, 2f.Scale(), 1f, 5f.Scale(), false);
 
                 if (Service.Configuration.HideConflictedCombos)
                 {
