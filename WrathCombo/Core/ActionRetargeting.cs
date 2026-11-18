@@ -1,8 +1,10 @@
 #region
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.DalamudServices;
 using ECommons.Logging;
@@ -83,12 +85,46 @@ public class ActionRetargeting : IDisposable
     (uint action,
         uint[] replacedActions,
         Func<IGameObject?> resolver,
-        bool dontCull = false)
-    {
+        bool dontCull = false) =>
         // Make sure the action is not in replaced actions,
         // and there are no duplicates
-        replacedActions = replacedActions.Distinct().ToArray();
+        RegisterDistinct(action, DistinctCopy(replacedActions), resolver, dontCull);
 
+    /// <summary> 只有一個被取代技能時的 <see cref="Register(uint,uint[],Func{IGameObject?},bool)" />，免得呼叫端先配一個單元素陣列。 </summary>
+    internal uint Register
+    (uint action,
+        uint replacedAction,
+        Func<IGameObject?> resolver,
+        bool dontCull = false) =>
+        RegisterDistinct(action, [replacedAction], resolver, dontCull);
+
+    /// <summary> 等同 <c>source.Distinct().ToArray()</c>：首次出現的順序、一定是新陣列；短陣列不經 HashSet。 </summary>
+    internal static uint[] DistinctCopy(uint[] source)
+    {
+        // 空陣列與長陣列照舊走 LINQ：空的時候 ToArray 回不回共用的空陣列，會影響下面用參考比對的覆寫判斷。
+        if (source.Length == 0 || source.Length > 16)
+            return source.Distinct().ToArray();
+
+        var count = 0;
+        for (var i = 0; i < source.Length; i++)
+            if (Array.IndexOf(source, source[i], 0, i) < 0)
+                count++;
+
+        var result = new uint[count];
+        var next = 0;
+        for (var i = 0; i < source.Length; i++)
+            if (Array.IndexOf(source, source[i], 0, i) < 0)
+                result[next++] = source[i];
+        return result;
+    }
+
+    /// <param name="replacedActions"> 已去重、呼叫端不再持有的新陣列（<see cref="Retargeting.ID" /> 與覆寫判斷都看它的參考）。 </param>
+    private uint RegisterDistinct
+    (uint action,
+        uint[] replacedActions,
+        Func<IGameObject?> resolver,
+        bool dontCull)
+    {
         // Build the Retarget object
         var retarget = new Retargeting(action, replacedActions, resolver, dontCull);
 
@@ -99,10 +135,13 @@ public class ActionRetargeting : IDisposable
         #region Replace existing Retargets
 
         var partialOverwrite = false;
-        string[] overwriting = [];
+        var overwrites = false;
+        string overwritingOld = "", overwritingNew = "";
         Retargeting? oldRetarget = null;
-        foreach (var replacedAction in replacedActions.Concat([action]))
+        // 走訪 replacedActions 再加上 action（原本是 Concat）；oldRetarget 每一輪都被 TryGetValue 覆寫，留下的是最後一個鍵的結果。
+        for (var i = 0; i <= replacedActions.Length; i++)
         {
+            var replacedAction = i < replacedActions.Length ? replacedActions[i] : action;
             if (!Retargets.TryGetValue(replacedAction, out oldRetarget))
                 continue;
 
@@ -110,38 +149,49 @@ public class ActionRetargeting : IDisposable
             if (replacedActions != oldRetarget.ReplacedActions)
                 partialOverwrite = true;
 
-            overwriting = [oldRetarget.ResolverName, retarget.ResolverName];
+            overwrites = true;
+            overwritingOld = oldRetarget.ResolverName;
+            overwritingNew = retarget.ResolverName;
         }
        
         // Remove the old Retarget
-        if (overwriting.Length != 0)
+        if (overwrites)
         {
             RemoveRetarget(oldRetarget?.ID ?? 0);
 
             // Elevate to a debug message if the overwriting method is not equivalent
-            var logLevel = overwriting[0] == overwriting[1] ? 0 : 1;
+            var logLevel = overwritingOld == overwritingNew ? 0 : 1;
 #if DEBUG
             // Elevate to a warning if not equivalent and on a debug build
             logLevel = logLevel == 1 ? 2 : logLevel;
 #endif
-            var overwritingText = $"{overwriting[0]} -> {overwriting[1]}";
             if (!partialOverwrite)
                 log("overwriting Retargeting for", logLevel: logLevel,
                     showAction: true,
                     retarget: retarget,
-                    messageAfterAction: overwritingText);
+                    messageAfterAction: $"{overwritingOld} -> {overwritingNew}");
         }
 
         #endregion
 
         // Save the Retarget
         var throttleTimespan = TS.FromSeconds(partialOverwrite ? 20 : 1);
-        if (EZ.Throttle($"retargetFor{retarget.Action}", throttleTimespan))
+        if (EZ.Throttle(RetargetForKey(retarget.Action), throttleTimespan))
             log("registering", showAction: true,
                 messageAfterAction: "for Retargeting",
                 showResolver: true, retarget: retarget);
         AddRetarget(retarget);
         return action;
+    }
+
+    // 節流鍵按技能記住，免得每次註冊都組一次字串；只在框架執行緒用（同 EzThrottler）。
+    private static readonly Dictionary<uint, string> RetargetForKeys = [];
+
+    private static string RetargetForKey(uint action)
+    {
+        if (!RetargetForKeys.TryGetValue(action, out var key))
+            RetargetForKeys[action] = key = $"retargetFor{action}";
+        return key;
     }
 
     /// <summary>
@@ -234,7 +284,7 @@ public class ActionRetargeting : IDisposable
         public Func<IGameObject?> Resolver { get; } = resolver;
 
         /// The name of the resolver method, to help with debugging.
-        public string ResolverName { get; } = GetMethodName(resolver);
+        public string ResolverName { get; } = MethodNames.GetOrAdd(resolver.Method, GetMethodName);
 
         /// Whether this Retarget should be removed by periodic culls.
         /// <see cref="ClearOldRetargets" />
@@ -246,16 +296,19 @@ public class ActionRetargeting : IDisposable
         /// <summary>
         ///     Gets the name for the resolver.
         /// </summary>
-        /// <param name="resolver">The resolver we want the name of.</param>
+        /// <param name="method">The resolver's method we want the name of.</param>
         /// <returns>
         ///     The name of the resolver, whether determined from the class (for
         ///     <see cref="SimpleTarget">Simple Targets</see>) or the name of the
         ///     resolver itself.
         /// </returns>
-        private static string GetMethodName(Func<IGameObject?> resolver)
+        // 名稱只取決於方法本身；每次註冊都是新的委派，按方法記住就不必每次重組字串。
+        private static readonly ConcurrentDictionary<MethodInfo, string> MethodNames = new();
+
+        private static string GetMethodName(MethodInfo method)
         {
-            var resolverName = resolver.Method.Name;
-            var resolverClass = resolver.Method.DeclaringType?.Name ?? "";
+            var resolverName = method.Name;
+            var resolverClass = method.DeclaringType?.Name ?? "";
 
             // Standardize the names, and if a custom resolver is used,
             // try to provide the custom name if one was provided
@@ -348,14 +401,19 @@ public class ActionRetargeting : IDisposable
     /// <param name="retargetID">The ID of the Retarget object to remove.</param>
     private void RemoveRetarget(int retargetID)
     {
-        var retarget = Retargets.Values
-            .FirstOrDefault(x => x.ID == retargetID);
+        Retargeting? retarget = null;
+        foreach (var candidate in Retargets.Values)
+            if (candidate.ID == retargetID)
+            {
+                retarget = candidate;
+                break;
+            }
         if (retarget == null)
             return;
 
-        var actionsToRemove = retarget.ReplacedActions.Concat([retarget.Action]);
-        foreach (var replacedAction in actionsToRemove)
+        foreach (var replacedAction in retarget.ReplacedActions)
             Retargets.Remove(replacedAction);
+        Retargets.Remove(retarget.Action);
     }
 
     /// Simple Flag to stop clearing the cache when the plugin is disposed.
@@ -460,6 +518,9 @@ public class ActionRetargeting : IDisposable
 
 internal static class FuncIGameObjectExtensions
 {
+    // 方法上的屬性在執行期不變；每次註冊都讀一次反射會配置屬性陣列。
+    private static readonly ConcurrentDictionary<MethodInfo, bool> HasTargetResolverAttr = new();
+
     /// <summary>
     ///     A simple extension to throw a warning if the target resolver does not
     ///     have the <see cref="ActionRetargeting.TargetResolverAttribute" />.
@@ -467,9 +528,8 @@ internal static class FuncIGameObjectExtensions
     public static Func<IGameObject?> CheckForAttribute
         (this Func<IGameObject?> target)
     {
-        var hasTargetResolverAttr = target.Method
-            .GetCustomAttributes(typeof(ActionRetargeting.TargetResolverAttribute), false)
-            .Length > 0;
+        var hasTargetResolverAttr = HasTargetResolverAttr.GetOrAdd(target.Method, static method =>
+            method.GetCustomAttributes(typeof(ActionRetargeting.TargetResolverAttribute), false).Length > 0);
         if (!hasTargetResolverAttr &&
             EZ.Throttle("retargetAttributeWarning", TS.FromSeconds(15)))
             PluginLog.Warning(
@@ -506,7 +566,7 @@ internal static class UIntExtensions
     /// <returns>The <paramref name="action" />.</returns>
     internal static uint Retarget
         (this uint action, IGameObject? target, bool dontCull = false) =>
-        P.ActionRetargeting.Register(action, [action], () => target, dontCull);
+        P.ActionRetargeting.Register(action, action, () => target, dontCull);
 
     /// <summary>
     ///     Retargets the action to the target specified.<br />
@@ -528,7 +588,7 @@ internal static class UIntExtensions
     /// <returns>The <paramref name="action" />.</returns>
     internal static uint Retarget
         (this uint action, Func<IGameObject?> target, bool dontCull = false) =>
-        P.ActionRetargeting.Register(action, [action],
+        P.ActionRetargeting.Register(action, action,
             target.CheckForAttribute(), dontCull);
 
     /// <summary>
@@ -555,7 +615,7 @@ internal static class UIntExtensions
         uint replaced,
         IGameObject? target,
         bool dontCull = false) =>
-        P.ActionRetargeting.Register(action, [replaced], () => target, dontCull);
+        P.ActionRetargeting.Register(action, replaced, () => target, dontCull);
 
     /// <summary>
     ///     Retargets the action to the target specified.
@@ -581,7 +641,7 @@ internal static class UIntExtensions
         uint replaced,
         Func<IGameObject?>  target,
         bool dontCull = false) =>
-        P.ActionRetargeting.Register(action, [replaced],
+        P.ActionRetargeting.Register(action, replaced,
             target.CheckForAttribute(), dontCull);
 
     /// <summary>
