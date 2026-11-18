@@ -521,52 +521,54 @@ internal partial class GNB : Tank
     ///   The order of the list needs to match the order in
     ///   <see cref="CustomComboPreset" />.
     ///</summary>
-    ///<value>
+    ///<returns>
     ///   <c>Action</c> is the action to use.<br />
     ///   <c>Preset</c> is the preset to check if the action is enabled.<br />
     ///   <c>Logic</c> is the logic for whether to use the action.
-    ///</value>
+    ///</returns>
     ///<remarks>
     ///    Each logic check is already combined with checking if the preset is
     ///    enabled and if the action is <see cref="ActionReady(uint)">ready</see>
     ///    and <see cref="LevelChecked(uint)">level-checked</see>.<br />
     ///   Do not add any of these checks to <c>Logic</c>.
     ///</remarks>
-    private static (uint Action, CustomComboPreset Preset, System.Func<bool> Logic)[]
-        PrioritizedMitigation =>
-    [
+    private static (uint Action, CustomComboPreset Preset, System.Func<bool> Logic)
+        PrioritizedMitigation(int index) => index switch
+    {
+        // 只建被要求的那一格（快捷列 hook 路徑每次都呼叫）；OriginalHook 的格要在呼叫當下求值，不可改成靜態快取。
         //Heart of Corundum
-        (OriginalHook(HeartOfStone), CustomComboPreset.GNB_Mit_Corundum,
+        0 => (OriginalHook(HeartOfStone), CustomComboPreset.GNB_Mit_Corundum,
             () => !HasStatusEffect(Buffs.HeartOfCorundum) &&
                   !HasStatusEffect(Buffs.HeartOfStone) &&
                   PlayerHealthPercentageHp() <= Config.GNB_Mit_Corundum_Health),
         //Aurora
-        (Aurora, CustomComboPreset.GNB_Mit_Aurora,
+        1 => (Aurora, CustomComboPreset.GNB_Mit_Aurora,
             () => !(TargetIsFriendly() && HasStatusEffect(Buffs.Aurora, CurrentTarget, true) ||
                     !TargetIsFriendly() && HasStatusEffect(Buffs.Aurora, anyOwner: true)) &&
                   GetRemainingCharges(Aurora) > Config.GNB_Mit_Aurora_Charges &&
                   PlayerHealthPercentageHp() <= Config.GNB_Mit_Aurora_Health),
         //Camouflage
-        (Camouflage, CustomComboPreset.GNB_Mit_Camouflage, () => true),
+        2 => (Camouflage, CustomComboPreset.GNB_Mit_Camouflage, () => true),
         //Reprisal
-        (Role.Reprisal, CustomComboPreset.GNB_Mit_Reprisal,
+        3 => (Role.Reprisal, CustomComboPreset.GNB_Mit_Reprisal,
             () => Role.CanReprisal(checkTargetForDebuff:false)),
         //Heart of Light
-        (HeartOfLight, CustomComboPreset.GNB_Mit_HeartOfLight,
+        4 => (HeartOfLight, CustomComboPreset.GNB_Mit_HeartOfLight,
             () => Config.GNB_Mit_HeartOfLight_PartyRequirement ==
                   (int)PartyRequirement.No ||
                   IsInParty()),
         //Rampart
-        (Role.Rampart, CustomComboPreset.GNB_Mit_Rampart,
+        5 => (Role.Rampart, CustomComboPreset.GNB_Mit_Rampart,
             () => Role.CanRampart(Config.GNB_Mit_Rampart_Health)),
         //Arm's Length
-        (Role.ArmsLength, CustomComboPreset.GNB_Mit_ArmsLength,
+        6 => (Role.ArmsLength, CustomComboPreset.GNB_Mit_ArmsLength,
             () => Role.CanArmsLength(Config.GNB_Mit_ArmsLength_EnemyCount,
                 Config.GNB_Mit_ArmsLength_Boss)),
         //Nebula
-        (OriginalHook(Nebula), CustomComboPreset.GNB_Mit_Nebula,
-            () => PlayerHealthPercentageHp() <= Config.GNB_Mit_Nebula_Health)
-    ];
+        7 => (OriginalHook(Nebula), CustomComboPreset.GNB_Mit_Nebula,
+            () => PlayerHealthPercentageHp() <= Config.GNB_Mit_Nebula_Health),
+        _ => throw new System.IndexOutOfRangeException()
+    };
 
     ///<summary>
     ///   Given the index of a mitigation in <see cref="PrioritizedMitigation" />,
@@ -587,10 +589,11 @@ internal partial class GNB : Tank
     private static bool CheckMitigationConfigMeetsRequirements
         (int index, out uint action)
     {
-        action = PrioritizedMitigation[index].Action;
+        var entry = PrioritizedMitigation(index);
+        action = entry.Action;
         return ActionReady(action) && LevelChecked(action) &&
-               PrioritizedMitigation[index].Logic() &&
-               IsEnabled(PrioritizedMitigation[index].Preset);
+               entry.Logic() &&
+               IsEnabled(entry.Preset);
     }
 
     #endregion

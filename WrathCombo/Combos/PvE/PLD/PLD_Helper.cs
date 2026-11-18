@@ -20,11 +20,11 @@ internal partial class PLD
     ///     The order of the list needs to match the order in
     ///     <see cref="CustomComboPreset" />.
     /// </summary>
-    /// <value>
+    /// <returns>
     ///     <c>Action</c> is the action to use.<br />
     ///     <c>Preset</c> is the preset to check if the action is enabled.<br />
     ///     <c>Logic</c> is the logic for whether to use the action.
-    /// </value>
+    /// </returns>
     /// <remarks>
     ///     Each logic check is already combined with checking if the preset
     ///     <see cref="IsEnabled(CustomComboPreset)">is enabled</see>
@@ -32,45 +32,47 @@ internal partial class PLD
     ///     <see cref="LevelChecked(uint)">level-checked</see>.<br />
     ///     Do not add any of these checks to <c>Logic</c>.
     /// </remarks>
-    private static (uint Action, CustomComboPreset Preset, System.Func<bool> Logic)[]
-        PrioritizedMitigation =>
-    [
+    private static (uint Action, CustomComboPreset Preset, System.Func<bool> Logic)
+        PrioritizedMitigation(int index) => index switch
+    {
+        // 只建被要求的那一格（快捷列 hook 路徑每次都呼叫）；OriginalHook 的格要在呼叫當下求值，不可改成靜態快取。
         //Sheltron
-        (OriginalHook(Sheltron), CustomComboPreset.PLD_Mit_Sheltron,
+        0 => (OriginalHook(Sheltron), CustomComboPreset.PLD_Mit_Sheltron,
             () => Gauge.OathGauge >= 50),
         // Reprisal
-        (Role.Reprisal, CustomComboPreset.PLD_Mit_Reprisal,
+        1 => (Role.Reprisal, CustomComboPreset.PLD_Mit_Reprisal,
             () => Role.CanReprisal(checkTargetForDebuff: false)),
         //Divine Veil
-        (DivineVeil, CustomComboPreset.PLD_Mit_DivineVeil,
+        2 => (DivineVeil, CustomComboPreset.PLD_Mit_DivineVeil,
             () => Config.PLD_Mit_DivineVeil_PartyRequirement ==
                   (int)PartyRequirement.No ||
                   IsInParty()),
         //Rampart
-        (Role.Rampart, CustomComboPreset.PLD_Mit_Rampart,
+        3 => (Role.Rampart, CustomComboPreset.PLD_Mit_Rampart,
             () => Role.CanRampart(Config.PLD_Mit_Rampart_Health)),
         //Sentinel
-        (OriginalHook(Sentinel), CustomComboPreset.PLD_Mit_Sentinel,
+        4 => (OriginalHook(Sentinel), CustomComboPreset.PLD_Mit_Sentinel,
             () => PlayerHealthPercentageHp() <= Config.PLD_Mit_Sentinel_Health),
         //Arm's Length
-        (Role.ArmsLength, CustomComboPreset.PLD_Mit_ArmsLength,
+        5 => (Role.ArmsLength, CustomComboPreset.PLD_Mit_ArmsLength,
             () => Role.CanArmsLength(Config.PLD_Mit_ArmsLength_EnemyCount,
                 Config.PLD_Mit_ArmsLength_Boss)),
         //Bulwark
-        (Bulwark, CustomComboPreset.PLD_Mit_Bulwark,
+        6 => (Bulwark, CustomComboPreset.PLD_Mit_Bulwark,
             () => PlayerHealthPercentageHp() <= Config.PLD_Mit_Bulwark_Health),
         //Hallowed Ground
-        (HallowedGround, CustomComboPreset.PLD_Mit_HallowedGround,
+        7 => (HallowedGround, CustomComboPreset.PLD_Mit_HallowedGround,
             () => PlayerHealthPercentageHp() <= Config.PLD_Mit_HallowedGround_Health &&
                   ContentCheck.IsInConfiguredContent(
                       Config.PLD_Mit_HallowedGround_Difficulty,
                       Config.PLD_Mit_HallowedGround_DifficultyListSet
                   )),
         //Clemency
-        (Clemency, CustomComboPreset.PLD_Mit_Clemency,
+        8 => (Clemency, CustomComboPreset.PLD_Mit_Clemency,
             () => LocalPlayer.CurrentMp >= 2000 &&
-                  PlayerHealthPercentageHp() <= Config.PLD_Mit_Clemency_Health)
-    ];
+                  PlayerHealthPercentageHp() <= Config.PLD_Mit_Clemency_Health),
+        _ => throw new System.IndexOutOfRangeException()
+    };
 
     /// <summary>
     ///     Given the index of a mitigation in <see cref="PrioritizedMitigation" />,
@@ -91,10 +93,11 @@ internal partial class PLD
     private static bool CheckMitigationConfigMeetsRequirements
         (int index, out uint action)
     {
-        action = PrioritizedMitigation[index].Action;
+        var entry = PrioritizedMitigation(index);
+        action = entry.Action;
         return ActionReady(action) && LevelChecked(action) &&
-               PrioritizedMitigation[index].Logic() &&
-               IsEnabled(PrioritizedMitigation[index].Preset);
+               entry.Logic() &&
+               IsEnabled(entry.Preset);
     }
 
     #endregion

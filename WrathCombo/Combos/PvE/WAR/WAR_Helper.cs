@@ -198,45 +198,47 @@ internal partial class WAR : Tank
     /// The order of the list needs to match the order in
     /// <see cref="CustomComboPreset" />.
     /// </summary>
-    /// <value>
+    /// <returns>
     /// <c>Action</c> is the action to use.<br />
     /// <c>Preset</c> is the preset to check if the action is enabled.<br />
     /// <c>Logic</c> is the logic for whether to use the action.
-    /// </value>
+    /// </returns>
     /// <remarks>
     /// Each logic check is already combined with checking if the preset is
     /// enabled and if the action is <see cref="ActionReady(uint)">ready</see>
     /// and <see cref="LevelChecked(uint)">level-checked</see>.<br />
     /// Do not add any of these checks to <c>Logic</c>.
     /// </remarks>
-    private static (uint Action, CustomComboPreset Preset, System.Func<bool> Logic)[]
-        PrioritizedMitigation =>
-        [
+    private static (uint Action, CustomComboPreset Preset, System.Func<bool> Logic)
+        PrioritizedMitigation(int index) => index switch
+        {
+            // 只建被要求的那一格（快捷列 hook 路徑每次都呼叫）；OriginalHook 的格要在呼叫當下求值，不可改成靜態快取。
             //Bloodwhetting
-            (OriginalHook(RawIntuition), CustomComboPreset.WAR_Mit_Bloodwhetting,
+            0 => (OriginalHook(RawIntuition), CustomComboPreset.WAR_Mit_Bloodwhetting,
             () => !HasStatusEffect(Buffs.RawIntuition) && !HasStatusEffect(Buffs.BloodwhettingDefenseLong) && PlayerHealthPercentageHp() <= Config.WAR_Mit_Bloodwhetting_Health),
             //Equilibrium
-            (Equilibrium, CustomComboPreset.WAR_Mit_Equilibrium,
+            1 => (Equilibrium, CustomComboPreset.WAR_Mit_Equilibrium,
             () => PlayerHealthPercentageHp() <= Config.WAR_Mit_Equilibrium_Health),
             // Reprisal
-            (Role.Reprisal, CustomComboPreset.WAR_Mit_Reprisal,
+            2 => (Role.Reprisal, CustomComboPreset.WAR_Mit_Reprisal,
             () => Role.CanReprisal(checkTargetForDebuff: false)),
             //Thrill of Battle
-            (ThrillOfBattle, CustomComboPreset.WAR_Mit_ThrillOfBattle,
+            3 => (ThrillOfBattle, CustomComboPreset.WAR_Mit_ThrillOfBattle,
             () => PlayerHealthPercentageHp() <= Config.WAR_Mit_ThrillOfBattle_Health),
             //Rampart
-            (Role.Rampart, CustomComboPreset.WAR_Mit_Rampart,
+            4 => (Role.Rampart, CustomComboPreset.WAR_Mit_Rampart,
             () => Role.CanRampart(Config.WAR_Mit_Rampart_Health)),
             //Shake it Off
-            (ShakeItOff, CustomComboPreset.WAR_Mit_ShakeItOff,
+            5 => (ShakeItOff, CustomComboPreset.WAR_Mit_ShakeItOff,
             () => !HasStatusEffect(Buffs.ShakeItOff) && (Config.WAR_Mit_ShakeItOff_PartyRequirement == (int)PartyRequirement.No || IsInParty())),
             //Arm's Length
-            (Role.ArmsLength, CustomComboPreset.WAR_Mit_ArmsLength,
+            6 => (Role.ArmsLength, CustomComboPreset.WAR_Mit_ArmsLength,
             () => Role.CanArmsLength(Config.WAR_Mit_ArmsLength_EnemyCount, Config.WAR_Mit_ArmsLength_Boss)),
             //Vengeance
-            (OriginalHook(Vengeance), CustomComboPreset.WAR_Mit_Vengeance,
-            () => PlayerHealthPercentageHp() <= Config.WAR_Mit_Vengeance_Health)
-        ];
+            7 => (OriginalHook(Vengeance), CustomComboPreset.WAR_Mit_Vengeance,
+            () => PlayerHealthPercentageHp() <= Config.WAR_Mit_Vengeance_Health),
+            _ => throw new System.IndexOutOfRangeException()
+        };
 
     /// <summary>
     /// Given the index of a mitigation in <see cref="PrioritizedMitigation" />,
@@ -254,10 +256,11 @@ internal partial class WAR : Tank
     /// </returns>
     private static bool CheckMitigationConfigMeetsRequirements(int index, out uint action)
     {
-        action = PrioritizedMitigation[index].Action;
+        var entry = PrioritizedMitigation(index);
+        action = entry.Action;
         return ActionReady(action) && LevelChecked(action) &&
-            PrioritizedMitigation[index].Logic() &&
-            IsEnabled(PrioritizedMitigation[index].Preset);
+            entry.Logic() &&
+            IsEnabled(entry.Preset);
     }
     #endregion
 

@@ -223,33 +223,36 @@ internal partial class SGE
 
     #region Movement Prio
 
-    private static (uint Action, CustomComboPreset Preset, System.Func<bool> Logic)[]
-        PrioritizedMovement =>
-    [
+    private static (uint Action, CustomComboPreset Preset, System.Func<bool> Logic)
+        PrioritizedMovement(int index) => index switch
+    {
+        // 只建被要求的那一格（快捷列 hook 路徑每次都呼叫）；OriginalHook 的格要在呼叫當下求值，不可改成靜態快取。
         //Toxikon
-        (OriginalHook(Toxikon), CustomComboPreset.SGE_ST_DPS_Movement,
+        0 => (OriginalHook(Toxikon), CustomComboPreset.SGE_ST_DPS_Movement,
             () => SGE_ST_DPS_Movement[0] &&
                   ActionReady(Toxikon) &&
                   HasAddersting()),
         // Dyskrasia
-        (OriginalHook(Dyskrasia), CustomComboPreset.SGE_ST_DPS_Movement,
+        1 => (OriginalHook(Dyskrasia), CustomComboPreset.SGE_ST_DPS_Movement,
             () => SGE_ST_DPS_Movement[1] &&
                   ActionReady(Dyskrasia) &&
                   InActionRange(Dyskrasia)),
         //Eukrasia
-        (Eukrasia, CustomComboPreset.SGE_ST_DPS_Movement,
+        2 => (Eukrasia, CustomComboPreset.SGE_ST_DPS_Movement,
             () => SGE_ST_DPS_Movement[2] &&
                   ActionReady(Eukrasia) &&
-                  !HasStatusEffect(Buffs.Eukrasia))
-    ];
+                  !HasStatusEffect(Buffs.Eukrasia)),
+        _ => throw new System.IndexOutOfRangeException()
+    };
 
     private static bool CheckMovementConfigMeetsRequirements
         (int index, out uint action)
     {
-        action = PrioritizedMovement[index].Action;
+        var entry = PrioritizedMovement(index);
+        action = entry.Action;
         return ActionReady(action) && LevelChecked(action) &&
-               PrioritizedMovement[index].Logic() &&
-               IsEnabled(PrioritizedMovement[index].Preset);
+               entry.Logic() &&
+               IsEnabled(entry.Preset);
     }
 
     #endregion

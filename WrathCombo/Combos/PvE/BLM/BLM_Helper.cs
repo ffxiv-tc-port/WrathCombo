@@ -59,11 +59,12 @@ internal partial class BLM
 
     #region Movement Prio
 
-    private static (uint Action, CustomComboPreset Preset, System.Func<bool> Logic)[]
-        PrioritizedMovement =>
-    [
+    private static (uint Action, CustomComboPreset Preset, System.Func<bool> Logic)
+        PrioritizedMovement(int index) => index switch
+    {
+        // 只建被要求的那一格（快捷列 hook 路徑每次都呼叫）；OriginalHook 的格要在呼叫當下求值，不可改成靜態快取。
         //Triplecast
-        (Triplecast, CustomComboPreset.BLM_ST_Movement,
+        0 => (Triplecast, CustomComboPreset.BLM_ST_Movement,
             () => Config.BLM_ST_MovementOption[0] &&
                   ActionReady(Triplecast) &&
                   !HasStatusEffect(Buffs.Triplecast) &&
@@ -71,7 +72,7 @@ internal partial class BLM
                   !HasStatusEffect(Buffs.LeyLines)),
 
         // Paradox
-        (OriginalHook(Paradox), CustomComboPreset.BLM_ST_Movement,
+        1 => (OriginalHook(Paradox), CustomComboPreset.BLM_ST_Movement,
             () => Config.BLM_ST_MovementOption[1] &&
                   ActionReady(Paradox) &&
                   FirePhase && ActiveParadox &&
@@ -80,26 +81,28 @@ internal partial class BLM
                   !HasStatusEffect(Role.Buffs.Swiftcast)),
 
         //Swiftcast
-        (Role.Swiftcast, CustomComboPreset.BLM_ST_Movement,
+        2 => (Role.Swiftcast, CustomComboPreset.BLM_ST_Movement,
             () => Config.BLM_ST_MovementOption[2] &&
                   ActionReady(Role.Swiftcast) &&
                   !HasStatusEffect(Buffs.Triplecast)),
 
         //Xeno
-        (Xenoglossy, CustomComboPreset.BLM_ST_Movement,
+        3 => (Xenoglossy, CustomComboPreset.BLM_ST_Movement,
             () => Config.BLM_ST_MovementOption[3] &&
                   HasPolyglotStacks() &&
                   !HasStatusEffect(Buffs.Triplecast) &&
-                  !HasStatusEffect(Role.Buffs.Swiftcast))
-    ];
+                  !HasStatusEffect(Role.Buffs.Swiftcast)),
+        _ => throw new System.IndexOutOfRangeException()
+    };
 
     private static bool CheckMovementConfigMeetsRequirements
         (int index, out uint action)
     {
-        action = PrioritizedMovement[index].Action;
+        var entry = PrioritizedMovement(index);
+        action = entry.Action;
         return ActionReady(action) && LevelChecked(action) &&
-               PrioritizedMovement[index].Logic() &&
-               IsEnabled(PrioritizedMovement[index].Preset);
+               entry.Logic() &&
+               IsEnabled(entry.Preset);
     }
 
     #endregion

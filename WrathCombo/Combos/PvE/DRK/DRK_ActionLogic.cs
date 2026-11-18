@@ -1069,11 +1069,11 @@ internal partial class DRK
     ///     The order of the list needs to match the order in
     ///     <see cref="Preset" />.
     /// </summary>
-    /// <value>
+    /// <returns>
     ///     <c>Action</c> is the action to use.<br />
     ///     <c>Preset</c> is the preset to check if the action is enabled.<br />
     ///     <c>Logic</c> is the logic for whether to use the action.
-    /// </value>
+    /// </returns>
     /// <remarks>
     ///     Each logic check is already combined with checking if the preset
     ///     <see cref="IsEnabled">is enabled</see>
@@ -1081,32 +1081,34 @@ internal partial class DRK
     ///     <see cref="LevelChecked(uint)">level-checked</see>.<br />
     ///     Do not add any of these checks to <c>Logic</c>.
     /// </remarks>
-    private static (uint Action, Preset Preset, System.Func<bool> Logic)[]
-        PrioritizedMitigation =>
-    [
-        (BlackestNight, Preset.DRK_Mit_TheBlackestNight,
+    private static (uint Action, Preset Preset, System.Func<bool> Logic)
+        PrioritizedMitigation(int index) => index switch
+    {
+        // 只建被要求的那一格（快捷列 hook 路徑每次都呼叫）；OriginalHook 的格要在呼叫當下求值，不可改成靜態快取。
+        0 => (BlackestNight, Preset.DRK_Mit_TheBlackestNight,
             () => !HasAnyTBN && LocalPlayer.CurrentMp > 3000 &&
                   PlayerHealthPercentageHp() <= Config.DRK_Mit_TBN_Health),
-        (Oblation, Preset.DRK_Mit_Oblation,
+        1 => (Oblation, Preset.DRK_Mit_Oblation,
             () => !((TargetIsFriendly() &&
                      HasStatusEffect(Buffs.Oblation, CurrentTarget, true)) ||
                     (!TargetIsFriendly() &&
                      HasStatusEffect(Buffs.Oblation, anyOwner: true))) &&
                   GetRemainingCharges(Oblation) > Config.DRK_Mit_Oblation_Charges),
-        (Role.Reprisal, Preset.DRK_Mit_Reprisal,
+        2 => (Role.Reprisal, Preset.DRK_Mit_Reprisal,
             () => Role.CanReprisal(checkTargetForDebuff: false)),
-        (DarkMissionary, Preset.DRK_Mit_DarkMissionary,
+        3 => (DarkMissionary, Preset.DRK_Mit_DarkMissionary,
             () => Config.DRK_Mit_DarkMissionary_PartyRequirement ==
                 (int)PartyRequirement.No || IsInParty()),
-        (Role.Rampart, Preset.DRK_Mit_Rampart,
+        4 => (Role.Rampart, Preset.DRK_Mit_Rampart,
             () => Role.CanRampart(Config.DRK_Mit_Rampart_Health)),
-        (DarkMind, Preset.DRK_Mit_DarkMind, () => true),
-        (Role.ArmsLength, Preset.DRK_Mit_ArmsLength,
+        5 => (DarkMind, Preset.DRK_Mit_DarkMind, () => true),
+        6 => (Role.ArmsLength, Preset.DRK_Mit_ArmsLength,
             () => Role.CanArmsLength(Config.DRK_Mit_ArmsLength_EnemyCount,
                 Config.DRK_Mit_ArmsLength_Boss)),
-        (OriginalHook(ShadowWall), Preset.DRK_Mit_ShadowWall,
+        7 => (OriginalHook(ShadowWall), Preset.DRK_Mit_ShadowWall,
             () => PlayerHealthPercentageHp() <= Config.DRK_Mit_ShadowWall_Health),
-    ];
+        _ => throw new System.IndexOutOfRangeException()
+    };
 
     /// <summary>
     ///     Given the index of a mitigation in <see cref="PrioritizedMitigation" />,
@@ -1127,10 +1129,11 @@ internal partial class DRK
     private static bool CheckMitigationConfigMeetsRequirements
         (int index, out uint action)
     {
-        action = PrioritizedMitigation[index].Action;
+        var entry = PrioritizedMitigation(index);
+        action = entry.Action;
         return ActionReady(action) &&
-               PrioritizedMitigation[index].Logic() &&
-               IsEnabled(PrioritizedMitigation[index].Preset);
+               entry.Logic() &&
+               IsEnabled(entry.Preset);
     }
 
     #endregion
