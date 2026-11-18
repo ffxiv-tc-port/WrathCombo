@@ -58,20 +58,19 @@ namespace WrathCombo.Window.Tabs
 
                 #region Shorten DTR bar text
 
+                // 資訊欄固定只畫圖示（UpdateDtrBar），此開關沒有讀取端；欄位與使用者的值刻意保留，日後恢復文字時不遺失。
                 bool shortDTRText = Service.Configuration.ShortDTRText;
+                var dtrIconOnlyNote = "This version's Server Info Bar entry only shows an icon; this option has no effect.".Loc();
 
-                if (ImGui.Checkbox("Shorten Server Info Bar Text".Loc(), ref shortDTRText))
-                {
-                    Service.Configuration.ShortDTRText = shortDTRText;
-                    Service.Configuration.Save();
-                }
+                ImGui.BeginDisabled();
+                ImGui.Checkbox("Shorten Server Info Bar Text".Loc(), ref shortDTRText);
+                ImGui.EndDisabled();
+                if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+                    ImGui.SetTooltip(dtrIconOnlyNote);
 
-                ImGuiComponents.HelpMarker((
-                    "By default, the Server Info Bar for Wrath Combo shows whether Auto-Rotation is on or off, " +
-                    "\nthen -if on- it will show how many active Auto-Mode combos you have enabled. " +
-                    "\nAnd finally, it will also show if another plugin is controlling that value." +
-                    "\nThis option will make the number of active Auto-Mode combos not show").Loc()
-                );
+                ImGui.SameLine();
+                ImGui.TextColored(ImGuiColors.DalamudGrey, "(No effect)".Loc());
+                ImGuiComponents.HelpMarker(dtrIconOnlyNote);
 
                 #endregion
 
