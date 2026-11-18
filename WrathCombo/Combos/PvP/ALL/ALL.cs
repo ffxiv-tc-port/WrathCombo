@@ -101,7 +101,7 @@ internal static class PvPCommon
                 case CustomComboPreset.PvP_CCOnlyOnPlayers:
                     DrawAppliesTo(ref _ccTooltip, CCActions,
                         "以控場為主、附帶傷害很低或沒有傷害的技能。傷害為主、順帶控場的技能（例如山崩、空氣錨、發炎III）不受影響。\n" +
-                        "戰士的獻身原本就只在目標是玩家或狂魂預備時放，不受這個開關影響。");
+                        "戰士的獻身、猛攻、蠻荒崩裂、原初的血氣由戰士自己的選項管（預設只對玩家放），不受這個開關影響。");
                     break;
 
                 case CustomComboPreset.PvP_LongCDOnlyOnPlayers:

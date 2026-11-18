@@ -44,8 +44,15 @@ namespace WrathCombo.Combos.PvP
             public static UserInt
                 WARPVP_BlotaTiming = new("WARPVP_BlotaTiming"),
                 WARPvP_RampartThreshold = new("WARPvP_RampartThreshold"),
-                WARPvP_PrimalScreamLBThreshold = new("WARPvP_PrimalScreamLBThreshold", 100);
+                WARPvP_PrimalScreamLBThreshold = new("WARPvP_PrimalScreamLBThreshold", 100),
+                // 80＝掉了兩成 HP（相當於原初的血煙一個防護罩的量）才放；滿血時放，吸血全部溢補。
+                WARPvP_BloodwhettingHPThreshold = new("WARPvP_BloodwhettingHPThreshold", 80);
 
+            // 「也放」型開關：缺鍵讀到 false＝只對玩家放，舊設定檔不必遷移就生效。
+            public static UserBool
+                WARPvP_BloodwhettingNonPlayers = new("WARPvP_BloodwhettingNonPlayers"),
+                WARPvP_OnslaughtNonPlayers = new("WARPvP_OnslaughtNonPlayers"),
+                WARPvP_PrimalRendNonPlayers = new("WARPvP_PrimalRendNonPlayers");
 
             internal static void Draw(CustomComboPreset preset)
             {
@@ -59,6 +66,23 @@ namespace WrathCombo.Combos.PvP
                     case CustomComboPreset.WARPvP_BurstMode_PrimalScreamLB:
                         UserConfig.DrawSliderInt(1, 100, WARPvP_PrimalScreamLBThreshold,
                             "目標 HP% 在這個值以下才放（100＝不限）");
+                        break;
+
+                    case CustomComboPreset.WARPvP_BurstMode_Bloodwhetting:
+                        UserConfig.DrawSliderInt(1, 100, WARPvP_BloodwhettingHPThreshold,
+                            "自身 HP% 在這個值以下（受過傷）才放原初的血氣（100＝不限）");
+                        UserConfig.DrawAdditionalBoolChoice(WARPvP_BloodwhettingNonPlayers, "目標不是玩家時也放",
+                            "沒勾＝目標是 NPC、物件或沒有目標時不放（原初的血氣本身沒有傷害）。之後的混沌旋風不受影響。");
+                        break;
+
+                    case CustomComboPreset.WARPvP_BurstMode_Onslaught:
+                        UserConfig.DrawAdditionalBoolChoice(WARPvP_OnslaughtNonPlayers, "目標不是玩家時也放",
+                            "沒勾＝目標是 NPC、物件或沒有目標時不放猛攻（不會移動的目標不必衝過去追）。");
+                        break;
+
+                    case CustomComboPreset.WARPvP_BurstMode_PrimalRend:
+                        UserConfig.DrawAdditionalBoolChoice(WARPvP_PrimalRendNonPlayers, "目標不是玩家時也放",
+                            "沒勾＝目標是 NPC、物件或沒有目標時不放蠻荒崩裂（躍向目標＋眩暈，留給追擊玩家）。之後的盡毀不受影響。");
                         break;
 
                     case CustomComboPreset.WARPvP_BurstMode_Blota:
@@ -78,6 +102,15 @@ namespace WrathCombo.Combos.PvP
             // 獻身把目標拉到身邊，只拉得動玩家（NPC、場地物件拉不動）；已變成狂魂時不是拉人，照舊。
             private static bool BlotaCanPull => OriginalHook(Blota) != Blota || PvPCommon.TargetIsPlayer();
 
+            // 原初的血氣沒有傷害（吸血＋防護罩），只對玩家、且受過傷才放；之後的混沌旋風是傷害技，不經這裡。
+            private static bool BloodwhettingAllowed =>
+                (Config.WARPvP_BloodwhettingNonPlayers || PvPCommon.TargetIsPlayer()) &&
+                PlayerHealthPercentageHp() <= Config.WARPvP_BloodwhettingHPThreshold;
+
+            // 猛攻、蠻荒崩裂是追擊用的位移（後者附眩暈）；NPC／物件不會移動，預設不對它們放。
+            private static bool OnslaughtAllowed => Config.WARPvP_OnslaughtNonPlayers || PvPCommon.TargetIsPlayer();
+            private static bool PrimalRendAllowed => Config.WARPvP_PrimalRendNonPlayers || PvPCommon.TargetIsPlayer();
+
             protected override uint Invoke(uint actionID)
             {
                 if (actionID is HeavySwing or Maim or StormsPath)
@@ -92,7 +125,7 @@ namespace WrathCombo.Combos.PvP
                         // Bloodwhetting condition (both WARPvP BurstMode and CanWeave)
                         if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_Bloodwhetting))
                         {
-                            if (!GetCooldown(Bloodwhetting).IsCooldown || canWeave && IsOffCooldown(Bloodwhetting))
+                            if ((!GetCooldown(Bloodwhetting).IsCooldown || canWeave && IsOffCooldown(Bloodwhetting)) && BloodwhettingAllowed)
                                 return OriginalHook(Bloodwhetting);
                         }
 
@@ -119,11 +152,11 @@ namespace WrathCombo.Combos.PvP
                             return Blota;
 
                         if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalRend) && PvPCommon.GapCloserRuleOn(PrimalRend) && IsOffCooldown(PrimalRend) &&
-                            PvPCommon.GapCloserInWindow(PrimalRend))
+                            PrimalRendAllowed && PvPCommon.GapCloserInWindow(PrimalRend))
                             return PrimalRend;
 
                         if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_Onslaught) && PvPCommon.GapCloserRuleOn(Onslaught) && !GetCooldown(Onslaught).IsCooldown && canWeave &&
-                            PvPCommon.GapCloserInWindow(Onslaught))
+                            OnslaughtAllowed && PvPCommon.GapCloserInWindow(Onslaught))
                             return Onslaught;
 
                         // Blota and PrimalRend conditions based on range and cooldowns
@@ -141,7 +174,7 @@ namespace WrathCombo.Combos.PvP
                             // PrimalRend if ready or BurstMode enabled
                             if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalRend))
                             {
-                                if ((IsOffCooldown(PrimalRend) || HasStatusEffect(Buffs.PrimalRuinationReady)) && !PvPCommon.GapCloserRuleOn(PrimalRend))
+                                if ((IsOffCooldown(PrimalRend) && PrimalRendAllowed || HasStatusEffect(Buffs.PrimalRuinationReady)) && !PvPCommon.GapCloserRuleOn(PrimalRend))
                                     return OriginalHook(PrimalRend);
                             }
 
@@ -155,7 +188,7 @@ namespace WrathCombo.Combos.PvP
                                 return OriginalHook(Blota);
 
                             // Onslaught and Orogeny conditions for melee
-                            if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_Onslaught) && !GetCooldown(Onslaught).IsCooldown && canWeave && !PvPCommon.GapCloserRuleOn(Onslaught))
+                            if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_Onslaught) && !GetCooldown(Onslaught).IsCooldown && canWeave && OnslaughtAllowed && !PvPCommon.GapCloserRuleOn(Onslaught))
                                 return OriginalHook(Onslaught);
 
                             // Nascent Chaos and Orogeny conditions
@@ -168,7 +201,7 @@ namespace WrathCombo.Combos.PvP
                             // PrimalRend if ready or BurstMode enabled
                             if (IsEnabled(CustomComboPreset.WARPvP_BurstMode_PrimalRend))
                             {
-                                if ((IsOffCooldown(PrimalRend) || HasStatusEffect(Buffs.PrimalRuinationReady)) && !PvPCommon.GapCloserRuleOn(PrimalRend))
+                                if ((IsOffCooldown(PrimalRend) && PrimalRendAllowed || HasStatusEffect(Buffs.PrimalRuinationReady)) && !PvPCommon.GapCloserRuleOn(PrimalRend))
                                     return OriginalHook(PrimalRend);
                             }
 

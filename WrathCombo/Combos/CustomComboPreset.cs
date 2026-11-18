@@ -9510,7 +9510,8 @@ public enum CustomComboPreset
 
     [PvPCustomCombo]
     [ParentCombo(WARPvP_BurstMode)]
-    [CustomComboInfo("Bloodwhetting Option", "Allows use of Bloodwhetting any time, not just between GCDs.",
+    [CustomComboInfo("Bloodwhetting Option",
+        "把原初的血氣加入 Burst Mode（不限能力技空檔），之後的混沌旋風照常放。\n原初的血氣本身沒有傷害（吸血＋防護罩）：預設只在目標是玩家、且自身 HP% 在設定值以下（受過傷）時放。",
         WARPvP.JobID)]
     WARPvP_BurstMode_Bloodwhetting = 128001,
 
@@ -9521,7 +9522,8 @@ public enum CustomComboPreset
 
     [PvPCustomCombo]
     [ParentCombo(WARPvP_BurstMode)]
-    [CustomComboInfo("Primal Rend Option", "Adds Primal Rend to Burst Mode.", WARPvP.JobID)]
+    [CustomComboInfo("Primal Rend Option",
+        "把蠻荒崩裂加入 Burst Mode，之後的盡毀照常放。\n蠻荒崩裂是躍向目標＋眩暈的追擊技：預設只在目標是玩家時放（NPC、物件不會移動）。", WARPvP.JobID)]
     WARPvP_BurstMode_PrimalRend = 128004,
 
     [PvPCustomCombo]
@@ -9536,7 +9538,8 @@ public enum CustomComboPreset
 
     [PvPCustomCombo]
     [ParentCombo(WARPvP_BurstMode)]
-    [CustomComboInfo("Onslaught Option", "Adds Onslaught to Burst Mode.", WARPvP.JobID)]
+    [CustomComboInfo("Onslaught Option",
+        "把猛攻加入 Burst Mode。\n猛攻是衝向目標的追擊技：預設只在目標是玩家時放（NPC、物件不會移動）。", WARPvP.JobID)]
     WARPvP_BurstMode_Onslaught = 128007,
 
     [PvPCustomCombo]
