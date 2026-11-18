@@ -281,8 +281,10 @@ public sealed partial class WrathCombo : IDalamudPlugin
             if (save)
             {
                 var path = Svc.PluginInterface.ConfigFile.FullName;
-                ReplaceConfigFile(path, json.ToString());
-                Svc.Log.Information($"[RemoveNullAutos] 已移除自動施放清單裡不存在的項目；原檔備份為 {Path.GetFileName(path) + NullAutosBackupSuffix}");
+                var backup = ReplaceConfigFile(path, json.ToString());
+                Svc.Log.Information(backup != null
+                    ? $"[RemoveNullAutos] 已移除自動施放清單裡不存在的項目；原檔備份為 {backup}"
+                    : $"[RemoveNullAutos] 已移除自動施放清單裡不存在的項目；備份檔名已被占用，這次沒有另存原檔備份");
             }
         }
         catch (Exception e)
@@ -293,9 +295,10 @@ public sealed partial class WrathCombo : IDalamudPlugin
 
     internal const string NullAutosBackupSuffix = ".bak-autoactions";
 
-    // 契約：先寫 <檔>.tmp 並落盤，再 File.Replace 換掉正式檔、原檔留成 <檔>.bak-autoactions；
+    // 契約：先寫 <檔>.tmp 並落盤，再 File.Replace 換掉正式檔、原檔留成備份；回傳備份檔名（沒留備份回 null）。
+    // 既有備份永不覆寫：第一次用 <檔>.bak-autoactions，之後用 <檔>.bak-autoactions-<時間>。
     // 任一步擲例外時正式檔不動、暫存檔刪掉，例外照擲給呼叫端。編碼同 File.WriteAllText（UTF-8 無 BOM）。
-    internal static void ReplaceConfigFile(string path, string contents)
+    internal static string? ReplaceConfigFile(string path, string contents, Func<DateTime>? now = null)
     {
         var tmp = path + ".tmp";
         try
@@ -306,7 +309,13 @@ public sealed partial class WrathCombo : IDalamudPlugin
                 fs.Write(bytes);
                 fs.Flush(true);
             }
-            File.Replace(tmp, path, path + NullAutosBackupSuffix);
+            var backup = path + NullAutosBackupSuffix;
+            if (File.Exists(backup))
+                backup = $"{path}{NullAutosBackupSuffix}-{(now ?? (() => DateTime.Now))():yyyyMMdd-HHmmss-fff}";
+            if (File.Exists(backup))
+                backup = null;
+            File.Replace(tmp, path, backup);
+            return backup == null ? null : Path.GetFileName(backup);
         }
         catch
         {
