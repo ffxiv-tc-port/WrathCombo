@@ -26,7 +26,7 @@ internal static class ManualPressDiag
     private const long AutoRecentMs = 2_000;
     private const long ManualRecentMs = 3_000;
 
-    private enum PathKind : byte { Replace, PerfReplace, Suppress, AutoFill, Direct, Clear }
+    private enum PathKind : byte { Replace, PerfReplace, Suppress, AutoFill, Direct, Clear, Hold }
 
     internal static bool Active =>
         Dalamud.EntryPoint.LogLevelSwitch.MinimumLevel <= LogEventLevel.Information;
@@ -178,6 +178,22 @@ internal static class ManualPressDiag
                 return;
             Log(PathKind.Clear, actionId, now,
                 $"自動循環的「{path}」清掉了佇列裡你 {now - _lastManualAt} ms 前手動按的 {Name(actionId)}（它要自己重送同一招）");
+        }
+        catch (Exception ex)
+        {
+            ReportFailure(ex);
+        }
+    }
+
+    /// <summary> 自動循環因為 BMR 佇列裡有玩家手動排的同群組技能而先不送的那一刻。 </summary>
+    internal static void NoteManualHold(uint manualAction, uint heldAction, long ageMs)
+    {
+        if (!Active)
+            return;
+        try
+        {
+            Log(PathKind.Hold, manualAction, Environment.TickCount64,
+                $"BMR 佇列裡有你 {ageMs} ms 前手動排的 {Name(manualAction)}，自動循環先不送同一冷卻群組的 {Name(heldAction)}（放出或過期後恢復）");
         }
         catch (Exception ex)
         {

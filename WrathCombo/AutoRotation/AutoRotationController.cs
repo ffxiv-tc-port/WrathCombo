@@ -128,9 +128,10 @@ namespace WrathCombo.AutoRotation
         ///     兩害相權取其輕：照字面當失敗＝<b>每個節流週期都重打同一發治療</b>，
         ///     而重複 Push 同一個動作還會讓 BMR 進入 emergency 模式（清空佇列裡其他項目、
         ///     強制插隊）；視同成功最壞只是偶爾晚約 1.2 秒（＋詠唱時間）。取後者。
+        ///     例外：玩家手動排的同群組技能還在 BMR 佇列、這一發被先擋下沒送＝真的沒排入，照失敗算。
         /// </remarks>
         private static bool ActionAccepted(bool ret) =>
-            ret || BossModRebornQueueTakeover;
+            ret || BossModRebornQueueTakeover && !ActionWatching.LastSendHeldForManual;
 
         // 同 BaseSelection.Any(IsCombatBypassTarget)、判斷順序相同；非戰鬥時每一輪都問，不建 Where 列舉器。
         // 兩個繞過都不可能成立時直接回 false：不掃物件表（每隻都要做視線檢查）。

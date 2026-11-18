@@ -253,6 +253,8 @@ public static class ActionWatching
             {
                 ActionTimestamps[actionId] = currentTick;
                 UsedOnDict[(actionId, targetObjectId)] = currentTick;
+                if (BmrManualPushGuard.HasPending && ActionSheet.TryGetValue(actionId, out var sentRow))
+                    BmrManualPushGuard.NoteSent(sentRow.CooldownGroup);
             }
 
             // Update Trackers
@@ -354,6 +356,8 @@ public static class ActionWatching
                           FrameworkThreadGate.Check("UseAction");
         var ownBmrPush = false;
         uint ownBmrAction = 0;
+        if (onFramework)
+            LastSendHeldForManual = false;
 
         if (onFramework)
         {
@@ -409,8 +413,16 @@ public static class ActionWatching
                 if (ConflictingPluginsChecks.BossModReborn.ManualQueueTakeover)
                 {
                     ownBmrAction = QueuedAsAction(actionId);
+                    var now = Environment.TickCount64;
                     // 回 false＝與 BMR 收進佇列時相同；呼叫端照 ActionAccepted 當成已排入。
-                    if (BmrOwnPushGuard.ShouldHold(ownBmrAction, targetId, Environment.TickCount64, ActionTimestamps))
+                    if (BmrManualPushGuard.HasPending && ActionSheet.TryGetValue(ownBmrAction, out var ownRow) &&
+                        BmrManualPushGuard.ShouldHold(ownRow.CooldownGroup, now, out var manualAction, out var manualAge))
+                    {
+                        LastSendHeldForManual = true;
+                        ManualPressDiag.NoteManualHold(manualAction, ownBmrAction, manualAge);
+                        return false;
+                    }
+                    if (BmrOwnPushGuard.ShouldHold(ownBmrAction, targetId, now, ActionTimestamps))
                         return false;
                     ownBmrPush = true;
                 }
@@ -439,6 +451,24 @@ public static class ActionWatching
                 ReportOwnPushGuardFailure(ex);
             }
         }
+        else if (!hookResult && onFramework && actionType is ActionType.Action && mode == ActionManager.UseActionMode.None &&
+                 !AutoRotationController.InRotation && !ManualPressDiag.OwnSendOutsideRotation)
+        {
+            try
+            {
+                // 玩家（或別的插件）按的、BMR 收進佇列：之後自己的送出不碰同一冷卻群組，免得把它換掉。
+                if (ConflictingPluginsChecks.BossModReborn.ManualQueueTakeover)
+                {
+                    var manual = QueuedAsAction(actionId);
+                    if (ActionSheet.TryGetValue(manual, out var row))
+                        BmrManualPushGuard.NoteManual(manual, row.CooldownGroup, targetId, IsGcdForQueue(manual), Environment.TickCount64);
+                }
+            }
+            catch (Exception ex)
+            {
+                ReportOwnPushGuardFailure(ex);
+            }
+        }
 
         // If the target was changed, support changing the target for ground actions, too
         if (changed)
@@ -457,6 +487,9 @@ public static class ActionWatching
 
         return hookResult;
     }
+
+    /// <summary> 上一次（框架執行緒上的）UseAction 是不是因為玩家手動排的同群組技能被擋下、沒有送進 BMR。 </summary>
+    internal static bool LastSendHeldForManual;
 
     // BMR 排的是遊戲換過之後的技能（它呼叫 GetAdjustedActionId，也就是我們的快捷列替換）；效能模式下 actionId 已經換過。
     private static uint QueuedAsAction(uint actionId) =>
