@@ -534,17 +534,25 @@ internal static class SimpleTarget
     public static IGameObject? LowestHPPAllyIfMissingHP =>
         LowestHPPAlly?.IfMissingHP();
 
-    // 同 GetPartyMembers().Select(BattleChara).Where(非 null 且活著).OrderBy(鍵).FirstOrDefault()，不建迭代器：
+    private static IBattleChara? LowestAlly(bool byPercent) =>
+        LowestOf(CustomComboFunctions.GetPartyMembers(), static m => m.BattleChara, byPercent);
+
+    // 補血對象的判死只看當下：倒地旗標或 HP 0 就跳過。
+    // 刻意不用 IsDead()／IsDeadEvenIfUnraisable()：那是復活用的判死（死滿 2 秒、帶復活狀態或非玩家都不算死），
+    // 剛倒地的人會被挑成血最少的活人。
+    internal static bool IsDownForHealing(IBattleChara x) => x.IsDead || x.CurrentHp == 0;
+
+    // 同 members.Select(chara).Where(非 null 且沒倒地).OrderBy(鍵).FirstOrDefault()，不建迭代器：
     // 照名單順序走訪，鍵「嚴格小於」目前最小值才換人（OrderBy 是穩定排序，平手取先出現的）。
     // 百分比鍵用浮點；MaxHp 為 0 的人跳過（原式在那裡會除以零擲例外），不參與比較。
-    private static IBattleChara? LowestAlly(bool byPercent)
+    internal static IBattleChara? LowestOf<T>(List<T> members, Func<T, IBattleChara?> chara, bool byPercent)
     {
         IBattleChara? best = null;
         double bestKey = 0;
-        foreach (var member in CustomComboFunctions.GetPartyMembers())
+        foreach (var member in members)
         {
-            var x = member.BattleChara;
-            if (x is null || x.IsDeadEvenIfUnraisable())
+            var x = chara(member);
+            if (x is null || IsDownForHealing(x))
                 continue;
 
             double key;
