@@ -18,6 +18,7 @@ using WrathCombo.AutoRotation;
 using WrathCombo.Combos;
 using WrathCombo.Combos.PvE;
 using WrathCombo.Core;
+using WrathCombo.Data.Conflicts;
 using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Extensions;
@@ -349,9 +350,12 @@ public static class ActionWatching
         var requestedTargetId = targetId;
         var changed = false;
         ManualPressDiag.Press press = default;
+        var onFramework = actionType is ActionType.Action or ActionType.Ability &&
+                          FrameworkThreadGate.Check("UseAction");
+        var ownBmrPush = false;
+        uint ownBmrAction = 0;
 
-        if (actionType is ActionType.Action or ActionType.Ability &&
-            FrameworkThreadGate.Check("UseAction"))
+        if (onFramework)
         {
             try
             {
@@ -397,11 +401,44 @@ public static class ActionWatching
             }
         }
 
+        if (onFramework && actionType is ActionType.Action && mode == ActionManager.UseActionMode.None &&
+            (AutoRotationController.InRotation || ManualPressDiag.OwnSendOutsideRotation))
+        {
+            try
+            {
+                if (ConflictingPluginsChecks.BossModReborn.ManualQueueTakeover)
+                {
+                    ownBmrAction = QueuedAsAction(actionId);
+                    // 回 false＝與 BMR 收進佇列時相同；呼叫端照 ActionAccepted 當成已排入。
+                    if (BmrOwnPushGuard.ShouldHold(ownBmrAction, targetId, Environment.TickCount64, ActionTimestamps))
+                        return false;
+                    ownBmrPush = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ownBmrPush = false;
+                ReportOwnPushGuardFailure(ex);
+            }
+        }
+
         //Important to pass actionId here and not replaced. Performance mode = result from earlier, which could be modified. Non-performance mode = original action, which gets modified by the hook. Same result.
         var hookResult = UseActionHook.OriginalDisposeSafe(actionManager, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
 
         if (press.Valid)
             ManualPressDiag.End(in press, actionManager, hookResult);
+
+        if (ownBmrPush && !hookResult)
+        {
+            try
+            {
+                BmrOwnPushGuard.NoteQueued(ownBmrAction, targetId, IsGcdForQueue(ownBmrAction), Environment.TickCount64);
+            }
+            catch (Exception ex)
+            {
+                ReportOwnPushGuardFailure(ex);
+            }
+        }
 
         // If the target was changed, support changing the target for ground actions, too
         if (changed)
@@ -419,6 +456,29 @@ public static class ActionWatching
         }
 
         return hookResult;
+    }
+
+    // BMR 排的是遊戲換過之後的技能（它呼叫 GetAdjustedActionId，也就是我們的快捷列替換）；效能模式下 actionId 已經換過。
+    private static uint QueuedAsAction(uint actionId) =>
+        !Service.Configuration.PerformanceMode &&
+        Service.ActionReplacer.LastActionInvokeFor.TryGetValue(actionId, out var adjusted) && adjusted != 0
+            ? adjusted
+            : actionId;
+
+    // 與 BMR 判 GCD 的方式相同：主或額外冷卻群組是 58。查不到的當 GCD（期限短，保守）。
+    private static bool IsGcdForQueue(uint actionId) =>
+        !ActionSheet.TryGetValue(actionId, out var row) ||
+        row.CooldownGroup == 58 || row.AdditionalCooldownGroup == 58;
+
+    private static bool _ownPushGuardFailed;
+
+    // 記帳失敗只會讓那一次退回「照舊送出」，不影響出招；只記一次。
+    private static void ReportOwnPushGuardFailure(Exception ex)
+    {
+        if (_ownPushGuardFailed)
+            return;
+        _ownPushGuardFailed = true;
+        Svc.Log.Warning($"[WrathCombo] BMR 佇列重送防護失敗，該次照舊送出（本次載入只記這一則）：{ex.GetType().Name}: {ex.Message}");
     }
 
     private static bool CheckForChangedTarget(uint actionId, ref ulong targetObjectId, out uint replacedWith)

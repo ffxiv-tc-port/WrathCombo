@@ -47,6 +47,13 @@ namespace WrathCombo.AutoRotation
         const int CleanseLockMs = 1200;
         const int CleanseBackoffMs = 5000;
 
+        // 復活（含先放的即刻詠唱）送出後的短鎖，理由同康復；放出了就提早解鎖，鎖到期沒放出算一次落空。
+        static uint _rezSentId;
+        static long _rezSentAt;
+        static long _rezLockUntil;
+        static int _rezMisses;
+        static long _rezBackoffUntil;
+
         static bool _lockedST = false;
         static bool _lockedAoE = false;
 
@@ -699,8 +706,11 @@ namespace WrathCombo.AutoRotation
                 }
 
                 ManualPressDiag.DirectPath = "自動復活";
-                if (!needsHeal && cfg.HealerSettings.AutoRez)
-                    RezParty();
+                if (!needsHeal && cfg.HealerSettings.AutoRez && RezParty())
+                {
+                    DiagEndTick(NoActStage.Busy);
+                    return;
+                }
                 ManualPressDiag.DirectPath = null;
             }
 
@@ -851,10 +861,27 @@ namespace WrathCombo.AutoRotation
             }
         }
 
-        private static void RezParty()
+        /// <returns> true＝這一節拍已被復活佔用（剛送出即刻詠唱／復活，或仍在送出後的短鎖內），呼叫端不可再推別的動作。 </returns>
+        private static bool RezParty()
         {
-            if (HasStatusEffect(418)) return;
-            uint resSpell = 
+            var now = Environment.TickCount64;
+            if (_rezSentAt != 0)
+            {
+                var executed = ActionTimestamps.TryGetValue(_rezSentId, out var usedAt) && usedAt >= _rezSentAt;
+                if (!executed && now < _rezLockUntil)
+                    return true;
+                if (executed)
+                    _rezMisses = 0;
+                else if (++_rezMisses >= 2)
+                {
+                    _rezMisses = 0;
+                    _rezBackoffUntil = now + CleanseBackoffMs;
+                }
+                _rezSentAt = 0;
+            }
+
+            if (now < _rezBackoffUntil || HasStatusEffect(418)) return false;
+            uint resSpell =
                 OccultCrescent.ReviveEnabledAndUsable
                 ? OccultCrescent.Revive
                 : Player.Job switch
@@ -868,62 +895,83 @@ namespace WrathCombo.AutoRotation
             };
 
             if (resSpell == 0)
-                return;
-
-            if (ActionManager.Instance()->QueuedActionId == resSpell)
-            {
-                ManualPressDiag.NoteQueueCleared("自動復活", resSpell);
-                ActionManager.Instance()->QueuedActionId = 0;
-            }
+                return false;
 
             if (Player.Object.CurrentMp >= GetResourceCost(resSpell) && ActionReady(resSpell))
             {
                 var timeSinceLastRez = TimeSinceLastSuccessfulCast(resSpell);
                 if ((timeSinceLastRez != -1f && timeSinceLastRez < 4f) || Player.Object.IsCasting())
-                    return;
+                    return false;
 
                 if (DeadPeople.Where(RezQuery).FindFirst(x => x is not null, out var member))
                 {
                     if (resSpell == OccultCrescent.Revive)
                     {
+                        ClearQueuedRez(resSpell);
                         ActionManager.Instance()->UseAction(ActionType.Action, resSpell, member.BattleChara.GameObjectId);
-                        return;
+                        return false;
                     }
 
                     if (Player.Job is Job.RDM)
                     {
                         if (ActionReady(RoleActions.Magic.Swiftcast) && !HasStatusEffect(RDM.Buffs.Dualcast))
-                        {
-                            ActionManager.Instance()->UseAction(ActionType.Action, RoleActions.Magic.Swiftcast);
-                            return;
-                        }
+                            return SendRez(RoleActions.Magic.Swiftcast, null, now);
 
                         if (ActionManager.GetAdjustedCastTime(ActionType.Action, resSpell) == 0)
-                        {
-                            ActionManager.Instance()->UseAction(ActionType.Action, resSpell, member.BattleChara.GameObjectId);
-                        }
-
+                            return SendRez(resSpell, member.BattleChara.GameObjectId, now);
                     }
                     else
                     {
                         if (ActionReady(RoleActions.Magic.Swiftcast))
                         {
                             if (ActionManager.Instance()->GetActionStatus(ActionType.Action, RoleActions.Magic.Swiftcast) == 0)
-                            {
-                                ActionManager.Instance()->UseAction(ActionType.Action, RoleActions.Magic.Swiftcast);
-                                return;
-                            }
+                                return SendRez(RoleActions.Magic.Swiftcast, null, now);
                         }
 
                         if (!IsMoving() || HasStatusEffect(RoleActions.Magic.Buffs.Swiftcast))
                         {
 
                             if ((cfg is not null) && ((cfg.HealerSettings.AutoRezRequireSwift && ActionManager.GetAdjustedCastTime(ActionType.Action, resSpell) == 0) || !cfg.HealerSettings.AutoRezRequireSwift))
-                                ActionManager.Instance()->UseAction(ActionType.Action, resSpell, member.BattleChara.GameObjectId);
+                                return SendRez(resSpell, member.BattleChara.GameObjectId, now);
                         }
                     }
                 }
             }
+
+            return false;
+        }
+
+        // 只在這次真的要自己送復活時才清遊戲佇列裡的同一招：不送卻清掉＝吃掉玩家剛手動排的復活。
+        private static void ClearQueuedRez(uint resSpell)
+        {
+            if (ActionManager.Instance()->QueuedActionId != resSpell)
+                return;
+            ManualPressDiag.NoteQueueCleared("自動復活", resSpell);
+            ActionManager.Instance()->QueuedActionId = 0;
+        }
+
+        /// <returns> 送出被接受（含被 BMR 收進手動佇列）時為 true，並上鎖到放出或鎖到期。 </returns>
+        private static bool SendRez(uint action, ulong? targetId, long now)
+        {
+            var isSwift = action == RoleActions.Magic.Swiftcast;
+            // BMR 只收 GCD 剩 1 秒內的 GCD；早送會被雙方拒絕卻被記成「已排入」，白鎖一段。
+            if (!isSwift && BossModRebornQueueTakeover && !AutoRotationHelper.InQueueWindow(action))
+                return false;
+
+            if (!isSwift)
+                ClearQueuedRez(action);
+
+            var ret = targetId is { } target
+                ? ActionManager.Instance()->UseAction(ActionType.Action, action, target)
+                : ActionManager.Instance()->UseAction(ActionType.Action, action);
+            if (!ActionAccepted(ret))
+                return false;
+
+            _rezSentId = action;
+            _rezSentAt = now;
+            _rezLockUntil = now + ActionManager.GetAdjustedCastTime(ActionType.Action, action) + CleanseLockMs;
+            DiagNoteFired();
+            return true;
         }
 
         /// <returns> true＝這一節拍已被康復佔用（剛送出，或仍在送出後的短鎖內），呼叫端不可再推別的動作。 </returns>
@@ -966,17 +1014,18 @@ namespace WrathCombo.AutoRotation
             if (lethalOnly && member is null)
                 return false;
 
-            if (ActionManager.Instance()->QueuedActionId == RoleActions.Healer.Esuna)
-            {
-                ManualPressDiag.NoteQueueCleared("自動康復", RoleActions.Healer.Esuna);
-                ActionManager.Instance()->QueuedActionId = 0;
-            }
-
             if (member is null
                 || !InActionRange(RoleActions.Healer.Esuna, member.BattleChara) || !IsInLineOfSight(member.BattleChara)
                 || !AutoRotationHelper.InQueueWindow(RoleActions.Healer.Esuna)
                 || Player.Object.CurrentMp < GetResourceCost(RoleActions.Healer.Esuna))
                 return false;
+
+            // 只在這次真的要自己送康復時才清遊戲佇列裡的同一招（理由同 ClearQueuedRez）。
+            if (ActionManager.Instance()->QueuedActionId == RoleActions.Healer.Esuna)
+            {
+                ManualPressDiag.NoteQueueCleared("自動康復", RoleActions.Healer.Esuna);
+                ActionManager.Instance()->QueuedActionId = 0;
+            }
 
             var ret = ActionManager.Instance()->UseAction(ActionType.Action, RoleActions.Healer.Esuna, member.BattleChara.GameObjectId);
             if (!ActionAccepted(ret))

@@ -3,6 +3,7 @@ using WrathCombo.Combos.PvE.Enums;
 using WrathCombo.Core;
 using WrathCombo.CustomComboNS;
 using WrathCombo.Data;
+using WrathCombo.Extensions;
 
 namespace WrathCombo.Combos.PvE;
 
@@ -509,9 +510,10 @@ internal partial class RDM : Caster
                     !schwifty &&
                     ActionReady(Vercure) &&
                     IsOnCooldown(Role.Swiftcast))
+                    // 赤療傷只為了觸發連續詠唱：治療集合挑到屍體（例如正選著要復活的人）就改放自己，放屍體上必失敗。
                     return IsEnabled(CustomComboPreset.RDM_Raise_Retarget)
                         ? Vercure.Retarget(Role.Swiftcast,
-                            SimpleTarget.Stack.AllyToHeal)
+                            SimpleTarget.Stack.AllyToHeal.IfAlive() ?? SimpleTarget.Self)
                         : Vercure;
             }
 
