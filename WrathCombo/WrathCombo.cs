@@ -224,6 +224,10 @@ public sealed partial class WrathCombo : IDalamudPlugin
         }
         CustomComboFunctions.TimerSetup();
 
+        // 建構子不在框架執行緒上跑（manifest 沒設 LoadSync）：放在改完已啟用清單之後，
+        // 讓登入那一幀不再付第一次建快取與 JIT 的成本。
+        Provider.PrewarmCaches();
+
         // Starts Retarget list cleaning process after a delay
         Svc.Framework.RunOnTick(ActionRetargeting.ClearOldRetargets,
             TimeSpan.FromSeconds(60), cancellationToken: UnloadToken);

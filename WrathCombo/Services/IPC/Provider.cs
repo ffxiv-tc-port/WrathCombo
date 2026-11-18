@@ -145,6 +145,8 @@ public partial class Provider : IDisposable
             return;
         }
 
+        var started = System.Diagnostics.Stopwatch.GetTimestamp();
+
         // Build job-specific combo state caches
         // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
         P.IPCSearch.ComboStatesByJob.TryGetValue(Player.Job, out _);
@@ -155,7 +157,38 @@ public partial class Provider : IDisposable
         // Mark IPC as ready after caches are built
         output._ipcReady = true;
 
-        Logging.Log("IPC caches built successfully");
+        Logging.Log("IPC caches built successfully (" +
+                    System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds.ToString("F1") + " ms)");
+    }
+
+    /// <summary>
+    ///     在插件建構子的執行緒（不是框架執行緒）先把 <see cref="BuildCaches" /> 會建的
+    ///     快取建好、相關方法 JIT 好，登入那一幀的 <see cref="BuildCaches" /> 就只剩命中快取。
+    /// </summary>
+    /// <remarks>
+    ///     不設 <c>_ipcReady</c>：<see cref="IPCReady" /> 照舊在登入後由 <see cref="BuildCaches" /> 翻成 true。
+    ///     這幾份快取的內容只看設定與租約、不看玩家，失效條件也照舊，所以登入前建的與登入後建的相同。
+    ///     失敗只記一筆，之後照舊在第一次使用時建。
+    /// </remarks>
+    internal static void PrewarmCaches()
+    {
+        if (ActionToken.IsCancellationRequested || UnloadToken.IsCancellationRequested)
+            return;
+
+        var started = System.Diagnostics.Stopwatch.GetTimestamp();
+        try
+        {
+            _ = P.IPCSearch.ComboStatesByJob;
+            _ = P.IPCSearch.AutoActions;
+        }
+        catch (Exception e)
+        {
+            Svc.Log.Warning("[Wrath IPC] Prewarming the IPC caches failed; they will be built on first use: " + e);
+            return;
+        }
+
+        Logging.Log("IPC caches prewarmed off the framework thread (" +
+                    System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalMilliseconds.ToString("F1") + " ms)");
     }
 
     /// <summary>
