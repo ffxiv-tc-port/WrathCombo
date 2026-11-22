@@ -9,10 +9,10 @@ using WrathCombo.Data.Conflicts;
 namespace WrathCombo.Data;
 
 /// <summary>
-///     BossMod(Reborn) 的「下一次全體傷害還有幾秒」，帶單幀快取。目前只給赤魔的昏亂／抗死選項用。
+///     BossMod(Reborn) 的「下一次全體傷害還有幾秒」，帶單幀快取。給赤魔的昏亂／抗死選項與 <see cref="RaidwideMitigationPolicy" /> 用。
 /// </summary>
 /// <remarks>
-///     刻意不併進 <c>RaidWideCasting()</c>：治療職業與暗黑騎士靠它，改了會靜默改變他們的行為。
+///     刻意不併進 <c>RaidWideCasting()</c>：那是 BMR 給不出危險度時的退路，治療職業與暗黑騎士靠它維持現行行為。
 ///     只在框架執行緒問 BMR，其他執行緒一律回「沒有預告」。
 /// </remarks>
 internal static class RaidwideForecast

@@ -3,6 +3,7 @@
 using System;
 using WrathCombo.Data;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
+using MitPolicy = WrathCombo.Data.RaidwideMitigationPolicy;
 using BossAvoidance = WrathCombo.Combos.PvE.All.Enums.BossAvoidance;
 using PartyRequirement = WrathCombo.Combos.PvE.All.Enums.PartyRequirement;
 using Preset = WrathCombo.Combos.CustomComboPreset;
@@ -506,20 +507,19 @@ internal partial class DRK
                 flags.HasFlag(Combo.Adv) && flags.HasFlag(Combo.AoE)
                     ? Config.DRK_AoE_ReprisalEnemyCount
                     : 1;
-            var reprisalUseForRaidwides =
-                flags.HasFlag(Combo.AoE) || RaidWideCasting();
 
             #endregion
 
             if ((flags.HasFlag(Combo.Simple) ||
                  IsSTEnabled(flags, Preset.DRK_ST_Mit_Reprisal) ||
                  IsAoEEnabled(flags, Preset.DRK_AoE_Mit_Reprisal)) &&
-                reprisalUseForRaidwides &&
                 Role.CanReprisal(reprisalThreshold, reprisalTargetCount,
                     !flags.HasFlag(Combo.AoE)) &&
                 HiddenFeaturesData.IsEnabledWith(
                     Preset.DRK_Hid_R6SNoAutoGroupMits,
-                    () => !HiddenFeaturesData.Content.InR6S))
+                    () => !HiddenFeaturesData.Content.InR6S) &&
+                // 範圍連段照舊不看全體傷害；單體只在全體傷害時放（放在最後：跳過會寫 log）。
+                (flags.HasFlag(Combo.AoE) || MitPolicy.Due(Role.Reprisal, 10f)))
                 return (action = Role.Reprisal) != 0;
 
             #endregion
@@ -544,12 +544,12 @@ internal partial class DRK
                 (flags.HasFlag(Combo.Simple) ||
                  IsEnabled(Preset.DRK_ST_Mit_Missionary)) &&
                 ActionReady(DarkMissionary) &&
-                RaidWideCasting() &&
                 missionaryAvoidanceSatisfied &&
                 PlayerHealthPercentageHp() <= missionaryThreshold &&
                 HiddenFeaturesData.IsEnabledWith(
                     Preset.DRK_Hid_R6SNoAutoGroupMits,
-                    () => !HiddenFeaturesData.Content.InR6S))
+                    () => !HiddenFeaturesData.Content.InR6S) &&
+                MitPolicy.Due(DarkMissionary, 15f))
                 return (action = DarkMissionary) != 0;
 
             #endregion

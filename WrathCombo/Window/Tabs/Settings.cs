@@ -495,6 +495,52 @@ namespace WrathCombo.Window.Tabs
                     ImGui.Unindent();
                 }
 
+                var rwSeverity = Service.Configuration.BossModRaidwideSeverity;
+                if (ImGui.Checkbox("Schedule Party Mitigation by BossMod (Reborn) Raidwide Danger".Loc(), ref rwSeverity))
+                {
+                    Service.Configuration.BossModRaidwideSeverity = rwSeverity;
+                    Service.Configuration.Save();
+                }
+
+                ImGuiComponents.HelpMarker((
+                    "When BossMod (Reborn) predicts the next raidwide and rates how dangerous it is, automatic party mitigation follows that rating: high uses everything (big cooldowns and GCD shields); medium or unrated uses only cooldowns of 60 seconds or less (Reprisal, Sacred Soil, Kerachole, Collective Unconscious; Addle only against magic damage); low uses nothing, so the cooldowns are saved.\n" +
+                    "Mitigation is used shortly before the predicted hit: within the lead time below, and never so early that the effect runs out first.\n\n" +
+                    "Applies to: the healer raidwide options (Astrologian, Scholar, Sage, White Mage), Dark Knight Reprisal / Dark Missionary, and Red Mage raidwide Addle / Magick Barrier (Red Mage keeps its own lead time).\n\n" +
+                    "BossMod (Reborn) missing, an older version without danger ratings, or no prediction: everything works exactly as before (enemy raidwide casts). Each mitigation used or skipped this way is written to the log (Information level).\n\n" +
+                    "Default: On").Loc());
+
+                if (rwSeverity)
+                {
+                    ImGui.Indent();
+
+                    var mediumMajor = Service.Configuration.BossModRaidwideMediumUsesMajor;
+                    if (ImGui.Checkbox("Medium danger: also use big cooldowns and GCD shields".Loc(), ref mediumMajor))
+                    {
+                        Service.Configuration.BossModRaidwideMediumUsesMajor = mediumMajor;
+                        Service.Configuration.Save();
+                    }
+
+                    ImGuiComponents.HelpMarker((
+                        "With this on, medium and unrated raidwides are treated like high ones: Temperance, Expedient, Holos, Neutral Sect, Asylum, Liturgy of the Bell, Dark Missionary, Addle, Magick Barrier and GCD shields may also be used. Low raidwides still use nothing.\n\n" +
+                        "Default: Off").Loc());
+
+                    var rwLead = Service.Configuration.BossModRaidwideLeadSeconds;
+                    ImGui.SetNextItemWidth(150);
+                    if (ImGui.SliderFloat("###RaidwideSeverityLead", ref rwLead, 2f, 10f, "%.1f"))
+                    {
+                        Service.Configuration.BossModRaidwideLeadSeconds = MathF.Round(rwLead * 10f) / 10f;
+                        Service.Configuration.Save();
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.Text("seconds before the hit".Loc());
+                    ImGuiComponents.HelpMarker((
+                        "How early before the predicted raidwide party mitigation may be used. Short effects use less (Collective Unconscious at most 4 seconds); GCD shields start that much earlier plus their cast time.\n\n" +
+                        "Default: 5").Loc());
+
+                    ImGui.Unindent();
+                }
+
                 ImGuiEx.Spacing(new Vector2(0, 10));
 
                 #endregion

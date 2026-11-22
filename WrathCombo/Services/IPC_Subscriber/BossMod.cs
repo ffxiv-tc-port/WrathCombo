@@ -308,6 +308,54 @@ internal sealed class BossModIPC(
         }
     }
 
+    private long _severityFailureLoggedAt;
+
+    /// <summary>
+    ///     <c>BossMod.Hints.NextRaidwideSeverity</c>：下一筆全體傷害預測的危險度（0 未知、1 低、2 中、3 高）。
+    /// </summary>
+    /// <returns><see langword="null" />＝端點不存在（舊版）、沒就緒、型別對不上或擲了任何例外＝沒有危險度資訊。</returns>
+    /// <remarks>只能在框架執行緒呼叫，理由同 <see cref="NextRaidwideDamageIn" />。</remarks>
+    public int? NextRaidwideSeverity()
+    {
+        try
+        {
+            return _nextRaidwideSeverity.TryInvoke(out var severity) ? severity : null;
+        }
+        catch (Exception e)
+        {
+            LogSeverityFailure("Hints.NextRaidwideSeverity", e);
+            return null;
+        }
+    }
+
+    /// <summary>
+    ///     <c>BossMod.Hints.NextRaidwideSourceAction</c>：下一筆全體傷害預測的來源技能 id（0＝不知道）。
+    /// </summary>
+    /// <returns><see langword="null" />＝端點不存在、沒就緒或呼叫失敗。</returns>
+    public uint? NextRaidwideSourceAction()
+    {
+        try
+        {
+            return _nextRaidwideSourceAction.TryInvoke(out var action) ? action : null;
+        }
+        catch (Exception e)
+        {
+            LogSeverityFailure("Hints.NextRaidwideSourceAction", e);
+            return null;
+        }
+    }
+
+    // TryInvoke 只攔 IpcNotReadyError；型別對不上與對方擲出的例外在這裡吃掉（兩個端點共用一分鐘一行）。
+    private void LogSeverityFailure(string tag, Exception e)
+    {
+        var now = Environment.TickCount64;
+        if (now - _severityFailureLoggedAt < 60_000)
+            return;
+        _severityFailureLoggedAt = now;
+        PluginLog.Information(
+            $"[MitPolicy] [{PluginName}] `{tag}` 呼叫失敗，本次視同沒有危險度資訊、團減照舊：" + e.ToStringFull());
+    }
+
     public DateTime LastModified()
     {
         if (!IsEnabled) return DateTime.MinValue;
@@ -359,6 +407,13 @@ internal sealed class BossModIPC(
 
     [EzIPC("BossMod.Hints.NextTankbusterOnPlayerIn", false)]
     private readonly Func<float> _nextTankbusterOnPlayerIn = null!;
+
+    // 明寫 None：包裝層會把「端點不存在」吞成 0，而 0 是合法的「未知」危險度，舊版 BMR 就分不出來。
+    [EzIPC("BossMod.Hints.NextRaidwideSeverity", false, wrapper: SafeWrapper.None)]
+    private readonly Func<int> _nextRaidwideSeverity = null!;
+
+    [EzIPC("BossMod.Hints.NextRaidwideSourceAction", false, wrapper: SafeWrapper.None)]
+    private readonly Func<uint> _nextRaidwideSourceAction = null!;
 
     // SafeWrapper.IPCException 會把 IpcNotReadyError 吞成 false，舊版 BMR 就分不出來。
     [EzIPC("BossMod.DeepDungeon.SelectiveInterruptActive", false, wrapper: SafeWrapper.None)]

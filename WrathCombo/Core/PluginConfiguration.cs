@@ -252,6 +252,21 @@ namespace WrathCombo.Core
         /// <summary>死刑預告提前量（秒）：剩餘秒數 ≤ 這個值才開短減傷。</summary>
         public float BossModTankbusterLeadSeconds = 2.5f;
 
+        /// <summary>
+        ///     依 BossMod(Reborn) 預告的全體傷害危險度安排團減：高才用大招、低就不放。
+        /// </summary>
+        /// <remarks>
+        ///     預設 <see langword="true" />（使用者已授權改變行為；既有設定檔沒有這個鍵＝吃初始值）。
+        ///     BMR 不在、舊版沒有危險度端點或沒有預告時，團減照舊看敵方詠唱。見 <c>Data/RaidwideMitigationPolicy.cs</c>。
+        /// </remarks>
+        public bool BossModRaidwideSeverity = true;
+
+        /// <summary>中危（含未知）也用冷卻 90 秒以上的團減與 GCD 團盾。預設關＝中危只用冷卻 ≤60 秒的。</summary>
+        public bool BossModRaidwideMediumUsesMajor = false;
+
+        /// <summary>全體傷害提前量（秒）：預告剩餘秒數 ≤ 這個值（再受效果持續時間限制）才開團減。赤魔沿用自己的提前量。</summary>
+        public float BossModRaidwideLeadSeconds = 5f;
+
         #endregion
 
         // Just has value so the UI element for it is more obvious from the get-go

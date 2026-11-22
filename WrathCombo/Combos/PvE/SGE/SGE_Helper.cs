@@ -9,6 +9,7 @@ using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Extensions;
 using static WrathCombo.Combos.PvE.SGE.Config;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
+using MitPolicy = WrathCombo.Data.RaidwideMitigationPolicy;
 namespace WrathCombo.Combos.PvE;
 
 internal partial class SGE
@@ -40,19 +41,22 @@ internal partial class SGE
     internal static bool HiddenKerachole() =>
         IsEnabled(CustomComboPreset.SGE_Hidden_Kerachole) &&
         ActionReady(Kerachole) && HasAddersgall() &&
-        CanWeave() && RaidWideCasting();
+        CanWeave() && MitPolicy.Due(Kerachole, 15f);
 
     internal static bool HiddenHolos() =>
         IsEnabled(CustomComboPreset.SGE_Hidden_Holos) &&
-        ActionReady(Holos) && CanWeave() && RaidWideCasting() &&
-        GetPartyAvgHPPercent() <= SGE_Hidden_HolosOption;
+        ActionReady(Holos) && CanWeave() &&
+        GetPartyAvgHPPercent() <= SGE_Hidden_HolosOption &&
+        MitPolicy.Due(Holos, 20f);
 
     internal static bool HiddenEprognosis()
     {
         bool shieldCheck = GetPartyBuffPercent(Buffs.EukrasianPrognosis) <= SGE_AoE_Heal_EPrognosisOption &&
                            GetPartyBuffPercent(SCH.Buffs.Galvanize) <= SGE_AoE_Heal_EPrognosisOption;
 
-        return IsEnabled(CustomComboPreset.SGE_Hidden_EPrognosis) && shieldCheck && RaidWideCasting();
+        // 還沒均衡時要先按均衡（佔一個短 GCD），當成 1 秒讀條。
+        return IsEnabled(CustomComboPreset.SGE_Hidden_EPrognosis) && shieldCheck &&
+               MitPolicy.Due(OriginalHook(EukrasianPrognosis), 30f, castSeconds: HasStatusEffect(Buffs.Eukrasia) ? 0f : 1f);
     }
 
     #endregion

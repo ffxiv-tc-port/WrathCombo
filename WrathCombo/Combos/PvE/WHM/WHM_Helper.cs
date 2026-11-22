@@ -8,6 +8,7 @@ using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Data;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
+using MitPolicy = WrathCombo.Data.RaidwideMitigationPolicy;
 
 // ReSharper disable AccessToStaticMemberViaDerivedType
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
@@ -247,14 +248,14 @@ internal partial class WHM
     {
         return IsEnabled(CustomComboPreset.WHM_Raidwide_Asylum) &&
                ActionReady(Asylum) &&
-               CanWeave() && RaidWideCasting();
+               CanWeave() && MitPolicy.Due(Asylum, 24f);
     }
 
     internal static bool RaidwideTemperance()
     {
         return IsEnabled(CustomComboPreset.WHM_Raidwide_Temperance) &&
                ActionReady(OriginalHook(Temperance)) &&
-               CanWeave() && RaidWideCasting();
+               CanWeave() && MitPolicy.Due(OriginalHook(Temperance), 20f);
     }
 
     internal static bool RaidwideLiturgyOfTheBell()
@@ -262,7 +263,7 @@ internal partial class WHM
         return IsEnabled(CustomComboPreset.WHM_Raidwide_LiturgyOfTheBell) &&
                ActionReady(LiturgyOfTheBell) &&
                !HasStatusEffect(Buffs.LiturgyOfTheBell) &&
-               RaidWideCasting() && CanWeave();
+               CanWeave() && MitPolicy.Due(LiturgyOfTheBell, 20f);
     }
 
     #endregion

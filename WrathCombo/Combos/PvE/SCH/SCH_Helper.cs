@@ -10,6 +10,7 @@ using WrathCombo.Core;
 using WrathCombo.CustomComboNS;
 using WrathCombo.CustomComboNS.Functions;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
+using MitPolicy = WrathCombo.Data.RaidwideMitigationPolicy;
 
 #endregion
 
@@ -54,15 +55,18 @@ internal partial class SCH
     
     internal static bool RaidwideSacredSoil()
     {
-        return IsEnabled(CustomComboPreset.SCH_Raidwide_SacredSoil) && ActionReady(SacredSoil) && CanWeave() && RaidWideCasting();
+        return IsEnabled(CustomComboPreset.SCH_Raidwide_SacredSoil) && ActionReady(SacredSoil) && CanWeave() &&
+               MitPolicy.Due(SacredSoil, 15f);
     }
     internal static bool RaidwideExpedient()
     {
-        return IsEnabled(CustomComboPreset.SCH_Raidwide_Expedient) && ActionReady(Expedient) && CanWeave() && RaidWideCasting();
+        return IsEnabled(CustomComboPreset.SCH_Raidwide_Expedient) && ActionReady(Expedient) && CanWeave() &&
+               MitPolicy.Due(Expedient, 20f);
     }
     internal static bool RaidwideSuccor()
     {
-        return IsEnabled(CustomComboPreset.SCH_Raidwide_Succor) && ActionReady(OriginalHook(Succor)) && ShieldCheck && RaidWideCasting();
+        return IsEnabled(CustomComboPreset.SCH_Raidwide_Succor) && ActionReady(OriginalHook(Succor)) && ShieldCheck &&
+               MitPolicy.Due(OriginalHook(Succor), 30f, castSeconds: GetActionCastTime(OriginalHook(Succor)));
     }
     internal static bool RaidwideRecitation()
     {

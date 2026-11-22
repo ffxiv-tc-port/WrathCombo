@@ -12,6 +12,7 @@ using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Data;
 using WrathCombo.Extensions;
 using static WrathCombo.CustomComboNS.Functions.CustomComboFunctions;
+using MitPolicy = WrathCombo.Data.RaidwideMitigationPolicy;
 #endregion
 
 namespace WrathCombo.Combos.PvE;
@@ -288,19 +289,27 @@ internal partial class RDM
     private static long _addleLoggedAt, _magickBarrierLoggedAt;
 
     /// <summary>
-    ///     全體傷害是否將至：BMR 有預告時只看預告（≤ 提前秒數），沒有預告或 BMR 不可用時退回敵方詠唱判斷，
-    ///     兩條都用同一個提前秒數（詠唱剩餘秒數 ≤ 提前秒數才算）。
+    ///     全體傷害是否將至：BMR 給得出危險度時交給 <see cref="MitPolicy" />（自己寫 log，<paramref name="byPolicy" /> 為真）；
+    ///     否則照舊：BMR 有預告時只看預告（≤ 提前秒數），沒有預告或 BMR 不可用時退回敵方詠唱判斷，兩條都用同一個提前秒數。
     ///     <paramref name="forecast" /> 為 <see langword="null" />＝這次是詠唱判斷給的答案。
     /// </summary>
     /// <remarks>只在框架執行緒判斷：BMR 端點在別的執行緒會阻塞，詠唱判斷也用了不分執行緒的 EzThrottler。</remarks>
-    private static bool RaidwideMitigationDue(out float? forecast)
+    private static bool RaidwideMitigationDue(uint action, float durationSeconds, MitPolicy.DamageKind bias,
+        out float? forecast, out bool byPolicy)
     {
         forecast = null;
+        byPolicy = false;
         if (!Svc.Framework.IsInFrameworkUpdateThread)
             return false;
 
-        forecast = RaidwideForecast.NextRaidwideIn();
         int lead = Config.RDM_RaidwideMit_LeadTime;
+        if (MitPolicy.Active)
+        {
+            byPolicy = true;
+            return MitPolicy.Due(action, durationSeconds, bias, leadSeconds: lead > 0 ? lead : null);
+        }
+
+        forecast = RaidwideForecast.NextRaidwideIn();
         // RaidWideCasting(0) 等於不看剩餘秒數；滑桿下限 1，0 只會來自手改設定檔，那時照舊不限。
         return RaidwideForecast.Verdict(forecast, lead) ?? RaidWideCasting(lead);
     }
@@ -309,10 +318,11 @@ internal partial class RDM
     internal static bool ShouldRaidwideAddle()
     {
         if (!InCombat() || !Role.CanAddle() || !HasBattleTarget() || !InActionRange(Role.Addle) ||
-            !RaidwideMitigationDue(out var forecast))
+            !RaidwideMitigationDue(Role.Addle, 10f, MitPolicy.DamageKind.Magic, out var forecast, out var byPolicy))
             return false;
 
-        LogRaidwideMitigation(Role.Addle, forecast, ref _addleLoggedAt);
+        if (!byPolicy)
+            LogRaidwideMitigation(Role.Addle, forecast, ref _addleLoggedAt);
         return true;
     }
 
@@ -323,11 +333,12 @@ internal partial class RDM
     {
         if (!InCombat() || !ActionReady(MagickBarrier) ||
             HasStatusEffect(Buffs.MagickBarrier, anyOwner: true) || JustUsed(Role.Addle, 6) ||
-            !RaidwideMitigationDue(out var forecast) ||
-            NumberOfAlliesInRange(MagickBarrier) < GetPartyMembers().Count * .75)
+            NumberOfAlliesInRange(MagickBarrier) < GetPartyMembers().Count * .75 ||
+            !RaidwideMitigationDue(MagickBarrier, 10f, MitPolicy.DamageKind.Unknown, out var forecast, out var byPolicy))
             return false;
 
-        LogRaidwideMitigation(MagickBarrier, forecast, ref _magickBarrierLoggedAt);
+        if (!byPolicy)
+            LogRaidwideMitigation(MagickBarrier, forecast, ref _magickBarrierLoggedAt);
         return true;
     }
 
