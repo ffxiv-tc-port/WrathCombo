@@ -18,6 +18,7 @@ namespace WrathCombo.Data;
 /// </summary>
 /// <remarks>
 ///     契約：開關關閉、不在框架執行緒、BMR 沒有危險度端點（不在／舊版／呼叫失敗）或沒有全體傷害預告＝完全照舊（呼叫端的舊判斷，預設 <c>RaidWideCasting()</c>）。
+///     BMR 有 <c>NextMitigableRaidwide*</c> 時看「下一筆值得減傷的」那筆（低危散開不擋後面），沒有就看第一筆。
 ///     有預告時只看預告：命中前 [0.8 秒＋讀條, min(持續−1, 提前量)＋讀條] 內才考慮；高全放、低不放、中與未知只放冷卻 ≤60 秒的 oGCD，
 ///     帶傷害屬性偏向的（昏亂）只在來源技能屬性對上時放；進階開關打開時中危也放大招與 GCD 盾。
 ///     持續秒數由呼叫端給各等級最短值：技能放下去之前讀不到狀態。
@@ -146,6 +147,12 @@ internal static class RaidwideMitigationPolicy
             return default;
 
         var sourceAction = source.NextRaidwideSourceAction() ?? 0;
+
+        // 新版 BMR 給得出「下一筆值得減傷的」就改看那筆：上面那組會被排在前面的低危散開擋住，要等散開結算才看得到後面的全體傷害。
+        // 是否接管仍由上面那組決定，讓舊版 BMR 與「只剩已過時預告」時行為照舊。
+        if (source.NextMitigableRaidwide() is { } next)
+            (seconds, severity, sourceAction) = next;
+
         var incoming = sourceAction != 0 && ActionWatching.ActionSheet.TryGetValue(sourceAction, out var row)
             ? KindOfAttackType(row.AttackType.RowId)
             : DamageKind.Unknown;

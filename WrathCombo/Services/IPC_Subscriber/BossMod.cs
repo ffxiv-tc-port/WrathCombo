@@ -345,6 +345,29 @@ internal sealed class BossModIPC(
         }
     }
 
+    /// <summary>
+    ///     <c>BossMod.Hints.NextMitigableRaidwide*</c>：下一筆值得考慮減傷的全體傷害（低危散開排在前面時不會擋住後面那發），
+    ///     秒數、危險度、來源技能指向同一筆預告。
+    /// </summary>
+    /// <returns><see langword="null" />＝端點不存在（舊版 BMR）、沒就緒、呼叫失敗或沒有預告；呼叫端退回 <see cref="NextRaidwideSeverity" /> 那組。</returns>
+    /// <remarks>只能在框架執行緒呼叫，理由同 <see cref="NextRaidwideDamageIn" />。</remarks>
+    public (float Seconds, int Severity, uint SourceAction)? NextMitigableRaidwide()
+    {
+        try
+        {
+            if (!_nextMitigableRaidwideIn.TryInvoke(out var seconds) || !float.IsFinite(seconds) || seconds >= float.MaxValue ||
+                !_nextMitigableRaidwideSeverity.TryInvoke(out var severity) ||
+                !_nextMitigableRaidwideSourceAction.TryInvoke(out var action))
+                return null;
+            return (seconds, severity, action);
+        }
+        catch (Exception e)
+        {
+            LogSeverityFailure("Hints.NextMitigableRaidwide", e);
+            return null;
+        }
+    }
+
     // TryInvoke 只攔 IpcNotReadyError；型別對不上與對方擲出的例外在這裡吃掉（兩個端點共用一分鐘一行）。
     private void LogSeverityFailure(string tag, Exception e)
     {
@@ -414,6 +437,16 @@ internal sealed class BossModIPC(
 
     [EzIPC("BossMod.Hints.NextRaidwideSourceAction", false, wrapper: SafeWrapper.None)]
     private readonly Func<uint> _nextRaidwideSourceAction = null!;
+
+    // 同上明寫 None：端點不存在才分得出舊版 BMR，好退回上面那組。
+    [EzIPC("BossMod.Hints.NextMitigableRaidwideIn", false, wrapper: SafeWrapper.None)]
+    private readonly Func<float> _nextMitigableRaidwideIn = null!;
+
+    [EzIPC("BossMod.Hints.NextMitigableRaidwideSeverity", false, wrapper: SafeWrapper.None)]
+    private readonly Func<int> _nextMitigableRaidwideSeverity = null!;
+
+    [EzIPC("BossMod.Hints.NextMitigableRaidwideSourceAction", false, wrapper: SafeWrapper.None)]
+    private readonly Func<uint> _nextMitigableRaidwideSourceAction = null!;
 
     // SafeWrapper.IPCException 會把 IpcNotReadyError 吞成 false，舊版 BMR 就分不出來。
     [EzIPC("BossMod.DeepDungeon.SelectiveInterruptActive", false, wrapper: SafeWrapper.None)]
