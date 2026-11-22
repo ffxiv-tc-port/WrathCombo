@@ -178,7 +178,7 @@ internal partial class GNB : Tank
                         (Config.GNB_ST_Reprisal_SubOption == 0 || TargetIsBoss() && Config.GNB_ST_Reprisal_SubOption == 1))
                         return Role.Reprisal;
                     if (IsEnabled(CustomComboPreset.GNB_ST_ArmsLength) &&
-                        HPP < Config.GNB_AoE_ArmsLength_Health &&
+                        HPP < Config.GNB_ST_ArmsLength_Health &&
                         Role.CanArmsLength())
                         return Role.ArmsLength;
                 }

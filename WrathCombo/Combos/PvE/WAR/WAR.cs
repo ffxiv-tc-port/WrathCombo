@@ -147,8 +147,8 @@ internal partial class WAR : Tank
                     (Config.WAR_ST_Equilibrium_SubOption == 0 || (TargetIsBoss() && Config.WAR_ST_Equilibrium_SubOption == 1)))
                     return Equilibrium;
                 if (IsEnabled(CustomComboPreset.WAR_ST_Bloodwhetting) && ActionReady(OriginalHook(RawIntuition)) &&
-                    PlayerHealthPercentageHp() <= Config.WAR_AoE_Bloodwhetting_Health &&
-                    (Config.WAR_AoE_Bloodwhetting_SubOption == 0 || (TargetIsBoss() && Config.WAR_AoE_Bloodwhetting_SubOption == 1)))
+                    PlayerHealthPercentageHp() <= Config.WAR_ST_Bloodwhetting_Health &&
+                    (Config.WAR_ST_Bloodwhetting_SubOption == 0 || (TargetIsBoss() && Config.WAR_ST_Bloodwhetting_SubOption == 1)))
                     return OriginalHook(RawIntuition);
             }
 

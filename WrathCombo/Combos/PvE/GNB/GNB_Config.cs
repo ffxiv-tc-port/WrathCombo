@@ -278,6 +278,16 @@ internal partial class GNB
                         "Bosses Only", $"Only uses {Role.Reprisal.ActionName()} when the targeted enemy is a boss.", 1);
                     break;
 
+                case CustomComboPreset.GNB_ST_ArmsLength:
+                    UserConfig.DrawSliderInt(1, 100, GNB_ST_ArmsLength_Health,
+                        "Player HP% to be \nless than or equal to:", 200);
+                    break;
+
+                case CustomComboPreset.GNB_AoE_ArmsLength:
+                    UserConfig.DrawSliderInt(1, 100, GNB_AoE_ArmsLength_Health,
+                        "Player HP% to be \nless than or equal to:", 200);
+                    break;
+
                 #region One-Button Mitigation
 
                 case CustomComboPreset.GNB_Mit_Superbolide_Max:
