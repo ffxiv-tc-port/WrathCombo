@@ -399,6 +399,16 @@ internal partial class WAR
                         "Bosses Only", "Only uses ?? when the targeted enemy is a boss".Loc(Role.Reprisal.ActionName()), 1);
                     break;
 
+                case CustomComboPreset.WAR_ST_ArmsLength:
+                    UserConfig.DrawSliderInt(1, 100, WAR_ST_ArmsLength_Health,
+                        "Player HP% to be \nless than or equal to:", 200);
+                    break;
+
+                case CustomComboPreset.WAR_AoE_ArmsLength:
+                    UserConfig.DrawSliderInt(1, 100, WAR_AoE_ArmsLength_Health,
+                        "Player HP% to be \nless than or equal to:", 200);
+                    break;
+
                 #region One-Button Mitigation
 
                 case CustomComboPreset.WAR_Mit_Holmgang_Max:
