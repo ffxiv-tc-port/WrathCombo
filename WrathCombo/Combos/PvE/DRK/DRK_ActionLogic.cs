@@ -434,6 +434,26 @@ internal partial class DRK
             // Bail if we just used mitigation
             if (JustUsedMitigation) return false;
 
+            // BMR 預告死刑打你：先開黑盾，藍不夠或冷卻中改獻奉；子選項與獻奉保留層數照既有設定。
+            if (TankbusterForecast.PreMitigationDue())
+            {
+                if ((flags.HasFlag(Combo.Simple) ||
+                     IsSTEnabled(flags, Preset.DRK_ST_Mit_TBN) ||
+                     IsAoEEnabled(flags, Preset.DRK_AoE_Mit_TBN)) &&
+                    ActionReady(BlackestNight) && LocalPlayer.CurrentMp >= 3000 && !HasOwnTBN &&
+                    CanApplyStatus(LocalPlayer, Buffs.BlackestNightShield))
+                    return (action = TankbusterForecast.Use(BlackestNight)) != 0;
+
+                var keepOblation = !flags.HasFlag(Combo.Adv) ? 0
+                    : flags.HasFlag(Combo.ST) ? (int)Config.DRK_ST_OblationCharges : (int)Config.DRK_AoE_OblationCharges;
+                if ((flags.HasFlag(Combo.Simple) ||
+                     IsSTEnabled(flags, Preset.DRK_ST_Mit_Oblation) ||
+                     IsAoEEnabled(flags, Preset.DRK_AoE_Mit_Oblation)) &&
+                    ActionReady(Oblation) && !HasStatusEffect(Buffs.Oblation, anyOwner: true) &&
+                    GetRemainingCharges(Oblation) > keepOblation)
+                    return (action = TankbusterForecast.Use(Oblation)) != 0;
+            }
+
             #region TBN
 
             if ((flags.HasFlag(Combo.Simple) ||

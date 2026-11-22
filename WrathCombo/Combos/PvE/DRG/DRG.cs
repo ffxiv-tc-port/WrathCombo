@@ -60,6 +60,9 @@ internal partial class DRG : Melee
                 CanDRGWeave())
                 return Variant.Rampart;
 
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
+
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
 
@@ -219,6 +222,9 @@ internal partial class DRG : Melee
             if (Variant.CanRampart(CustomComboPreset.DRG_Variant_Rampart) &&
                 CanDRGWeave())
                 return Variant.Rampart;
+
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
 
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
@@ -423,6 +429,9 @@ internal partial class DRG : Melee
                 CanDRGWeave())
                 return Variant.Rampart;
 
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
+
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
 
@@ -559,6 +568,9 @@ internal partial class DRG : Melee
             if (Variant.CanRampart(CustomComboPreset.DRG_Variant_Rampart) &&
                 CanDRGWeave())
                 return Variant.Rampart;
+
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
 
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();

@@ -99,6 +99,7 @@ namespace WrathCombo.Combos.PvE
         {
             uint LegSweep { get; }
             bool CanLegSweep();
+            bool CanLegSweepMarkedCast();
         }
 
         internal interface IBloodbath

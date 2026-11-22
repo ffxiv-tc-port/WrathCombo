@@ -44,6 +44,8 @@ internal partial class GNB : Tank
                 {
                     if (ActionReady(Superbolide) && HPP < 30)
                         return Superbolide;
+                    if (TankbusterForecast.PreMitigationDue() && ActionReady(OriginalHook(HeartOfStone)))
+                        return TankbusterForecast.Use(OriginalHook(HeartOfStone));
                     if (IsPlayerTargeted())
                     {
                         if (ActionReady(OriginalHook(Nebula)) && HPP < 60)
@@ -161,6 +163,9 @@ internal partial class GNB : Tank
                 if (IsEnabled(CustomComboPreset.GNB_ST_Superbolide) && ActionReady(Superbolide) && HPP < Config.GNB_ST_Superbolide_Health &&
                     (Config.GNB_ST_Superbolide_SubOption == 0 || TargetIsBoss() && Config.GNB_ST_Superbolide_SubOption == 1))
                     return Superbolide;
+                if (IsEnabled(CustomComboPreset.GNB_ST_Corundum) && TankbusterForecast.PreMitigationDue() &&
+                    ActionReady(OriginalHook(HeartOfStone)))
+                    return TankbusterForecast.Use(OriginalHook(HeartOfStone));
                 if (IsPlayerTargeted())
                 {
                     if (IsEnabled(CustomComboPreset.GNB_ST_Nebula) && ActionReady(OriginalHook(Nebula)) && HPP < Config.GNB_ST_Nebula_Health &&
@@ -288,6 +293,8 @@ internal partial class GNB : Tank
                 {
                     if (ActionReady(Superbolide) && HPP < 30)
                         return Superbolide;
+                    if (TankbusterForecast.PreMitigationDue() && ActionReady(OriginalHook(HeartOfStone)))
+                        return TankbusterForecast.Use(OriginalHook(HeartOfStone));
                     if (IsPlayerTargeted())
                     {
                         if (ActionReady(OriginalHook(Nebula)) && HPP < 60)
@@ -366,6 +373,9 @@ internal partial class GNB : Tank
                 if (IsEnabled(CustomComboPreset.GNB_AoE_Superbolide) && ActionReady(Superbolide) && HPP < Config.GNB_AoE_Superbolide_Health &&
                     (Config.GNB_AoE_Superbolide_SubOption == 0 || TargetIsBoss() && Config.GNB_AoE_Superbolide_SubOption == 1))
                     return Superbolide;
+                if (IsEnabled(CustomComboPreset.GNB_AoE_Corundum) && TankbusterForecast.PreMitigationDue() &&
+                    ActionReady(OriginalHook(HeartOfStone)))
+                    return TankbusterForecast.Use(OriginalHook(HeartOfStone));
                 if (IsPlayerTargeted())
                 {
                     if (IsEnabled(CustomComboPreset.GNB_AoE_Nebula) && ActionReady(OriginalHook(Nebula)) && HPP < Config.GNB_AoE_Nebula_Health &&

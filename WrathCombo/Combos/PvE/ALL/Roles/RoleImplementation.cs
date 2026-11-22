@@ -201,6 +201,9 @@ namespace WrathCombo.Combos.PvE
                     public bool CanLegSweep() =>
                         RoleActions.Melee.CanLegSweep();
 
+                    public bool CanLegSweepMarkedCast() =>
+                        RoleActions.Melee.CanLegSweepMarkedCast();
+
                     public bool CanBloodBath(int healthpercent) =>
                         RoleActions.Melee.CanBloodBath(healthpercent);
 

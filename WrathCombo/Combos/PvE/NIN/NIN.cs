@@ -118,6 +118,9 @@ internal partial class NIN : Melee
             if (Variant.CanCure(CustomComboPreset.NIN_Variant_Cure, Config.NIN_VariantCure))
                 return Variant.Cure;
 
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
+
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
 
@@ -416,6 +419,9 @@ internal partial class NIN : Melee
             if (Variant.CanCure(CustomComboPreset.NIN_Variant_Cure, Config.NIN_VariantCure))
                 return Variant.Cure;
 
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
+
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
 
@@ -609,6 +615,9 @@ internal partial class NIN : Melee
 
             if (Variant.CanCure(CustomComboPreset.NIN_Variant_Cure, Config.NIN_VariantCure))
                 return Variant.Cure;
+
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
 
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
@@ -837,6 +846,9 @@ internal partial class NIN : Melee
 
             if (Variant.CanCure(CustomComboPreset.NIN_Variant_Cure, Config.NIN_VariantCure))
                 return Variant.Cure;
+
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
 
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();

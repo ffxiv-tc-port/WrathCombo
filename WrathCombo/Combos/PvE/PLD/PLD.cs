@@ -101,6 +101,10 @@ internal partial class PLD : Tank
                         PlayerHealthPercentageHp() < 30) //Player's health is below 30%
                         return HallowedGround;
 
+                    if (TankbusterForecast.PreMitigationDue() && ActionReady(OriginalHook(Sheltron)) &&
+                        !HasStatusEffect(Buffs.Sheltron) && !HasStatusEffect(Buffs.HolySheltron))
+                        return TankbusterForecast.Use(OriginalHook(Sheltron));
+
                     if (IsPlayerTargeted())
                     {
                         //Sentinel / Damnation
@@ -297,6 +301,10 @@ internal partial class PLD : Tank
                     if (ActionReady(HallowedGround) && //Hallowed Ground is ready
                         PlayerHealthPercentageHp() < 30) //Player's health is below 30%
                         return HallowedGround;
+
+                    if (TankbusterForecast.PreMitigationDue() && ActionReady(OriginalHook(Sheltron)) &&
+                        !HasStatusEffect(Buffs.Sheltron) && !HasStatusEffect(Buffs.HolySheltron))
+                        return TankbusterForecast.Use(OriginalHook(Sheltron));
 
                     if (IsPlayerTargeted())
                     {
@@ -527,6 +535,11 @@ internal partial class PLD : Tank
                                                                                                  TargetIsBoss() && Config.PLD_ST_HallowedGround_SubOption == 2))
                             return HallowedGround;
 
+                        if (IsEnabled(CustomComboPreset.PLD_ST_AdvancedMode_Sheltron) && TankbusterForecast.PreMitigationDue() &&
+                            ActionReady(OriginalHook(Sheltron)) && Gauge.OathGauge >= Config.PLD_ST_SheltronOption &&
+                            !HasStatusEffect(Buffs.Sheltron) && !HasStatusEffect(Buffs.HolySheltron))
+                            return TankbusterForecast.Use(OriginalHook(Sheltron));
+
                         // Sentinel / Guardian
                         if (IsEnabled(CustomComboPreset.PLD_ST_AdvancedMode_Sentinel) && ActionReady(OriginalHook(Sentinel)) &&
                             PlayerHealthPercentageHp() < Config.PLD_ST_Sentinel_Health && (Config.PLD_ST_Sentinel_SubOption == 1 ||
@@ -720,6 +733,11 @@ internal partial class PLD : Tank
                             PlayerHealthPercentageHp() < Config.PLD_AoE_HallowedGround_Health && (Config.PLD_AoE_HallowedGround_SubOption == 1 ||
                                                                                                   TargetIsBoss() && Config.PLD_AoE_HallowedGround_SubOption == 2))
                             return HallowedGround;
+
+                        if (IsEnabled(CustomComboPreset.PLD_AoE_AdvancedMode_Sheltron) && TankbusterForecast.PreMitigationDue() &&
+                            ActionReady(OriginalHook(Sheltron)) && Gauge.OathGauge >= Config.PLD_AoE_SheltronOption &&
+                            !HasStatusEffect(Buffs.Sheltron) && !HasStatusEffect(Buffs.HolySheltron))
+                            return TankbusterForecast.Use(OriginalHook(Sheltron));
 
                         // Sentinel / Guardian
                         if (IsEnabled(CustomComboPreset.PLD_AoE_AdvancedMode_Sentinel) && ActionReady(OriginalHook(Sentinel)) &&

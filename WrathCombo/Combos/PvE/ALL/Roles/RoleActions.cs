@@ -153,6 +153,16 @@ internal static partial class RoleActions
         public static bool CanLegSweep() =>
             ActionReady(LegSweep);
 
+        /// <summary>
+        ///     近戰自動掃腿：只在 BossMod(Reborn) 標記目前目標這一發該暈眩時，oGCD 窗內、射程內、冷卻好、遞減未滿才成立。
+        /// </summary>
+        /// <remarks>刻意不對沒標記的讀條出手（使用者要求危險性低的省下來）；標記判定放最後，只有真的要放時才記 log。</remarks>
+        public static bool CanLegSweepMarkedCast() =>
+            CanLegSweep() && TargetIsCasting() && CanWeave() && InActionRange(LegSweep) &&
+            (ICDTracker.StatusIsExpired(All.Debuffs.Stun, CurrentTarget.GameObjectId) || ICDTracker.NumberOfTimesApplied(All.Debuffs.Stun, CurrentTarget.GameObjectId) < 3) &&
+            !MechanicHints.StunHeldByReservation(CurrentTarget) &&
+            MechanicHints.StunMarkedForLegSweep(CurrentTarget);
+
         public static bool CanBloodBath(int healthPercent) =>
             ActionReady(Bloodbath) && PlayerHealthPercentageHp() <= healthPercent;
 

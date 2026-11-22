@@ -71,6 +71,19 @@ internal static class MechanicHints
     }
 
     /// <summary>
+    ///     BMR 標記這個目標「這一發該暈眩」，且近戰自動掃腿開著：近戰可以對它用掃腿。
+    /// </summary>
+    /// <remarks>契約：沒有標記、BMR 不在、任一開關關閉一律 <see langword="false" />＝近戰照舊從不掃腿。</remarks>
+    internal static bool StunMarkedForLegSweep(IGameObject? target)
+    {
+        if (!ControlMarksEnabled || !Service.Configuration.BossModMeleeLegSweep ||
+            target is null || !IsFlagged(Hints(HintKind.Stun), target))
+            return false;
+        LogControl("近戰掃腿 BMR 標記的讀條", target);
+        return true;
+    }
+
+    /// <summary>
     ///     BMR 的模組宣告本場眩暈保留給標記的讀條，而這個目標沒被標記：不該對它用眩暈。
     /// </summary>
     internal static bool StunHeldByReservation(IGameObject? target) =>

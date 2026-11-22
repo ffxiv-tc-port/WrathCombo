@@ -37,6 +37,8 @@ internal partial class WAR : Tank
             {
                 if (ActionReady(Holmgang) && PlayerHealthPercentageHp() < 30)
                     return Holmgang;
+                if (TankbusterForecast.PreMitigationDue() && ActionReady(OriginalHook(RawIntuition)))
+                    return TankbusterForecast.Use(OriginalHook(RawIntuition));
                 if (IsPlayerTargeted())
                 {
                     if (ActionReady(OriginalHook(Vengeance)) && PlayerHealthPercentageHp() < 60)
@@ -115,6 +117,9 @@ internal partial class WAR : Tank
                     PlayerHealthPercentageHp() <= Config.WAR_ST_Holmgang_Health &&
                     (Config.WAR_ST_Holmgang_SubOption == 0 || (TargetIsBoss() && Config.WAR_ST_Holmgang_SubOption == 1)))
                     return Holmgang;
+                if (IsEnabled(CustomComboPreset.WAR_ST_Bloodwhetting) && TankbusterForecast.PreMitigationDue() &&
+                    ActionReady(OriginalHook(RawIntuition)))
+                    return TankbusterForecast.Use(OriginalHook(RawIntuition));
                 if (IsPlayerTargeted())
                 {
                     if (IsEnabled(CustomComboPreset.WAR_ST_Vengeance) && ActionReady(OriginalHook(Vengeance)) &&
@@ -207,6 +212,8 @@ internal partial class WAR : Tank
                 {
                     if (ActionReady(Holmgang) && PlayerHealthPercentageHp() < 30)
                         return Holmgang;
+                    if (TankbusterForecast.PreMitigationDue() && ActionReady(OriginalHook(RawIntuition)))
+                        return TankbusterForecast.Use(OriginalHook(RawIntuition));
                     if (IsPlayerTargeted())
                     {
                         if (ActionReady(OriginalHook(Vengeance)) && PlayerHealthPercentageHp() < 60)
@@ -283,6 +290,9 @@ internal partial class WAR : Tank
                 if (IsEnabled(CustomComboPreset.WAR_AoE_Holmgang) && ActionReady(Holmgang) && PlayerHealthPercentageHp() <= Config.WAR_AoE_Holmgang_Health &&
                     (Config.WAR_AoE_Holmgang_SubOption == 0 || (TargetIsBoss() && Config.WAR_AoE_Holmgang_SubOption == 1)))
                     return Holmgang;
+                if (IsEnabled(CustomComboPreset.WAR_AoE_Bloodwhetting) && TankbusterForecast.PreMitigationDue() &&
+                    ActionReady(OriginalHook(RawIntuition)))
+                    return TankbusterForecast.Use(OriginalHook(RawIntuition));
                 if (IsPlayerTargeted())
                 {
                     if (IsEnabled(CustomComboPreset.WAR_AoE_Vengeance) && ActionReady(OriginalHook(Vengeance)) && PlayerHealthPercentageHp() <= Config.WAR_AoE_Vengeance_Health &&

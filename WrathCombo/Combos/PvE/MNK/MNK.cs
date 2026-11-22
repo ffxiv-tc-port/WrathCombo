@@ -38,6 +38,9 @@ internal partial class MNK : Melee
             if (Variant.CanRampart(CustomComboPreset.MNK_Variant_Rampart))
                 return Variant.Rampart;
 
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
+
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
 
@@ -150,6 +153,9 @@ internal partial class MNK : Melee
             //Variant Rampart
             if (Variant.CanRampart(CustomComboPreset.MNK_Variant_Rampart))
                 return Variant.Rampart;
+
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
 
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
@@ -274,6 +280,9 @@ internal partial class MNK : Melee
             if (Variant.CanRampart(CustomComboPreset.MNK_Variant_Rampart))
                 return Variant.Rampart;
 
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
+
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
 
@@ -384,6 +393,9 @@ internal partial class MNK : Melee
             //Variant Rampart
             if (Variant.CanRampart(CustomComboPreset.MNK_Variant_Rampart))
                 return Variant.Rampart;
+
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
 
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();

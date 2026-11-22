@@ -281,6 +281,33 @@ internal sealed class BossModIPC(
         }
     }
 
+    private long _tankbusterFailureLoggedAt;
+
+    /// <summary>
+    ///     <c>BossMod.Hints.NextTankbusterOnPlayerIn</c>：下一發打本機玩家的死刑還有幾秒（沒有預告時回 <see cref="float.MaxValue" />）。
+    /// </summary>
+    /// <returns><see langword="null" />＝端點不存在（舊版）、沒就緒、型別對不上或擲了任何例外，呼叫端一律當「沒有預告」。</returns>
+    /// <remarks>只能在框架執行緒呼叫，理由同 <see cref="NextRaidwideDamageIn" />。</remarks>
+    public float? NextTankbusterOnPlayerIn()
+    {
+        try
+        {
+            return _nextTankbusterOnPlayerIn.TryInvoke(out var seconds) ? seconds : null;
+        }
+        catch (Exception e)
+        {
+            var now = Environment.TickCount64;
+            if (now - _tankbusterFailureLoggedAt >= 60_000)
+            {
+                _tankbusterFailureLoggedAt = now;
+                PluginLog.Information(
+                    $"[WrathCombo][死刑預判減傷] [{PluginName}] `Hints.NextTankbusterOnPlayerIn` 呼叫失敗，" +
+                    "本次視同沒有預告、照舊只看血量：" + e.ToStringFull());
+            }
+            return null;
+        }
+    }
+
     public DateTime LastModified()
     {
         if (!IsEnabled) return DateTime.MinValue;
@@ -329,6 +356,9 @@ internal sealed class BossModIPC(
 
     [EzIPC("BossMod.Hints.NextRaidwideDamageIn", false)]
     private readonly Func<float> _nextRaidwideDamageIn = null!;
+
+    [EzIPC("BossMod.Hints.NextTankbusterOnPlayerIn", false)]
+    private readonly Func<float> _nextTankbusterOnPlayerIn = null!;
 
     // SafeWrapper.IPCException 會把 IpcNotReadyError 吞成 false，舊版 BMR 就分不出來。
     [EzIPC("BossMod.DeepDungeon.SelectiveInterruptActive", false, wrapper: SafeWrapper.None)]

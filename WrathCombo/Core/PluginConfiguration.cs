@@ -231,6 +231,27 @@ namespace WrathCombo.Core
         /// </remarks>
         public bool BossModControlMarks = true;
 
+        /// <summary>
+        ///     近戰職業在 BossMod(Reborn) 標記「該眩暈」的目前目標讀條上自動用掃腿（需 <see cref="BossModControlMarks" />）。
+        /// </summary>
+        /// <remarks>
+        ///     預設 <see langword="true" />：只對模組明確標記的讀條出手、從不對一般讀條；BMR 不在或沒標記時從不放掃腿。
+        ///     見 <c>RoleActions.Melee.CanLegSweepMarkedCast</c>。
+        /// </remarks>
+        public bool BossModMeleeLegSweep = true;
+
+        /// <summary>
+        ///     坦克在 BossMod(Reborn) 預告「下一發死刑打你」且剩餘秒數在 <see cref="BossModTankbusterLeadSeconds" /> 內時開一個短減傷。
+        /// </summary>
+        /// <remarks>
+        ///     預設 <see langword="true" />：只看模組標成死刑且指向本機玩家的預告，只用冷卻短的那一格；
+        ///     BMR 不在、舊版或沒有預告時照舊只看血量。見 <c>Data/TankbusterForecast.cs</c>。
+        /// </remarks>
+        public bool BossModTankbusterMitigation = true;
+
+        /// <summary>死刑預告提前量（秒）：剩餘秒數 ≤ 這個值才開短減傷。</summary>
+        public float BossModTankbusterLeadSeconds = 2.5f;
+
         #endregion
 
         // Just has value so the UI element for it is more obvious from the get-go

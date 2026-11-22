@@ -443,6 +443,58 @@ namespace WrathCombo.Window.Tabs
                     "BossMod (Reborn) missing, an older version, or nothing flagged all behave exactly like this is off. Each overridden or held action is written to the log (Information level).\n\n" +
                     "Default: On").Loc());
 
+                if (controlMarks)
+                {
+                    ImGui.Indent();
+
+                    var meleeSweep = Service.Configuration.BossModMeleeLegSweep;
+                    if (ImGui.Checkbox("Melee: Leg Sweep Casts Flagged for Stuns".Loc(), ref meleeSweep))
+                    {
+                        Service.Configuration.BossModMeleeLegSweep = meleeSweep;
+                        Service.Configuration.Save();
+                    }
+
+                    ImGuiComponents.HelpMarker((
+                        "Monk, Dragoon, Ninja, Samurai, Reaper and Viper rotations (Simple and Advanced) use Leg Sweep on your current target while BossMod (Reborn) flags its cast as one that must be stunned: in an oGCD window, in range, Leg Sweep ready, and the target not yet stun-resistant.\n" +
+                        "Casts that are not flagged are never stunned, so Leg Sweep is saved for the dangerous ones.\n\n" +
+                        "BossMod (Reborn) missing or nothing flagged: Leg Sweep is never used. Each use is written to the log (Information level).\n\n" +
+                        "Default: On").Loc());
+
+                    ImGui.Unindent();
+                }
+
+                var tbMit = Service.Configuration.BossModTankbusterMitigation;
+                if (ImGui.Checkbox("Tanks: Short Mitigation Before Tankbusters on You (BossMod (Reborn))".Loc(), ref tbMit))
+                {
+                    Service.Configuration.BossModTankbusterMitigation = tbMit;
+                    Service.Configuration.Save();
+                }
+
+                ImGuiComponents.HelpMarker((
+                    "When BossMod (Reborn) predicts that the next tankbuster will hit you and it lands within the lead time below, the tank rotations (Simple and Advanced, single target and AoE) use one short-cooldown mitigation: Warrior Raw Intuition / Bloodwhetting, Paladin Sheltron / Holy Sheltron, Dark Knight The Blackest Night (Oblation when it cannot), Gunbreaker Heart of Stone / Heart of Corundum.\n" +
+                    "Only casts the boss module marks as tankbusters count; big cooldowns such as Rampart stay on your health thresholds. Nothing is used right after another mitigation, when that rotation's mitigation options are off, or (Advanced) when that action's own option is off.\n\n" +
+                    "BossMod (Reborn) missing, an older version, or no prediction: mitigation works exactly as before (health only). Each use is written to the log (Information level).\n\n" +
+                    "Default: On").Loc());
+
+                if (tbMit)
+                {
+                    ImGui.Indent();
+                    var lead = Service.Configuration.BossModTankbusterLeadSeconds;
+                    ImGui.SetNextItemWidth(150);
+                    if (ImGui.SliderFloat("###TankbusterLead", ref lead, 1f, 5f, "%.1f"))
+                    {
+                        Service.Configuration.BossModTankbusterLeadSeconds = MathF.Round(lead * 10f) / 10f;
+                        Service.Configuration.Save();
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.Text("seconds before the hit".Loc());
+                    ImGuiComponents.HelpMarker((
+                        "How early before the predicted tankbuster the short mitigation may be used. Earlier is safer against latency; later keeps more of the effect for the hit itself.\n\n" +
+                        "Default: 2.5").Loc());
+                    ImGui.Unindent();
+                }
+
                 ImGuiEx.Spacing(new Vector2(0, 10));
 
                 #endregion

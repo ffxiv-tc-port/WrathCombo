@@ -105,6 +105,9 @@ internal partial class SAM : Melee
             if (Variant.CanRampart(CustomComboPreset.SAM_Variant_Rampart))
                 return Variant.Rampart;
 
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
+
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
 
@@ -278,6 +281,9 @@ internal partial class SAM : Melee
 
             if (Variant.CanRampart(CustomComboPreset.SAM_Variant_Rampart))
                 return Variant.Rampart;
+
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
 
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
@@ -513,6 +519,9 @@ internal partial class SAM : Melee
             if (Variant.CanRampart(CustomComboPreset.SAM_Variant_Rampart))
                 return Variant.Rampart;
 
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
+
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();
 
@@ -623,6 +632,9 @@ internal partial class SAM : Melee
 
             if (Variant.CanRampart(CustomComboPreset.SAM_Variant_Rampart))
                 return Variant.Rampart;
+
+            if (Role.CanLegSweepMarkedCast())
+                return Role.LegSweep;
 
             if (OccultCrescent.ShouldUsePhantomActions())
                 return OccultCrescent.BestPhantomAction();

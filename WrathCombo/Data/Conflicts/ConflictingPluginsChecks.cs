@@ -170,6 +170,9 @@ public static class ConflictingPluginsChecks
         /// <inheritdoc cref="BossModIPC.NextRaidwideDamageIn" />
         public float? NextRaidwideDamageIn() => IPC.NextRaidwideDamageIn();
 
+        /// <inheritdoc cref="BossModIPC.NextTankbusterOnPlayerIn" />
+        public float? NextTankbusterOnPlayerIn() => IPC.NextTankbusterOnPlayerIn();
+
         public override void CheckForConflict()
         {
             if (!ThrottlePassed(8, false))
