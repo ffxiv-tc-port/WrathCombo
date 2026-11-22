@@ -340,6 +340,18 @@ internal partial class DRK
                         stopUsingAtDescription,
                         itemWidth: little, sliderIncrement: SliderIncrements.Tens);
 
+                    ImGui.Indent();
+                    UserConfig.DrawHorizontalRadioButton(
+                        DRK_AoE_LivingDeadBossRestriction, "All Enemies",
+                        "Will use Living Dead regardless of the type of enemy.",
+                        outputValue: (int) BossAvoidance.Off, itemWidth: 125f);
+                    UserConfig.DrawHorizontalRadioButton(
+                        DRK_AoE_LivingDeadBossRestriction, "Avoid Bosses",
+                        "Will try not to use Living Dead when your target is a boss.\n" +
+                        "(Note: don't rely on this 100%, square sometimes marks enemies inconsistently)",
+                        outputValue: (int) BossAvoidance.On, itemWidth: 125f);
+                    ImGui.Unindent();
+
                     break;
 
                 #endregion
@@ -1119,6 +1131,23 @@ internal partial class DRK
         /// <seealso cref="CustomComboPreset.DRK_AoE_Mit_LivingDead" />
         public static readonly UserInt DRK_AoE_LivingDeadTargetThreshold =
             new("DRK_AoE_LivingDeadTargetThreshold", 15);
+
+        /// <summary>
+        ///     Living Dead Boss Restriction for AoE.
+        /// </summary>
+        /// <value>
+        ///     <b>Default</b>: <see cref="BossAvoidance.On" /> <br />
+        ///     <b>Options</b>: <see cref="BossAvoidance">BossAvoidance Enum</see>
+        /// </value>
+        /// <remarks>
+        ///     缺鍵時首次寫入的是單體鍵當下的值：範圍循環原本共用單體鍵，這樣既有使用者行為不變。
+        ///     必須宣告在 <see cref="DRK_ST_LivingDeadBossRestriction" /> 之後（同檔靜態初始化照文字順序）。
+        /// </remarks>
+        /// <seealso cref="CustomComboPreset.DRK_AoE_Mit_LivingDead" />
+        public static readonly UserInt DRK_AoE_LivingDeadBossRestriction =
+            new("DRK_AoE_LivingDeadBossRestriction",
+                (int)DRK_ST_LivingDeadBossRestriction)
+            { Default = (int) BossAvoidance.On };
 
         #endregion
 

@@ -400,9 +400,11 @@ internal partial class DRK
 
             #region Variables
 
-            var bossRestrictionLivingDead = flags.HasFlag(Combo.Adv)
-                ? (int)Config.DRK_ST_LivingDeadBossRestriction
-                : (int)BossAvoidance.Off;
+            var bossRestrictionLivingDead = flags.HasFlag(Combo.Adv) ?
+                flags.HasFlag(Combo.ST)
+                    ? (int)Config.DRK_ST_LivingDeadBossRestriction
+                    : (int)Config.DRK_AoE_LivingDeadBossRestriction :
+                (int)BossAvoidance.Off;
             var livingDeadSelfThreshold = flags.HasFlag(Combo.Adv) ?
                 flags.HasFlag(Combo.ST)
                     ? Config.DRK_ST_LivingDeadSelfThreshold
