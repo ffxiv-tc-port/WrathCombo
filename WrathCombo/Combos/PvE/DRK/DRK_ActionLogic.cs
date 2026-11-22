@@ -424,10 +424,9 @@ internal partial class DRK
                 ActionReady(LivingDead) &&
                 PlayerHealthPercentageHp() <= livingDeadSelfThreshold &&
                 GetTargetHPPercent(Target(flags)) >= livingDeadTargetThreshold &&
-                // Checking if the target matches the boss avoidance option
-                ((bossRestrictionLivingDead is (int)BossAvoidance.On &&
-                  InBossEncounter()) ||
-                 bossRestrictionLivingDead is (int)BossAvoidance.Off))
+                // 「避開首領」＝首領戰中不放，與黑盾、親疏自行同一語意
+                (bossRestrictionLivingDead is (int)BossAvoidance.Off ||
+                 !InBossEncounter()))
                 return (action = LivingDead) != 0;
 
             #endregion

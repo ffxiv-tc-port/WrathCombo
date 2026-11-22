@@ -113,7 +113,7 @@ namespace WrathCombo.Resources.Dictionary.Chinese.Description
                 KeyValuePair.Create("To be used in conjunction with Redirect/Reaction/etc", "需與Redirect/Reaction等插件結合使用。"),
                 KeyValuePair.Create("Include Shields in HP Percent Sliders", "在血量百分比滑塊中包含護盾"),
                 KeyValuePair.Create("Stop using when below HP %.", "當血量低於此百分比時停用。"),
-                KeyValuePair.Create("Will try not to use", "將嘗試使用"),
+                KeyValuePair.Create("Will try not to use", "盡量不使用"),
                 KeyValuePair.Create("when in a boss fight.", "（當處於BOSS戰）。"),
                 KeyValuePair.Create("when your target is a boss.", "（當你的目標是BOSS）。"),
                 KeyValuePair.Create("HP percentage threshold", "生命百分比閾值"),
