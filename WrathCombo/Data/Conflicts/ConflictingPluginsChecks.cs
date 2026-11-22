@@ -149,6 +149,12 @@ public static class ConflictingPluginsChecks
         /// <inheritdoc cref="BossModIPC.ShouldStunTargets" />
         public ulong[] StunHints() => IPC.ShouldStunTargets();
 
+        /// <inheritdoc cref="BossModIPC.StunsReserved" />
+        public bool StunsReserved() => IPC.StunsReserved();
+
+        /// <inheritdoc cref="BossModIPC.InterruptsReserved" />
+        public bool InterruptsReserved() => IPC.InterruptsReserved();
+
         /// <inheritdoc cref="BossModIPC.IsActionDashSafe" />
         internal Func<uint, ulong, int> DashSafeQuery => IPC.IsActionDashSafe;
 

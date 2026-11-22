@@ -25,10 +25,9 @@ internal partial class GNB : Tank
             #region Stuns
             if (Role.CanInterject())
                 return Role.Interject;
-            if (!TargetIsBoss()
-                && Role.CanLowBlow()
+            if (Role.CanLowBlow()
                 && !JustUsed(Role.Interject)
-                && !InBossEncounter())
+                && RoleActions.Tank.StunBossGuardPasses())
                 return Role.LowBlow;
             #endregion
 
@@ -145,10 +144,9 @@ internal partial class GNB : Tank
             if (IsEnabled(CustomComboPreset.GNB_ST_Interrupt) && Role.CanInterject())
                 return Role.Interject;
             if (IsEnabled(CustomComboPreset.GNB_ST_Stun)
-                && !TargetIsBoss()
                 && Role.CanLowBlow()
                 && !JustUsed(Role.Interject)
-                && !InBossEncounter())
+                && RoleActions.Tank.StunBossGuardPasses())
                 return Role.LowBlow;
             #endregion
 

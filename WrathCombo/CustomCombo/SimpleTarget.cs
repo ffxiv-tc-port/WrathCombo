@@ -384,7 +384,8 @@ internal static class SimpleTarget
             Svc.Objects
                 .OfType<IBattleChara>()
                 .Where(x => x.IsHostile() && x.IsTargetable &&
-                            x.IsWithinRange(3) && x.IsCastInterruptible),
+                            x.IsWithinRange(3) && x.IsCastInterruptible &&
+                            !MechanicHints.InterruptHeldByReservation(x)),
             MechanicHints.HintKind.Interrupt);
 
     public static IGameObject? StunnableEnemy(int reStunCheck = 3) =>
@@ -392,7 +393,8 @@ internal static class SimpleTarget
             Svc.Objects
                 .OfType<IBattleChara>()
                 .Where(x => x.IsHostile() && x.IsTargetable &&
-                            !x.IsBoss() && x.IsWithinRange(3) &&
+                            (!x.IsBoss() || MechanicHints.StunOverridesBossCheck(x)) &&
+                            x.IsWithinRange(3) && !MechanicHints.StunHeldByReservation(x) &&
                             !CustomComboFunctions.HasStatusEffect(All.Debuffs.Stun, x) &&
                             (ICDTracker.StatusIsExpired(All.Debuffs.Stun, x.GameObjectId) ||
                              ICDTracker.Trackers.FirstOrDefault(y =>
@@ -400,8 +402,8 @@ internal static class SimpleTarget
                                  x.GameObjectId == y.GameObjectId)?
                                  .TimesApplied < reStunCheck) &&
                             // MonsterDex 明確說「不吃暈眩」才排除；
-                            // 功能關閉／沒安裝／查無資料一律放行。
-                            MonsterVulnerability.CanBeStunned(x)),
+                            // 功能關閉／沒安裝／查無資料、或 BMR 標記該眩暈的一律放行。
+                            (MonsterVulnerability.CanBeStunned(x) || MechanicHints.StunOverridesBossCheck(x))),
             MechanicHints.HintKind.Stun);
 
     /// <summary>

@@ -165,6 +165,31 @@ internal sealed class BossModIPC(
         SafeHintList(_shouldStunTargets, "Hints.ShouldStunTargets");
 
     /// <summary>
+    ///     BossMod(Reborn) 的模組是否宣告「本場眩暈只留給標記的讀條」。
+    /// </summary>
+    /// <returns>端點不存在（舊版）、未就緒或擲例外一律 <see langword="false" />＝沒有保留、照現行行為。</returns>
+    public bool StunsReserved() => SafeHintFlag(_stunsReserved, "Hints.StunsReserved");
+
+    /// <summary>同 <see cref="StunsReserved" />，對象是打斷。</summary>
+    public bool InterruptsReserved() => SafeHintFlag(_interruptsReserved, "Hints.InterruptsReserved");
+
+    private bool SafeHintFlag(Func<bool> ipc, string tag)
+    {
+        try
+        {
+            return ipc.TryInvoke(out var value) && value;
+        }
+        catch (Exception e)
+        {
+            if (EZ.Throttle($"MechanicHintsFailure_{tag}", TS.FromMinutes(1)))
+                PluginLog.Information(
+                    $"[MechanicHints] [{PluginName}] `{tag}` 呼叫失敗，本次視同沒有保留：" +
+                    e.ToStringFull());
+            return false;
+        }
+    }
+
+    /// <summary>
     ///     取一份提示清單，任何失敗都降級成「沒有機制資訊」（空陣列）。
     /// </summary>
     /// <remarks>
@@ -289,6 +314,12 @@ internal sealed class BossModIPC(
 
     [EzIPC("BossMod.Hints.ShouldStunTargets", false)]
     private readonly Func<ulong[]> _shouldStunTargets = null!;
+
+    [EzIPC("BossMod.Hints.StunsReserved", false)]
+    private readonly Func<bool> _stunsReserved = null!;
+
+    [EzIPC("BossMod.Hints.InterruptsReserved", false)]
+    private readonly Func<bool> _interruptsReserved = null!;
 
     [EzIPC("BossMod.Hints.IsActionDashSafe", false)]
     private readonly Func<uint, ulong, int> _isActionDashSafe = null!;

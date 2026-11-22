@@ -429,6 +429,20 @@ namespace WrathCombo.Window.Tabs
                     "Only a definite 'not stunnable' excludes an enemy. MonsterDex not installed, no entry for that enemy, or any failed lookup all count as 'unknown', and unknown always passes - so this can never silently disable your stuns.\n\n" +
                     "Default: Off").Loc());
 
+                var controlMarks = Service.Configuration.BossModControlMarks;
+                if (ImGui.Checkbox("Follow BossMod (Reborn) Danger Marks for Stuns and Interrupts".Loc(),
+                        ref controlMarks))
+                {
+                    Service.Configuration.BossModControlMarks = controlMarks;
+                    Service.Configuration.Save();
+                }
+
+                ImGuiComponents.HelpMarker((
+                    "When BossMod (Reborn) flags a cast as one that must be stunned, automatic stuns are used on it even if the caster is a boss or a boss fight is in progress (both are normally skipped). This only applies while the flag is up.\n\n" +
+                    "When a BossMod (Reborn) module reserves stuns or interrupts for specific casts, they are not used on anything else during that fight, so the cooldown is ready for the cast that matters.\n\n" +
+                    "BossMod (Reborn) missing, an older version, or nothing flagged all behave exactly like this is off. Each overridden or held action is written to the log (Information level).\n\n" +
+                    "Default: On").Loc());
+
                 ImGuiEx.Spacing(new Vector2(0, 10));
 
                 #endregion

@@ -221,6 +221,16 @@ namespace WrathCombo.Core
         /// </remarks>
         public bool MonsterDexStunGate = false;
 
+        /// <summary>
+        ///     照 BossMod(Reborn) 的危險讀條標記眩暈／打斷：標記該眩暈的那一刻越過自動眩暈的首領排除，
+        ///     模組宣告保留時不對沒標記的讀條用眩暈／打斷。
+        /// </summary>
+        /// <remarks>
+        ///     預設 <see langword="true" />：BMR 不在、舊版或沒標記時行為與關閉相同，只有模組明確標記才改變出手；
+        ///     既有設定檔沒有這個鍵＝吃這個初始值。見 <c>Data/MechanicHints.cs</c>。
+        /// </remarks>
+        public bool BossModControlMarks = true;
+
         #endregion
 
         // Just has value so the UI element for it is more obvious from the get-go

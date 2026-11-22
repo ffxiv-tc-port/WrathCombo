@@ -76,10 +76,9 @@ internal partial class PLD : Tank
                 return Role.Interject;
 
             // Stun
-            if (!TargetIsBoss()
-                && TargetIsCasting()
+            if (TargetIsCasting()
                 && !JustUsed(Role.Interject)
-                && !InBossEncounter())
+                && RoleActions.Tank.StunBossGuardPasses())
                 if (Role.CanLowBlow())
                     return Role.LowBlow;
 
@@ -441,11 +440,10 @@ internal partial class PLD : Tank
                 return Role.Interject;
 
             // Stun
-            if (!TargetIsBoss()
-                && TargetIsCasting()
+            if (TargetIsCasting()
                 && !JustUsed(Role.Interject)
-                && !InBossEncounter())
-                if (IsEnabled(CustomComboPreset.PLD_ST_ShieldBash) && ActionReady(ShieldBash) && !JustUsed(Role.LowBlow) && !JustUsedOn(ShieldBash, CurrentTarget, 10))
+                && RoleActions.Tank.StunBossGuardPasses())
+                if (IsEnabled(CustomComboPreset.PLD_ST_ShieldBash) && ActionReady(ShieldBash) && !JustUsed(Role.LowBlow) && !JustUsedOn(ShieldBash, CurrentTarget, 10) && !MechanicHints.StunHeldByReservation(CurrentTarget))
                     return ShieldBash;
                 else if (IsEnabled(CustomComboPreset.PLD_ST_LowBlow) && Role.CanLowBlow() && !JustUsed(ShieldBash))
                     return Role.LowBlow;
@@ -651,7 +649,7 @@ internal partial class PLD : Tank
 
             // Stun
             if (TargetIsCasting() && !JustUsed(Role.Interject))
-                if (IsEnabled(CustomComboPreset.PLD_AoE_ShieldBash) && ActionReady(ShieldBash) && !JustUsed(Role.LowBlow) && !JustUsedOn(ShieldBash, CurrentTarget, 10))
+                if (IsEnabled(CustomComboPreset.PLD_AoE_ShieldBash) && ActionReady(ShieldBash) && !JustUsed(Role.LowBlow) && !JustUsedOn(ShieldBash, CurrentTarget, 10) && !MechanicHints.StunHeldByReservation(CurrentTarget))
                     return ShieldBash;
                 else if (IsEnabled(CustomComboPreset.PLD_AoE_LowBlow) && Role.CanLowBlow() && !JustUsed(ShieldBash))
                     return Role.LowBlow;

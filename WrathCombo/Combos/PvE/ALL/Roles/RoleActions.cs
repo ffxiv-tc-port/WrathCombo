@@ -185,7 +185,12 @@ internal static partial class RoleActions
             ActionReady(Rampart) && PlayerHealthPercentageHp() <= healthPercent;
 
         public static bool CanLowBlow() =>
-            ActionReady(LowBlow) && TargetIsCasting() && (ICDTracker.StatusIsExpired(All.Debuffs.Stun, CurrentTarget.GameObjectId) || ICDTracker.NumberOfTimesApplied(All.Debuffs.Stun, CurrentTarget.GameObjectId) < 3);
+            ActionReady(LowBlow) && TargetIsCasting() && (ICDTracker.StatusIsExpired(All.Debuffs.Stun, CurrentTarget.GameObjectId) || ICDTracker.NumberOfTimesApplied(All.Debuffs.Stun, CurrentTarget.GameObjectId) < 3) &&
+            !MechanicHints.StunHeldByReservation(CurrentTarget);
+
+        /// <summary>自動眩暈的首領排除：BMR 標記目前目標該眩暈時越過，否則照舊不暈首領、首領戰中不暈。</summary>
+        public static bool StunBossGuardPasses() =>
+            MechanicHints.StunOverridesBossCheck(CurrentTarget) || !TargetIsBoss() && !InBossEncounter();
 
         public static bool CanProvoke() =>
             ActionReady(Provoke);

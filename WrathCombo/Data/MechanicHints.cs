@@ -1,6 +1,7 @@
 #region
 
 using System;
+using System.Collections.Generic;
 using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.DalamudServices;
 using ECommons.Logging;
@@ -49,6 +50,61 @@ internal static class MechanicHints
     internal static bool StrictOnly =>
         Enabled && Service.Configuration.MechanicAwareTargetingStrictOnly;
 
+    private static bool _stunsReserved;
+    private static bool _interruptsReserved;
+    private static readonly Dictionary<(string Kind, uint Entity, uint Cast), long> _controlLoggedAt = [];
+
+    /// <summary>使用者有沒有開「照 BossMod(Reborn) 的危險讀條標記眩暈／打斷」（與上面的目標排序是兩件事）。</summary>
+    internal static bool ControlMarksEnabled =>
+        Service.Configuration.BossModControlMarks;
+
+    /// <summary>
+    ///     BMR 標記這個目標「這一發該暈眩」：自動眩暈可以越過首領排除。
+    /// </summary>
+    /// <remarks>契約：只在標記存在的這一幀成立；沒有標記、BMR 不在、開關關閉一律 <see langword="false" />＝照舊排除首領。</remarks>
+    internal static bool StunOverridesBossCheck(IGameObject? target)
+    {
+        if (!ControlMarksEnabled || target is null || !IsFlagged(Hints(HintKind.Stun), target))
+            return false;
+        LogControl("越過首領排除，眩暈 BMR 標記的讀條", target);
+        return true;
+    }
+
+    /// <summary>
+    ///     BMR 的模組宣告本場眩暈保留給標記的讀條，而這個目標沒被標記：不該對它用眩暈。
+    /// </summary>
+    internal static bool StunHeldByReservation(IGameObject? target) =>
+        HeldByReservation(HintKind.Stun, target);
+
+    /// <summary>同 <see cref="StunHeldByReservation" />，對象是打斷。</summary>
+    internal static bool InterruptHeldByReservation(IGameObject? target) =>
+        HeldByReservation(HintKind.Interrupt, target);
+
+    private static bool HeldByReservation(HintKind kind, IGameObject? target)
+    {
+        if (!ControlMarksEnabled || target is null)
+            return false;
+        var hints = Hints(kind);
+        var reserved = kind is HintKind.Stun ? _stunsReserved : _interruptsReserved;
+        if (!reserved || IsFlagged(hints, target))
+            return false;
+        LogControl(kind is HintKind.Stun ? "眩暈保留中，不暈沒標記的讀條" : "打斷保留中，不打沒標記的讀條", target);
+        return true;
+    }
+
+    // 同一（判定, 目標, 讀條）10 秒內只記一次（約一次讀條一行）：判定在每幀路徑上、目標挑選會輪流問多個敵人。
+    private static void LogControl(string what, IGameObject target)
+    {
+        var key = (what, target.EntityId, (target as IBattleChara)?.CastActionId ?? 0u);
+        var now = Environment.TickCount64;
+        if (_controlLoggedAt.TryGetValue(key, out var at) && now - at < 10_000)
+            return;
+        if (_controlLoggedAt.Count > 128)
+            _controlLoggedAt.Clear();
+        _controlLoggedAt[key] = now;
+        PluginLog.Information($"[MechanicHints] {what}：目標 {target.BaseId}（讀條 {key.Item3}）");
+    }
+
     internal static ulong[] Hints(HintKind kind)
     {
         Refresh();
@@ -91,6 +147,8 @@ internal static class MechanicHints
         {
             _interruptHints = [];
             _stunHints = [];
+            _stunsReserved = false;
+            _interruptsReserved = false;
 
             // 嚴格模式 ＋ 沒有 BMR ＝ 打斷／暈眩會完全不出手，
             // 而那看起來就像「功能壞了」。這條是使用者唯一查得到的線索。
@@ -105,5 +163,7 @@ internal static class MechanicHints
 
         _interruptHints = source.InterruptHints();
         _stunHints = source.StunHints();
+        _stunsReserved = source.StunsReserved();
+        _interruptsReserved = source.InterruptsReserved();
     }
 }

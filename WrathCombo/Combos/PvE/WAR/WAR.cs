@@ -26,10 +26,9 @@ internal partial class WAR : Tank
             #region Stuns
             if (Role.CanInterject())
                 return Role.Interject;
-            if (!TargetIsBoss()
-                && Role.CanLowBlow()
+            if (Role.CanLowBlow()
                 && !JustUsed(Role.Interject)
-                && !InBossEncounter())
+                && RoleActions.Tank.StunBossGuardPasses())
                 return Role.LowBlow;
             #endregion
 
@@ -103,10 +102,9 @@ internal partial class WAR : Tank
                 && Role.CanInterject())
                 return Role.Interject;
             if (IsEnabled(CustomComboPreset.WAR_ST_Stun)
-                && !TargetIsBoss()
                 && Role.CanLowBlow()
                 && !JustUsed(Role.Interject)
-                && !InBossEncounter())
+                && RoleActions.Tank.StunBossGuardPasses())
                 return Role.LowBlow;
             #endregion
 
