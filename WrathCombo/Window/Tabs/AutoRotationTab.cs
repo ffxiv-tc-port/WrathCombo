@@ -289,6 +289,9 @@ namespace WrathCombo.Window.Tabs
 
             changed |= ImGui.Checkbox("Enable Automatically in Instanced Content".Loc(), ref cfg.EnableInInstance);
             changed |= ImGui.Checkbox("Disable After Leaving Instanced Content".Loc(), ref cfg.DisableAfterInstance);
+            changed |= ImGui.Checkbox("Pause When BossMod (Reborn) Says Stop Acting".Loc(), ref cfg.BossModHoldPause);
+            ImGuiComponents.HelpMarker(("When BossMod (Reborn) reports a mechanic where using any action hurts you (Pyretic, Acceleration Bomb, a raised Holy Shield and the like), Auto-Rotation sends nothing from 1 second before it takes effect until BossMod (Reborn) lifts it. Mechanics that only forbid moving, or require you to keep moving, do not pause it.\n" +
+                "Actions you press yourself are never blocked. If BossMod (Reborn) is not loaded or cannot answer, Auto-Rotation runs as usual. A pause lasting over 30 seconds is treated as an error and Auto-Rotation resumes.\n\nDefault: On").Loc());
 
             if (ImGui.CollapsingHeader("Damage Settings".Loc()))
             {

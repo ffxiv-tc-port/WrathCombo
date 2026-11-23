@@ -167,6 +167,12 @@ public static class ConflictingPluginsChecks
         /// <inheritdoc cref="BossModIPC.SelectiveInterruptActive" />
         internal Func<bool> SelectiveInterruptActiveQuery => IPC.SelectiveInterruptActive;
 
+        /// <inheritdoc cref="BossModIPC.SpecialModeType" />
+        internal Func<int> SpecialModeTypeQuery => IPC.SpecialModeType;
+
+        /// <inheritdoc cref="BossModIPC.SpecialModeIn" />
+        internal Func<float> SpecialModeInQuery => IPC.SpecialModeIn;
+
         /// <inheritdoc cref="BossModIPC.NextRaidwideDamageIn" />
         public float? NextRaidwideDamageIn() => IPC.NextRaidwideDamageIn();
 

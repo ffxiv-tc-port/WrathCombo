@@ -249,6 +249,14 @@ internal sealed class BossModIPC(
     /// <remarks> 呼叫端 <c>DeepDungeonInterruptFilter</c> 攔所有例外並退避，失敗一律照舊全打。 </remarks>
     internal Func<bool> SelectiveInterruptActive => _selectiveInterruptActive;
 
+    /// <summary> <c>BossMod.Hints.SpecialModeType</c>：BMR <c>AIHints.SpecialMode</c> 的整數值（0＝沒有）。原始委派，不吞例外。 </summary>
+    /// <remarks> 呼叫端 <c>BossModHold</c> 攔所有例外並退避，失敗一律當不暫停。 </remarks>
+    internal Func<int> SpecialModeType => _specialModeType;
+
+    /// <summary> <c>BossMod.Hints.SpecialModeIn</c>：上面那個模式離生效還有幾秒（負值＝已生效；沒有時 <see cref="float.MaxValue" />）。 </summary>
+    /// <remarks> 同 <see cref="SpecialModeType" />。 </remarks>
+    internal Func<float> SpecialModeIn => _specialModeIn;
+
     private long _raidwideFailureLoggedAt;
 
     /// <summary>
@@ -451,5 +459,12 @@ internal sealed class BossModIPC(
     // SafeWrapper.IPCException 會把 IpcNotReadyError 吞成 false，舊版 BMR 就分不出來。
     [EzIPC("BossMod.DeepDungeon.SelectiveInterruptActive", false, wrapper: SafeWrapper.None)]
     private readonly Func<bool> _selectiveInterruptActive = null!;
+
+    // 型別照提供端 IPCProvider 的 Register（float／int）；明寫 None 讓呼叫端分得出端點不存在。
+    [EzIPC("BossMod.Hints.SpecialModeType", false, wrapper: SafeWrapper.None)]
+    private readonly Func<int> _specialModeType = null!;
+
+    [EzIPC("BossMod.Hints.SpecialModeIn", false, wrapper: SafeWrapper.None)]
+    private readonly Func<float> _specialModeIn = null!;
 #pragma warning restore CS8618, CS0649
 }

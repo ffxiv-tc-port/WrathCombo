@@ -191,7 +191,11 @@ namespace WrathCombo.AutoRotation
                 return true;
             }
 
-            return !EzThrottler.Throttle("Autorot", cfg.Throttler);
+            if (!EzThrottler.Throttle("Autorot", cfg.Throttler))
+                return true;
+
+            // 放在節流之後：BMR 最多每個節流間隔被問一次。只擋自動循環，連段替換（玩家按鍵）不經過這裡。
+            return Data.BossModHold.ShouldPause(cfg.BossModHoldPause);
         }
 
         // 順序有意義：Player.Available 要先於 Player.Object 的讀取，前面成立就不看後面。

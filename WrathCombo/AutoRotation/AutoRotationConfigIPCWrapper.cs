@@ -104,6 +104,8 @@ public class AutoRotationConfigIPCWrapper(AutoRotationConfig? config)
 
     public bool DeepDungeonPullSafety => config.DeepDungeonPullSafety;
 
+    public bool BossModHoldPause => config.BossModHoldPause;
+
     #endregion
 }
 
