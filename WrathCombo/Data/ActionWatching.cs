@@ -517,6 +517,8 @@ public static class ActionWatching
     private static bool CheckForChangedTarget(uint actionId, ref ulong targetObjectId, out uint replacedWith)
     {
         replacedWith = actionId;
+        if (AutoRotationController.IsRdmAutoRezTarget(actionId, targetObjectId))
+            return false;
         if (!P.ActionRetargeting.TryGetTargetFor(actionId, out var target, out replacedWith) ||
             target is null)
             return false;

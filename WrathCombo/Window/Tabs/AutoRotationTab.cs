@@ -496,6 +496,27 @@ namespace WrathCombo.Window.Tabs
                      "If you target them yourself (hard target, soft target, focus or mouseover) and press Raise, it still goes to them. " +
                      "Turn this off to raise them automatically as before.").Loc(limitedRaise));
 
+                var rdm = RDM.JobID.JobAbbreviation();
+                var verraise = RDM.Verraise.ActionName();
+                changed |= ImGui.Checkbox("[??] Save the last Raise's worth of MP for tanks and healers".Loc(rdm),
+                    ref cfg.HealerSettings.AutoRezRDMReserveLastForTankHealer);
+                ImGuiComponents.HelpMarker(
+                    ("When casting ?? would leave less MP than one more ??, Auto-Resurrect and the automatic picks of Raise retargeting skip DPS. " +
+                     "If you target a DPS yourself and press Raise, it still goes to them.").Loc(verraise, verraise));
+
+                changed |= ImGui.Checkbox("[??] When all tanks or all healers in your party are down, stop the rotation and raise first".Loc(rdm),
+                    ref cfg.HealerSettings.AutoRezRDMEmergency);
+                ImGuiComponents.HelpMarker(
+                    ("Auto-Resurrect only. Until at least one tank and one healer are standing again, raising comes before damage (also during the melee combo). " +
+                     "Uses ?? or ?? if available; otherwise casts ?? first to get ??. Does not move you.").Loc(
+                        RoleActions.Magic.Swiftcast.ActionName(), RDM.Buffs.Dualcast.StatusName(),
+                        RDM.Vercure.ActionName(), RDM.Buffs.Dualcast.StatusName()));
+
+                changed |= ImGui.Checkbox("[??] Raise order: healers, then tanks, then DPS".Loc(rdm),
+                    ref cfg.HealerSettings.AutoRezRDMRolePriority);
+                ImGuiComponents.HelpMarker(
+                    "Auto-Resurrect only. Party members come before players outside your party within the same role.".Loc());
+
                 P.UIHelper.ShowIPCControlledIndicatorIfNeeded("AutoCleanse");
                 changed |= P.UIHelper.ShowIPCControlledCheckboxIfNeeded(
                     "Auto-??".Loc(RoleActions.Healer.Esuna.ActionName()), ref cfg.HealerSettings.AutoCleanse, "AutoCleanse");

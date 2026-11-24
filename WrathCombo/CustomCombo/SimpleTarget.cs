@@ -2,6 +2,7 @@
 
 using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.DalamudServices;
+using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
@@ -10,7 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using WrathCombo.Attributes;
 using WrathCombo.AutoRotation;
+using WrathCombo.Combos;
 using WrathCombo.Combos.PvE;
+using WrathCombo.Combos.PvE.Content;
 using WrathCombo.Core;
 using WrathCombo.CustomComboNS.Functions;
 using WrathCombo.Data;
@@ -198,6 +201,7 @@ internal static class SimpleTarget
             if (stack is StackOption.RaiseStack)
             {
                 var logging = EZ.Throttle("raiseStackLog", TS.FromSeconds(10));
+                var rdmReserve = RdmReserveLastShot();
 
                 foreach (var name in Service.Configuration.RaiseStack)
                 {
@@ -216,6 +220,7 @@ internal static class SimpleTarget
                         );
 
                     if (target != null && SkipLimitedRaiseAutoPick(name, target)) target = null;
+                    if (target != null && rdmReserve && !ManualRaisePicks.Contains(name) && IsDpsRole(target)) target = null;
                     if (target != null) return target;
                 }
 
@@ -224,7 +229,9 @@ internal static class SimpleTarget
                 {
                     var hard = HardTarget.IfCanUseOn(WHM.Raise).IfDead();
                     if (hard != null) return hard;
-                    return ResolveRaiseEntry(nameof(AnyDeadPartyMember));
+                    return rdmReserve
+                        ? FirstDeadPartyMember(nameof(AnyDeadPartyMember), skipDps: true)
+                        : ResolveRaiseEntry(nameof(AnyDeadPartyMember));
                 }
             }
             #endregion
@@ -248,6 +255,24 @@ internal static class SimpleTarget
             Service.Configuration.RotationConfig.HealerSettings.AutoRezSkipLimitedRaise &&
             !ManualRaisePicks.Contains(stackEntry) &&
             RezThrottle.SkipLimitedRaise(target, "復活重定向");
+
+        // 赤魔「最後一發只給坦克與治療職業」（判準同 RdmRaisePolicy.IsLastShot）：復活集合自動挑的條目跳過 DPS，玩家自己指的目標照選。
+        // 刻意不管復活集合的順序：那是玩家自己排的；變異復活不吃 MP，所以那時不保留。
+        private static bool RdmReserveLastShot()
+        {
+            if (Player.Job is not Job.RDM || Player.Object is null ||
+                !Service.Configuration.RotationConfig.HealerSettings.AutoRezRDMReserveLastForTankHealer ||
+                Variant.CanRaise(CustomComboPreset.RDM_Variant_Raise) ||
+                !RdmRaisePolicy.IsLastShot(Player.Object.CurrentMp, CustomComboFunctions.GetResourceCost(RDM.Verraise)))
+                return false;
+            foreach (var m in CustomComboFunctions.GetPartyMembers())
+                if (m.BattleChara.IsNotThePlayer() && m.GetRole() is CombatRole.Tank or CombatRole.Healer)
+                    return true;
+            return false;
+        }
+
+        private static bool IsDpsRole(IGameObject target) =>
+            target is not ICharacter c || c.GetRole() is not (CombatRole.Tank or CombatRole.Healer);
 
         // 「挑第一個死者」的條目在選項開著時跳過有限制復活的、改挑同一條件下的下一位；選項關著時與屬性本身相同。
         private static IGameObject? ResolveRaiseEntry(string name) => name switch
@@ -504,11 +529,13 @@ internal static class SimpleTarget
     public static IGameObject? AnyDeadNonPartyMember => FirstDeadNonPartyMember(null);
 
     // skipLimitedFor：null＝不跳過任何人；否則是復活堆疊的條目名，交給 Stack.SkipLimitedRaiseAutoPick 判要不要跳過。
-    private static IGameObject? FirstDeadPartyMember(string? skipLimitedFor)
+    private static IGameObject? FirstDeadPartyMember(string? skipLimitedFor, bool skipDps = false)
     {
         foreach (var member in CustomComboFunctions.GetPartyMembers())
         {
             var x = member.BattleChara;
+            if (skipDps && member.GetRole() is not (CombatRole.Tank or CombatRole.Healer))
+                continue;
             if (x?.IsDead() == true && (skipLimitedFor is null || !Stack.SkipLimitedRaiseAutoPick(skipLimitedFor, x)))
                 return x;
         }

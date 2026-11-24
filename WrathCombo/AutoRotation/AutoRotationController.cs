@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using ECommons;
 using ECommons.DalamudServices;
@@ -13,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 using WrathCombo.Combos;
 using WrathCombo.Combos.PvE;
@@ -950,6 +952,9 @@ namespace WrathCombo.AutoRotation
                 if ((timeSinceLastRez != -1f && timeSinceLastRez < 4f) || Player.Object.IsCasting())
                     return false;
 
+                if (Player.Job is Job.RDM && resSpell == RDM.Verraise && RdmPolicyOn(out var reserve, out var emergency, out var priority))
+                    return RdmRez(resSpell, now, reserve, emergency, priority);
+
                 if (DeadPeople.Where(RezQuery).FindFirst(x => x is not null, out var member))
                 {
                     if (resSpell == OccultCrescent.Revive)
@@ -986,6 +991,155 @@ namespace WrathCombo.AutoRotation
             }
 
             return false;
+        }
+
+        // 赤魔挑人的暫存（每次重建、不跨幀保存物件）；只在框架執行緒用。
+        static readonly List<RdmRaisePolicy.Member> _rdmMembers = [];
+        static readonly List<ulong> _rdmMemberIds = [];
+        static readonly HashSet<ulong> _beingRaised = [];
+        static bool _rdmEmergencyLogged;
+        static long _rdmReserveLogNextAt;
+        // 赤魔自動復活剛選定的目標：復活重定向不可把它換成治療集合挑的人，否則 A／C 在那條路徑上失效。
+        static ulong _rdmRezTarget;
+        static long _rdmRezTargetAt;
+        const long RdmRezTargetHoldMs = 3000;
+
+        private static bool RdmPolicyOn(out bool reserve, out bool emergency, out bool priority)
+        {
+            var hs = Service.Configuration.RotationConfig.HealerSettings;
+            reserve = hs.AutoRezRDMReserveLastForTankHealer;
+            emergency = hs.AutoRezRDMEmergency;
+            priority = hs.AutoRezRDMRolePriority;
+            return reserve || emergency || priority;
+        }
+
+        /// <summary> 這次赤復活的目標是不是自動復活剛選定的人（是＝不要重定向）。只在框架執行緒呼叫。 </summary>
+        internal static bool IsRdmAutoRezTarget(uint actionId, ulong targetId) =>
+            actionId == RDM.Verraise && _rdmRezTarget != 0 && targetId == _rdmRezTarget &&
+            Environment.TickCount64 - _rdmRezTargetAt < RdmRezTargetHoldMs;
+
+        /// <returns> 與 <see cref="RezParty" /> 相同：true＝這一節拍被復活佔用（含規則 B 等排隊窗時先不讓輸出出招）。 </returns>
+        private static bool RdmRez(uint resSpell, long now, bool reserve, bool emergency, bool priority)
+        {
+            var targetId = PickRdmRaise(resSpell, reserve, emergency, priority, out var d);
+            if (targetId == 0)
+                return false;
+
+            if (ActionReady(RoleActions.Magic.Swiftcast) && !HasStatusEffect(RDM.Buffs.Dualcast))
+                return SendRez(RoleActions.Magic.Swiftcast, null, now);
+
+            if (ActionManager.GetAdjustedCastTime(ActionType.Action, resSpell) == 0)
+            {
+                _rdmRezTarget = targetId;
+                _rdmRezTargetAt = now;
+                return SendRez(resSpell, targetId, now) || (d.Emergency && WaitingForQueueWindow(resSpell));
+            }
+
+            if (!d.Emergency)
+                return false;
+
+            // 沒有即刻詠唱也沒有連續魔法：照「復活功能」的赤療傷慣例先放一發短詠唱拿連續魔法；刻意不硬詠唱 10 秒的赤復活。
+            if (IsMoving() || !LevelChecked(RDM.Vercure) || !ActionReady(RDM.Vercure) ||
+                Player.Object.CurrentMp < GetResourceCost(RDM.Vercure) + GetResourceCost(resSpell))
+                return false;
+            return SendRez(RDM.Vercure, Player.Object.GameObjectId, now) || WaitingForQueueWindow(RDM.Vercure);
+        }
+
+        // BMR 接管佇列時 GCD 只能在排隊窗內送；窗外先擋住輸出，免得近戰連擊或輸出 GCD 搶在復活前面排進去。
+        private static bool WaitingForQueueWindow(uint action) =>
+            BossModRebornQueueTakeover && !AutoRotationHelper.InQueueWindow(action);
+
+        /// <returns> 要拉的人的 GameObjectId；0＝這一輪不拉。 </returns>
+        private static ulong PickRdmRaise(uint resSpell, bool reserve, bool emergency, bool priority, out RdmRaisePolicy.Decision decision)
+        {
+            decision = new(-1, false, false);
+            var dead = DeadPeople;
+            if (dead.Count == 0)
+            {
+                _rdmEmergencyLogged = false;
+                return 0;
+            }
+
+            _rdmMembers.Clear();
+            _rdmMemberIds.Clear();
+            CollectBeingRaised();
+            var self = Player.Object.GameObjectId;
+            var party = GetPartyMembers();
+            foreach (var x in party)
+                if (x.GameObjectId != self)
+                    AddRdmMember(x, inParty: true);
+            foreach (var x in dead)
+                if (x.GameObjectId != self && !ContainsId(party, x.GameObjectId))
+                    AddRdmMember(x, inParty: false);
+
+            var mp = Player.Object.CurrentMp;
+            var cost = GetResourceCost(resSpell);
+            decision = RdmRaisePolicy.Decide(CollectionsMarshal.AsSpan(_rdmMembers), mp, cost, reserve, emergency, priority);
+            var targetId = decision.Index >= 0 ? _rdmMemberIds[decision.Index] : 0;
+            NoteRdmDecision(decision, targetId, mp, cost);
+            return targetId;
+        }
+
+        private static void AddRdmMember(WrathPartyMember x, bool inParty)
+        {
+            if (x.BattleChara is not { } bc)
+                return;
+            var role = x.GetRole() switch
+            {
+                CombatRole.Tank => RdmRaisePolicy.Role.Tank,
+                CombatRole.Healer => RdmRaisePolicy.Role.Healer,
+                _ => RdmRaisePolicy.Role.Dps,
+            };
+            var isDead = bc.IsDead;
+            var beingRaised = isDead && _beingRaised.Contains(x.GameObjectId);
+            var raisable = isDead && !beingRaised && RezQuery(x);
+            var pending = isDead && !raisable &&
+                          (beingRaised || RaiseStatuses.HasAny(bc, RaiseStatuses.Raised) ||
+                           RezThrottle.SentWithin(UsedOnDict, RezThrottle.RaiseActions, x.GameObjectId,
+                               Environment.TickCount64, out _, out _));
+            _rdmMembers.Add(new(role, inParty, !isDead, raisable, pending));
+            _rdmMemberIds.Add(x.GameObjectId);
+        }
+
+        // 別的玩家正在對誰詠唱復活（不含自己）；詠唱中斷了下一輪就不在名單裡。
+        private static void CollectBeingRaised()
+        {
+            _beingRaised.Clear();
+            var self = Player.Object.GameObjectId;
+            foreach (var o in Svc.Objects)
+                if (o is IPlayerCharacter { IsCasting: true } c && c.GameObjectId != self &&
+                    Array.IndexOf(RezThrottle.RaiseActions, c.CastActionId) >= 0)
+                    _beingRaised.Add(c.CastTargetObjectId);
+        }
+
+        private static bool ContainsId(List<WrathPartyMember> members, ulong id)
+        {
+            foreach (var m in members)
+                if (m.GameObjectId == id)
+                    return true;
+            return false;
+        }
+
+        private static void NoteRdmDecision(RdmRaisePolicy.Decision d, ulong targetId, uint mp, int cost)
+        {
+            if (!d.Emergency)
+                _rdmEmergencyLogged = false;
+            else if (!_rdmEmergencyLogged)
+            {
+                _rdmEmergencyLogged = true;
+                var role = _rdmMembers[d.Index].Role is RdmRaisePolicy.Role.Healer ? "治療職業" : "坦克";
+                PluginLog.Information($"[AutoRez] 赤魔：小隊{role}全倒，先拉 0x{targetId:X}（{role}），拉起來之前暫停輸出循環。MP {mp}。");
+            }
+
+            if (!d.LastShot || Environment.TickCount64 < _rdmReserveLogNextAt)
+                return;
+            foreach (var m in _rdmMembers)
+                if (m.Raisable && m.Role is RdmRaisePolicy.Role.Dps)
+                {
+                    _rdmReserveLogNextAt = Environment.TickCount64 + 30_000;
+                    PluginLog.Information($"[AutoRez] 赤魔：MP {mp} 放完這一發（{cost}）就不夠下一發，留給坦克與治療職業，暫不拉 DPS。30 秒內不再記。");
+                    break;
+                }
         }
 
         // 只在這次真的要自己送復活時才清遊戲佇列裡的同一招：不送卻清掉＝吃掉玩家剛手動排的復活。

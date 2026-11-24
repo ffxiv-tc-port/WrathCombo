@@ -87,6 +87,10 @@ namespace WrathCombo.AutoRotation
         public bool AutoRezOutOfParty = false;
         // 自動復活與復活重定向自動挑人時，跳過帶「限制復活」的死者（改由玩家手動）。
         public bool AutoRezSkipLimitedRaise = true;
+        // 赤魔自動復活（RdmRaisePolicy）：A＝最後一發只給坦克與治療職業、B＝小隊坦克或治療職業全倒時中斷輸出先拉、C＝治療職業＞坦克＞DPS。
+        public bool AutoRezRDMReserveLastForTankHealer = true;
+        public bool AutoRezRDMEmergency = true;
+        public bool AutoRezRDMRolePriority = true;
         public bool AutoCleanse = false;
         public bool PreEmptiveHoT = false;
         public bool IncludeNPCs = false;
