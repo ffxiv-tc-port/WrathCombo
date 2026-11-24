@@ -139,6 +139,8 @@ namespace WrathCombo.AutoRotation
         {
             get
             {
+                if (HuntMarkBypassFor(Svc.Targets.Target))
+                    return true;
                 if (!cfg.BypassQuest && !(cfg.BypassFATE && InFATE()))
                     return false;
                 var priority = DPSTargeting.AnyPriority();
@@ -167,6 +169,8 @@ namespace WrathCombo.AutoRotation
         // 對敵人出招的閘門用這支；總閘門仍用 CombatBypass（後面還有補血、復活等不對敵人的動作）。
         private static bool CombatBypassFor(IGameObject? target)
         {
+            if (HuntMarkBypassFor(target))
+                return true;
             var targetFateId = TargetFateId(target);
             var inFate = InFATE();
             if (!cfg.BypassQuest && !(cfg.BypassFATE && inFate && targetFateId != 0))
@@ -179,6 +183,31 @@ namespace WrathCombo.AutoRotation
 
         // 只在取得目標的同一幀呼叫。
         private static uint TargetFateId(IGameObject? target) => target is null ? 0u : target.Struct()->FateId;
+
+        /// <summary> DailyDuty 通緝目標繞過：設定開著、而且這一隻的 GameObjectId 正是 DailyDuty 此刻要求開打的那個值。 </summary>
+        internal static bool IsHuntMarkBypass(bool enabled, ulong targetId, ulong requestedId) =>
+            enabled && targetId != 0 && targetId == requestedId;
+
+        private static ulong _huntLoggedTarget;
+
+        // 目標是戰鬥 NPC 才去問 DailyDuty（IPC 同一幀最多問一次）；只在取得目標的同一幀呼叫。
+        private static bool HuntMarkBypassFor(IGameObject? target)
+        {
+            if (!cfg.BypassDailyDutyHunt || target is not IBattleNpc)
+                return false;
+            var targetId = target.GameObjectId;
+            var requested = DailyDutyIPC.HuntEngageTargetId();
+            if (requested == 0)
+                _huntLoggedTarget = 0;
+            if (!IsHuntMarkBypass(true, targetId, requested))
+                return false;
+            if (_huntLoggedTarget != targetId)
+            {
+                _huntLoggedTarget = targetId;
+                PluginLog.Information($"[AutoRotation][通緝目標] DailyDuty 要求開打目標 0x{targetId:X}（{target.Name.TextValue}），「僅於戰鬥中」對這一隻放行");
+            }
+            return true;
+        }
 
         static bool NotInCombat => !GetPartyMembers().Any(x => x.BattleChara is not null && x.BattleChara.Struct()->InCombat) || PartyEngageDuration().TotalSeconds < cfg.CombatDelay;
 
@@ -384,7 +413,17 @@ namespace WrathCombo.AutoRotation
                 .Append("，人在 FATE 內（等級已同步）=").Append(InFATE() ? "是" : "否")
                 .Append("，可選目標裡有 FATE 怪=")
                 .Append(DPSTargeting.BaseSelection.Any(x => x.Struct()->FateId != 0) ? "是" : "否")
-                .Append("，任務目標繞過=").Append(cfg.BypassQuest ? "開" : "關");
+                .Append("，任務目標繞過=").Append(cfg.BypassQuest ? "開" : "關")
+                .Append("，DailyDuty 通緝目標繞過=").Append(cfg.BypassDailyDutyHunt ? "開" : "關");
+            if (cfg.BypassDailyDutyHunt)
+            {
+                var requested = DailyDutyIPC.HuntEngageTargetId();
+                sb.Append(requested == 0
+                    ? "（DailyDuty 沒有要求開打）"
+                    : Svc.Targets.Target?.GameObjectId == requested
+                        ? $"（DailyDuty 要求開打 0x{requested:X}＝目前目標）"
+                        : $"（DailyDuty 要求開打 0x{requested:X}，不是目前目標）");
+            }
             if (cfg.CombatDelay > 0)
                 sb.Append("，開戰延遲 ").Append(cfg.CombatDelay).Append(" 秒");
             if (Svc.Targets.Target is IBattleNpc npc)
@@ -451,8 +490,11 @@ namespace WrathCombo.AutoRotation
             var selection = DPSTargeting.BaseSelection;
             var fate = selection.Any(x => IsCombatBypassCandidate(false, false, cfg.BypassFATE, x.Struct()->FateId, InFATE()));
             var quest = selection.Any(x => IsCombatBypassCandidate(cfg.BypassQuest, IsQuestMob(x), false, 0, false));
-            return NoActDiagnostics.ClassifyGateSource(cfg.InCombatOnly, engageDelayBlocking,
+            source = NoActDiagnostics.ClassifyGateSource(cfg.InCombatOnly, engageDelayBlocking,
                 self, InCombat(), slot, nonSlot, npc, fate, quest);
+            return source == NoActGateSource.Unknown && HuntMarkBypassFor(Svc.Targets.Target)
+                ? NoActGateSource.DailyDutyHuntBypass
+                : source;
         }
 
         #endregion

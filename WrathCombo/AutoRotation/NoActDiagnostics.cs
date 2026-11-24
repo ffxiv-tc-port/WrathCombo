@@ -70,6 +70,7 @@ internal enum NoActGateSource : byte
     OutOfPartyNpc,
     FateBypass,
     QuestBypass,
+    DailyDutyHuntBypass,
 }
 
 internal static class NoActDiagnostics
@@ -204,6 +205,7 @@ internal static class NoActDiagnostics
         NoActGateSource.OutOfPartyNpc => "隊伍名單裡的隊外 NPC 在戰鬥中",
         NoActGateSource.FateBypass => "FATE 目標繞過",
         NoActGateSource.QuestBypass => "任務目標繞過",
+        NoActGateSource.DailyDutyHuntBypass => "DailyDuty 通緝目標繞過",
         _ => "找不到放行依據",
     };
 }

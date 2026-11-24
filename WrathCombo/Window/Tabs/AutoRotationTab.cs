@@ -278,6 +278,11 @@ namespace WrathCombo.Window.Tabs
                         ref cfg.BypassFATE, "BypassFATE");
                     ImGuiComponents.HelpMarker("Disables Auto-Mode outside of combat unless you're synced to a FATE.".Loc());
 
+                    ImGuiExtensions.Prefix(false);
+                    changed |= ImGui.Checkbox("Bypass Only in Combat for DailyDuty Hunt Marks".Loc(), ref cfg.BypassDailyDutyHunt);
+                    ImGuiComponents.HelpMarker(("Only takes effect when DailyDuty's hunt bill option \"Start the fight when the mark is reached\" asks for it: Auto-Rotation may then act outside combat, but only while your current target is the exact mark DailyDuty asked for. The request lasts at most 10 seconds and ends as soon as combat starts or DailyDuty stops.\n" +
+                        "Without DailyDuty, or with that DailyDuty option off, this does nothing.\n\nDefault: On").Loc());
+
                     ImGuiExtensions.Prefix(true);
                     ImGuiEx.SetNextItemWidthScaled(100);
                     changed |= ImGui.InputInt("Delay to activate Auto-Rotation once combat starts (seconds)".Loc(), ref cfg.CombatDelay);

@@ -106,6 +106,8 @@ public class AutoRotationConfigIPCWrapper(AutoRotationConfig? config)
 
     public bool BossModHoldPause => config.BossModHoldPause;
 
+    public bool BypassDailyDutyHunt => config.BypassDailyDutyHunt;
+
     #endregion
 }
 

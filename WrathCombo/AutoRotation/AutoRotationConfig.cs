@@ -25,6 +25,8 @@ namespace WrathCombo.AutoRotation
         public bool DeepDungeonPullSafety = true;
         // BossMod(Reborn) 回報熱病類機制時整輪不出招；見 Data/BossModHold.cs。
         public bool BossModHoldPause = true;
+        // DailyDuty 通緝令自動開打要求的那一隻可在戰鬥外出手；見 Services/IPC_Subscriber/DailyDuty.cs。
+        public bool BypassDailyDutyHunt = true;
     }
 
     public class DPSSettings
