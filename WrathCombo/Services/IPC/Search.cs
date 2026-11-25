@@ -321,6 +321,9 @@ public class Search(Leasing leasing)
         {
             // 🔴 世代只讀一次，理由同 AllAutoRotationConfigsControlled。
             var generation = _leasing.StampsGeneration;
+            // 建立時間也在讀設定之前取（同 Provider.IsCurrentJobAutoRotationReady）：途中有別條執行緒改設定並存檔，
+            // 檔案時間必晚於它，這份可能混了改前改後的結果下一次就不會命中。
+            var builtAt = DateTime.Now;
 
             // 這一支是 [EzIPC] 端點（Provider.GetComboState／GetComboOptionState，承租外掛的執行緒）與繪製執行緒同時進得來的，快取的讀寫紀律：
             // 寫：在區域變數把整份新的組好，最後才一次指派回欄位（參考指派是原子的，讀取端看不到組到一半的字典）。
@@ -368,7 +371,7 @@ public class Search(Leasing leasing)
             // 🔴 先發佈快取再刷新：UpdateActiveJobPresets() 經 GetJobAutorots → AutoActions
             //    遞迴進這一支，那一層要命中快取而不是無限重建。
             Volatile.Write(ref _presetStatesCache,
-                new PresetStatesSnapshot(rebuilt, generation, DateTime.Now));
+                new PresetStatesSnapshot(rebuilt, generation, builtAt));
             UpdateActiveJobPresets();
             return rebuilt;
         }
