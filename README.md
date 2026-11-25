@@ -25,12 +25,11 @@
 
 - **Orbwalker**：自動循環模式下選擇施法時自動停下移動，不需手動停止
 - **[AutoDuty](https://github.com/ffxiv-tc-port/AutoDuty)**：可作為副本自動戰鬥引擎
-- **[Questionable](https://github.com/ffxiv-tc-port/Questionable)**：可作為跑任務時的戰鬥模組
 - **[BossMod Reborn](https://github.com/ffxiv-tc-port/BossmodReborn)**：見下方「搭配 BossMod Reborn」
 - **[DailyDuty](https://github.com/ffxiv-tc-port/DailyDuty)**：DailyDuty 的通緝令「自動開打」提出要求時，自動循環可以在戰鬥外對它指定的那一隻通緝目標出招（設定「DailyDuty 通緝目標繞過『僅於戰鬥中』限制」，預設開）。只在 DailyDuty 提出要求、而且你目前的目標正是那一隻時才作用；要求最多維持 10 秒，進入戰鬥或 DailyDuty 停下就結束。沒裝 DailyDuty 或它那一項沒開時，這個設定沒有任何作用
 - **[MonsterDex](https://github.com/ffxiv-tc-port/MonsterDex)**：可設定略過確定免疫眩暈的敵人（預設關；查不到資料一律當作可以眩暈）
 
-AutoDuty、Questionable 啟用時，會自動鎖定必要的連擊設定為「開啟」以確保循環能運作。
+AutoDuty 啟用時，會自動鎖定必要的連擊設定為「開啟」以確保循環能運作。
 
 ### 搭配 BossMod Reborn
 
