@@ -21,6 +21,7 @@ namespace WrathCombo.Data;
 ///     BMR 有 <c>NextMitigableRaidwide*</c> 時看「下一筆值得減傷的」那筆（低危散開不擋後面），沒有就看第一筆。
 ///     有預告時只看預告：命中前 [0.8 秒＋讀條, min(持續−1, 提前量)＋讀條] 內才考慮；高全放、低不放、中與未知只放冷卻 ≤60 秒的 oGCD，
 ///     帶傷害屬性偏向的（昏亂）只在來源技能屬性對上時放；進階開關打開時中危也放大招與 GCD 盾。
+///     保留冷卻（開關，BMR 有 <c>NextHighRaidwideIn</c> 才生效）：非高危的這一發要放時，若下一次高危落在這一發之後、冷卻轉好之前，改成不放。
 ///     持續秒數由呼叫端給各等級最短值：技能放下去之前讀不到狀態。
 /// </remarks>
 internal static class RaidwideMitigationPolicy
@@ -87,6 +88,21 @@ internal static class RaidwideMitigationPolicy
             : Verdict.Skip;
     }
 
+    /// <summary>與 BMR 的同波合併窗一致：下一次高危要晚於這一發這麼多秒才算另一發。</summary>
+    internal const float SameHitSeconds = 0.5f;
+
+    /// <summary>
+    ///     保留冷卻：這一發不是高危、下一次高危（<paramref name="nextHighIn" />，<see langword="null" />＝不知道）落在這一發之後，
+    ///     而且現在放下去最晚可放時機（命中前 <see cref="MinLeadSeconds" />）冷卻還沒轉好、手上也沒有第二層可用。
+    /// </summary>
+    internal static bool ShouldReserve(int severity, float secondsToHit, float? nextHighIn,
+        float cooldownSeconds, uint chargesLeft)
+    {
+        if (severity == 3 || nextHighIn is not { } high || chargesLeft >= 2)
+            return false;
+        return high > secondsToHit + SameHitSeconds && cooldownSeconds > high - MinLeadSeconds;
+    }
+
     /// <summary>Action 表 AttackType：1～4 斬突打射＝物理、5＝魔法，其餘（0、吐息、音波…）不知道。</summary>
     internal static DamageKind KindOfAttackType(uint attackTypeRowId) => attackTypeRowId switch
     {
@@ -107,7 +123,7 @@ internal static class RaidwideMitigationPolicy
 
     #region 每幀快照
 
-    private readonly record struct Snapshot(bool Active, int Severity, float SecondsToHit, uint SourceAction, DamageKind Incoming);
+    private readonly record struct Snapshot(bool Active, int Severity, float SecondsToHit, uint SourceAction, DamageKind Incoming, float? NextHighIn);
 
     private static DateTime _cachedForFrame;
     private static bool _primed;
@@ -156,7 +172,11 @@ internal static class RaidwideMitigationPolicy
         var incoming = sourceAction != 0 && ActionWatching.ActionSheet.TryGetValue(sourceAction, out var row)
             ? KindOfAttackType(row.AttackType.RowId)
             : DamageKind.Unknown;
-        return new Snapshot(true, severity, seconds, sourceAction, incoming);
+        // 只有非高危才用得到；舊版 BMR 沒有這個端點＝null＝不保留。
+        var nextHigh = severity != 3 && Service.Configuration.BossModRaidwideReserveForHigh
+            ? source.NextHighRaidwideIn()
+            : null;
+        return new Snapshot(true, severity, seconds, sourceAction, incoming, nextHigh);
     }
 
     #endregion
@@ -180,13 +200,19 @@ internal static class RaidwideMitigationPolicy
         if (!snap.Active)
             return legacy?.Invoke() ?? RaidWideCasting();
 
+        var recast = RecastSeconds(action);
         var verdict = Decide(snap.Severity, snap.SecondsToHit, false,
-            RecastSeconds(action), durationSeconds, castSeconds, IsGcd(action),
+            recast, durationSeconds, castSeconds, IsGcd(action),
             bias, snap.Incoming, leadSeconds ?? LeadSeconds,
             Service.Configuration.BossModRaidwideMediumUsesMajor);
 
+        var reserved = verdict == Verdict.Use &&
+                       ShouldReserve(snap.Severity, snap.SecondsToHit, snap.NextHighIn, recast, GetRemainingCharges(action));
+        if (reserved)
+            verdict = Verdict.Skip;
+
         if (verdict != Verdict.NotDue)
-            Log(action, verdict, snap);
+            Log(action, verdict, snap, reserved ? recast : null);
         return verdict == Verdict.Use;
     }
 
@@ -198,14 +224,15 @@ internal static class RaidwideMitigationPolicy
         ActionWatching.GetAttackType(action) != ActionWatching.ActionAttackType.Ability;
 
     // 連段每幀問好幾次；同一招同一種結論 15 秒內只記一行。
-    private static readonly Dictionary<uint, (Verdict Verdict, long At)> LoggedAt = [];
+    private static readonly Dictionary<uint, (Verdict Verdict, bool Reserved, long At)> LoggedAt = [];
 
-    private static void Log(uint action, Verdict verdict, Snapshot snap)
+    private static void Log(uint action, Verdict verdict, Snapshot snap, float? reservedRecast)
     {
         var now = Environment.TickCount64;
-        if (LoggedAt.TryGetValue(action, out var last) && last.Verdict == verdict && now - last.At < 15_000)
+        var reserved = reservedRecast.HasValue;
+        if (LoggedAt.TryGetValue(action, out var last) && last.Verdict == verdict && last.Reserved == reserved && now - last.At < 15_000)
             return;
-        LoggedAt[action] = (verdict, now);
+        LoggedAt[action] = (verdict, reserved, now);
 
         var kind = snap.Incoming switch
         {
@@ -213,8 +240,11 @@ internal static class RaidwideMitigationPolicy
             DamageKind.Magic => "魔法",
             _ => "屬性不明",
         };
+        var why = reservedRecast is { } recast
+            ? $"；{snap.NextHighIn:0.0} 秒後還有一次高危、冷卻 {recast:0} 秒轉不回來，保留"
+            : "";
         PluginLog.Information(
             $"[MitPolicy] 下一發全體傷害判成{SeverityName(snap.Severity)}（BMR 預告 {snap.SecondsToHit:0.0} 秒後，" +
-            $"來源 {snap.SourceAction}，{kind}），{(verdict == Verdict.Use ? "開" : "不開")}{action.ActionName()}");
+            $"來源 {snap.SourceAction}，{kind}{why}），{(verdict == Verdict.Use ? "開" : "不開")}{action.ActionName()}");
     }
 }

@@ -264,6 +264,12 @@ namespace WrathCombo.Core
         /// <summary>中危（含未知）也用冷卻 90 秒以上的團減與 GCD 團盾。預設關＝中危只用冷卻 ≤60 秒的。</summary>
         public bool BossModRaidwideMediumUsesMajor = false;
 
+        /// <summary>
+        ///     中危（含未知）的團減，若 BMR 預告下一次高危會在冷卻轉好之前到，就留給那一次。
+        ///     預設開（使用者裁定「只對高危、低危省冷卻」）；BMR 沒有 <c>Hints.NextHighRaidwideIn</c> 時不起作用。
+        /// </summary>
+        public bool BossModRaidwideReserveForHigh = true;
+
         /// <summary>全體傷害提前量（秒）：預告剩餘秒數 ≤ 這個值（再受效果持續時間限制）才開團減。赤魔沿用自己的提前量。</summary>
         public float BossModRaidwideLeadSeconds = 5f;
 

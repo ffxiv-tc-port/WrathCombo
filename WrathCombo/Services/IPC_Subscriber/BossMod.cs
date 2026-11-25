@@ -376,6 +376,26 @@ internal sealed class BossModIPC(
         }
     }
 
+    /// <summary>
+    ///     <c>BossMod.Hints.NextHighRaidwideIn</c>：下一次高危全體傷害還有幾秒（本幀預告＋沿首領時間軸往後找）。
+    /// </summary>
+    /// <returns><see langword="null" />＝端點不存在（舊版 BMR）、沒就緒、呼叫失敗或找不到下一次高危。</returns>
+    /// <remarks>只能在框架執行緒呼叫，理由同 <see cref="NextRaidwideDamageIn" />。</remarks>
+    public float? NextHighRaidwideIn()
+    {
+        try
+        {
+            return _nextHighRaidwideIn.TryInvoke(out var seconds) && float.IsFinite(seconds) && seconds < float.MaxValue
+                ? seconds
+                : null;
+        }
+        catch (Exception e)
+        {
+            LogSeverityFailure("Hints.NextHighRaidwideIn", e);
+            return null;
+        }
+    }
+
     // TryInvoke 只攔 IpcNotReadyError；型別對不上與對方擲出的例外在這裡吃掉（兩個端點共用一分鐘一行）。
     private void LogSeverityFailure(string tag, Exception e)
     {
@@ -455,6 +475,9 @@ internal sealed class BossModIPC(
 
     [EzIPC("BossMod.Hints.NextMitigableRaidwideSourceAction", false, wrapper: SafeWrapper.None)]
     private readonly Func<uint> _nextMitigableRaidwideSourceAction = null!;
+
+    [EzIPC("BossMod.Hints.NextHighRaidwideIn", false, wrapper: SafeWrapper.None)]
+    private readonly Func<float> _nextHighRaidwideIn = null!;
 
     // SafeWrapper.IPCException 會把 IpcNotReadyError 吞成 false，舊版 BMR 就分不出來。
     [EzIPC("BossMod.DeepDungeon.SelectiveInterruptActive", false, wrapper: SafeWrapper.None)]

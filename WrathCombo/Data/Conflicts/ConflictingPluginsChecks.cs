@@ -188,6 +188,9 @@ public static class ConflictingPluginsChecks
         /// <inheritdoc cref="BossModIPC.NextMitigableRaidwide" />
         public (float Seconds, int Severity, uint SourceAction)? NextMitigableRaidwide() => IPC.NextMitigableRaidwide();
 
+        /// <inheritdoc cref="BossModIPC.NextHighRaidwideIn" />
+        public float? NextHighRaidwideIn() => IPC.NextHighRaidwideIn();
+
         public override void CheckForConflict()
         {
             if (!ThrottlePassed(8, false))

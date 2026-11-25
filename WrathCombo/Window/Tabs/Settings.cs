@@ -524,6 +524,18 @@ namespace WrathCombo.Window.Tabs
                         "With this on, medium and unrated raidwides are treated like high ones: Temperance, Expedient, Holos, Neutral Sect, Asylum, Liturgy of the Bell, Dark Missionary, Addle, Magick Barrier and GCD shields may also be used. Low raidwides still use nothing.\n\n" +
                         "Default: Off").Loc());
 
+                    var reserveHigh = Service.Configuration.BossModRaidwideReserveForHigh;
+                    if (ImGui.Checkbox("Save cooldowns for the next high-danger raidwide".Loc(), ref reserveHigh))
+                    {
+                        Service.Configuration.BossModRaidwideReserveForHigh = reserveHigh;
+                        Service.Configuration.Save();
+                    }
+
+                    ImGuiComponents.HelpMarker((
+                        "When BossMod (Reborn) sees a high-danger raidwide coming later (from the boss timeline) and a mitigation used now for a medium or unrated raidwide would still be on cooldown by then, that mitigation is kept for the high one instead. Each mitigation kept this way is written to the log (Information level).\n\n" +
+                        "Needs a BossMod (Reborn) version that reports the next high-danger raidwide; otherwise nothing changes.\n\n" +
+                        "Default: On").Loc());
+
                     var rwLead = Service.Configuration.BossModRaidwideLeadSeconds;
                     ImGui.SetNextItemWidth(150);
                     if (ImGui.SliderFloat("###RaidwideSeverityLead", ref rwLead, 2f, 10f, "%.1f"))
