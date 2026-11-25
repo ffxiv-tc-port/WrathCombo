@@ -59,8 +59,8 @@ AutoDuty、Questionable 啟用時，會自動鎖定必要的連擊設定為「�
 
 ## 安裝
 
-在 Dalamud 設定的「自訂插件庫」加入
-`https://raw.githubusercontent.com/ffxiv-tc-port/DalamudPluginsTC/main/repo.json` 並啟用，
-再從插件列表安裝。
+`/xlsettings` 開「Dalamud 設定」→「試驗性功能」→「第三方插件倉庫」，加入 `https://raw.githubusercontent.com/ffxiv-tc-port/DalamudPluginsTC/main/repo.json` 並啟用、儲存，再到「插件管理員」（`/xlplugins`）安裝；同一個插件只裝這裡的版本，不要同時裝上游版。
 
 原作者：Team Wrath，上游由 [PunishXIV](https://github.com/PunishXIV/WrathCombo) 維護發佈。
+
+授權：BSD-3-Clause（見 LICENSE）
